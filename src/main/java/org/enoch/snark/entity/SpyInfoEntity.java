@@ -13,8 +13,8 @@ public class SpyInfoEntity {
     private Integer deuterium;
     private Integer power;
     private Timestamp update;
-    private PlanetsEntity planetsByPlanetId;
-    private SourcesEntity sourcesBySourceId;
+    private PlanetEntity planetsByPlanetId;
+    private SourceEntity sourcesBySourceId;
 
     @Id
     @Column(name = "id")
@@ -97,21 +97,21 @@ public class SpyInfoEntity {
 
     @ManyToOne
     @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
-    public PlanetsEntity getPlanetsByPlanetId() {
+    public PlanetEntity getPlanetsByPlanetId() {
         return planetsByPlanetId;
     }
 
-    public void setPlanetsByPlanetId(PlanetsEntity planetsByPlanetId) {
+    public void setPlanetsByPlanetId(PlanetEntity planetsByPlanetId) {
         this.planetsByPlanetId = planetsByPlanetId;
     }
 
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id")
-    public SourcesEntity getSourcesBySourceId() {
+    public SourceEntity getSourcesBySourceId() {
         return sourcesBySourceId;
     }
 
-    public void setSourcesBySourceId(SourcesEntity sourcesBySourceId) {
+    public void setSourcesBySourceId(SourceEntity sourcesBySourceId) {
         this.sourcesBySourceId = sourcesBySourceId;
     }
 }

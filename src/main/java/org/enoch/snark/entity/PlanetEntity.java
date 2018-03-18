@@ -4,13 +4,14 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sources", schema = "public", catalog = "snark")
-public class SourcesEntity {
+@Table(name = "planets", schema = "public", catalog = "snark")
+public class PlanetEntity {
     private long id;
     private int galaxy;
     private int system;
     private int position;
-    private int cp;
+    private int power;
+    private String type;
 
     @Id
     @Column(name = "id")
@@ -53,30 +54,41 @@ public class SourcesEntity {
     }
 
     @Basic
-    @Column(name = "cp")
-    public int getCp() {
-        return cp;
+    @Column(name = "power")
+    public int getPower() {
+        return power;
     }
 
-    public void setCp(int cp) {
-        this.cp = cp;
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    @Basic
+    @Column(name = "type")
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SourcesEntity that = (SourcesEntity) o;
+        PlanetEntity that = (PlanetEntity) o;
         return id == that.id &&
                 galaxy == that.galaxy &&
                 system == that.system &&
                 position == that.position &&
-                cp == that.cp;
+                power == that.power &&
+                Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, galaxy, system, position, cp);
+        return Objects.hash(id, galaxy, system, position, power, type);
     }
 }

@@ -7,8 +7,8 @@
         <description>JPA</description>
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <class>org.enoch.snark.entity.ExplorationEntity</class>
-        <class>org.enoch.snark.entity.PlanetsEntity</class>
-        <class>org.enoch.snark.entity.SourcesEntity</class>
+        <class>org.enoch.snark.entity.PlanetEntity</class>
+        <class>org.enoch.snark.entity.SourceEntity</class>
         <class>org.enoch.snark.entity.SpyInfoEntity</class>
         <class>org.enoch.snark.entity.UniversesEntity</class>
         <properties>
