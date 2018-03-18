@@ -4,6 +4,9 @@
 .gradle/
 out/
 
+#pass
+META-INF/persistence.xml
+
 # Compiled class file
 *.class
 
