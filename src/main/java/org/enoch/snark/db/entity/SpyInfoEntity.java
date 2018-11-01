@@ -1,4 +1,4 @@
-package org.enoch.snark.entity;
+package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -7,7 +7,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "spy_info", schema = "public", catalog = "snark")
 public class SpyInfoEntity {
-    private long id;
+    private Long id;
     private Integer metal;
     private Integer crystal;
     private Integer deuterium;
@@ -18,11 +18,11 @@ public class SpyInfoEntity {
 
     @Id
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -81,7 +81,7 @@ public class SpyInfoEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SpyInfoEntity that = (SpyInfoEntity) o;
-        return id == that.id &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(metal, that.metal) &&
                 Objects.equals(crystal, that.crystal) &&
                 Objects.equals(deuterium, that.deuterium) &&

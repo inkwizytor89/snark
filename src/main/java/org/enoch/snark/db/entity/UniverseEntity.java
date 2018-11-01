@@ -1,27 +1,32 @@
-package org.enoch.snark.entity;
+package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
 @Table(name = "universes", schema = "public", catalog = "snark")
-public class UniversesEntity {
-    private long id;
+public class UniverseEntity {
+    private Long id;
     private String login;
     private String pass;
     private String name;
     private String tag;
     private String url;
-    private Integer galaxyCount;
+    private Integer galaxyMax;
+    private Integer systemMax;
     private Integer explorationArea;
+    private Collection<GalaxyEntity> galaxiesById;
+    private Collection<PlanetEntity> planetsById;
+    private Collection<SourceEntity> sourcesById;
 
     @Id
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -76,13 +81,23 @@ public class UniversesEntity {
     }
 
     @Basic
-    @Column(name = "galaxy_count")
-    public Integer getGalaxyCount() {
-        return galaxyCount;
+    @Column(name = "galaxy_max")
+    public Integer getGalaxyMax() {
+        return galaxyMax;
     }
 
-    public void setGalaxyCount(Integer galaxyCount) {
-        this.galaxyCount = galaxyCount;
+    public void setGalaxyMax(Integer galaxyCount) {
+        this.galaxyMax = galaxyCount;
+    }
+
+    @Basic
+    @Column(name = "system_max")
+    public Integer getSystemMax() {
+        return systemMax;
+    }
+
+    public void setSystemMax(Integer systemMax) {
+        this.systemMax = systemMax;
     }
 
     @Basic
@@ -99,20 +114,47 @@ public class UniversesEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UniversesEntity that = (UniversesEntity) o;
-        return id == that.id &&
+        UniverseEntity that = (UniverseEntity) o;
+        return Objects.equals(id, that.id) &&
                 Objects.equals(login, that.login) &&
                 Objects.equals(pass, that.pass) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(tag, that.tag) &&
                 Objects.equals(url, that.url) &&
-                Objects.equals(galaxyCount, that.galaxyCount) &&
+                Objects.equals(galaxyMax, that.galaxyMax) &&
                 Objects.equals(explorationArea, that.explorationArea);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, login, pass, name, tag, url, galaxyCount, explorationArea);
+        return Objects.hash(id, login, pass, name, tag, url, galaxyMax, explorationArea);
+    }
+
+    @OneToMany(mappedBy = "universesByUniversId")
+    public Collection<GalaxyEntity> getGalaxiesById() {
+        return galaxiesById;
+    }
+
+    public void setGalaxiesById(Collection<GalaxyEntity> galaxiesById) {
+        this.galaxiesById = galaxiesById;
+    }
+
+    @OneToMany(mappedBy = "universesByUniverseId")
+    public Collection<PlanetEntity> getPlanetsById() {
+        return planetsById;
+    }
+
+    public void setPlanetsById(Collection<PlanetEntity> planetsById) {
+        this.planetsById = planetsById;
+    }
+
+    @OneToMany(mappedBy = "universesByUniverseId")
+    public Collection<SourceEntity> getSourcesById() {
+        return sourcesById;
+    }
+
+    public void setSourcesById(Collection<SourceEntity> sourcesById) {
+        this.sourcesById = sourcesById;
     }
 }

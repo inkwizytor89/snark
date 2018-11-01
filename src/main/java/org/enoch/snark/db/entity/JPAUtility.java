@@ -1,4 +1,4 @@
-package org.enoch.snark.entity;
+package org.enoch.snark.db.entity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

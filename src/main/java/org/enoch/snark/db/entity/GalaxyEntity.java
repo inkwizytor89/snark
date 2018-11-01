@@ -1,24 +1,28 @@
-package org.enoch.snark.entity;
+package org.enoch.snark.db.entity;
+
+import org.enoch.snark.model.SystemView;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "exploration", schema = "public", catalog = "snark")
-public class ExplorationEntity {
-    private long id;
+@Table(name = "galaxy", schema = "public", catalog = "snark")
+public class GalaxyEntity {
+    private Long id;
     private Integer galaxy;
     private Integer system;
     private Timestamp updated;
+    private UniverseEntity universesByUniversId;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -56,8 +60,8 @@ public class ExplorationEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ExplorationEntity that = (ExplorationEntity) o;
-        return id == that.id &&
+        GalaxyEntity that = (GalaxyEntity) o;
+        return Objects.equals(id, that.id) &&
                 Objects.equals(galaxy, that.galaxy) &&
                 Objects.equals(system, that.system) &&
                 Objects.equals(updated, that.updated);
@@ -67,5 +71,19 @@ public class ExplorationEntity {
     public int hashCode() {
 
         return Objects.hash(id, galaxy, system, updated);
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "univers_id", referencedColumnName = "id")
+    public UniverseEntity getUniversesByUniversId() {
+        return universesByUniversId;
+    }
+
+    public void setUniversesByUniversId(UniverseEntity universesByUniversId) {
+        this.universesByUniversId = universesByUniversId;
+    }
+
+    public SystemView toSystemView() {
+        return new SystemView(galaxy, system);
     }
 }
