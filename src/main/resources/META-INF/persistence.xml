@@ -15,10 +15,10 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://51.15.85.159/snark"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/snark"/>
             <property name="javax.persistence.jdbc.user" value="postgres"/>
             <property name="javax.persistence.jdbc.password" value=""/>
-            <property name="hibernate.connection.url" value="jdbc:postgresql://51.15.85.159:5432/snark"/>
+            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/snark"/>
             <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
         </properties>
     </persistence-unit>
