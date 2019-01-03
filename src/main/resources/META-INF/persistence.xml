@@ -6,11 +6,11 @@
     <persistence-unit name="PERSISTENCE">
         <description>JPA</description>
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
-        <class>org.enoch.snark.entity.ExplorationEntity</class>
-        <class>org.enoch.snark.entity.PlanetEntity</class>
-        <class>org.enoch.snark.entity.SourceEntity</class>
-        <class>org.enoch.snark.entity.SpyInfoEntity</class>
-        <class>org.enoch.snark.entity.UniversesEntity</class>
+        <class>org.enoch.snark.db.entity.ExplorationEntity</class>
+        <class>org.enoch.snark.db.entity.PlanetEntity</class>
+        <class>org.enoch.snark.db.entity.SourceEntity</class>
+        <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
+        <class>org.enoch.snark.db.entity.UniversesEntity</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
