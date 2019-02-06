@@ -30,6 +30,8 @@ class SessionHelper {
         try {
             final WebElement exitButton = webDriver.findElement(By.linkText("x"));
             exitButton.click();
+            final WebElement loginSubmit = webDriver.findElement(By.id("accept_btn"));
+            new Actions(webDriver).moveToElement(loginSubmit).click().perform();
         } catch (NoSuchElementException e) {}
     }
 
@@ -40,7 +42,8 @@ class SessionHelper {
         webDriver.findElement(By.id("usernameLogin")).sendKeys(username);
         webDriver.findElement(By.id("passwordLogin")).sendKeys(password);
         final WebElement loginSubmit = webDriver.findElement(By.id("loginSubmit"));
-        loginSubmit.click();
+        new Actions(webDriver).moveToElement(loginSubmit).click().perform();
+//        loginSubmit.click();
     }
 
     public void chooseServer(String server) {
@@ -50,5 +53,11 @@ class SessionHelper {
         WebElement serverElement = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + server + "')]").get(0);
         Actions actions = new Actions(webDriver);
         actions.doubleClick(serverElement).perform();
+    }
+
+    public void skipFastLoginIfExists() {
+        if(webDriver.getCurrentUrl().equals("https://lobby.ogame.gameforge.com/pl_PL/?language=pl")) {
+            webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts");
+        }
     }
 }

@@ -55,6 +55,7 @@ public class GISession {
     private void logIn() {
         sessionHelper.skipBannerIfExists();
         sessionHelper.insertLoginData(instance.universeEntity.getLogin(), instance.universeEntity.getPass());
+        sessionHelper.skipFastLoginIfExists();
         sessionHelper.chooseServer(instance.universeEntity.getName());
         isLoggedIn = true;
     }
