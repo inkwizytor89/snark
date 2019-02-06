@@ -4,13 +4,12 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
     <persistence-unit name="PERSISTENCE">
-        <description>JPA</description>
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <class>org.enoch.snark.db.entity.ExplorationEntity</class>
         <class>org.enoch.snark.db.entity.PlanetEntity</class>
         <class>org.enoch.snark.db.entity.SourceEntity</class>
         <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
-        <class>org.enoch.snark.db.entity.UniversesEntity</class>
+        <class>org.enoch.snark.db.entity.UniverseEntity</class>
+
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
@@ -18,8 +17,6 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/snark"/>
             <property name="javax.persistence.jdbc.user" value="postgres"/>
             <property name="javax.persistence.jdbc.password" value=""/>
-            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/snark"/>
-            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
         </properties>
     </persistence-unit>
 </persistence>

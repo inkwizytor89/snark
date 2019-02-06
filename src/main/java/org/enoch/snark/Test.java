@@ -8,7 +8,7 @@ public class Test {
 
     public static void main(String[] args) {
         for(UniverseEntity universeEntity : new UniverseDAOImpl().fetchAllUniverses()) {
-            if(universeEntity.getName().equals("Spica")){
+            if(universeEntity.getName().equals("Fenrir")){
                 Runnable task = new Instance(universeEntity, false)::runTest;
                 new Thread(task).start();
             }

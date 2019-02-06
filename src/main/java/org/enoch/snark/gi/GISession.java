@@ -6,6 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
@@ -25,15 +26,19 @@ public class GISession {
         webDriver = new ChromeDriver();
         sessionHelper = new SessionHelper(instance, this);
 
-        boolean islogged = false;
-        while(!islogged) {
+        while(!isLoggedIn) {
             try {
                 open();
-                islogged = true;
             } catch (Exception e) {
                 System.err.println(e);
             }
         }
+        switchToServerTab();
+    }
+
+    private void switchToServerTab() {
+        String server = new ArrayList<>(webDriver.getWindowHandles()).get(1);
+        webDriver.switchTo().window(server);
     }
 
     public void open() {
@@ -49,13 +54,9 @@ public class GISession {
 
     private void logIn() {
         sessionHelper.skipBannerIfExists();
-        sessionHelper.insertLoginData(
-                instance.universeEntity.getLogin(),
-                instance.universeEntity.getPass(),
-                instance.universeEntity.getName()
-        );
+        sessionHelper.insertLoginData(instance.universeEntity.getLogin(), instance.universeEntity.getPass());
+        sessionHelper.chooseServer(instance.universeEntity.getName());
         isLoggedIn = true;
-        sleep(TimeUnit.SECONDS, 1);
     }
 
     private void logOut() {

@@ -5,7 +5,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 class SessionHelper {
@@ -30,19 +33,22 @@ class SessionHelper {
         } catch (NoSuchElementException e) {}
     }
 
-    public void insertLoginData(String username, String password, String server) {
-        final WebElement loginButton = webDriver.findElement(By.id("loginBtn"));
-        loginButton.click();
-
+    public void insertLoginData(String username, String password) {
+        String loginTab = "ui-id-1";
+        webDriver.findElement(By.id(loginTab)).click();
         session.sleep(TimeUnit.SECONDS, 1);
         webDriver.findElement(By.id("usernameLogin")).sendKeys(username);
-        session.sleep(TimeUnit.SECONDS, 1);
         webDriver.findElement(By.id("passwordLogin")).sendKeys(password);
-        session.sleep(TimeUnit.SECONDS, 1);
-        webDriver.findElement(By.id("serverLogin")).sendKeys(server);
-
         final WebElement loginSubmit = webDriver.findElement(By.id("loginSubmit"));
-        session.sleep(TimeUnit.SECONDS, 1);
         loginSubmit.click();
+    }
+
+    public void chooseServer(String server) {
+//        webDriver.findElement(By.className("btn btn-primary")).click();
+//        webDriver.findElement(By.name(server)).click();
+//        webDriver.findElement(By.name(server)).click();
+        WebElement serverElement = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + server + "')]").get(0);
+        Actions actions = new Actions(webDriver);
+        actions.doubleClick(serverElement).perform();
     }
 }

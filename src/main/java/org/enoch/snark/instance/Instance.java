@@ -11,6 +11,8 @@ import org.enoch.snark.model.SystemView;
 import org.enoch.snark.module.explore.SpaceModule;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.ArrayList;
+
 public class Instance {
 
     public UniverseEntity universeEntity;
@@ -30,7 +32,6 @@ public class Instance {
         } else {
             commander = new DumbCommanderImpl();
         }
-
         new GIUrlBuilder(this).updateFleetStatus();
     }
 
@@ -41,8 +42,6 @@ public class Instance {
     }
 
     public void runSI() {
-
-
         new SI(this).run();
     }
 

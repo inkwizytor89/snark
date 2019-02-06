@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "universes", schema = "public", catalog = "snark")
+@Table(name = "universes")
 public class UniverseEntity {
     private Long id;
     private String login;
@@ -131,28 +131,28 @@ public class UniverseEntity {
         return Objects.hash(id, login, pass, name, tag, url, galaxyMax, explorationArea);
     }
 
-    @OneToMany(mappedBy = "universesByUniversId")
-    public Collection<GalaxyEntity> getGalaxiesById() {
-        return galaxiesById;
-    }
+//    @OneToMany(mappedBy = "universesByUniversId")
+//    public Collection<GalaxyEntity> getGalaxiesById() {
+//        return galaxiesById;
+//    }
 
     public void setGalaxiesById(Collection<GalaxyEntity> galaxiesById) {
         this.galaxiesById = galaxiesById;
     }
 
-    @OneToMany(mappedBy = "universesByUniverseId")
-    public Collection<PlanetEntity> getPlanetsById() {
-        return planetsById;
-    }
+//    @OneToMany(mappedBy = "universesByUniverseId")
+//    public Collection<PlanetEntity> getPlanetsById() {
+//        return planetsById;
+//    }
 
     public void setPlanetsById(Collection<PlanetEntity> planetsById) {
         this.planetsById = planetsById;
     }
 
-    @OneToMany(mappedBy = "universesByUniverseId")
-    public Collection<SourceEntity> getSourcesById() {
-        return sourcesById;
-    }
+//    @OneToMany(mappedBy = "universesByUniverseId")
+//    public Collection<SourceEntity> getSourcesById() {
+//        return sourcesById;
+//    }
 
     public void setSourcesById(Collection<SourceEntity> sourcesById) {
         this.sourcesById = sourcesById;

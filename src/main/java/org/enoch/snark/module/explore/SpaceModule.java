@@ -24,7 +24,7 @@ public class SpaceModule extends AbstractModule {
 
     private void generateViewArea(List<SystemView> newestGalaxyToView) {
         toView = new LinkedList<>();
-        final Collection<SourceEntity> sources = instance.universeEntity.getSourcesById();
+        final Collection<SourceEntity> sources = null;//instance.universeEntity.getSourcesById();
         for(SourceEntity source : sources) {
             toView.addAll(generateSystemToView(source));
         }
