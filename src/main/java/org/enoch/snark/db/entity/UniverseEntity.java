@@ -18,7 +18,7 @@ public class UniverseEntity {
     private Integer explorationArea;
     private Collection<GalaxyEntity> galaxiesById;
     private Collection<PlanetEntity> planetsById;
-    private Collection<SourceEntity> sourcesById;
+    private Collection<SourceEntity> sources;
 
     @Id
     @Column(name = "id")
@@ -151,10 +151,15 @@ public class UniverseEntity {
 
 //    @OneToMany(mappedBy = "universesByUniverseId")
 //    public Collection<SourceEntity> getSourcesById() {
-//        return sourcesById;
+//        return sources;
 //    }
 
-    public void setSourcesById(Collection<SourceEntity> sourcesById) {
-        this.sourcesById = sourcesById;
+    @OneToMany(mappedBy = "universes")
+    public Collection<SourceEntity> getSources() {
+        return sources;
+    }
+
+    public void setSources(Collection<SourceEntity> sources) {
+        this.sources = sources;
     }
 }

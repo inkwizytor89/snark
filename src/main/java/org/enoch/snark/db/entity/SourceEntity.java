@@ -11,7 +11,7 @@ public class SourceEntity {
     private Integer system;
     private Integer position;
     private Integer cp;
-    private UniverseEntity universesByUniverseId;
+    private UniverseEntity universes;
 
     @Id
     @Column(name = "id")
@@ -83,11 +83,11 @@ public class SourceEntity {
 
     @ManyToOne
     @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity getUniversesByUniverseId() {
-        return universesByUniverseId;
+    public UniverseEntity getUniverses() {
+        return universes;
     }
 
-    public void setUniversesByUniverseId(UniverseEntity universesByUniverseId) {
-        this.universesByUniverseId = universesByUniverseId;
+    public void setUniverses(UniverseEntity universes) {
+        this.universes = universes;
     }
 }
