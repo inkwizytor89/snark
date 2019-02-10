@@ -13,7 +13,7 @@ public class GalaxyEntity {
     private Integer galaxy;
     private Integer system;
     private Timestamp updated;
-    private UniverseEntity universesByUniversId;
+    private UniverseEntity universe;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,13 +74,13 @@ public class GalaxyEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "univers_id", referencedColumnName = "id")
-    public UniverseEntity getUniversesByUniversId() {
-        return universesByUniversId;
+    @JoinColumn(name = "universe_id", referencedColumnName = "id")
+    public UniverseEntity getUniverse() {
+        return universe;
     }
 
-    public void setUniversesByUniversId(UniverseEntity universesByUniversId) {
-        this.universesByUniversId = universesByUniversId;
+    public void setUniverse(UniverseEntity universe) {
+        this.universe = universe;
     }
 
     public SystemView toSystemView() {

@@ -23,7 +23,7 @@ public class GalaxyDAOImpl extends AbstractDAOImpl implements GalaxyDAO {
             galaxyEntity.get().setUpdated(new Timestamp(System.currentTimeMillis()));
         } else {
             GalaxyEntity entity = new GalaxyEntity();
-            entity.setUniversesByUniversId(universeEntity);
+            entity.setUniverse(universeEntity);
             entity.setGalaxy(systemView.galaxy);
             entity.setSystem(systemView.system);
             entity.setUpdated(new Timestamp(System.currentTimeMillis()));

@@ -20,7 +20,7 @@ public class PlanetEntity {
     private Long fleetSum;
     private Long defenseSum;
     private Timestamp updated;
-    private UniverseEntity universeEntity;
+    private UniverseEntity universe;
     private Collection<SpyInfoEntity> spyInfosById;
 
     @Id
@@ -138,12 +138,12 @@ public class PlanetEntity {
 
     @ManyToOne
     @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity getUniversesByUniverseId() {
-        return universeEntity;
+    public UniverseEntity getUniverse() {
+        return universe;
     }
 
-    public void setUniversesByUniverseId(UniverseEntity universesByUniverseId) {
-        this.universeEntity = universesByUniverseId;
+    public void setUniverse(UniverseEntity universe) {
+        this.universe = universe;
     }
 
     @OneToMany(mappedBy = "planetsByPlanetId")

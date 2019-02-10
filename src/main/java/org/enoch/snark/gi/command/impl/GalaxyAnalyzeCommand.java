@@ -53,7 +53,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
                 final Optional<PlanetEntity> planetEntity = planetDAO.find(systemView.galaxy, systemView.system, position);
                 if(!planetEntity.isPresent()) {
                     PlanetEntity entity = new PlanetEntity();
-                    entity.setUniversesByUniverseId(instance.universeEntity);
+                    entity.setUniverse(instance.universeEntity);
                     entity.setGalaxy(systemView.galaxy);
                     entity.setSystem(systemView.system);
                     entity.setPosition(position);

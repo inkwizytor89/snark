@@ -1,0 +1,1 @@
+alter table galaxy rename column univers_id to universe_id;

@@ -16,8 +16,8 @@ public class UniverseEntity {
     private Integer galaxyMax;
     private Integer systemMax;
     private Integer explorationArea;
-    private Collection<GalaxyEntity> galaxiesById;
-    private Collection<PlanetEntity> planetsById;
+    private Collection<GalaxyEntity> galaxies;
+    private Collection<PlanetEntity> planets;
     private Collection<SourceEntity> sources;
 
     @Id
@@ -131,30 +131,25 @@ public class UniverseEntity {
         return Objects.hash(id, login, pass, name, tag, url, galaxyMax, explorationArea);
     }
 
-//    @OneToMany(mappedBy = "universesByUniversId")
-//    public Collection<GalaxyEntity> getGalaxiesById() {
-//        return galaxiesById;
-//    }
-
-    public void setGalaxiesById(Collection<GalaxyEntity> galaxiesById) {
-        this.galaxiesById = galaxiesById;
+    @OneToMany(mappedBy = "universe")
+    public Collection<GalaxyEntity> getGalaxies() {
+        return galaxies;
     }
 
-//    @OneToMany(mappedBy = "universesByUniverseId")
-//    public Collection<PlanetEntity> getPlanetsById() {
-//        return planetsById;
-//    }
-
-    public void setPlanetsById(Collection<PlanetEntity> planetsById) {
-        this.planetsById = planetsById;
+    public void setGalaxies(Collection<GalaxyEntity> galaxies) {
+        this.galaxies = galaxies;
     }
 
-//    @OneToMany(mappedBy = "universesByUniverseId")
-//    public Collection<SourceEntity> getSourcesById() {
-//        return sources;
-//    }
+    @OneToMany(mappedBy = "universe")
+    public Collection<PlanetEntity> getPlanets() {
+        return planets;
+    }
 
-    @OneToMany(mappedBy = "universes")
+    public void setPlanets(Collection<PlanetEntity> planets) {
+        this.planets = planets;
+    }
+
+    @OneToMany(mappedBy = "universe")
     public Collection<SourceEntity> getSources() {
         return sources;
     }

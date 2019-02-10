@@ -8,6 +8,7 @@
         <class>org.enoch.snark.db.entity.PlanetEntity</class>
         <class>org.enoch.snark.db.entity.SourceEntity</class>
         <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
+        <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
 
         <properties>
