@@ -6,8 +6,6 @@ import org.enoch.snark.instance.Instance;
 import java.util.logging.Logger;
 
 public abstract class AbstractCommand {
-    protected static final Logger log = Logger.getLogger( AbstractCommand.class.getName() );
-
     private AbstractCommand afterCommand;
     private int secoundToDelay;
     protected Instance instance;

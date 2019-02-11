@@ -10,9 +10,9 @@ public abstract class AbstractDAOImpl {
     protected final EntityManager entityManager;
     protected UniverseEntity universeEntity;
 
-    AbstractDAOImpl() {
-        entityManager = JPAUtility.getEntityManager();
-    }
+//    AbstractDAOImpl() {
+//        entityManager = JPAUtility.getEntityManager();
+//    }
 
     AbstractDAOImpl(UniverseEntity universeEntity) {
         this.universeEntity = universeEntity;

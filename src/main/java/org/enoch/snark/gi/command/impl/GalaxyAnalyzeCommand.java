@@ -29,6 +29,11 @@ public class GalaxyAnalyzeCommand extends GICommand {
         super(instance, CommandType.INTERFACE_REQUIERED);
         giUrlBuilder = new GIUrlBuilder(instance);
         this.systemView = systemView;
+        normalize(this.systemView);
+    }
+
+    private void normalize(SystemView systemView) {
+        systemView.galaxy = Math.floorMod(systemView.galaxy, instance.universeEntity.getGalaxyMax());
     }
 
     @Override

@@ -73,6 +73,11 @@ public class GalaxyEntity {
         return Objects.hash(id, galaxy, system, updated);
     }
 
+    @Override
+    public String toString() {
+        return "["+galaxy+", "+system+"]";
+    }
+
     @ManyToOne
     @JoinColumn(name = "universe_id", referencedColumnName = "id")
     public UniverseEntity getUniverse() {

@@ -30,7 +30,7 @@ public class PlanetDAOImpl extends AbstractDAOImpl implements PlanetDAO {
     public Optional<PlanetEntity> find(Integer galaxy, Integer system, Integer position) {
         final List<PlanetEntity> result = entityManager.createQuery("" +
                 "from PlanetEntity " +
-                "where universesByUniverseId = :universe and " +
+                "where universe = :universe and " +
                 "       galaxy = :galaxy and" +
                 "       system = :system and " +
                 "       position = :position", PlanetEntity.class)

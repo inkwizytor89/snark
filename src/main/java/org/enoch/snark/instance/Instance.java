@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.db.entity.SourceEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
@@ -36,12 +37,16 @@ public class Instance {
     }
 
     public void runTest() {
+
+        exploreUnknownSpace();
 //        new GalaxyAnalyzeCommand(this, new SystemView(2, 109)).execute();
-        final SpaceModule spaceModule = new SpaceModule(this);
-        while(true) spaceModule.run();
+//        final SpaceModule spaceModule = new SpaceModule(this);
+//        while(true) spaceModule.run();
     }
 
     public void runSI() {
+        exploreUnknownSpace();
+
         new SI(this).run();
     }
 
@@ -58,5 +63,13 @@ public class Instance {
 //            }
 //        }
 //        return nearestPlanet;
+    }
+
+    private void exploreUnknownSpace() {
+        for(SourceEntity source : universeEntity.getSources()) {
+            for(SystemView systemView : source.generateSystemToView()) {
+                commander.push(new GalaxyAnalyzeCommand(this, systemView));
+            }
+        }
     }
 }
