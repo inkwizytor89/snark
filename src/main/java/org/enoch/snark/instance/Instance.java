@@ -47,7 +47,7 @@ public class Instance {
     public void runSI() {
         exploreUnknownSpace();
 
-//        new SI(this).run();
+//        new SampleSI(this).run();
     }
 
     public SourcePlanet findNearestSource(Planet planet) {
