@@ -1,5 +1,9 @@
 create table fleet(
     id bigserial not null primary key,
+    universe_id bigint not null references universes,
+    type text not null,
+    planet_id bigint not null references fleet,
+    start timestamp default null,
     visited timestamp default null,
     back timestamp default null
 );

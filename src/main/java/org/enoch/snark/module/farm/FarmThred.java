@@ -21,5 +21,4 @@ public class FarmThred extends AbstractThred {
         // wysyłamy sondy
     }
 
-    private void
 }

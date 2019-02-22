@@ -10,6 +10,8 @@
         <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
         <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
+        <class>org.enoch.snark.db.entity.FleetEntity</class>
+        <class>org.enoch.snark.db.entity.ShipsEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>

@@ -22,6 +22,7 @@ public class PlanetEntity {
     private Timestamp updated;
     private UniverseEntity universe;
     private Collection<SpyInfoEntity> spyInfosById;
+    private Collection<FleetEntity> fleet;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -153,5 +154,14 @@ public class PlanetEntity {
 
     public void setSpyInfosById(Collection<SpyInfoEntity> spyInfosById) {
         this.spyInfosById = spyInfosById;
+    }
+
+    @OneToMany(mappedBy = "planet")
+    public Collection<FleetEntity> getFleet() {
+        return fleet;
+    }
+
+    public void setFleet(Collection<FleetEntity> fleet) {
+        this.fleet = fleet;
     }
 }
