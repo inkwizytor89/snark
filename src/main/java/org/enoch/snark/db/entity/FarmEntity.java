@@ -3,9 +3,9 @@ package org.enoch.snark.db.entity;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-@Entity
-@Table(name = "planets", schema = "public", catalog = "snark")
-public class SpyRequestEntity {
+//@Entity
+@Table(name = "farm_waves", schema = "public", catalog = "snark")
+public class FarmEntity {
 
     @Id
     @Column(name = "id")
@@ -16,11 +16,12 @@ public class SpyRequestEntity {
     public UniverseEntity universe;
 
     @Basic
-    @Column(name = "code")
-    public Long code;
+    @Column(name = "start")
+    public Timestamp start;
 
-    @OneToMany
-    @JoinColumn(name = "fleet_id", referencedColumnName = "id", nullable = false)
-    public FleetEntity fleetEntity;
+    public SpyRequestEntity spyRequestEntity;
+
+    public WarRequestEntity warRequestEntity;
+
 
 }

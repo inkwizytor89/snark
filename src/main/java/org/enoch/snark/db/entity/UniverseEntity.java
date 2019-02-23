@@ -20,6 +20,7 @@ public class UniverseEntity {
     private Collection<PlanetEntity> planets;
     private Collection<SourceEntity> sources;
     private Collection<FleetEntity> fleet;
+    private Collection<FarmEntity> farms;
 
     @Id
     @Column(name = "id")
@@ -166,5 +167,14 @@ public class UniverseEntity {
 
     public void setFleet(Collection<FleetEntity> fleet) {
         this.fleet = fleet;
+    }
+
+    @OneToMany(mappedBy = "universe")
+    public Collection<FarmEntity> getFarms() {
+        return farms;
+    }
+
+    public void setFarms(Collection<FarmEntity> farms) {
+        this.farms = farms;
     }
 }

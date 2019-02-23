@@ -28,4 +28,9 @@ public class ResourceSI implements SI {
         }
         return 0;
     }
+
+    @Override
+    public Instance getInstance() {
+        return instance;
+    }
 }

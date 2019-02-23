@@ -1,11 +1,10 @@
 package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "planets", schema = "public", catalog = "snark")
-public class SpyRequestEntity {
+public class WarRequestEntity {
 
     @Id
     @Column(name = "id")
