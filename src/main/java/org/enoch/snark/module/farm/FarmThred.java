@@ -12,6 +12,7 @@ public class FarmThred extends AbstractThred {
     public void run() {
         super.run();
 
+        // wczytaj ostatni stan
         exploreSpace();
 
         int fleetNum = si.getAvailableFleetCount(this);
