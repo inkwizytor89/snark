@@ -7,11 +7,11 @@ import org.enoch.snark.module.AbstractThred;
 
 public class FarmThred extends AbstractThred {
 
-//    private final FarmDAOImpl farmDAO;
+    private final FarmDAOImpl farmDAO;
 
     public FarmThred(SI si) {
         super(si);
-//        farmDAO = new FarmDAOImpl(si.getInstance());
+        farmDAO = new FarmDAOImpl(si.getInstance().universeEntity);
     }
 
     @Override

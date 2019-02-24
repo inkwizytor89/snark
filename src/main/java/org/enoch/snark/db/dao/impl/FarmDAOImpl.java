@@ -5,7 +5,7 @@ import org.enoch.snark.db.entity.UniverseEntity;
 
 public class FarmDAOImpl extends AbstractDAOImpl implements FarmDAO {
 
-    publicFarmDAOImpl(UniverseEntity universeEntity) {
+    public FarmDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
     }
 }

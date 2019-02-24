@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Table(name = "planets", schema = "public", catalog = "snark")
@@ -20,6 +21,6 @@ public class WarRequestEntity {
 
     @OneToMany
     @JoinColumn(name = "fleet_id", referencedColumnName = "id", nullable = false)
-    public FleetEntity fleetEntity;
+    public Collection<FleetEntity> fleet;
 
 }

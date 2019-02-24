@@ -2,8 +2,9 @@ package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Collection;
 
-//@Entity
+@Entity
 @Table(name = "farm_waves", schema = "public", catalog = "snark")
 public class FarmEntity {
 
@@ -19,9 +20,9 @@ public class FarmEntity {
     @Column(name = "start")
     public Timestamp start;
 
-    public SpyRequestEntity spyRequestEntity;
+    public Long spyRequestCode;
 
-    public WarRequestEntity warRequestEntity;
+    public Long warRequestCode;
 
 
 }

@@ -12,6 +12,8 @@
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.ShipsEntity</class>
+        <class>org.enoch.snark.db.entity.FarmEntity</class>
+        <class>org.enoch.snark.db.entity.SpyRequestEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
