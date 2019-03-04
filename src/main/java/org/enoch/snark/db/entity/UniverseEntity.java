@@ -6,8 +6,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "universes")
-public class UniverseEntity {
-    private Long id;
+public class UniverseEntity extends IdEntity {
     private String login;
     private String pass;
     private String name;
@@ -21,16 +20,6 @@ public class UniverseEntity {
     private Collection<SourceEntity> sources;
     private Collection<FleetEntity> fleet;
 //    private Collection<FarmEntity> farms;
-
-    @Id
-    @Column(name = "id")
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "login")

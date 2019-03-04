@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GalaxyDAO {
+    void saveOrUpdate(GalaxyEntity galaxyEntity);
     void update(SystemView systemView);
     Optional<GalaxyEntity> find(SystemView systemView);
     List<GalaxyEntity> findLatestGalaxyToView();
 
-    void saveOrUpdate(GalaxyEntity galaxyEntity);
 }

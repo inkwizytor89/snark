@@ -1,9 +1,16 @@
 package org.enoch.snark.gi.command.request;
 
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.FleetRequestDAO;
+import org.enoch.snark.db.dao.impl.FleetDAOImpl;
+import org.enoch.snark.db.dao.impl.FleetRequestDAOImpl;
+import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.gi.command.SpyObserver;
 import org.enoch.snark.gi.command.impl.ReadSpyInfoCommand;
 import org.enoch.snark.gi.command.impl.SpyCommand;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Fleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SpyInfo;
 
@@ -14,15 +21,36 @@ import java.util.concurrent.TimeUnit;
 
 public class SpyRequest implements SpyObserver{
 
-    private final List<Planet> targets;
+    private final List<Planet> targetsOld;
     private final SpyReportWaiter waiter;
     private final List<SpyInfo> spyReport = new ArrayList<>();
     private final LocalDateTime startTimestamp = LocalDateTime.now();
 
-    public SpyRequest(Instance instance, List<Planet> targets, SpyReportWaiter waiter) {
-        this.targets = targets;
+    @Deprecated
+    public SpyRequest(Instance instance, List<Planet> targetsOld, SpyReportWaiter waiter) {
+        this.targetsOld = targetsOld;
         this.waiter = waiter;
-        for(Planet target : targets) {
+        for(Planet target : targetsOld) {
+
+            final SpyCommand spyCommand = new SpyCommand(instance, target);
+            spyCommand.setAfterCommand(new ReadSpyInfoCommand(instance, target, this));
+            instance.commander.push(spyCommand);
+        }
+
+        returnSpyReport();
+    }
+
+    public SpyRequest(Instance instance, List<PlanetEntity> targetsOld) {
+        waiter = null;
+        FleetDAO fleetDAO = new FleetDAOImpl(instance.universeEntity);
+        FleetRequestDAO fleetRequestDAO = new FleetRequestDAOImpl(instance.universeEntity);
+
+        Fleet fleet = null;
+        fleetDAO.saveOrUpdate(new FleetEntity(fleet));
+
+
+        this.targetsOld = targetsOld;
+        for(Planet target : targetsOld) {
 
             final SpyCommand spyCommand = new SpyCommand(instance, target);
             spyCommand.setAfterCommand(new ReadSpyInfoCommand(instance, target, this));
@@ -50,7 +78,7 @@ public class SpyRequest implements SpyObserver{
 
     private boolean areNotAll() {
         LocalDateTime toLate = startTimestamp.plusMinutes(20);
-        return !LocalDateTime.now().isAfter(toLate) && spyReport.size() < targets.size();
+        return !LocalDateTime.now().isAfter(toLate) && spyReport.size() < targetsOld.size();
 
     }
 

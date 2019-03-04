@@ -7,11 +7,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "planets", schema = "public", catalog = "snark")
-public class PlanetEntity {
+public class PlanetEntity extends BaseEntity {
 
     public final static String IN_ACTIVE = "IN_ACTIVE";
 
-    private Long id;
     private Integer galaxy;
     private Integer system;
     private Integer position;
@@ -20,20 +19,8 @@ public class PlanetEntity {
     private Long fleetSum;
     private Long defenseSum;
     private Timestamp updated;
-    private UniverseEntity universe;
     private Collection<SpyInfoEntity> spyInfosById;
     private Collection<FleetEntity> fleet;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id",unique=true, nullable = false)
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "galaxy")
@@ -135,16 +122,6 @@ public class PlanetEntity {
     public int hashCode() {
 
         return Objects.hash(id, galaxy, system, position, power, type, fleetSum, defenseSum, updated);
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity getUniverse() {
-        return universe;
-    }
-
-    public void setUniverse(UniverseEntity universe) {
-        this.universe = universe;
     }
 
     @OneToMany(mappedBy = "planetsByPlanetId")

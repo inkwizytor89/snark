@@ -6,15 +6,7 @@ import java.util.Collection;
 
 @Entity
 @Table(name = "farm_waves", schema = "public", catalog = "snark")
-public class FarmEntity {
-
-    @Id
-    @Column(name = "id")
-    public Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity universe;
+public class FarmEntity extends BaseEntity {
 
     @Basic
     @Column(name = "start")

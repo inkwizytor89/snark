@@ -8,22 +8,25 @@ import javax.persistence.EntityTransaction;
 import java.util.List;
 import java.util.Optional;
 
-public class PlanetDAOImpl extends AbstractDAOImpl implements PlanetDAO {
+public class PlanetDAOImpl extends AbstractDAOImpl<PlanetEntity> implements PlanetDAO {
 
     public PlanetDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
     }
 
     @Override
-    public void saveOrUpdatePlanet(PlanetEntity planet) {
-        final EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-        if(planet.getId() == null) {
-            entityManager.persist(planet);
-        } else {
-            entityManager.merge(planet);
-        }
-        transaction.commit();
+    public List<PlanetEntity> findFarms(Integer limit) {
+        final List<PlanetEntity> result = entityManager.createQuery("" +
+                "from PlanetEntity " +
+                "where universe = :universe and " +
+                "       fleet_sum = 0" +
+                "       defense_sum = 0" +
+                "order by power desc " +
+                "limit :limit", PlanetEntity.class)
+                .setParameter("universe", universeEntity)
+                .setParameter("limit", limit)
+                .getResultList();
+        return result;
     }
 
     @Override

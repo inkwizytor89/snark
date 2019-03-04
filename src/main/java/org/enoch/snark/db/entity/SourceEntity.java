@@ -10,23 +10,11 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "sources", schema = "public", catalog = "snark")
-public class SourceEntity {
-    private Long id;
+public class SourceEntity extends BaseEntity {
     private Integer galaxy;
     private Integer system;
     private Integer position;
     private Integer cp;
-    private UniverseEntity universe;
-
-    @Id
-    @Column(name = "id")
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "galaxy")
@@ -85,17 +73,6 @@ public class SourceEntity {
 
         return Objects.hash(id, galaxy, system, position, cp);
     }
-
-    @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity getUniverse() {
-        return universe;
-    }
-
-    public void setUniverse(UniverseEntity universe) {
-        this.universe = universe;
-    }
-
 
     public Collection<SystemView> generateSystemToView() {
 

@@ -8,23 +8,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
-public class GalaxyEntity {
-    private Long id;
+public class GalaxyEntity extends BaseEntity {
     private Integer galaxy;
     private Integer system;
     private Timestamp updated;
-    private UniverseEntity universe;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "galaxy")
@@ -76,16 +63,6 @@ public class GalaxyEntity {
     @Override
     public String toString() {
         return "["+galaxy+", "+system+"]";
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id")
-    public UniverseEntity getUniverse() {
-        return universe;
-    }
-
-    public void setUniverse(UniverseEntity universe) {
-        this.universe = universe;
     }
 
     public SystemView toSystemView() {

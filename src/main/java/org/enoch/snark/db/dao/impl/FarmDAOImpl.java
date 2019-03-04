@@ -7,7 +7,7 @@ import org.enoch.snark.db.entity.UniverseEntity;
 import javax.persistence.EntityTransaction;
 import java.util.List;
 
-public class FarmDAOImpl extends AbstractDAOImpl implements FarmDAO {
+public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO {
 
     public FarmDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
@@ -38,17 +38,5 @@ public class FarmDAOImpl extends AbstractDAOImpl implements FarmDAO {
                 "from FarmEntity " +
                         "order by start desc", FarmEntity.class
         ).getResultList();
-    }
-
-    @Override
-    public void saveOrUpdate(FarmEntity farmEntity) {
-        final EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-        if(farmEntity.id == null) {
-            entityManager.persist(farmEntity);
-        } else {
-            entityManager.merge(farmEntity);
-        }
-        transaction.commit();
     }
 }

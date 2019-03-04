@@ -4,16 +4,8 @@ import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
-@Table(name = "planets", schema = "public", catalog = "snark")
-public class WarRequestEntity {
-
-    @Id
-    @Column(name = "id")
-    public Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
-    public UniverseEntity universe;
+@Table(name = "fleet_requests", schema = "public", catalog = "snark")
+public class FleetRequestEntity extends BaseEntity {
 
     @Basic
     @Column(name = "code")

@@ -1,23 +1,34 @@
 package org.enoch.snark.module.farm;
 
 import org.enoch.snark.db.dao.FarmDAO;
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.PlanetDAO;
 import org.enoch.snark.db.dao.impl.FarmDAOImpl;
+import org.enoch.snark.db.dao.impl.FleetDAOImpl;
+import org.enoch.snark.db.dao.impl.PlanetDAOImpl;
 import org.enoch.snark.db.entity.FarmEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.gi.command.request.SpyRequest;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThred;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class FarmThred extends AbstractThred {
 
     private final FarmDAO farmDAO;
+    private final FleetDAO fleetDAO;
+    private final PlanetDAO planetDAO;
     private FarmEntity actualFarm;
     private FarmEntity previousFarm;
 
     public FarmThred(SI si) {
         super(si);
         farmDAO = new FarmDAOImpl(si.getInstance().universeEntity);
+        planetDAO = new PlanetDAOImpl(si.getInstance().universeEntity);
+        fleetDAO = new FleetDAOImpl(si.getInstance().universeEntity);
         actualFarm = farmDAO.getActualState();
         previousFarm = farmDAO.getPreviousState();
     }
@@ -42,7 +53,9 @@ public class FarmThred extends AbstractThred {
                 // i podajesz ile ma z tego ruszyc, bo jak by jakis byl nie wypalem z powodu
                 // bledu albo pozniej ze z falangi sie nie oplaca to zeby wziol nastepny
             } else if(actualFarm.start.before( new Timestamp(System.currentTimeMillis()))) {
-
+                List<PlanetEntity> farms = planetDAO.findFarms(50);
+                actualFarm.spyRequestCode = sendSondsAndWait(farms);
+                farmDAO.saveOrUpdate(actualFarm);
                 // wyciagnij poprzedni zbior celow
                 
                 // wysylac sondy 50 sond do planet ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
@@ -58,6 +71,19 @@ public class FarmThred extends AbstractThred {
 
         }
 //        farmDAO.getLastState();
+    }
 
+    private Long sendSondsAndWait(List<PlanetEntity> targets) {
+        SpyRequest spyRequest = new SpyRequest(si.getInstance(), targets);
+        spyRequest.send();
+        while(spyRequest.inProgress()) {
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                break;
+            }
+        }
+        return spyRequest.getCode();
     }
 }

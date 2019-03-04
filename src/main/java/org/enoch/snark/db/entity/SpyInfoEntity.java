@@ -6,8 +6,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "spy_info", schema = "public", catalog = "snark")
-public class SpyInfoEntity {
-    private Long id;
+public class SpyInfoEntity extends BaseEntity {
     private Integer metal;
     private Integer crystal;
     private Integer deuterium;
@@ -15,16 +14,6 @@ public class SpyInfoEntity {
     private Timestamp update;
     private PlanetEntity planetsByPlanetId;
     private SourceEntity sourcesBySourceId;
-
-    @Id
-    @Column(name = "id")
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Basic
     @Column(name = "metal")

@@ -5,12 +5,7 @@ create table fleet(
     planet_id bigint not null references fleet,
     start timestamp default null,
     visited timestamp default null,
-    back timestamp default null
-);
-
-create table ships(
-    id bigserial not null primary key,
-    fleet_id bigint not null references fleet,
+    back timestamp default null,
     lm int default 0,
     cm int default 0,
     kr int default 0,
@@ -26,14 +21,7 @@ create table ships(
     son int default 0
 );
 
-create table spy_requests(
-    id bigserial not null,
-    universe_id bigint not null references universes,
-    code bigint not null,
-    fleet_id bigint not null references fleet
-);
-
-create table war_requests(
+create table fleet_requests(
     id bigserial not null,
     universe_id bigint not null references universes,
     code bigint not null,

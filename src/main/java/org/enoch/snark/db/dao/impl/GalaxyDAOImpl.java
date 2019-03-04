@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-public class GalaxyDAOImpl extends AbstractDAOImpl implements GalaxyDAO {
+public class GalaxyDAOImpl extends AbstractDAOImpl<GalaxyEntity> implements GalaxyDAO {
 private static int poolint = 0;
     public GalaxyDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
@@ -23,7 +23,7 @@ private static int poolint = 0;
             galaxyEntity.get().setUpdated(new Timestamp(System.currentTimeMillis()));
         } else {
             GalaxyEntity entity = new GalaxyEntity();
-            entity.setUniverse(universeEntity);
+            entity.universe = universeEntity;
             entity.setGalaxy(systemView.galaxy);
             entity.setSystem(systemView.system);
             entity.setUpdated(new Timestamp(System.currentTimeMillis()));
@@ -60,18 +60,4 @@ private static int poolint = 0;
                 .setMaxResults(10)
                 .getResultList();
     }
-
-
-    @Override
-    public void saveOrUpdate(GalaxyEntity galaxyEntity) {
-        final EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-        if(galaxyEntity.getId() == null) {
-            entityManager.persist(galaxyEntity);
-        } else {
-            entityManager.merge(galaxyEntity);
-        }
-        transaction.commit();
-    }
-
 }
