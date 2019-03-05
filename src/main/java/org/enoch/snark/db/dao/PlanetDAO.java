@@ -1,15 +1,15 @@
 package org.enoch.snark.db.dao;
 
-import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PlanetDAO  {
 
-    void saveOrUpdate(PlanetEntity planet);
+    void saveOrUpdate(TargetEntity planet);
 
-    List<PlanetEntity> findFarms(Integer limit);
+    List<TargetEntity> findFarms(Integer limit);
 
-    Optional<PlanetEntity> find(Integer galaxy, Integer system, Integer position);
+    Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position);
 }

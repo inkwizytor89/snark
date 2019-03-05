@@ -86,7 +86,7 @@ public class SpyInfo implements Comparable  {
 
     @Override
     public String toString() {
-        final String fileName = file != null ? file.getName() : "Dont Existing planet";
+        final String fileName = file != null ? file.getName() : "Dont Existing target";
         return fileName +" m="+metal+" c="+crystal+" d="+deuterium+" p="+power+" date="+date;
     }
 }

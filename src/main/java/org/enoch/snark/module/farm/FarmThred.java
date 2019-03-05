@@ -7,7 +7,7 @@ import org.enoch.snark.db.dao.impl.FarmDAOImpl;
 import org.enoch.snark.db.dao.impl.FleetDAOImpl;
 import org.enoch.snark.db.dao.impl.PlanetDAOImpl;
 import org.enoch.snark.db.entity.FarmEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.request.SpyRequest;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThred;
@@ -53,12 +53,12 @@ public class FarmThred extends AbstractThred {
                 // i podajesz ile ma z tego ruszyc, bo jak by jakis byl nie wypalem z powodu
                 // bledu albo pozniej ze z falangi sie nie oplaca to zeby wziol nastepny
             } else if(actualFarm.start.before( new Timestamp(System.currentTimeMillis()))) {
-                List<PlanetEntity> farms = planetDAO.findFarms(50);
+                List<TargetEntity> farms = planetDAO.findFarms(50);
                 actualFarm.spyRequestCode = sendSondsAndWait(farms);
                 farmDAO.saveOrUpdate(actualFarm);
                 // wyciagnij poprzedni zbior celow
                 
-                // wysylac sondy 50 sond do planet ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
+                // wysylac sondy 50 sond do target ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
                 // spyrequest zrobic mu konsrtuktor ktory dziala na tych zbiorach lub lepiej
             } else {
                 // niech czeka ile trzeba a nie aktywuje sie co sekunde
@@ -73,7 +73,7 @@ public class FarmThred extends AbstractThred {
 //        farmDAO.getLastState();
     }
 
-    private Long sendSondsAndWait(List<PlanetEntity> targets) {
+    private Long sendSondsAndWait(List<TargetEntity> targets) {
         SpyRequest spyRequest = new SpyRequest(si.getInstance(), targets);
         spyRequest.send();
         while(spyRequest.inProgress()) {

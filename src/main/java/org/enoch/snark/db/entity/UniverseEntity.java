@@ -16,7 +16,7 @@ public class UniverseEntity extends IdEntity {
     private Integer systemMax;
     private Integer explorationArea;
     private Collection<GalaxyEntity> galaxies;
-    private Collection<PlanetEntity> planets;
+    private Collection<TargetEntity> planets;
     private Collection<SourceEntity> sources;
     private Collection<FleetEntity> fleet;
 //    private Collection<FarmEntity> farms;
@@ -132,11 +132,11 @@ public class UniverseEntity extends IdEntity {
     }
 
     @OneToMany(mappedBy = "universe")
-    public Collection<PlanetEntity> getPlanets() {
+    public Collection<TargetEntity> getPlanets() {
         return planets;
     }
 
-    public void setPlanets(Collection<PlanetEntity> planets) {
+    public void setPlanets(Collection<TargetEntity> planets) {
         this.planets = planets;
     }
 

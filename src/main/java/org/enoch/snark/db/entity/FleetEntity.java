@@ -1,6 +1,6 @@
 package org.enoch.snark.db.entity;
 
-import org.enoch.snark.model.Fleet;
+import org.enoch.snark.instance.Instance;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -12,11 +12,15 @@ public class FleetEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
-    public PlanetEntity planet;
+    public TargetEntity target;
+
+    @ManyToOne
+    @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
+    public SourceEntity source;
 
     @Basic
     @Column(name = "start")
-    public Timestamp start;
+    public Timestamp start = new Timestamp(System.currentTimeMillis());
 
     @Basic
     @Column(name = "visited")
@@ -67,7 +71,22 @@ public class FleetEntity extends BaseEntity {
 
     FleetEntity() {}
 
-    FleetEntity(@Nonnull Fleet fleet) {
+    public FleetEntity(Instance instance) {
+        super();
+        universe = instance.universeEntity;
+    }
 
+    public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
+        return createSpyFleet(instance, target, 1);
+    }
+
+    public static FleetEntity createSpyFleet(@Nonnull Instance instance,
+                                             @Nonnull TargetEntity target,
+                                             @Nonnull Integer count) {
+        FleetEntity fleet = new FleetEntity(instance);
+        fleet.target = target;
+        fleet.source = instance.findNearestSource(target);
+        fleet.son = count.longValue();
+        return fleet;
     }
 }

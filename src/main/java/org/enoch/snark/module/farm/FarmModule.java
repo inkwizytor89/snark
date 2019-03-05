@@ -28,8 +28,8 @@ public class FarmModule extends AbstractModule implements SpyReportWaiter, Attac
 //        List<Planet> targets = PlanetFromFileReader.get(targetsFile.getAbsolutePath());
 //        if(targets == null ) throw new RuntimeException("Error when load targets from file");
 //        System.err.println("Do szukania:");
-//        for (Planet planet : targets) {
-//            System.err.println(planet);
+//        for (Planet target : targets) {
+//            System.err.println(target);
 //        }
 //        new SpyRequest(instance, targets, this);
     }

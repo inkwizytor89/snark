@@ -5,7 +5,7 @@
              version="2.0">
     <persistence-unit name="PERSISTENCE">
         <class>org.enoch.snark.db.entity.ExplorationEntity</class>
-        <class>org.enoch.snark.db.entity.PlanetEntity</class>
+        <class>org.enoch.snark.db.entity.TargetEntity</class>
         <class>org.enoch.snark.db.entity.SourceEntity</class>
         <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
         <class>org.enoch.snark.db.entity.GalaxyEntity</class>

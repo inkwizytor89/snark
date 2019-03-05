@@ -15,10 +15,6 @@ public abstract class AbstractDAOImpl<T extends BaseEntity> {
     protected final EntityManager entityManager;
     protected UniverseEntity universeEntity;
 
-//    AbstractDAOImpl() {
-//        entityManager = JPAUtility.getEntityManager();
-//    }
-
     AbstractDAOImpl(UniverseEntity universeEntity) {
         this.universeEntity = universeEntity;
         entityManager = JPAUtility.getEntityManager();
@@ -35,11 +31,9 @@ public abstract class AbstractDAOImpl<T extends BaseEntity> {
         transaction.commit();
     }
 
-    public List<T> fetchAll() {
-        return entityManager.createQuery("" +
-                "from UniverseEntity " +
-                "where universe = :universe ")
-                .setParameter("universe", universeEntity)
+    public List fetchAll(Class clazz) {
+        return entityManager.createQuery("from " + clazz.getName())
                 .getResultList();
+
     }
 }

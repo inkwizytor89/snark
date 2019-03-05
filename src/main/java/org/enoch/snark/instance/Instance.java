@@ -1,5 +1,8 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.db.DAOFactory;
+import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.SourceEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GISession;
@@ -9,10 +12,9 @@ import org.enoch.snark.gi.macro.MessageService;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SourcePlanet;
 import org.enoch.snark.model.SystemView;
-import org.enoch.snark.module.explore.SpaceModule;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Instance {
 
@@ -20,9 +22,11 @@ public class Instance {
     public Commander commander;
     public GISession session;
     public MessageService messageService;
+    public DAOFactory daoFactory;
 
     public Instance(UniverseEntity universeEntity) {
         this(universeEntity, true);
+        daoFactory = new DAOFactory(universeEntity);
     }
 
     public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
@@ -50,19 +54,21 @@ public class Instance {
 //        new SampleSI(this).run();
     }
 
-    public SourcePlanet findNearestSource(Planet planet) {
-        throw new NotImplementedException();
-//        SourcePlanet nearestPlanet = appProperties.sourcePlanets.get(0);
-//        Integer minDistance = planet.calculateDistance(nearestPlanet);
-//
-//        for(SourcePlanet source : appProperties.sourcePlanets) {
-//            Integer distance = planet.calculateDistance(source);
-//            if (distance < minDistance) {
-//                minDistance = distance;
-//                nearestPlanet = source;
-//            }
-//        }
-//        return nearestPlanet;
+    public SourceEntity findNearestSource(PlanetEntity planet) {
+
+        List<SourceEntity> sources = daoFactory.sourceDAO.fetchAll();
+
+        SourceEntity nearestPlanet = sources.get(0);
+        Integer minDistance = planet.calculateDistance(sources.get(0));
+
+        for(SourceEntity source : sources) {
+            Integer distance = planet.calculateDistance(source);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPlanet = source;
+            }
+        }
+        return nearestPlanet;
     }
 
     private void exploreUnknownSpace() {

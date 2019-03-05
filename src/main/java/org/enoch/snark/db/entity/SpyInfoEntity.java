@@ -12,7 +12,7 @@ public class SpyInfoEntity extends BaseEntity {
     private Integer deuterium;
     private Integer power;
     private Timestamp update;
-    private PlanetEntity planetsByPlanetId;
+    private TargetEntity planetsByPlanetId;
     private SourceEntity sourcesBySourceId;
 
     @Basic
@@ -86,11 +86,11 @@ public class SpyInfoEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
-    public PlanetEntity getPlanetsByPlanetId() {
+    public TargetEntity getPlanetsByPlanetId() {
         return planetsByPlanetId;
     }
 
-    public void setPlanetsByPlanetId(PlanetEntity planetsByPlanetId) {
+    public void setPlanetsByPlanetId(TargetEntity planetsByPlanetId) {
         this.planetsByPlanetId = planetsByPlanetId;
     }
 

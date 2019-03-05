@@ -6,7 +6,7 @@ import org.enoch.snark.db.dao.PlanetDAO;
 import org.enoch.snark.db.dao.impl.GalaxyDAOImpl;
 import org.enoch.snark.db.dao.impl.PlanetDAOImpl;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -55,14 +55,14 @@ public class GalaxyAnalyzeCommand extends GICommand {
             final String status = row.findElement(By.className("status")).getText();
             System.err.println(position+": "+status);
             if(isAvailableFarm(status)) {
-                final Optional<PlanetEntity> planetEntity = planetDAO.find(systemView.galaxy, systemView.system, position);
+                final Optional<TargetEntity> planetEntity = planetDAO.find(systemView.galaxy, systemView.system, position);
                 if(!planetEntity.isPresent()) {
-                    PlanetEntity entity = new PlanetEntity();
+                    TargetEntity entity = new TargetEntity();
                     entity.universe = instance.universeEntity;
                     entity.setGalaxy(systemView.galaxy);
                     entity.setSystem(systemView.system);
                     entity.setPosition(position);
-                    entity.setType(PlanetEntity.IN_ACTIVE);
+                    entity.setType(TargetEntity.IN_ACTIVE);
                     planetDAO.saveOrUpdate(entity);
                 }
             }

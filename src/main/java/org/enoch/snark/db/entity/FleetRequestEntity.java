@@ -1,5 +1,7 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.instance.Instance;
+
 import javax.persistence.*;
 import java.util.Collection;
 
@@ -11,8 +13,11 @@ public class FleetRequestEntity extends BaseEntity {
     @Column(name = "code")
     public Long code;
 
-    @OneToMany
+    @OneToOne
     @JoinColumn(name = "fleet_id", referencedColumnName = "id", nullable = false)
-    public Collection<FleetEntity> fleet;
+    public FleetEntity fleet;
 
+    public FleetRequestEntity(Instance instance) {
+        universe = instance.universeEntity;
+    }
 }
