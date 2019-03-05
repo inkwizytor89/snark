@@ -14,6 +14,11 @@ public class PlanetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Plan
     }
 
     @Override
+    protected Class<TargetEntity> getEntitylass() {
+        return TargetEntity.class;
+    }
+
+    @Override
     public List<TargetEntity> findFarms(Integer limit) {
         final List<TargetEntity> result = entityManager.createQuery("" +
                 "from TargetEntity " +

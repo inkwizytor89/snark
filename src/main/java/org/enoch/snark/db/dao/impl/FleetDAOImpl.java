@@ -9,4 +9,9 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
     public FleetDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
     }
+
+    @Override
+    protected Class<FleetEntity> getEntitylass() {
+        return FleetEntity.class;
+    }
 }

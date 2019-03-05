@@ -9,4 +9,9 @@ public class FleetRequestDAOImpl extends AbstractDAOImpl<FleetRequestEntity> imp
         super(universeEntity);
     }
 
+    @Override
+    protected Class<FleetRequestEntity> getEntitylass() {
+        return FleetRequestEntity.class;
+    }
+
 }

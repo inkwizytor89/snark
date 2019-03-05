@@ -17,6 +17,11 @@ private static int poolint = 0;
     }
 
     @Override
+    protected Class<GalaxyEntity> getEntitylass() {
+        return GalaxyEntity.class;
+    }
+
+    @Override
     public void update(SystemView systemView) {
         final Optional<GalaxyEntity> galaxyEntity = find(systemView);
         if(galaxyEntity.isPresent()) {

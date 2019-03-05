@@ -4,13 +4,17 @@ import org.enoch.snark.db.dao.FarmDAO;
 import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 
-import javax.persistence.EntityTransaction;
 import java.util.List;
 
 public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO {
 
     public FarmDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
+    }
+
+    @Override
+    protected Class<FarmEntity> getEntitylass() {
+        return FarmEntity.class;
     }
 
     @Override
@@ -32,11 +36,11 @@ public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO 
             return new FarmEntity();
         }
     }
-
-    private List<FarmEntity> fetchAll() {
-        return entityManager.createQuery(
-                "from FarmEntity " +
-                        "order by start desc", FarmEntity.class
-        ).getResultList();
-    }
+//
+//    private List<FarmEntity> fetchAll() {
+//        return entityManager.createQuery(
+//                "from FarmEntity " +
+//                        "order by start desc", FarmEntity.class
+//        ).getResultList();
+//    }
 }

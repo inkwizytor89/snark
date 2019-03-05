@@ -13,7 +13,7 @@ public class SourceDAOImpl extends AbstractDAOImpl<SourceEntity> implements Sour
     }
 
     @Override
-    public List<SourceEntity> fetchAll() {
-        return fetchAll(SourceEntity.class);
+    protected Class<SourceEntity> getEntitylass() {
+        return SourceEntity.class;
     }
 }
