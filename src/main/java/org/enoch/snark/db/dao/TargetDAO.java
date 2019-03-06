@@ -5,7 +5,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import java.util.List;
 import java.util.Optional;
 
-public interface PlanetDAO extends AbstractDAO<TargetEntity> {
+public interface TargetDAO extends AbstractDAO<TargetEntity> {
 
     List<TargetEntity> findFarms(Integer limit);
 

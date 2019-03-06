@@ -1,15 +1,15 @@
 package org.enoch.snark.db.dao.impl;
 
-import org.enoch.snark.db.dao.PlanetDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 
 import java.util.List;
 import java.util.Optional;
 
-public class PlanetDAOImpl extends AbstractDAOImpl<TargetEntity> implements PlanetDAO {
+public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements TargetDAO {
 
-    public PlanetDAOImpl(UniverseEntity universeEntity) {
+    public TargetDAOImpl(UniverseEntity universeEntity) {
         super(universeEntity);
     }
 

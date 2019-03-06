@@ -2,9 +2,9 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
-import org.enoch.snark.db.dao.PlanetDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.dao.impl.GalaxyDAOImpl;
-import org.enoch.snark.db.dao.impl.PlanetDAOImpl;
+import org.enoch.snark.db.dao.impl.TargetDAOImpl;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.CommandType;
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 public class GalaxyAnalyzeCommand extends GICommand {
 
-    private PlanetDAO planetDAO = new PlanetDAOImpl(instance.universeEntity);
+    private TargetDAO targetDAO = new TargetDAOImpl(instance.universeEntity);
     private GalaxyDAO galaxyDAO = new GalaxyDAOImpl(instance.universeEntity);
     private final GIUrlBuilder giUrlBuilder;
     private SystemView systemView;
@@ -55,7 +55,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
             final String status = row.findElement(By.className("status")).getText();
             System.err.println(position+": "+status);
             if(isAvailableFarm(status)) {
-                final Optional<TargetEntity> planetEntity = planetDAO.find(systemView.galaxy, systemView.system, position);
+                final Optional<TargetEntity> planetEntity = targetDAO.find(systemView.galaxy, systemView.system, position);
                 if(!planetEntity.isPresent()) {
                     TargetEntity entity = new TargetEntity();
                     entity.universe = instance.universeEntity;
@@ -63,7 +63,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
                     entity.setSystem(systemView.system);
                     entity.setPosition(position);
                     entity.setType(TargetEntity.IN_ACTIVE);
-                    planetDAO.saveOrUpdate(entity);
+                    targetDAO.saveOrUpdate(entity);
                 }
             }
         }

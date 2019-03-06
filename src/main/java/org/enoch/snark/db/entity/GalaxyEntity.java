@@ -4,6 +4,7 @@ import org.enoch.snark.model.SystemView;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -11,7 +12,7 @@ import java.util.Objects;
 public class GalaxyEntity extends BaseEntity {
     private Integer galaxy;
     private Integer system;
-    private Timestamp updated;
+    private LocalDateTime updated;
 
     @Basic
     @Column(name = "galaxy")
@@ -35,11 +36,11 @@ public class GalaxyEntity extends BaseEntity {
 
     @Basic
     @Column(name = "updated")
-    public Timestamp getUpdated() {
+    public LocalDateTime getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Timestamp updated) {
+    public void setUpdated(LocalDateTime updated) {
         this.updated = updated;
     }
 

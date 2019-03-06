@@ -2,6 +2,7 @@ package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -15,7 +16,7 @@ public class TargetEntity extends PlanetEntity {
     private String type;
     private Long fleetSum;
     private Long defenseSum;
-    private Timestamp updated;
+    private LocalDateTime updated;
     private Collection<SpyInfoEntity> spyInfosById;
     private Collection<FleetEntity> fleet;
 
@@ -61,11 +62,11 @@ public class TargetEntity extends PlanetEntity {
 
     @Basic
     @Column(name = "updated")
-    public Timestamp getUpdated() {
+    public LocalDateTime getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Timestamp updated) {
+    public void setUpdated(LocalDateTime updated) {
         this.updated = updated;
     }
 

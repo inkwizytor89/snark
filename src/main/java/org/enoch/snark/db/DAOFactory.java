@@ -10,14 +10,14 @@ public class DAOFactory {
     public FarmDAO farmDAO;
     public FleetDAO fleetDAO;
     public GalaxyDAO galaxyDAO;
-    public PlanetDAO planetDAO;
+    public TargetDAO targetDAO;
     public SourceDAO sourceDAO;
 
     public DAOFactory(@Nonnull UniverseEntity entity) {
         farmDAO = new FarmDAOImpl(entity);
         fleetDAO = new FleetDAOImpl(entity);
         galaxyDAO = new GalaxyDAOImpl(entity);
-        planetDAO = new PlanetDAOImpl(entity);
+        targetDAO = new TargetDAOImpl(entity);
         sourceDAO = new SourceDAOImpl(entity);
     }
 
