@@ -19,6 +19,10 @@ public class FleetEntity extends BaseEntity {
     public SourceEntity source;
 
     @Basic
+    @Column(name = "type")
+    public String type;
+
+    @Basic
     @Column(name = "start")
     public Timestamp start = new Timestamp(System.currentTimeMillis());
 
@@ -29,6 +33,10 @@ public class FleetEntity extends BaseEntity {
     @Basic
     @Column(name = "back")
     public Timestamp back;
+
+    @Basic
+    @Column(name = "code")
+    public Long code;
 
     @Column(name = "LM")
     public Long lm;

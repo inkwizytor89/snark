@@ -7,6 +7,7 @@ create table fleet(
     start timestamp default null,
     visited timestamp default null,
     back timestamp default null,
+    code bigint,
     lm int default 0,
     cm int default 0,
     kr int default 0,
@@ -20,11 +21,4 @@ create table fleet(
     kol int default 0,
     rec int default 0,
     son int default 0
-);
-
-create table fleet_requests(
-    id bigserial not null,
-    universe_id bigint not null references universes,
-    code bigint not null,
-    fleet_id bigint not null references fleet
 );

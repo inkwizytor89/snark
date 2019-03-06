@@ -1,17 +1,13 @@
 package org.enoch.snark.gi.command.request;
 
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.dao.FleetRequestDAO;
 import org.enoch.snark.db.dao.impl.FleetDAOImpl;
-import org.enoch.snark.db.dao.impl.FleetRequestDAOImpl;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.FleetRequestEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.SpyObserver;
 import org.enoch.snark.gi.command.impl.ReadSpyInfoCommand;
 import org.enoch.snark.gi.command.impl.SpyCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Fleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SpyInfo;
 
@@ -44,16 +40,12 @@ public class SpyRequest implements SpyObserver{
     public SpyRequest(Instance instance, List<TargetEntity> targets) {
         waiter = null;
         FleetDAO fleetDAO = new FleetDAOImpl(instance.universeEntity);
-        FleetRequestDAO fleetRequestDAO = new FleetRequestDAOImpl(instance.universeEntity);
-        Long code = fleetRequestDAO.genereteNewCode();
+        Long code = fleetDAO.genereteNewCode();
 
         for(TargetEntity target : targets) {
             FleetEntity fleet = FleetEntity.createSpyFleet(instance, target);
+            fleet.code = code;
             fleetDAO.saveOrUpdate(fleet);
-
-            FleetRequestEntity request = new FleetRequestEntity(instance);
-            request.code = code;
-            ((FleetRequestDAOImpl) fleetRequestDAO).saveOrUpdate(request);
 
             final SpyCommand spyCommand = new SpyCommand(instance, target);
             spyCommand.setAfterCommand(new ReadSpyInfoCommand(instance, target, this));
