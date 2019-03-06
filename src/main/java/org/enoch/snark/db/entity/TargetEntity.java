@@ -12,63 +12,27 @@ public class TargetEntity extends PlanetEntity {
 
     public final static String IN_ACTIVE = "IN_ACTIVE";
 
-    private Integer power;
-    private String type;
-    private Long fleetSum;
-    private Long defenseSum;
-    private LocalDateTime updated;
-    private Collection<SpyInfoEntity> spyInfosById;
-    private Collection<FleetEntity> fleet;
-
-    @Basic
-    @Column(name = "power")
-    public Integer getPower() {
-        return power;
-    }
-
-    public void setPower(Integer power) {
-        this.power = power;
-    }
-
     @Basic
     @Column(name = "type")
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    public String type;
 
     @Basic
     @Column(name = "fleet_sum")
-    public Long getFleetSum() {
-        return fleetSum;
-    }
-
-    public void setFleetSum(Long fleetSum) {
-        this.fleetSum = fleetSum;
-    }
+    public Long fleetSum;
 
     @Basic
     @Column(name = "defense_sum")
-    public Long getDefenseSum() {
-        return defenseSum;
-    }
-
-    public void setDefenseSum(Long defenseSum) {
-        this.defenseSum = defenseSum;
-    }
+    public Long defenseSum;
 
     @Basic
     @Column(name = "updated")
-    public LocalDateTime getUpdated() {
-        return updated;
-    }
+    public LocalDateTime updated;
 
-    public void setUpdated(LocalDateTime updated) {
-        this.updated = updated;
-    }
+    @OneToMany(mappedBy = "planetsByPlanetId")
+    public Collection<SpyInfoEntity> spyInfosById;
+
+    @OneToMany(mappedBy = "planetsByPlanetId")
+    public Collection<FleetEntity> fleet;
 
     @Override
     public boolean equals(Object o) {
@@ -90,37 +54,5 @@ public class TargetEntity extends PlanetEntity {
     public int hashCode() {
 
         return Objects.hash(id, galaxy, system, position, power, type, fleetSum, defenseSum, updated);
-    }
-
-    @OneToMany(mappedBy = "planetsByPlanetId")
-    public Collection<SpyInfoEntity> getSpyInfosById() {
-        return spyInfosById;
-    }
-
-    public void setSpyInfosById(Collection<SpyInfoEntity> spyInfosById) {
-        this.spyInfosById = spyInfosById;
-    }
-
-    @OneToMany(mappedBy = "target")
-    public Collection<FleetEntity> getFleet() {
-        return fleet;
-    }
-
-    public void setFleet(Collection<FleetEntity> fleet) {
-        this.fleet = fleet;
-    }
-
-    public Integer calculateDistance(TargetEntity planet) {
-        if(!galaxy.equals(planet.galaxy)) {
-            return roundDistance(galaxy, planet.galaxy, 6) *20000;
-        }
-        if(!system.equals(planet.system)) {
-            return roundDistance(system, planet.system, 499) *95 +2700;
-        }
-        return roundDistance(position, planet.position, 15)*5+1000;
-    }
-
-    private int roundDistance(Integer x1, Integer x2, Integer max) {
-        return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
     }
 }

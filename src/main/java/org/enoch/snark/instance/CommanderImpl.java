@@ -1,9 +1,11 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.impl.PauseCommand;
+import org.enoch.snark.gi.command.impl.SendFleetCommandOld;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 
 import java.util.LinkedList;
@@ -39,7 +41,6 @@ public class CommanderImpl implements Commander {
     private void startInterfaceQueue() {
         Runnable task = () -> {
             while(true) {
-
                 if(!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
                     resolve(fleetActionQueue.poll());
                     fleetCount++;
@@ -64,6 +65,11 @@ public class CommanderImpl implements Commander {
     private void startCalculationQueue() {
         Runnable task = () -> {
             while(true) {
+
+                for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
+                    fleetActionQueue.add(new SendFleetCommandOld(instance, fleet));
+                }
+
                 while(!calculationActionQueue.isEmpty()) {
                     resolve(calculationActionQueue.poll());
                 }

@@ -1,6 +1,6 @@
 package org.enoch.snark.gi.command.request;
 
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.command.impl.SendFleetCommandOld;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.AttackInfo;
@@ -20,7 +20,7 @@ public class AttackRequest {
         this.waiter = waiter;
         for(AttackPlan attack : attacks) {
 
-            final SendFleetCommand attackCommand = new SendFleetCommand(instance, attack.target, Mission.ATTACK, attack.fleet);
+            final SendFleetCommandOld attackCommand = new SendFleetCommandOld(instance, attack.target, Mission.ATTACK, attack.fleet);
             instance.commander.push(attackCommand);
         }
     }

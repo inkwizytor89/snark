@@ -80,11 +80,14 @@ public class FleetEntity extends BaseEntity {
     @Column(name = "SON")
     public Long son;
 
-    FleetEntity() {}
+    FleetEntity() {
+        start = LocalDateTime.now();
+    }
 
     public FleetEntity(Instance instance) {
         super();
         universe = instance.universeEntity;
+        start = LocalDateTime.now();
     }
 
     public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {

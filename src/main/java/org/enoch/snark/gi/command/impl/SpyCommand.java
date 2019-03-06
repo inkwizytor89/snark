@@ -6,7 +6,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Fleet;
 import org.enoch.snark.model.Planet;
 
-public class SpyCommand extends SendFleetCommand {
+public class SpyCommand extends SendFleetCommandOld {
 
     public SpyCommand(Instance instance, Planet target) {
         this(instance, target, 1);

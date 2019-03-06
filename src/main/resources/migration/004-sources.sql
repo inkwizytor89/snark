@@ -11,5 +11,9 @@ create table sources
   galaxy      integer   not null,
   system      integer   not null,
   position    integer   not null,
+  metal       integer,
+  crystal     integer,
+  deuterium   integer,
+  power       integer,
   cp          integer   not null
 );

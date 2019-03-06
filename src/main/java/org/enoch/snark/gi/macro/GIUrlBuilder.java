@@ -1,5 +1,7 @@
 package org.enoch.snark.gi.macro;
 
+import org.enoch.snark.db.entity.SourceEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SourcePlanet;
@@ -19,10 +21,10 @@ public class GIUrlBuilder {
         this.instance = instance;
     }
 
-    public void openFleetView(SourcePlanet planet, Planet target, Mission mission) {
+    public void openFleetView(SourceEntity source, TargetEntity target, Mission mission) {
         String builder = instance.universeEntity.getUrl() + "?" +
                 "page=" + PAGE_BASE_FLEET +
-                "&cp=" + planet.planetId +
+                "&cp=" + source.cp +
                 "&galaxy=" + target.galaxy +
                 "&system=" + target.system +
                 "&position=" + target.position +

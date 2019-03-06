@@ -42,8 +42,4 @@ public class SpyRequest {
     public Long getCode() {
         return code;
     }
-
-    public List<SpyInfo> returnSpyReport() {
-        return null;
-    }
 }

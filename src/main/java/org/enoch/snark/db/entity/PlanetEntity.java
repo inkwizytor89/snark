@@ -17,6 +17,22 @@ public abstract class PlanetEntity extends BaseEntity{
     @Column(name = "position")
     public Integer position;
 
+    @Basic
+    @Column(name = "metal")
+    public Long metal;
+
+    @Basic
+    @Column(name = "crystal")
+    public Long crystal;
+
+    @Basic
+    @Column(name = "deuterium")
+    public Long deuterium;
+
+    @Basic
+    @Column(name = "power")
+    public Integer power;
+
     public Integer calculateDistance(PlanetEntity planet) {
         if(!galaxy.equals(planet.galaxy)) {
             return roundDistance(galaxy, planet.galaxy, 6) *20000;

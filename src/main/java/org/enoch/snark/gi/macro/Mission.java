@@ -1,5 +1,10 @@
 package org.enoch.snark.gi.macro;
 
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
+
 public enum Mission {
     EXPEDITION("id=missionButton15", 15),
     COLONIZATION("id=missionButton7", 7),
@@ -26,5 +31,18 @@ public enum Mission {
 
     public int getValue() {
         return value;
+    }
+
+    public static Mission convertFromString(@Nonnull String name) {
+        for (Mission mission : allMissions()) {
+            if(mission.name().equals(name)) {
+                return mission;
+            }
+        }
+        throw new RuntimeException("Unknown mission " + name);
+    }
+
+    static List<Mission> allMissions() {
+        return Arrays.asList(EXPEDITION, COLONIZATION, RECYCLE, TRANSPORT, STATIONED, SPY, STOP, ATTACK, GROUP_ATTACK, DESTROY);
     }
 }

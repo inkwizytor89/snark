@@ -59,10 +59,10 @@ public class GalaxyAnalyzeCommand extends GICommand {
                 if(!planetEntity.isPresent()) {
                     TargetEntity entity = new TargetEntity();
                     entity.universe = instance.universeEntity;
-                    entity.setGalaxy(systemView.galaxy);
-                    entity.setSystem(systemView.system);
-                    entity.setPosition(position);
-                    entity.setType(TargetEntity.IN_ACTIVE);
+                    entity.galaxy = systemView.galaxy;
+                    entity.system = systemView.system;
+                    entity.position = position;
+                    entity.type = TargetEntity.IN_ACTIVE;
                     targetDAO.saveOrUpdate(entity);
                 }
             }

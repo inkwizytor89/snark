@@ -20,7 +20,7 @@ public class FleetSelector {
         webDriver = session.getWebDriver();
     }
 
-    public void typeShip(ShipEnum shipEnum, Integer count) {
+    public void typeShip(ShipEnum shipEnum, Long count) {
         webDriver.findElement(By.id(shipEnum.getId())).sendKeys(count.toString());
     }
 

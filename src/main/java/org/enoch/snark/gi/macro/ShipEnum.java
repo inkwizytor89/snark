@@ -1,5 +1,10 @@
 package org.enoch.snark.gi.macro;
 
+import org.enoch.snark.db.entity.FleetEntity;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public enum ShipEnum {
     LM("id=ship_204"),
     CM("id=ship_205"),
@@ -23,5 +28,23 @@ public enum ShipEnum {
 
     public String getId() {
         return id;
+    }
+
+    public static Map<ShipEnum, Long> createShipsMap(FleetEntity fleet) {
+        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        if(fleet.lm > 0) shipsMap.put(LM, fleet.lm);
+        if(fleet.cm > 0) shipsMap.put(CM, fleet.cm);
+        if(fleet.kr > 0) shipsMap.put(KR, fleet.kr);
+        if(fleet.ow > 0) shipsMap.put(OW, fleet.ow);
+        if(fleet.pan > 0) shipsMap.put(PAN, fleet.pan);
+        if(fleet.bom > 0) shipsMap.put(BOM, fleet.bom);
+        if(fleet.ni > 0) shipsMap.put(NI, fleet.ni);
+        if(fleet.gs > 0) shipsMap.put(GS, fleet.gs);
+        if(fleet.lt > 0) shipsMap.put(LT, fleet.lt);
+        if(fleet.dt > 0) shipsMap.put(DT, fleet.dt);
+        if(fleet.kol > 0) shipsMap.put(KOL, fleet.kol);
+        if(fleet.rec > 0) shipsMap.put(REC, fleet.rec);
+        if(fleet.son > 0) shipsMap.put(SON, fleet.son);
+        return shipsMap;
     }
 }

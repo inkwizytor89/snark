@@ -34,4 +34,9 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
                 .setParameter("code", code)
                 .getResultList();
     }
+
+    @Override
+    public List<FleetEntity> findToProcess() {
+        return null;
+    }
 }
