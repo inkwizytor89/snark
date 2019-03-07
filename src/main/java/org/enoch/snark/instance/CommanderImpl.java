@@ -5,7 +5,6 @@ import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.impl.PauseCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommandOld;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 
 import java.util.LinkedList;

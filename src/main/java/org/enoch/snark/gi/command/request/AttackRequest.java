@@ -1,6 +1,5 @@
 package org.enoch.snark.gi.command.request;
 
-import org.enoch.snark.gi.command.impl.SendFleetCommandOld;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.AttackInfo;

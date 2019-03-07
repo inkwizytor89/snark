@@ -62,6 +62,10 @@ public class SendFleetCommand extends GICommand {
         setSecoundToDelayAfterCommand(time.toSecondOfDay()+ 5);
         fleetSelector.next();
 
+        if(Mission.SPY.equals(mission)) {
+            setAfterCommand(ReadSpyInfoCommand);
+        }
+
         try {
             fleetSelector.start();
         } catch(PlanetDoNotExistException | ToStrongPlayerException e) {
