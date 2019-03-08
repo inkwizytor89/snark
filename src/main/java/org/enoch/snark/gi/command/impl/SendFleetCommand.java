@@ -2,7 +2,6 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.command.SpyReporter;
 import org.enoch.snark.gi.macro.FleetSelector;
@@ -10,9 +9,6 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Fleet;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SourcePlanet;
 import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
@@ -63,7 +59,7 @@ public class SendFleetCommand extends GICommand {
         fleetSelector.next();
 
         if(Mission.SPY.equals(mission)) {
-            setAfterCommand(ReadSpyInfoCommand);
+            setAfterCommand(ReadMessageCommand);
         }
 
         try {

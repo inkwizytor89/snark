@@ -7,11 +7,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ReadSpyInfoCommandTest extends AbstractSeleniumTest implements SpyObserver {
+public class ReadMessageCommandTest extends AbstractSeleniumTest implements SpyObserver {
 
     @Test
     public void execute() {
-        final ReadSpyInfoCommand command = new ReadSpyInfoCommand(instance, sampleTarget, this);
+        final ReadMessageCommand command = new ReadMessageCommand(instance, sampleTarget, this);
 
         command.execute();
     }

@@ -18,13 +18,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
 
-public class ReadSpyInfoCommand extends AbstractCommand implements SpyReporter {
+public class ReadMessageCommand extends AbstractCommand implements SpyReporter {
 
     private final Instance instance;
     private Planet planet;
     private SpyObserver observer;
 
-    public ReadSpyInfoCommand(Instance instance, Planet planet, SpyObserver observer) {
+    public ReadMessageCommand(Instance instance, Planet planet, SpyObserver observer) {
         super(instance, INTERFACE_REQUIERED);
         this.instance = instance;
         this.planet = planet;

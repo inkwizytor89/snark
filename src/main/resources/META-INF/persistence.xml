@@ -7,7 +7,7 @@
         <class>org.enoch.snark.db.entity.ExplorationEntity</class>
         <class>org.enoch.snark.db.entity.TargetEntity</class>
         <class>org.enoch.snark.db.entity.SourceEntity</class>
-        <class>org.enoch.snark.db.entity.SpyInfoEntity</class>
+        <class>org.enoch.snark.db.entity.MessageEntity</class>
         <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
         <class>org.enoch.snark.db.entity.FleetEntity</class>

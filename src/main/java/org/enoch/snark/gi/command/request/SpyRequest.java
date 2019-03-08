@@ -4,17 +4,10 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.impl.FleetDAOImpl;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.command.SpyObserver;
-import org.enoch.snark.gi.command.impl.ReadSpyInfoCommand;
-import org.enoch.snark.gi.command.impl.SpyCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SpyInfo;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class SpyRequest {
 
