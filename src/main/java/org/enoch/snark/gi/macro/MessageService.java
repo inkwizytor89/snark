@@ -18,41 +18,12 @@ import java.util.regex.Pattern;
 
 public class MessageService {
     private static final Logger log = Logger.getLogger( MessageService.class.getName() );
-    private static final String PATH_TO_MESSAGE = "/message/";
-    private static final String SPY_DIRECTORY = "spy/";
-    private static final String WAR_DIRECTORY = "war/";
     private Instance instance;
-
-    private File spyDir;
-    private File warDir;
 
     private Map<String, SpyInfo> spyMesseges = new HashMap<>();
 
-    private Map<String, WarInfo> warMessageMap = new HashMap<>();
-
     public MessageService(Instance instance) {
-//        this.instance = instance;
-//        String messageMainPath = instance.pathToMainDir + PATH_TO_MESSAGE;
-//
-//        spyDir = loadDir(messageMainPath +SPY_DIRECTORY);
-//        warDir = loadDir(messageMainPath +WAR_DIRECTORY);
-//
-//        loadSpyFiles();
-//        loadWarMesseges();
-    }
-
-    private File loadDir(String path) {
-        File dir = new File(path);
-        if(!dir.exists()) {
-            dir.mkdirs();
-        }
-        return dir;
-    }
-
-    private void loadSpyFiles() {
-        for (File file : Objects.requireNonNull(spyDir.listFiles())) {
-            loadSpyFile(file);
-        }
+        this.instance = instance;
     }
 
     private void loadSpyFile(File file) {

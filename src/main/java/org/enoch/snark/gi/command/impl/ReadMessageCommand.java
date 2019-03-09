@@ -1,16 +1,13 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.gi.command.SpyReporter;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.gi.command.SpyObserver;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SpyInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,17 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
 
-public class ReadMessageCommand extends AbstractCommand implements SpyReporter {
+public class ReadMessageCommand extends AbstractCommand {
 
     private final Instance instance;
     private Planet planet;
-    private SpyObserver observer;
 
-    public ReadMessageCommand(Instance instance, Planet planet, SpyObserver observer) {
+    public ReadMessageCommand(Instance instance) {
         super(instance, INTERFACE_REQUIERED);
         this.instance = instance;
-        this.planet = planet;
-        this.observer = observer;
     }
 
     @Override
@@ -41,15 +35,7 @@ public class ReadMessageCommand extends AbstractCommand implements SpyReporter {
 
             List<String> spyReports = loadMessagesLinks();
             instance.messageService.storeSpyMessage(spyReports);
-            lastSpyInfo = instance.messageService.getLastSpyInfo(planet);
-        }
-
-        if(lastSpyInfo == null) {
-            return false;
-        }
-        lastSpyInfo.source = instance.findNearestSource(lastSpyInfo.planet);
-        if(observer!= null) {
-            observer.report(lastSpyInfo);
+            instance.messageService.getLastSpyInfo(planet);
         }
         return true;
     }
@@ -68,12 +54,7 @@ public class ReadMessageCommand extends AbstractCommand implements SpyReporter {
     }
 
     @Override
-    public SpyObserver getSpyObserver() {
-        return observer;
-    }
-
-    @Override
     public String toString() {
-        return "load spy message from "+planet;
+        return "load messages";
     }
 }

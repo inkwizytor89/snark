@@ -3,7 +3,6 @@ package org.enoch.snark.gi.command.impl;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.GICommand;
-import org.enoch.snark.gi.command.SpyReporter;
 import org.enoch.snark.gi.macro.FleetSelector;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;

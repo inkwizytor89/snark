@@ -1,7 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.gi.command.AttackObserver;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 
