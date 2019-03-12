@@ -1,5 +1,7 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.instance.Instance;
@@ -12,6 +14,8 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
 
@@ -34,7 +38,7 @@ public class ReadMessageCommand extends AbstractCommand {
             instance.session.sleep(TimeUnit.SECONDS, 5);
 
             List<String> spyReports = loadMessagesLinks();
-            instance.messageService.storeSpyMessage(spyReports);
+            storeSpyMessage(spyReports);
             instance.messageService.getLastSpyInfo(planet);
         }
         return true;
@@ -51,6 +55,45 @@ public class ReadMessageCommand extends AbstractCommand {
             }
         }
         return spyReports;
+    }
+
+    public void storeSpyMessage(List<String> links) {
+        for(String link : links) {
+            storeSpyMessage(link);
+        }
+        new GIUrlBuilder(instance).openOverview();
+    }
+
+    // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie
+    private void storeSpyMessage(String link) {
+        String messageId = getMessageIdFromLink(link);
+        boolean alreadyExists = instance.daoFactory.messageDAO.fetchAll().stream().anyMatch(
+                messageEntity -> messageEntity.messageId.equals(messageId));
+        if(alreadyExists) {
+            return;
+        }
+        instance.session.getWebDriver().get(link);
+        MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
+        messageEntity.messageId = Long.parseLong(messageId);
+
+        instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
+
+        File file = storeAsFile(spyDir, messageId, link);
+        File finalFile = new File(spyDir.getAbsolutePath()+"/" +
+                new SpyInfo(file).planet.toFileName() + "#" +messageId);
+        final boolean renameCorrect = file.renameTo(finalFile);
+        if(!renameCorrect) log.log(Level.SEVERE, "Cann not store report "+finalFile.getAbsolutePath());
+        loadSpyFile(finalFile);
+    }
+
+    private String getMessageIdFromLink(String link) {
+        Pattern pattern = Pattern.compile("messageId=(.*?)&tabid");
+        Matcher matcher = pattern.matcher(link);
+        if (matcher.find())
+        {
+            return matcher.group(1);
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override

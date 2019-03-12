@@ -2,11 +2,14 @@ package org.enoch.snark.db.entity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Entity
 @Table(name = "messages", schema = "public", catalog = "snark")
 public class MessageEntity extends BaseEntity {
+
+    public static final String SPY = "SPY";
 
     @Basic
     @Column(name = "created")
@@ -23,5 +26,16 @@ public class MessageEntity extends BaseEntity {
     @Basic
     @Column(name = "content")
     public String content;
+
+    public static MessageEntity create(String content) {
+        MessageEntity messageEntity = new MessageEntity();
+        messageEntity.content = content;
+        messageEntity.type = SPY;
+        // TODO: 12.03.2019 ustawic wartosc z raportu zamiast obecnej daty
+        messageEntity.created = LocalDateTime.now();
+        final String[] reportLines = content.split("\\R+");
+        messageEntity.messageId = Long.parseLong(reportLines[0]);
+        return messageEntity;
+    }
 
 }
