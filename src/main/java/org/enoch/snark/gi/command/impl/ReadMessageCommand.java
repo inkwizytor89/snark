@@ -2,6 +2,8 @@ package org.enoch.snark.gi.command.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.MessageEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.instance.Instance;
@@ -13,6 +15,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +69,7 @@ public class ReadMessageCommand extends AbstractCommand {
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie
     private void storeSpyMessage(String link) {
-        String messageId = getMessageIdFromLink(link);
+        Long messageId = Long.parseLong(getMessageIdFromLink(link));
         boolean alreadyExists = instance.daoFactory.messageDAO.fetchAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) {
@@ -74,16 +77,16 @@ public class ReadMessageCommand extends AbstractCommand {
         }
         instance.session.getWebDriver().get(link);
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
-        messageEntity.messageId = Long.parseLong(messageId);
+        messageEntity.messageId = messageId;
 
         instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
 
-        File file = storeAsFile(spyDir, messageId, link);
-        File finalFile = new File(spyDir.getAbsolutePath()+"/" +
-                new SpyInfo(file).planet.toFileName() + "#" +messageId);
-        final boolean renameCorrect = file.renameTo(finalFile);
-        if(!renameCorrect) log.log(Level.SEVERE, "Cann not store report "+finalFile.getAbsolutePath());
-        loadSpyFile(finalFile);
+        if(MessageEntity.SPY.equals(messageEntity.type)) {
+            PlanetEntity planet = messageEntity.getPlanet();
+            Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.galaxy, planet.system, planet.position);
+            targetEntity.get().update(planet);
+            instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
+        }
     }
 
     private String getMessageIdFromLink(String link) {

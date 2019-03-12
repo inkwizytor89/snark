@@ -3,7 +3,10 @@ package org.enoch.snark.db.entity;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 
-public abstract class PlanetEntity extends BaseEntity{
+public class PlanetEntity extends BaseEntity{
+    public static final Integer GALAXY_INDEX = 1;
+    public static final Integer SYSTEM_INDEX = 2;
+    public static final Integer POSITION_INDEX = 3;
 
     @Basic
     @Column(name = "galaxy")
@@ -31,7 +34,23 @@ public abstract class PlanetEntity extends BaseEntity{
 
     @Basic
     @Column(name = "power")
-    public Integer power;
+    public Long power;
+
+    public PlanetEntity() {
+        super();
+    }
+
+    public PlanetEntity(String input) {
+        super();
+        loadPlanetCoordinate(input);
+    }
+
+    public void update(PlanetEntity planetEntity) {
+        this.metal = planetEntity.metal;
+        this.crystal = planetEntity.crystal;
+        this.deuterium = planetEntity.deuterium;
+        this.power = planetEntity.power;
+    }
 
     public Integer calculateDistance(PlanetEntity planet) {
         if(!galaxy.equals(planet.galaxy)) {
@@ -45,5 +64,12 @@ public abstract class PlanetEntity extends BaseEntity{
 
     private int roundDistance(Integer x1, Integer x2, Integer max) {
         return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
+    }
+
+    protected void loadPlanetCoordinate(String coordinateString) {
+        String[] numbersTable = coordinateString.split("\\D+");
+        galaxy = new Integer(numbersTable[GALAXY_INDEX]);
+        system = new Integer(numbersTable[SYSTEM_INDEX]);
+        position = new Integer(numbersTable[POSITION_INDEX]);
     }
 }
