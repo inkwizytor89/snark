@@ -5,6 +5,7 @@ import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.impl.PauseCommand;
+import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ public class CommanderImpl implements Commander {
             while(true) {
 
                 for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
-                    fleetActionQueue.add(new SendFleetCommandOld(instance, fleet));
+                    fleetActionQueue.add(new SendFleetCommand(instance, fleet));
                 }
 
                 while(!calculationActionQueue.isEmpty()) {

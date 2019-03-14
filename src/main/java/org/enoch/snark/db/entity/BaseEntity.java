@@ -1,10 +1,8 @@
 package org.enoch.snark.db.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
+@MappedSuperclass
 public abstract class BaseEntity extends IdEntity {
 
     @ManyToOne

@@ -22,7 +22,7 @@ public class GIUrlBuilder {
     }
 
     public void openFleetView(SourceEntity source, TargetEntity target, Mission mission) {
-        String builder = instance.universeEntity.getUrl() + "?" +
+        String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
                 "&galaxy=" + target.galaxy +
@@ -35,7 +35,7 @@ public class GIUrlBuilder {
     }
 
     public void updateFleetStatus() {
-        String builder = instance.universeEntity.getUrl() + "?" +
+        String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_BASE_FLEET ;
         instance.session.getWebDriver().get(builder);
 
@@ -58,13 +58,13 @@ public class GIUrlBuilder {
     }
 
     public void openMessages() {
-        String builder = instance.universeEntity.getUrl() + "?" +
+        String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_MESSAGES;
         instance.session.getWebDriver().get(builder);
     }
 
     public void openOverview() {
-        String builder = instance.universeEntity.getUrl() + "?" +
+        String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_OVERVIEW;
         instance.session.getWebDriver().get(builder);
     }
@@ -74,7 +74,7 @@ public class GIUrlBuilder {
     }
 
     public void openGalaxy(int galaxy, int system, int position) {
-        String builder = instance.universeEntity.getUrl() + "?" +
+        String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_SPACE +
                 "&galaxy=" + galaxy +
                 "&system=" + system +

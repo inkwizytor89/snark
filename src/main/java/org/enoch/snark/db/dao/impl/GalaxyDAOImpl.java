@@ -7,6 +7,7 @@ import org.enoch.snark.model.SystemView;
 
 import javax.persistence.EntityTransaction;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,13 +26,13 @@ private static int poolint = 0;
     public void update(SystemView systemView) {
         final Optional<GalaxyEntity> galaxyEntity = find(systemView);
         if(galaxyEntity.isPresent()) {
-            galaxyEntity.get().setUpdated(new Timestamp(System.currentTimeMillis()));
+            galaxyEntity.get().setUpdated(LocalDateTime.now());
         } else {
             GalaxyEntity entity = new GalaxyEntity();
             entity.universe = universeEntity;
             entity.setGalaxy(systemView.galaxy);
             entity.setSystem(systemView.system);
-            entity.setUpdated(new Timestamp(System.currentTimeMillis()));
+            entity.setUpdated(LocalDateTime.now());
             saveOrUpdate(entity);
         }
     }

@@ -1,4 +1,4 @@
-create table planets
+create table targets
 (
   id          bigserial   not null
     constraint targets_pkey
@@ -14,6 +14,7 @@ create table planets
   metal       integer,
   crystal     integer,
   deuterium   integer,
+  resources   integer,
   power       integer,
   type        varchar(15) not null,
   fleet_sum   bigint default 0,

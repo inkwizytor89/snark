@@ -19,21 +19,6 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
     }
 
     @Override
-    public List<TargetEntity> findFarms(Integer limit) {
-        final List<TargetEntity> result = entityManager.createQuery("" +
-                "from TargetEntity " +
-                "where universe = :universe and " +
-                "       fleet_sum = 0" +
-                "       defense_sum = 0" +
-                "order by power desc " +
-                "limit :limit", TargetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("limit", limit)
-                .getResultList();
-        return result;
-    }
-
-    @Override
     public Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position) {
         final List<TargetEntity> result = entityManager.createQuery("" +
                 "from TargetEntity " +
@@ -52,5 +37,34 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         return Optional.of(result.get(0));
     }
 
+    @Override
+    public List<TargetEntity> findFarms(Integer limit) {
+        final List<TargetEntity> result = entityManager.createQuery("" +
+                "from TargetEntity " +
+                "where universe = :universe and " +
+                "       fleet_sum = 0" +
+                "       defense_sum = 0" +
+                "order by power desc " +
+                "limit :limit", TargetEntity.class)
+                .setParameter("universe", universeEntity)
+                .setParameter("limit", limit)
+                .getResultList();
+        return result;
+    }
+
+    @Override
+    public List<TargetEntity> findTopFarms(int limit) {
+        final List<TargetEntity> result = entityManager.createQuery("" +
+                "from TargetEntity " +
+                "where universe = :universe and " +
+                "       fleet_sum = 0" +
+                "       defense_sum = 0" +
+                "order by resources desc " +
+                "limit :limit", TargetEntity.class)
+                .setParameter("universe", universeEntity)
+                .setParameter("limit", limit)
+                .getResultList();
+        return result;
+    }
 
 }

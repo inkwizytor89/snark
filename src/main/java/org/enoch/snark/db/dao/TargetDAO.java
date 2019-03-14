@@ -7,7 +7,9 @@ import java.util.Optional;
 
 public interface TargetDAO extends AbstractDAO<TargetEntity> {
 
+    Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position);
+
     List<TargetEntity> findFarms(Integer limit);
 
-    Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position);
+    List<TargetEntity> findTopFarms(int limit);
 }

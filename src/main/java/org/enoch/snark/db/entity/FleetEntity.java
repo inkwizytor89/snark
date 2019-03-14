@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "fleet", schema = "public", catalog = "snark")
 public class FleetEntity extends BaseEntity {
 
-    private static final String SPY = "SPY";
+    public static final String SPY = "SPY";
+    public static final String ATTACK = "ATTACK";
 
     @ManyToOne
     @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
@@ -90,6 +91,12 @@ public class FleetEntity extends BaseEntity {
         start = LocalDateTime.now();
     }
 
+    public boolean isDone() {
+        LocalDateTime now = LocalDateTime.now();
+        return (SPY.equals(type) && visited != null && now.isAfter(visited)) ||
+                (ATTACK.equals(type) && back != null && now.isAfter(back));
+    }
+
     public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
         return createSpyFleet(instance, target, 1);
     }
@@ -102,6 +109,16 @@ public class FleetEntity extends BaseEntity {
         fleet.source = instance.findNearestSource(target);
         fleet.type = SPY;
         fleet.son = count.longValue();
+        return fleet;
+    }
+
+    public static FleetEntity createFarmFleet(@Nonnull Instance instance,
+                                             @Nonnull TargetEntity target) {
+        FleetEntity fleet = new FleetEntity(instance);
+        fleet.target = target;
+        fleet.source = instance.findNearestSource(target);
+        fleet.type = ATTACK;
+        fleet.lt = target.calculateTransportByLt();
         return fleet;
     }
 }

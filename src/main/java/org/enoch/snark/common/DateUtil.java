@@ -19,11 +19,9 @@ public class DateUtil {
 
     }
 
-    public static boolean lessThan20H(Timestamp updated) {
+    public static boolean lessThan20H(LocalDateTime updated) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime lastUpdate = LocalDateTime.ofInstant(Instant.ofEpochMilli(updated.getTime() ), TimeZone
-                .getDefault().toZoneId());
-        return now.minusHours(20).isBefore(lastUpdate);
+        return now.minusHours(20).isBefore(updated);
     }
 
 }

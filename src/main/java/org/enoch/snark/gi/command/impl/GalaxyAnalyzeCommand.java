@@ -33,7 +33,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
     }
 
     private void normalize(SystemView systemView) {
-        systemView.galaxy = Math.floorMod(systemView.galaxy, instance.universeEntity.getGalaxyMax());
+        systemView.galaxy = Math.floorMod(systemView.galaxy, instance.universeEntity.galaxyMax);
     }
 
     @Override

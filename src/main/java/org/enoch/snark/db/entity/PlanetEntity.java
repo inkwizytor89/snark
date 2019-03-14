@@ -2,7 +2,9 @@ package org.enoch.snark.db.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 
+@MappedSuperclass
 public class PlanetEntity extends BaseEntity{
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -33,6 +35,10 @@ public class PlanetEntity extends BaseEntity{
     public Long deuterium;
 
     @Basic
+    @Column(name = "resources")
+    public Long resources;
+
+    @Basic
     @Column(name = "power")
     public Long power;
 
@@ -49,6 +55,7 @@ public class PlanetEntity extends BaseEntity{
         this.metal = planetEntity.metal;
         this.crystal = planetEntity.crystal;
         this.deuterium = planetEntity.deuterium;
+        this.resources = 3 * metal + 2 * crystal + deuterium;
         this.power = planetEntity.power;
     }
 

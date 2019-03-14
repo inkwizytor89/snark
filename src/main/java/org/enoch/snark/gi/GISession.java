@@ -42,7 +42,7 @@ public class GISession {
     }
 
     public void open() {
-        webDriver.get(instance.universeEntity.getUrl());
+        webDriver.get(instance.universeEntity.url);
         logIn();
     }
 
@@ -54,8 +54,8 @@ public class GISession {
 
     private void logIn() {
         sessionHelper.skipBannerIfExists();
-        sessionHelper.insertLoginData(instance.universeEntity.getLogin(), instance.universeEntity.getPass());
-        sessionHelper.chooseServer(instance.universeEntity.getName());
+        sessionHelper.insertLoginData(instance.universeEntity.login, instance.universeEntity.pass);
+        sessionHelper.chooseServer(instance.universeEntity.name);
         isLoggedIn = true;
     }
 

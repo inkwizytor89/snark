@@ -28,12 +28,6 @@ public class TargetEntity extends PlanetEntity {
     @Column(name = "updated")
     public LocalDateTime updated;
 
-    @OneToMany(mappedBy = "planetsByPlanetId")
-    public Collection<SpyInfoEntity> spyInfosById;
-
-    @OneToMany(mappedBy = "planetsByPlanetId")
-    public Collection<FleetEntity> fleet;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,5 +48,9 @@ public class TargetEntity extends PlanetEntity {
     public int hashCode() {
 
         return Objects.hash(id, galaxy, system, position, power, type, fleetSum, defenseSum, updated);
+    }
+
+    public Long calculateTransportByLt() {
+        return (long) Math.ceil((double) (metal+crystal+deuterium)/10000);
     }
 }

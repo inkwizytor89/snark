@@ -58,18 +58,13 @@ public class SendFleetCommand extends GICommand {
         fleetSelector.next();
 
         if(Mission.SPY.equals(mission)) {
-            setAfterCommand(ReadMessageCommand);
+            setAfterCommand(new ReadMessageCommand(instance));
         }
 
         try {
             fleetSelector.start();
         } catch(PlanetDoNotExistException | ToStrongPlayerException e) {
-            if(getAfterCommand() instanceof SpyReporter) {
-                SpyReporter reporter = (SpyReporter) getAfterCommand();
-                final SpyInfo nonExistingPlanetInfo = new SpyInfo(target);
-                nonExistingPlanetInfo.source = instance.findNearestSource(target);
-                reporter.getSpyObserver().report(nonExistingPlanetInfo);
-            }
+            System.err.println(e);
             setAfterCommand(null);
         }
         return true;

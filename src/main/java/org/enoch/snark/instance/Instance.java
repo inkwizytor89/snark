@@ -2,17 +2,12 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.db.DAOFactory;
 import org.enoch.snark.db.entity.PlanetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.SourceEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.gi.macro.MessageService;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SourcePlanet;
 import org.enoch.snark.model.SystemView;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.List;
 
@@ -21,7 +16,7 @@ public class Instance {
     public UniverseEntity universeEntity;
     public Commander commander;
     public GISession session;
-    public MessageService messageService;
+//    public MessageService messageService;
     public DAOFactory daoFactory;
 
     public Instance(UniverseEntity universeEntity) {
@@ -50,8 +45,7 @@ public class Instance {
 
     public void runSI() {
         exploreUnknownSpace();
-
-//        new SampleSI(this).run();
+        new ResourceSI(this).run();
     }
 
     public SourceEntity findNearestSource(PlanetEntity planet) {
@@ -72,7 +66,7 @@ public class Instance {
     }
 
     private void exploreUnknownSpace() {
-        for(SourceEntity source : universeEntity.getSources()) {
+        for(SourceEntity source : universeEntity.sources) {
             for(SystemView systemView : source.generateSystemToView()) {
                 commander.push(new GalaxyAnalyzeCommand(this, systemView));
             }

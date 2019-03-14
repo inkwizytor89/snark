@@ -20,8 +20,8 @@ public class SourceEntity extends PlanetEntity {
 
         List<SystemView> result = new ArrayList<>();
         // TODO: extend about begin-end circle
-        int begin = system - universe.getExplorationArea();
-        int end = system + universe.getExplorationArea();
+        int begin = system - universe.explorationArea;
+        int end = system + universe.explorationArea;
         for(int i = begin; i < end; i++ ) {
             result.add(new SystemView(galaxy, i));
         }

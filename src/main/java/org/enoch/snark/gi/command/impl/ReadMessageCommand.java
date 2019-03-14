@@ -34,16 +34,16 @@ public class ReadMessageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        SpyInfo lastSpyInfo = instance.messageService.getLastSpyInfo(planet);
-
-        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
+//        SpyInfo lastSpyInfo = instance.messageService.getLastSpyInfo(planet);
+//
+//        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
             new GIUrlBuilder(instance).openMessages();
             instance.session.sleep(TimeUnit.SECONDS, 5);
 
             List<String> spyReports = loadMessagesLinks();
             storeSpyMessage(spyReports);
-            instance.messageService.getLastSpyInfo(planet);
-        }
+//            instance.messageService.getLastSpyInfo(planet);
+//        }
         return true;
     }
 

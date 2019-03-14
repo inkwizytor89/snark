@@ -7,99 +7,37 @@ import java.util.Objects;
 @Entity
 @Table(name = "universes")
 public class UniverseEntity extends IdEntity {
-    private String login;
-    private String pass;
-    private String name;
-    private String tag;
-    private String url;
-    private Integer galaxyMax;
-    private Integer systemMax;
-    private Integer explorationArea;
-    private Collection<GalaxyEntity> galaxies;
-    private Collection<TargetEntity> planets;
-    private Collection<SourceEntity> sources;
-    private Collection<FleetEntity> fleet;
-//    private Collection<FarmEntity> farms;
 
     @Basic
     @Column(name = "login")
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
+    public String login;
     @Basic
     @Column(name = "pass")
-    public String getPass() {
-        return pass;
-    }
-
-    public void setPass(String pass) {
-        this.pass = pass;
-    }
-
+    public String pass;
     @Basic
     @Column(name = "name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    public String name;
     @Basic
     @Column(name = "tag")
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
+    public String tag;
     @Basic
     @Column(name = "url")
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
+    public String url;
     @Basic
     @Column(name = "galaxy_max")
-    public Integer getGalaxyMax() {
-        return galaxyMax;
-    }
-
-    public void setGalaxyMax(Integer galaxyCount) {
-        this.galaxyMax = galaxyCount;
-    }
-
+    public Integer galaxyMax;
     @Basic
     @Column(name = "system_max")
-    public Integer getSystemMax() {
-        return systemMax;
-    }
-
-    public void setSystemMax(Integer systemMax) {
-        this.systemMax = systemMax;
-    }
-
+    public Integer systemMax;
     @Basic
     @Column(name = "exploration_area")
-    public Integer getExplorationArea() {
-        return explorationArea;
-    }
-
-    public void setExplorationArea(Integer explorationArea) {
-        this.explorationArea = explorationArea;
-    }
+    public Integer explorationArea;
+    @OneToMany(mappedBy = "universe")
+    public Collection<GalaxyEntity> galaxies;
+    @OneToMany(mappedBy = "universe")
+    public Collection<TargetEntity> planets;
+    @OneToMany(mappedBy = "universe")
+    public Collection<SourceEntity> sources;
 
     @Override
     public boolean equals(Object o) {
@@ -121,49 +59,4 @@ public class UniverseEntity extends IdEntity {
 
         return Objects.hash(id, login, pass, name, tag, url, galaxyMax, explorationArea);
     }
-
-    @OneToMany(mappedBy = "universe")
-    public Collection<GalaxyEntity> getGalaxies() {
-        return galaxies;
-    }
-
-    public void setGalaxies(Collection<GalaxyEntity> galaxies) {
-        this.galaxies = galaxies;
-    }
-
-    @OneToMany(mappedBy = "universe")
-    public Collection<TargetEntity> getPlanets() {
-        return planets;
-    }
-
-    public void setPlanets(Collection<TargetEntity> planets) {
-        this.planets = planets;
-    }
-
-    @OneToMany(mappedBy = "universe")
-    public Collection<SourceEntity> getSources() {
-        return sources;
-    }
-
-    public void setSources(Collection<SourceEntity> sources) {
-        this.sources = sources;
-    }
-
-    @OneToMany(mappedBy = "universe")
-    public Collection<FleetEntity> getFleet() {
-        return fleet;
-    }
-
-    public void setFleet(Collection<FleetEntity> fleet) {
-        this.fleet = fleet;
-    }
-
-//    @OneToMany(mappedBy = "universe")
-//    public Collection<FarmEntity> getFarms() {
-//        return farms;
-//    }
-//
-//    public void setFarms(Collection<FarmEntity> farms) {
-//        this.farms = farms;
-//    }
 }
