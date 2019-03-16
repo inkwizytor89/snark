@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface GalaxyDAO extends AbstractDAO<GalaxyEntity> {
     void update(SystemView systemView);
     Optional<GalaxyEntity> find(SystemView systemView);
-    List<GalaxyEntity> findLatestGalaxyToView();
+    Optional<GalaxyEntity> findLatestGalaxyToView();
 
 }

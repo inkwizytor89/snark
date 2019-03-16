@@ -58,12 +58,11 @@ private static int poolint = 0;
 
 
     @Override
-    public List<GalaxyEntity> findLatestGalaxyToView() {
-        return entityManager.createQuery(
+    public Optional<GalaxyEntity> findLatestGalaxyToView() {
+        return Optional.of(entityManager.createQuery(
                 "from GalaxyEntity where universe = :universe " +
-                        "order by updated asc", GalaxyEntity.class)
+                        "order by updated asc limit 1", GalaxyEntity.class)
                 .setParameter("universe", universeEntity)
-                .setMaxResults(10)
-                .getResultList();
+                .getSingleResult());
     }
 }

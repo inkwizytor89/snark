@@ -39,6 +39,15 @@ public class FarmThred extends AbstractThred {
         super.run();
         while(true) {
 
+            if(targetDAO.findFarms(100).size()<100) {
+                try {
+                    TimeUnit.SECONDS.sleep(60);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+
             if(actualFarm.warRequestCode != null) {
                 previousFarm = actualFarm;
                 actualFarm = new FarmEntity();

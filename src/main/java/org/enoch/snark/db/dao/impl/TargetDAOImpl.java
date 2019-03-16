@@ -67,4 +67,20 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         return result;
     }
 
+    @Override
+    public Optional<TargetEntity> findNotScaned() {
+        return Optional.ofNullable(entityManager.createQuery("" +
+                "from TargetEntity " +
+                "where universe = :universe and " +
+                "       fleet_sum is null and " +
+                "       defense_sum is null and " +
+                "       type = :type " +
+                "order by resources desc " +
+                "limit :limit", TargetEntity.class)
+                .setParameter("universe", universeEntity)
+                .setParameter("type", TargetEntity.IN_ACTIVE)
+                .setParameter("limit", 1)
+                .getSingleResult());
+    }
+
 }

@@ -2,7 +2,7 @@ create table fleet(
     id bigserial not null primary key,
     universe_id bigint not null references universes,
     type text not null,
-    planet_id bigint not null references planets,
+    target_id bigint not null references targets,
     source_id bigint not null references sources,
     start timestamp default null,
     visited timestamp default null,

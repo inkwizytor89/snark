@@ -12,4 +12,6 @@ public interface TargetDAO extends AbstractDAO<TargetEntity> {
     List<TargetEntity> findFarms(Integer limit);
 
     List<TargetEntity> findTopFarms(int limit);
+
+    Optional<TargetEntity> findNotScaned();
 }
