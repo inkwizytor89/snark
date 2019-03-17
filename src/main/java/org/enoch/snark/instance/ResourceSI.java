@@ -6,6 +6,8 @@ import org.enoch.snark.module.explore.SpaceThred;
 import org.enoch.snark.module.farm.FarmThred;
 import org.enoch.snark.module.scan.ScanThred;
 
+import static com.google.common.collect.ComparisonChain.start;
+
 public class ResourceSI implements SI {
 
     private final SpaceThred spaceThred;
@@ -21,9 +23,9 @@ public class ResourceSI implements SI {
     }
 
     public void run() {
-        spaceThred.run();
-        scanThred.run();
-        farmThred.run();
+        new Thread(spaceThred).start();
+        new Thread(scanThred).start();
+        new Thread(farmThred).start();
     }
 
     @Override

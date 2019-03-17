@@ -10,39 +10,18 @@ import java.util.Objects;
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
 public class GalaxyEntity extends BaseEntity {
-    private Integer galaxy;
-    private Integer system;
-    private LocalDateTime updated;
 
     @Basic
     @Column(name = "galaxy")
-    public Integer getGalaxy() {
-        return galaxy;
-    }
-
-    public void setGalaxy(Integer galaxy) {
-        this.galaxy = galaxy;
-    }
+    public Integer galaxy;
 
     @Basic
     @Column(name = "system")
-    public Integer getSystem() {
-        return system;
-    }
-
-    public void setSystem(Integer system) {
-        this.system = system;
-    }
+    public Integer system;
 
     @Basic
     @Column(name = "updated")
-    public LocalDateTime getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(LocalDateTime updated) {
-        this.updated = updated;
-    }
+    public LocalDateTime updated = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {
@@ -57,7 +36,6 @@ public class GalaxyEntity extends BaseEntity {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, galaxy, system, updated);
     }
 

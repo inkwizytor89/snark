@@ -21,11 +21,11 @@ public class Instance {
 
     public Instance(UniverseEntity universeEntity) {
         this(universeEntity, true);
-        daoFactory = new DAOFactory(universeEntity);
     }
 
     public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
         this.universeEntity = universeEntity;
+        daoFactory = new DAOFactory(universeEntity);
         session = new GISession(this);
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);
@@ -36,15 +36,9 @@ public class Instance {
     }
 
     public void runTest() {
-
-        exploreUnknownSpace();
-//        new GalaxyAnalyzeCommand(this, new SystemView(2, 109)).execute();
-//        final SpaceModule spaceModule = new SpaceModule(this);
-//        while(true) spaceModule.run();
     }
 
     public void runSI() {
-        exploreUnknownSpace();
         new ResourceSI(this).run();
     }
 
@@ -63,13 +57,5 @@ public class Instance {
             }
         }
         return nearestPlanet;
-    }
-
-    private void exploreUnknownSpace() {
-        for(SourceEntity source : universeEntity.sources) {
-            for(SystemView systemView : source.generateSystemToView()) {
-                commander.push(new GalaxyAnalyzeCommand(this, systemView));
-            }
-        }
     }
 }

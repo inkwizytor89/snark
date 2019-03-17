@@ -39,12 +39,8 @@ public class GalaxyAnalyzeCommand extends GICommand {
     @Override
     public boolean execute() {
         final Optional<GalaxyEntity> galaxyEntity = galaxyDAO.find(systemView);
-        if(galaxyEntity.isPresent()) {
-            System.err.println(galaxyEntity.get().getUpdated());
-        } else {
-            System.err.println("pierwsza aktualizacja "+galaxyEntity);
-        }
-        if(galaxyEntity.isPresent() && DateUtil.lessThan20H(galaxyEntity.get().getUpdated())) {
+
+        if(galaxyEntity.isPresent() && DateUtil.lessThan20H(galaxyEntity.get().updated)) {
             return true;
         }
 

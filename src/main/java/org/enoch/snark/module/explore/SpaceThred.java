@@ -30,15 +30,15 @@ public class SpaceThred extends AbstractThred {
             final Optional<GalaxyEntity> latestGalaxyToView = instance.daoFactory.galaxyDAO.findLatestGalaxyToView();
 
             if(!latestGalaxyToView.isPresent()) {
-                System.err.println("No new galaxy to scan");
+                System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
             } else {
-                if(DateUtil.lessThan20H(latestGalaxyToView.get().getUpdated())) {
-                    System.err.println("No new galaxy to scan");
+                if(DateUtil.lessThan20H(latestGalaxyToView.get().updated)) {
+                    System.err.println(SpaceThred.class.getName()+": No new galaxy to scan");
                 } else {
                     instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));
                 }
             }
-            instance.session.sleep(TimeUnit.SECONDS, 5);
+            instance.session.sleep(TimeUnit.SECONDS, 30);
         }
     }
 

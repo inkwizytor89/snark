@@ -10,9 +10,9 @@ public class SendShipEnumCommandTest extends AbstractSeleniumTest {
 
     @Test
     public void execute() {
-        final Fleet fleet = new Fleet().put(ShipEnum.SON, 2);
-        final SendFleetCommandOld command = new SendFleetCommandOld(instance, sampleTarget, Mission.SPY, fleet);
-
-        command.execute();
+//        final Fleet fleet = new Fleet().put(ShipEnum.SON, 2);
+//        final SendFleetCommandOld command = new SendFleetCommandOld(instance, sampleTarget, Mission.SPY, fleet);
+//
+//        command.execute();
     }
 }

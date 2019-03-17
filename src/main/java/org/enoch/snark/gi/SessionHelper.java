@@ -26,11 +26,12 @@ class SessionHelper {
         webDriver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     }
 
-    public void skipBannerIfExists() {
+    public void skipBannersIfExists() {
         try {
             final WebElement exitButton = webDriver.findElement(By.linkText("x"));
             exitButton.click();
         } catch (NoSuchElementException e) {}
+        closeAgreement();
     }
 
     public void insertLoginData(String username, String password) {
@@ -40,15 +41,25 @@ class SessionHelper {
         webDriver.findElement(By.id("usernameLogin")).sendKeys(username);
         webDriver.findElement(By.id("passwordLogin")).sendKeys(password);
         final WebElement loginSubmit = webDriver.findElement(By.id("loginSubmit"));
-        loginSubmit.click();
+        loginSubmit.submit();
     }
 
     public void chooseServer(String server) {
 //        webDriver.findElement(By.className("btn btn-primary")).click();
 //        webDriver.findElement(By.name(server)).click();
 //        webDriver.findElement(By.name(server)).click();
+        closeAgreement();
+        try {
+            webDriver.findElement(By.linkText("Graj")).click();
+        } catch (NoSuchElementException e) {}
         WebElement serverElement = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + server + "')]").get(0);
         Actions actions = new Actions(webDriver);
         actions.doubleClick(serverElement).perform();
+    }
+
+    private void closeAgreement() {
+        try {
+            webDriver.findElement(By.linkText("Zgadzam się")).click();
+        } catch (NoSuchElementException e) {}
     }
 }
