@@ -15,7 +15,7 @@ public class FleetEntity extends BaseEntity {
     public static final String ATTACK = "ATTACK";
 
     @ManyToOne
-    @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
     public TargetEntity target;
 
     @ManyToOne

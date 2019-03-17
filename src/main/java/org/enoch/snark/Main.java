@@ -9,8 +9,7 @@ public class Main {
     public static void main(String[] args) {
         for(UniverseEntity universeEntity : new UniverseDAOImpl().fetchAllUniverses()) {
             if(universeEntity.name.equals("Fenrir")){
-				Runnable task = new Instance(universeEntity)::runSI;
-                new Thread(task).start();
+                new Thread(new Instance(universeEntity)::runSI).start();
             }
         }
     }

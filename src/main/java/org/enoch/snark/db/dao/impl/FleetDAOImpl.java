@@ -20,8 +20,7 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
     @Override
     public Long genereteNewCode() {
         return entityManager.createQuery("" +
-                "select max(e.code) from FleetEntity e",
-                Long.class)
+                "select max(e.code) from FleetEntity e", Long.class)
                 .getSingleResult() +1;
     }
 
@@ -29,14 +28,20 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
     public List<FleetEntity> findWithCode(Long code) {
         return entityManager.createQuery("" +
                 "from FleetEntity " +
-                "where code = :code",
-                FleetEntity.class)
+                        "where  universe = :universe and " +
+                "       code = :code", FleetEntity.class)
+                .setParameter("universe", universeEntity)
                 .setParameter("code", code)
                 .getResultList();
     }
 
     @Override
     public List<FleetEntity> findToProcess() {
-        return null;
+        return entityManager.createQuery("" +
+                        "from FleetEntity " +
+                        "where  universe = :universe and " +
+                        "       start < now() ", FleetEntity.class)
+                .setParameter("universe", universeEntity)
+                .getResultList();
     }
 }

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "planets", schema = "public", catalog = "snark")
+@Table(name = "targets", schema = "public", catalog = "snark")
 public class TargetEntity extends PlanetEntity {
 
     public final static String IN_ACTIVE = "IN_ACTIVE";

@@ -39,22 +39,20 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
 
     @Override
     public List<TargetEntity> findFarms(Integer limit) {
-        final List<TargetEntity> result = entityManager.createQuery("" +
+        return entityManager.createQuery("" +
                 "from TargetEntity " +
                 "where universe = :universe and " +
                 "       fleet_sum = 0" +
                 "       defense_sum = 0" +
-                "order by power desc " +
-                "limit :limit", TargetEntity.class)
+                "order by power desc ", TargetEntity.class)
                 .setParameter("universe", universeEntity)
-                .setParameter("limit", limit)
+                .setMaxResults(limit)
                 .getResultList();
-        return result;
     }
 
     @Override
     public List<TargetEntity> findTopFarms(int limit) {
-        final List<TargetEntity> result = entityManager.createQuery("" +
+        return entityManager.createQuery("" +
                 "from TargetEntity " +
                 "where universe = :universe and " +
                 "       fleet_sum = 0" +
@@ -62,25 +60,23 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
                 "order by resources desc " +
                 "limit :limit", TargetEntity.class)
                 .setParameter("universe", universeEntity)
-                .setParameter("limit", limit)
+                .setMaxResults(limit)
                 .getResultList();
-        return result;
     }
 
     @Override
     public Optional<TargetEntity> findNotScaned() {
-        return Optional.ofNullable(entityManager.createQuery("" +
+        return entityManager.createQuery("" +
                 "from TargetEntity " +
                 "where universe = :universe and " +
                 "       fleet_sum is null and " +
                 "       defense_sum is null and " +
                 "       type = :type " +
-                "order by resources desc " +
-                "limit :limit", TargetEntity.class)
+                "order by resources desc ", TargetEntity.class)
                 .setParameter("universe", universeEntity)
                 .setParameter("type", TargetEntity.IN_ACTIVE)
-                .setParameter("limit", 1)
-                .getSingleResult());
+                .setMaxResults(1)
+                .getResultList().stream().findFirst();
     }
 
 }

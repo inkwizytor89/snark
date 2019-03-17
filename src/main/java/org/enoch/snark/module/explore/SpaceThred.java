@@ -56,8 +56,10 @@ public class SpaceThred extends AbstractThred {
         }
         Map<SystemView, GalaxyEntity> spaceMap= new HashMap<>();
         toView.forEach(view -> spaceMap.put(view, null));
-        instance.daoFactory.galaxyDAO.fetchAll().forEach(galaxyEntity ->
-                spaceMap.put(galaxyEntity.toSystemView(), galaxyEntity));
+
+        instance.daoFactory.galaxyDAO.fetchAll().stream()
+                .filter(galaxy -> galaxy.universe.equals(instance.universeEntity))
+                .forEach(galaxyEntity -> spaceMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         return spaceMap;
     }
 
