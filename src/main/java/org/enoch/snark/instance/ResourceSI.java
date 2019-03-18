@@ -14,15 +14,15 @@ public class ResourceSI implements SI {
 
     public ResourceSI(Instance instance) {
         this.instance = instance;
-//        spaceThred = new SpaceThred(this);
+        spaceThred = new SpaceThred(this);
         scanThred = new ScanThred(this);
-//        farmThred = new FarmThred(this);
+        farmThred = new FarmThred(this);
     }
 
     public void run() {
         new Thread(spaceThred).start();
-        new Thread(scanThred).start();
-        new Thread(farmThred).start();
+//        new Thread(scanThred).start();
+//        new Thread(farmThred).start();
     }
 
     @Override

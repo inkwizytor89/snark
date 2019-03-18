@@ -5,4 +5,3 @@ create table farm_waves(
     spy_requests_code bigint,
     war_requests_code bigint
 );
-

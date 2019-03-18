@@ -11,7 +11,7 @@
         <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
         <class>org.enoch.snark.db.entity.FleetEntity</class>
-        <class>org.en-och.snark.db.entity.FarmEntity</class>
+        <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
 
         <properties>

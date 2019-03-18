@@ -4,6 +4,8 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetDAO {
@@ -37,11 +39,13 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
 
     @Override
     public List<FleetEntity> findToProcess() {
-        return entityManager.createQuery("" +
-                        "from FleetEntity " +
-                        "where  universe = :universe and " +
-                        "       start < now() ", FleetEntity.class)
-                .setParameter("universe", universeEntity)
-                .getResultList();
+return new ArrayList<>();
+        //        return entityManager.createQuery("" +
+//                        "from FleetEntity " +
+//                        "where  universe = :universe and " +
+//                        "       start < :now ", FleetEntity.class)
+//                .setParameter("universe", universeEntity)
+//                .setParameter("now", LocalDateTime.now())
+//                .getResultList();
     }
 }

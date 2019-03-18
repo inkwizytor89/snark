@@ -13,9 +13,12 @@ public class FarmEntity extends BaseEntity {
     @Column(name = "start")
     public LocalDateTime start;
 
+    @Basic
+    @Column(name = "spy_requests_code")
     public Long spyRequestCode;
 
+    @Basic
+    @Column(name = "war_requests_code")
     public Long warRequestCode;
-
 
 }
