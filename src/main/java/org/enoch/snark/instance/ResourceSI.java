@@ -20,7 +20,7 @@ public class ResourceSI implements SI {
     }
 
     public void run() {
-        new Thread(spaceThred).start();
+//        new Thread(spaceThred).start();
 //        new Thread(scanThred).start();
 //        new Thread(farmThred).start();
     }

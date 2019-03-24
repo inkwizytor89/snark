@@ -12,4 +12,7 @@ public interface AbstractDAO<T extends BaseEntity> {
 
     @Nonnull
     List<T> fetchAll();
+
+    @Nonnull
+    T fetch(T entity);
 }

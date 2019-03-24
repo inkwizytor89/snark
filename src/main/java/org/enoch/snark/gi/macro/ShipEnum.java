@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ShipEnum {
-    LM("id=ship_204"),
-    CM("id=ship_205"),
-    KR("id=ship_206"),
-    OW("id=ship_207"),
-    PAN("id=ship_215"),
-    BOM("id=ship_211"),
-    NI("id=ship_213"),
-    GS("id=ship_214 "),
-    LT("id=ship_202"),
-    DT("id=ship_203"),
-    KOL("id=ship_208"),
-    REC("id=ship_209"),
-    SON("id=ship_210");
+    LM("ship_204"),
+    CM("ship_205"),
+    KR("ship_206"),
+    OW("ship_207"),
+    PAN("ship_215"),
+    BOM("ship_211"),
+    NI("ship_213"),
+    GS("ship_214 "),
+    LT("ship_202"),
+    DT("ship_203"),
+    KOL("ship_208"),
+    REC("ship_209"),
+    SON("ship_210");
 
     private String id;
 

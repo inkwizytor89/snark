@@ -25,6 +25,7 @@ public class GalaxyDAOImpl extends AbstractDAOImpl<GalaxyEntity> implements Gala
         final Optional<GalaxyEntity> galaxyEntity = find(systemView);
         if(galaxyEntity.isPresent()) {
             galaxyEntity.get().updated = LocalDateTime.now();
+            saveOrUpdate(galaxyEntity.get());
         } else {
             GalaxyEntity entity = new GalaxyEntity();
             entity.universe = universeEntity;

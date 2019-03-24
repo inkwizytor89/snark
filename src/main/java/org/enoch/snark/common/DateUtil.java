@@ -1,12 +1,15 @@
 package org.enoch.snark.common;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.TimeZone;
+import java.time.format.DateTimeFormatter;
 
 public class DateUtil {
+
+    public static LocalDateTime parseToLocalDateTime(String input) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm:ss");
+        return LocalDateTime.parse(input, formatter);
+    }
 
     // TODO: 2018-02-06 extends to days in input
     public static LocalTime parse(String input) {
@@ -16,7 +19,6 @@ public class DateUtil {
             time = "0"+time;
         }
         return LocalTime.parse(time);
-
     }
 
     public static boolean lessThan20H(LocalDateTime updated) {

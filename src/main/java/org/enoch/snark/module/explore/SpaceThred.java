@@ -33,7 +33,8 @@ public class SpaceThred extends AbstractThred {
                 System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
             } else {
                 if(DateUtil.lessThan20H(latestGalaxyToView.get().updated)) {
-                    System.err.println(SpaceThred.class.getName()+": No new galaxy to scan");
+                    System.err.println(SpaceThred.class.getName()+
+                            ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
                 } else {
                     instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));
                 }

@@ -121,4 +121,9 @@ public class FleetEntity extends BaseEntity {
         fleet.lt = target.calculateTransportByLt();
         return fleet;
     }
+
+    @Override
+    public String toString() {
+        return "[" + id + ": " + type + " " + source + " -> " + target + "]";
+    }
 }

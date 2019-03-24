@@ -44,6 +44,14 @@ public abstract class AbstractDAOImpl<T extends BaseEntity> implements AbstractD
     public List<T> fetchAll() {
         return entityManager.createQuery("from " + getEntitylass().getName())
                 .getResultList();
+    }
 
+    @Nonnull
+    public T fetch(T entity) {
+        T t = entityManager.find(getEntitylass(), entity.id);
+        if(t == null) {
+            return entity;
+        }
+        return t;
     }
 }

@@ -13,6 +13,7 @@ import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ public class SendFleetCommand extends GICommand {
 //    protected SourcePlanet source;
     private GIUrlBuilder giUrlBuilder;
 
-    private final FleetEntity fleet;
+    private FleetEntity fleet;
 
     public SendFleetCommand(Instance instance, FleetEntity fleet) {
         super(instance, FLEET_REQUIERED);
@@ -40,7 +41,11 @@ public class SendFleetCommand extends GICommand {
 
     @Override
     public boolean execute() {
-
+        fleet = instance.daoFactory.fleetDAO.fetch(fleet);
+        if(fleet.visited != null || fleet.back != null) {
+            System.err.println("Fleet already send "+fleet);
+            return true;
+        }
         // musimy pobrac odpowiednia flote z bazy danych
         // uzupełnić odpowiednimi danymi
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
@@ -53,8 +58,12 @@ public class SendFleetCommand extends GICommand {
 
         instance.session.sleep(TimeUnit.SECONDS, 1);
         final String duration = webDriver.findElement(By.id("duration")).getText();
-        final LocalTime time = DateUtil.parse(duration);
-        setSecoundToDelayAfterCommand(time.toSecondOfDay()+ 5);
+        final LocalTime durationTime = DateUtil.parse(duration);
+        final String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
+        fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);
+        final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
+        fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
+        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5);
         fleetSelector.next();
 
         if(Mission.SPY.equals(mission)) {
@@ -67,6 +76,7 @@ public class SendFleetCommand extends GICommand {
             System.err.println(e);
             setAfterCommand(null);
         }
+        instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
         return true;
     }
 
