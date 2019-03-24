@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.gi.command.impl.ReadMessageCommand;
 import org.enoch.snark.module.AbstractThred;
 import org.enoch.snark.module.explore.SpaceThred;
 import org.enoch.snark.module.farm.FarmThred;
@@ -20,6 +21,7 @@ public class ResourceSI implements SI {
     }
 
     public void run() {
+        instance.commander.push(new ReadMessageCommand(instance));
 //        new Thread(spaceThred).start();
 //        new Thread(scanThred).start();
 //        new Thread(farmThred).start();

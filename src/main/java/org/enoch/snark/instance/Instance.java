@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.SourceEntity;
@@ -9,6 +10,8 @@ import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.SystemView;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class Instance {
@@ -18,6 +21,7 @@ public class Instance {
     public GISession session;
 //    public MessageService messageService;
     public DAOFactory daoFactory;
+    public ImmutableList<SourceEntity> sources;
 
     public Instance(UniverseEntity universeEntity) {
         this(universeEntity, true);
@@ -25,6 +29,7 @@ public class Instance {
 
     public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
         this.universeEntity = universeEntity;
+        sources = ImmutableList.copyOf(universeEntity.sources);
         daoFactory = new DAOFactory(universeEntity);
         session = new GISession(this);
         if(isQueueEnabled) {

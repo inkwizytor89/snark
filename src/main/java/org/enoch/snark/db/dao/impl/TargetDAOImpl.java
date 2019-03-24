@@ -23,9 +23,9 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         final List<TargetEntity> result = entityManager.createQuery("" +
                 "from TargetEntity " +
                 "where universe = :universe and " +
-                "       galaxy = :galaxy and" +
+                "       galaxy = :galaxy and " +
                 "       system = :system and " +
-                "       position = :position", TargetEntity.class)
+                "       position = :position ", TargetEntity.class)
                 .setParameter("universe", universeEntity)
                 .setParameter("galaxy", galaxy)
                 .setParameter("system", system)
@@ -42,8 +42,8 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         return entityManager.createQuery("" +
                 "from TargetEntity " +
                 "where universe = :universe and " +
-                "       fleet_sum = 0" +
-                "       defense_sum = 0" +
+                "       fleet_sum = 0 and " +
+                "       defense_sum = 0 " +
                 "order by power desc ", TargetEntity.class)
                 .setParameter("universe", universeEntity)
                 .setMaxResults(limit)

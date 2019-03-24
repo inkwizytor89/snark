@@ -52,7 +52,7 @@ public class SpaceThred extends AbstractThred {
 
     private Map<SystemView, GalaxyEntity> buildSpaceMap() {
         List<SystemView> toView = new LinkedList<>();
-        for(SourceEntity source : instance.universeEntity.sources) {
+        for(SourceEntity source : instance.sources) {
             toView.addAll(generateSystemToView(source));
         }
         Map<SystemView, GalaxyEntity> spaceMap= new HashMap<>();

@@ -36,7 +36,7 @@ public class MessageEntity extends BaseEntity {
         // TODO: 12.03.2019 ustawic wartosc z raportu zamiast obecnej daty
         messageEntity.created = LocalDateTime.now();
         final String[] reportLines = content.split("\\R+");
-        messageEntity.messageId = Long.parseLong(reportLines[0]);
+//        messageEntity.messageId = Long.parseLong(reportLines[0]);
         return messageEntity;
     }
 

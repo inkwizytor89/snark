@@ -78,6 +78,7 @@ public class ReadMessageCommand extends AbstractCommand {
         instance.session.getWebDriver().get(link);
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
+        messageEntity.universe = instance.universeEntity;
 
         instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
 
