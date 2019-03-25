@@ -79,4 +79,9 @@ public class PlanetEntity extends BaseEntity{
         system = new Integer(numbersTable[SYSTEM_INDEX]);
         position = new Integer(numbersTable[POSITION_INDEX]);
     }
+
+    @Override
+    public String toString() {
+        return "[" + galaxy + ", " + system + ", " + position + "]";
+    }
 }
