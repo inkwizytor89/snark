@@ -1,6 +1,8 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.model.Planet;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -42,6 +44,7 @@ public class MessageEntity extends BaseEntity {
 
     public PlanetEntity getPlanet() {
         PlanetEntity planet = new PlanetEntity();
+        Document document = Jsoup.parse(content);
         final String[] reportLines = content.split("\\R+");
         for (int i = 1; i < reportLines.length; i++) {
             if(reportLines[i].equals("Raport szpiegowski z")) {
