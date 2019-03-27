@@ -48,6 +48,7 @@ class SessionHelper {
 //        webDriver.findElement(By.className("btn btn-primary")).click();
 //        webDriver.findElement(By.name(server)).click();
 //        webDriver.findElement(By.name(server)).click();
+//        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts");
         closeAgreement();
         try {
             webDriver.findElement(By.linkText("Graj")).click();

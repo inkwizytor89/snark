@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.SpyInfoParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -43,29 +44,30 @@ public class MessageEntity extends BaseEntity {
     }
 
     public PlanetEntity getPlanet() {
-        PlanetEntity planet = new PlanetEntity();
-        Document document = Jsoup.parse(content);
-        final String[] reportLines = content.split("\\R+");
-        for (int i = 1; i < reportLines.length; i++) {
-            if(reportLines[i].equals("Raport szpiegowski z")) {
-                final String reportInfo = reportLines[i + 1];
-                final String[] split = reportInfo.split("\\s+");
-                String time = split[split.length-1];
-                String date = split[split.length-2];
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-                //planet.update = LocalDateTime.parse(date +" " + time, formatter);
-                planet = new PlanetEntity(split[split.length-3]);
-                i++;
-            }
-            if(reportLines[i].equals("Surowce")) {
-                planet.metal = Long.parseLong(reportLines[i+1].replace(".", ""));
-                planet.crystal = Long.parseLong(reportLines[i+2].replace(".", ""));
-                planet.deuterium = Long.parseLong(reportLines[i+3].replace(".", ""));
-//                resourcePoint = metal*2 + crystal*3 + deuterium*6;
-                planet.power = Long.parseLong(reportLines[i+4].replace(".", ""));
-                i+=4;
-            }
-        }
-        return planet;
+        return new SpyInfoParser(content).extractPlanetEntity();
+//        PlanetEntity planet = new PlanetEntity();
+//        Document document = Jsoup.parse(content);
+//        final String[] reportLines = content.split("\\R+");
+//        for (int i = 1; i < reportLines.length; i++) {
+//            if(reportLines[i].equals("Raport szpiegowski z")) {
+//                final String reportInfo = reportLines[i + 1];
+//                final String[] split = reportInfo.split("\\s+");
+//                String time = split[split.length-1];
+//                String date = split[split.length-2];
+//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+//                //planet.update = LocalDateTime.parse(date +" " + time, formatter);
+//                planet = new PlanetEntity(split[split.length-3]);
+//                i++;
+//            }
+//            if(reportLines[i].equals("Surowce")) {
+//                planet.metal = Long.parseLong(reportLines[i+1].replace(".", ""));
+//                planet.crystal = Long.parseLong(reportLines[i+2].replace(".", ""));
+//                planet.deuterium = Long.parseLong(reportLines[i+3].replace(".", ""));
+////                resourcePoint = metal*2 + crystal*3 + deuterium*6;
+//                planet.power = Long.parseLong(reportLines[i+4].replace(".", ""));
+//                i+=4;
+//            }
+//        }
+//        return planet;
     }
 }
