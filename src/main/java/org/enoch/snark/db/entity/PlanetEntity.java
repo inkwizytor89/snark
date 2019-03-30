@@ -80,6 +80,19 @@ public class PlanetEntity extends BaseEntity{
         position = new Integer(numbersTable[POSITION_INDEX]);
     }
 
+    public static Long parseResource(String input) {
+        double base = 1;
+        input = input.replace(".","");
+
+        if(input.contains("Mln")) {
+            base = 1000000;
+            input = input.replace("Mln","");
+            input = input.replace(",",".");
+        }
+        Double result = Double.parseDouble(input) * base;
+        return result.longValue();
+    }
+
     @Override
     public String toString() {
         return "[" + galaxy + ", " + system + ", " + position + "]";

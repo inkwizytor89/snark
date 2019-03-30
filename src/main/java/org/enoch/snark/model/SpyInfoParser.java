@@ -27,10 +27,10 @@ public class SpyInfoParser {
     private void extractResource() {
 
         String[] resourcesParts = document.getElementsByAttributeValue("data-type", "resources").text().split("\\s+");
-        planet.metal = Long.parseLong(resourcesParts[0].replace(".",""));
-        planet.crystal = Long.parseLong(resourcesParts[1].replace(".",""));
-        planet.deuterium = Long.parseLong(resourcesParts[2].replace(".",""));
-        planet.power = Long.parseLong(resourcesParts[3].replace(".",""));
+        planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
+        planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
+        planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
+        planet.power = PlanetEntity.parseResource(resourcesParts[3]);
     }
 
     private String extractCoordinateFromTitle(String input) {

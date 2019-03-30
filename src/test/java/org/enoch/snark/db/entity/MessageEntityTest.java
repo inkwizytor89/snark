@@ -9,8 +9,8 @@ public class MessageEntityTest {
 
     @Test
     public void getPlanet() {
-        Document doc = Jsoup.parse(text);
-        Elements title = doc.getElementsByClass("msg_title new blue_txt");
+//        Document doc = Jsoup.parse(text);
+//        Elements title = doc.getElementsByClass("msg_title new blue_txt");
         MessageEntity messageEntity = new MessageEntity();
         messageEntity.content = text;
         PlanetEntity planet = messageEntity.getPlanet();
