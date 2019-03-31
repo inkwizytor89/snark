@@ -2,10 +2,10 @@ package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetDAO {
@@ -21,31 +21,37 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
 
     @Override
     public Long genereteNewCode() {
-        return entityManager.createQuery("" +
-                "select max(e.code) from FleetEntity e", Long.class)
-                .getSingleResult() +1;
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "select max(e.code) from FleetEntity e", Long.class)
+                    .getSingleResult() + 1;
+        }
     }
 
     @Override
     public List<FleetEntity> findWithCode(Long code) {
-        return entityManager.createQuery("" +
-                "from FleetEntity " +
-                        "where  universe = :universe and " +
-                "       code = :code", FleetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("code", code)
-                .getResultList();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where  universe = :universe and " +
+                    "       code = :code", FleetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("code", code)
+                    .getResultList();
+        }
     }
 
     @Override
     public List<FleetEntity> findToProcess() {
-                return entityManager.createQuery("" +
-                        "from FleetEntity " +
-                        "where  universe = :universe and " +
-                        "       start < :now and" +
-                        "       visited is null", FleetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("now", LocalDateTime.now())
-                .getResultList();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where  universe = :universe and " +
+                    "       start < :now and" +
+                    "       visited is null", FleetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("now", LocalDateTime.now())
+                    .getResultList();
+        }
     }
 }

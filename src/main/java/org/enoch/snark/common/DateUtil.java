@@ -8,7 +8,13 @@ public class DateUtil {
 
     public static LocalDateTime parseToLocalDateTime(String input) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm:ss");
-        return LocalDateTime.parse(input, formatter);
+        final String[] split = input.split("\\s+");
+        String date = split[0];
+        String time = split[1];
+        if(time.length() == 7) {
+            time = "0"+time;
+        }
+        return LocalDateTime.parse(date + " " + time, formatter);
     }
 
     // TODO: 2018-02-06 extends to days in input

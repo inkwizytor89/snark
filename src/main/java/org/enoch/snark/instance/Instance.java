@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.SourceEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
@@ -13,6 +14,7 @@ import org.enoch.snark.model.SystemView;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class Instance {
 
@@ -62,5 +64,16 @@ public class Instance {
             }
         }
         return nearestPlanet;
+    }
+
+    public void removePlanet(TargetEntity target) {
+        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.galaxy, target.system, target.position);
+        if(targetEntity.isPresent()) {
+            daoFactory.fleetDAO.fetchAll().stream()
+                    .filter(fleetEntity -> fleetEntity.target.id.equals(target.id))
+                    .forEach(fleetEntity -> daoFactory.fleetDAO.remove(fleetEntity));
+            daoFactory.targetDAO.remove(target);
+            //TODO: remove messegas and others
+        }
     }
 }

@@ -21,10 +21,9 @@ public class ResourceSI implements SI {
     }
 
     public void run() {
-        instance.commander.push(new ReadMessageCommand(instance));
-//        new Thread(spaceThred).start();
-//        new Thread(scanThred).start();
-//        new Thread(farmThred).start();
+        new Thread(spaceThred).start();
+        new Thread(scanThred).start();
+        new Thread(farmThred).start();
     }
 
     @Override

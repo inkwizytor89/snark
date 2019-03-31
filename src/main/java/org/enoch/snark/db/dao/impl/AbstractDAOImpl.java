@@ -2,7 +2,6 @@ package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.AbstractDAO;
 import org.enoch.snark.db.entity.BaseEntity;
-import org.enoch.snark.db.entity.IdEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 
@@ -13,7 +12,7 @@ import java.util.List;
 
 public abstract class AbstractDAOImpl<T extends BaseEntity> implements AbstractDAO<T> {
 
-    protected final EntityManager entityManager;
+    final EntityManager entityManager;
     protected UniverseEntity universeEntity;
 
     AbstractDAOImpl(UniverseEntity universeEntity) {
@@ -42,16 +41,30 @@ public abstract class AbstractDAOImpl<T extends BaseEntity> implements AbstractD
     @Nonnull
     @SuppressWarnings("unchecked")
     public List<T> fetchAll() {
-        return entityManager.createQuery("from " + getEntitylass().getName())
-                .getResultList();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("from " + getEntitylass().getSimpleName())
+                    .getResultList();
+        }
     }
 
     @Nonnull
     public T fetch(T entity) {
-        T t = entityManager.find(getEntitylass(), entity.id);
-        if(t == null) {
-            return entity;
+        synchronized (JPAUtility.dbSynchro) {
+            T t = entityManager.find(getEntitylass(), entity.id);
+            if (t == null) {
+                return entity;
+            }
+            return t;
         }
-        return t;
+    }
+
+    public void remove(T entity) {
+        synchronized (JPAUtility.dbSynchro) {
+            final EntityTransaction transaction = entityManager.getTransaction();
+            transaction.begin();
+            entityManager.remove(entity);
+            entityManager.flush();
+            transaction.commit();
+        }
     }
 }

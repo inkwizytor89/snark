@@ -1,6 +1,7 @@
 package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.TargetDAO;
+import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 
@@ -39,44 +40,50 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
 
     @Override
     public List<TargetEntity> findFarms(Integer limit) {
-        return entityManager.createQuery("" +
-                "from TargetEntity " +
-                "where universe = :universe and " +
-                "       fleet_sum = 0 and " +
-                "       defense_sum = 0 " +
-                "order by power desc ", TargetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setMaxResults(limit)
-                .getResultList();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where universe = :universe and " +
+                    "       fleet_sum = 0 and " +
+                    "       defense_sum = 0 " +
+                    "order by power desc ", TargetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setMaxResults(limit)
+                    .getResultList();
+        }
     }
 
     @Override
     public List<TargetEntity> findTopFarms(int limit) {
-        return entityManager.createQuery("" +
-                "from TargetEntity " +
-                "where universe = :universe and " +
-                "       fleet_sum = 0" +
-                "       defense_sum = 0" +
-                "order by resources desc " +
-                "limit :limit", TargetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setMaxResults(limit)
-                .getResultList();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where universe = :universe and " +
+                    "       fleet_sum = 0" +
+                    "       defense_sum = 0" +
+                    "order by resources desc " +
+                    "limit :limit", TargetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setMaxResults(limit)
+                    .getResultList();
+        }
     }
 
     @Override
     public Optional<TargetEntity> findNotScaned() {
-        return entityManager.createQuery("" +
-                "from TargetEntity " +
-                "where universe = :universe and " +
-                "       fleet_sum is null and " +
-                "       defense_sum is null and " +
-                "       type = :type " +
-                "order by resources desc ", TargetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("type", TargetEntity.IN_ACTIVE)
-                .setMaxResults(1)
-                .getResultList().stream().findFirst();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where universe = :universe and " +
+                    "       fleet_sum is null and " +
+                    "       defense_sum is null and " +
+                    "       type = :type " +
+                    "order by resources desc ", TargetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("type", TargetEntity.IN_ACTIVE)
+                    .setMaxResults(1)
+                    .getResultList().stream().findFirst();
+        }
     }
 
 }

@@ -36,11 +36,4 @@ public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO 
             return new FarmEntity();
         }
     }
-//
-//    private List<FarmEntity> fetchAll() {
-//        return entityManager.createQuery(
-//                "from FarmEntity " +
-//                        "order by start desc", FarmEntity.class
-//        ).getResultList();
-//    }
 }

@@ -15,4 +15,6 @@ public interface AbstractDAO<T extends BaseEntity> {
 
     @Nonnull
     T fetch(T entity);
+
+    void remove(T entity);
 }

@@ -72,8 +72,15 @@ public class SendFleetCommand extends GICommand {
 
         try {
             fleetSelector.start();
-        } catch(PlanetDoNotExistException | ToStrongPlayerException e) {
+        } catch(PlanetDoNotExistException e) {
+            e.printStackTrace();
+            instance.removePlanet(fleet.target);
+            // TODO: thred don't get information about one fleet slot free
+            return true;
+        }
+        catch(ToStrongPlayerException e) {
             System.err.println(e);
+        } finally {
             setAfterCommand(null);
         }
         instance.daoFactory.fleetDAO.saveOrUpdate(fleet);

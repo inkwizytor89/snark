@@ -2,11 +2,11 @@ package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
+import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.model.SystemView;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public class GalaxyDAOImpl extends AbstractDAOImpl<GalaxyEntity> implements GalaxyDAO {
@@ -39,24 +39,28 @@ public class GalaxyDAOImpl extends AbstractDAOImpl<GalaxyEntity> implements Gala
 
     @Override
     public Optional<GalaxyEntity> find(SystemView systemView) {
-        return entityManager.createQuery("" +
-                "from GalaxyEntity " +
-                "where universe = :universe and " +
-                "       galaxy = :galaxy and " +
-                "       system = :system ", GalaxyEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("galaxy", systemView.galaxy)
-                .setParameter("system", systemView.system)
-                .getResultList().stream().findFirst();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from GalaxyEntity " +
+                    "where universe = :universe and " +
+                    "       galaxy = :galaxy and " +
+                    "       system = :system ", GalaxyEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("galaxy", systemView.galaxy)
+                    .setParameter("system", systemView.system)
+                    .getResultList().stream().findFirst();
+        }
     }
 
 
     @Override
     public Optional<GalaxyEntity> findLatestGalaxyToView() {
-        return entityManager.createQuery(
-                "from GalaxyEntity where universe = :universe " +
-                        "order by updated asc", GalaxyEntity.class)
-                .setParameter("universe", universeEntity)
-                .getResultList().stream().findFirst();
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery(
+                    "from GalaxyEntity where universe = :universe " +
+                            "order by updated asc", GalaxyEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .getResultList().stream().findFirst();
+        }
     }
 }
