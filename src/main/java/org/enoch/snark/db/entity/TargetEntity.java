@@ -11,6 +11,8 @@ import java.util.Objects;
 public class TargetEntity extends PlanetEntity {
 
     public final static String IN_ACTIVE = "IN_ACTIVE";
+    public final static String WEAK = "WEAK";
+    public final static String STRONG = "STRONG";
 
     @Basic
     @Column(name = "type")

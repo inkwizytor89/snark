@@ -2,6 +2,7 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.FleetSelector;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -12,6 +13,7 @@ import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -65,7 +67,12 @@ public class SendFleetCommand extends GICommand {
         fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
         setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5);
         fleetSelector.next();
-
+        if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
+            TargetEntity target = fleet.target;
+            target.type = TargetEntity.WEAK;
+            instance.daoFactory.targetDAO.saveOrUpdate(target);
+            return true;
+        }
         if(Mission.SPY.equals(mission)) {
             setAfterCommand(new ReadMessageCommand(instance));
         }
@@ -75,12 +82,12 @@ public class SendFleetCommand extends GICommand {
         } catch(PlanetDoNotExistException e) {
             e.printStackTrace();
             instance.removePlanet(fleet.target);
+            setAfterCommand(null);
             // TODO: thred don't get information about one fleet slot free
             return true;
         }
         catch(ToStrongPlayerException e) {
             System.err.println(e);
-        } finally {
             setAfterCommand(null);
         }
         instance.daoFactory.fleetDAO.saveOrUpdate(fleet);

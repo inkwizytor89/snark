@@ -10,14 +10,19 @@ import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.request.SendFleetRequest;
+import org.enoch.snark.instance.CommanderImpl;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThred;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class FarmThred extends AbstractThred {
+
+
+    private static final Logger log = Logger.getLogger(FarmThred.class.getName());
 
     private final FarmDAO farmDAO;
     private final FleetDAO fleetDAO;
@@ -39,7 +44,7 @@ public class FarmThred extends AbstractThred {
         super.run();
         while(true) {
 
-            if(targetDAO.findFarms(100).size()<100) {
+            if(targetDAO.findFarms(100).size()<80) {
                 try {
                     TimeUnit.SECONDS.sleep(60);
                 } catch (InterruptedException e) {
