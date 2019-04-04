@@ -1,5 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -43,25 +44,34 @@ public class GalaxyAnalyzeCommand extends GICommand {
         if(galaxyEntity.isPresent() && DateUtil.lessThan20H(galaxyEntity.get().updated)) {
             return true;
         }
-
         giUrlBuilder.openGalaxy(systemView.galaxy, systemView.system);
-        final List<WebElement> rows = webDriver.findElements(By.className("row"));
-        for(WebElement row : rows) {
+        List<TargetEntity> targets = instance.daoFactory.targetDAO.find(systemView.galaxy, systemView.system);
+        for(WebElement row : webDriver.findElements(By.className("row"))) {
             final int position = Integer.parseInt(row.findElement(By.className("position")).getText());
-            final String status = row.findElement(By.className("status")).getText();
-            System.err.println(position+": "+status);
-            if(isAvailableFarm(status)) {
-                final Optional<TargetEntity> planetEntity = targetDAO.find(systemView.galaxy, systemView.system, position);
-                if(!planetEntity.isPresent()) {
-                    TargetEntity entity = new TargetEntity();
-                    entity.universe = instance.universeEntity;
-                    entity.galaxy = systemView.galaxy;
-                    entity.system = systemView.system;
-                    entity.position = position;
-                    entity.type = TargetEntity.IN_ACTIVE;
-                    targetDAO.saveOrUpdate(entity);
-                }
+            final String player = row.findElement(By.className("playername")).getText().trim();
+            final String statusCode = row.findElement(By.className("status")).getText().trim();
+            Optional<TargetEntity> targetFromDb = targets.stream().filter(t -> t.position.equals(position)).findAny();
+
+            if(StringUtils.isEmpty(player) && targetFromDb.isPresent()) {
+                instance.removePlanet(targetFromDb.get());
+                continue;
             }
+            String status = setStatus(statusCode);
+            if(targetFromDb.isPresent() && status.equals(targetFromDb.get().type)) {
+                continue;
+            }
+            TargetEntity entity;
+            if(targetFromDb.isPresent()) {
+                entity = targetFromDb.get();
+            } else {
+                entity = new TargetEntity();
+                entity.universe = instance.universeEntity;
+                entity.galaxy = systemView.galaxy;
+                entity.system = systemView.system;
+                entity.position = position;
+            }
+            entity.type = status;
+            targetDAO.saveOrUpdate(entity);
         }
 
         galaxyDAO.update(systemView);
@@ -69,7 +79,20 @@ public class GalaxyAnalyzeCommand extends GICommand {
     }
 
     private boolean isAvailableFarm(String status) {
-
         return !status.contains("u") && (status.contains("i") || status.contains("I"));
+    }
+
+    private String setStatus(String status) {
+        if (status.contains("A")) {
+            return TargetEntity.ADMIN;
+        } else if (status.contains("u")) {
+            return TargetEntity.ABSENCE;
+        } else if (status.contains("i") || status.contains("I")) {
+            return TargetEntity.IN_ACTIVE;
+        } else if (status.contains("s")) {
+            return TargetEntity.WEAK;
+        } else {
+            return TargetEntity.NORMAL;
+        }
     }
 }

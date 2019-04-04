@@ -21,21 +21,38 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
 
     @Override
     public Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position) {
-        final List<TargetEntity> result = entityManager.createQuery("" +
-                "from TargetEntity " +
-                "where universe = :universe and " +
-                "       galaxy = :galaxy and " +
-                "       system = :system and " +
-                "       position = :position ", TargetEntity.class)
-                .setParameter("universe", universeEntity)
-                .setParameter("galaxy", galaxy)
-                .setParameter("system", system)
-                .setParameter("position", position)
-                .getResultList();
-        if(result.isEmpty()) {
-            return Optional.empty();
+        synchronized (JPAUtility.dbSynchro) {
+            final List<TargetEntity> result = entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where universe = :universe and " +
+                    "       galaxy = :galaxy and " +
+                    "       system = :system and " +
+                    "       position = :position ", TargetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("galaxy", galaxy)
+                    .setParameter("system", system)
+                    .setParameter("position", position)
+                    .getResultList();
+            if (result.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(result.get(0));
         }
-        return Optional.of(result.get(0));
+    }
+
+    @Override
+    public List<TargetEntity> find(Integer galaxy, Integer system) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where universe = :universe and " +
+                    "       galaxy = :galaxy and " +
+                    "       system = :system ", TargetEntity.class)
+                    .setParameter("universe", universeEntity)
+                    .setParameter("galaxy", galaxy)
+                    .setParameter("system", system)
+                    .getResultList();
+        }
     }
 
     @Override

@@ -10,9 +10,11 @@ import java.util.Objects;
 @Table(name = "targets", schema = "public", catalog = "snark")
 public class TargetEntity extends PlanetEntity {
 
-    public final static String IN_ACTIVE = "IN_ACTIVE";
+    public final static String ADMIN = "ADMIN";
+    public final static String NORMAL = "NORMAL";
+    public final static String ABSENCE = "ABSENCE";
     public final static String WEAK = "WEAK";
-    public final static String STRONG = "STRONG";
+    public final static String IN_ACTIVE = "IN_ACTIVE";
 
     @Basic
     @Column(name = "type")

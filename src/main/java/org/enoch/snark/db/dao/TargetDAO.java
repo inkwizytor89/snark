@@ -9,6 +9,8 @@ public interface TargetDAO extends AbstractDAO<TargetEntity> {
 
     Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position);
 
+    List<TargetEntity> find(Integer galaxy, Integer system);
+
     List<TargetEntity> findFarms(Integer limit);
 
     List<TargetEntity> findTopFarms(int limit);
