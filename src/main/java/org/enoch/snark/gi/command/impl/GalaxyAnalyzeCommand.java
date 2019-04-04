@@ -56,6 +56,9 @@ public class GalaxyAnalyzeCommand extends GICommand {
                 instance.removePlanet(targetFromDb.get());
                 continue;
             }
+            if(StringUtils.isEmpty(player) && !targetFromDb.isPresent()) {
+                continue;
+            }
             String status = setStatus(statusCode);
             if(targetFromDb.isPresent() && status.equals(targetFromDb.get().type)) {
                 continue;
