@@ -9,7 +9,6 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -44,7 +43,10 @@ public class CommanderImpl implements Commander {
             while(true) {
                 if(fleetActionQueue.isEmpty()) {
                     for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
-                        fleetActionQueue.add(new SendFleetCommand(instance, fleet));
+                        SendFleetCommand newSendFleet = new SendFleetCommand(instance, fleet);
+                        if(!containsFleetCommand(newSendFleet, fleetActionQueue)) {
+                            fleetActionQueue.add(newSendFleet);
+                        }
                     }
                 }
                 if(!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
@@ -66,6 +68,14 @@ public class CommanderImpl implements Commander {
         };
 
         new Thread(task).start();
+    }
+
+    private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {
+        return fleetActionQueue.stream().anyMatch(command -> command instanceof SendFleetCommand &&
+                newSendFleet.mission.equals(((SendFleetCommand) command).mission) &&
+                newSendFleet.fleet.target.galaxy.equals(((SendFleetCommand) command).fleet.target.galaxy) &&
+                newSendFleet.fleet.target.system.equals(((SendFleetCommand) command).fleet.target.system) &&
+                newSendFleet.fleet.target.position.equals(((SendFleetCommand) command).fleet.target.position));
     }
 
     private void startCalculationQueue() {

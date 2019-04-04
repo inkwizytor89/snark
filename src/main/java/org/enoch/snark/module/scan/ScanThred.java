@@ -27,7 +27,7 @@ public class ScanThred extends AbstractThred {
                 FleetEntity fleet = FleetEntity.createSpyFleet(instance, target.get());
                 instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
             }
-            instance.session.sleep(TimeUnit.SECONDS, 30);
+            instance.session.sleep(TimeUnit.SECONDS, 60);
         }
     }
 }

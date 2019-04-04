@@ -26,11 +26,11 @@ public class SendFleetCommand extends GICommand {
 
     private final FleetSelector fleetSelector;
 //    protected TargetEntity target;
-    private Mission mission;
+    public Mission mission;
 //    protected SourcePlanet source;
     private GIUrlBuilder giUrlBuilder;
 
-    private FleetEntity fleet;
+    public FleetEntity fleet;
 
     public SendFleetCommand(Instance instance, FleetEntity fleet) {
         super(instance, FLEET_REQUIERED);
