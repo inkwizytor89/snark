@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 
 public class FarmThred extends AbstractThred {
 
-
     private static final Logger log = Logger.getLogger(FarmThred.class.getName());
 
     private final FarmDAO farmDAO;
@@ -40,61 +39,50 @@ public class FarmThred extends AbstractThred {
     }
 
     @Override
-    public void run() {
-        super.run();
-        while(true) {
+    protected int getPauseInSeconds() {
+        return 1;
+    }
 
-            if(targetDAO.findFarms(100).size()<80) {
-                try {
-                    TimeUnit.SECONDS.sleep(60);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                continue;
-            }
-
-            if(actualFarm.warRequestCode != null) {
-                previousFarm = actualFarm;
-                actualFarm = new FarmEntity();
-                actualFarm.start = LocalDateTime.now();
-                farmDAO.saveOrUpdate(actualFarm);
-                // x = przylot ostatniego statku
-                // stworz nowy farm entity
-                // ustaw jego start na x-5min
-                // aktualny actualFarm ustaw jako nowy
-            } else if (actualFarm.spyRequestCode !=null) {
-                int fleetNum = si.getAvailableFleetCount(this);
-                List<TargetEntity> farmTargets = targetDAO.findTopFarms(fleetNum);
-                actualFarm.warRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.ATTACK, farmTargets)
-                        .setLimit(fleetNum)
-                        .sendAndWait();
-                farmDAO.saveOrUpdate(actualFarm);
-                // zapytaj o 50 najnowszych skanow
-                // posortuj je wg korzystnosci i bez obrony
-                // wybierz fleetNum najbardziej korzystnych
-                // posegreguj je wg najdluższego lotu
-                // stworz war request - niech ma konstruktor ktoremu podajesz cele
-                // i podajesz ile ma z tego ruszyc, bo jak by jakis byl nie wypalem z powodu
-                // bledu albo pozniej ze z falangi sie nie oplaca to zeby wziol nastepny
-            } else if(LocalDateTime.now().isAfter(actualFarm.start)) {
-                List<TargetEntity> farmTargets = targetDAO.findFarms(50);
-                actualFarm.spyRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.SPY, farmTargets)
-                        .sendAndWait();
-                farmDAO.saveOrUpdate(actualFarm);
-                // wyciagnij poprzedni zbior celow
-                
-                // wysylac sondy 50 sond do target ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
-                // spyrequest zrobic mu konsrtuktor ktory dziala na tych zbiorach lub lepiej
-            } else {
-                // niech czeka ile trzeba a nie aktywuje sie co sekunde
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
+    @Override
+    public void onStep() {
+        if(targetDAO.findFarms(100).size()<80) {
+            si.getInstance().session.sleep(TimeUnit.SECONDS, 60);
+            return;
         }
-//        farmDAO.getLastState();
+
+        if(actualFarm.warRequestCode != null) {
+            previousFarm = actualFarm;
+            actualFarm = new FarmEntity();
+            actualFarm.start = LocalDateTime.now();
+            farmDAO.saveOrUpdate(actualFarm);
+            // x = przylot ostatniego statku
+            // stworz nowy farm entity
+            // ustaw jego start na x-5min
+            // aktualny actualFarm ustaw jako nowy
+        } else if (actualFarm.spyRequestCode !=null) {
+            int fleetNum = si.getAvailableFleetCount(this);
+            List<TargetEntity> farmTargets = targetDAO.findTopFarms(fleetNum);
+            actualFarm.warRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.ATTACK, farmTargets)
+                    .setLimit(fleetNum)
+                    .sendAndWait();
+            farmDAO.saveOrUpdate(actualFarm);
+            // zapytaj o 50 najnowszych skanow
+            // posortuj je wg korzystnosci i bez obrony
+            // wybierz fleetNum najbardziej korzystnych
+            // posegreguj je wg najdluższego lotu
+            // stworz war request - niech ma konstruktor ktoremu podajesz cele
+            // i podajesz ile ma z tego ruszyc, bo jak by jakis byl nie wypalem z powodu
+            // bledu albo pozniej ze z falangi sie nie oplaca to zeby wziol nastepny
+        } else if(LocalDateTime.now().isAfter(actualFarm.start)) {
+            List<TargetEntity> farmTargets = targetDAO.findFarms(50);
+            actualFarm.spyRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.SPY, farmTargets)
+                    .sendAndWait();
+            farmDAO.saveOrUpdate(actualFarm);
+            // wyciagnij poprzedni zbior celow
+
+            // wysylac sondy 50 sond do target ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
+            // spyrequest zrobic mu konsrtuktor ktory dziala na tych zbiorach lub lepiej
+        }
+            // niech czeka ile trzeba a nie aktywuje sie co sekunde
     }
 }

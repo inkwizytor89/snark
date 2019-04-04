@@ -19,15 +19,16 @@ public class ScanThred extends AbstractThred {
     }
 
     @Override
-    public void run() {
-        super.run();
-        while(true) {
-            Optional<TargetEntity> target = instance.daoFactory.targetDAO.findNotScaned();
-            if(target.isPresent()) {
-                FleetEntity fleet = FleetEntity.createSpyFleet(instance, target.get());
-                instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
-            }
-            instance.session.sleep(TimeUnit.SECONDS, 60);
+    protected int getPauseInSeconds() {
+        return 60;
+    }
+
+    @Override
+    protected void onStep() {
+        Optional<TargetEntity> target = instance.daoFactory.targetDAO.findNotScaned();
+        if(target.isPresent()) {
+            FleetEntity fleet = FleetEntity.createSpyFleet(instance, target.get());
+            instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
         }
     }
 }

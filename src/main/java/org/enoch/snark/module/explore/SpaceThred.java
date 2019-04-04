@@ -10,7 +10,6 @@ import org.enoch.snark.model.SystemView;
 import org.enoch.snark.module.AbstractThred;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class SpaceThred extends AbstractThred {
 
@@ -22,24 +21,28 @@ public class SpaceThred extends AbstractThred {
     }
 
     @Override
-    public void run() {
-        super.run();
+    protected int getPauseInSeconds() {
+        return 30;
+    }
+
+    @Override
+    protected void onStart() {
         checkMissing();
-        while(true) {
+    }
 
-            final Optional<GalaxyEntity> latestGalaxyToView = instance.daoFactory.galaxyDAO.findLatestGalaxyToView();
+    @Override
+    protected void onStep() {
+        final Optional<GalaxyEntity> latestGalaxyToView = instance.daoFactory.galaxyDAO.findLatestGalaxyToView();
 
-            if(!latestGalaxyToView.isPresent()) {
-                System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
+        if(!latestGalaxyToView.isPresent()) {
+            System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
+        } else {
+            if(DateUtil.lessThan20H(latestGalaxyToView.get().updated)) {
+                System.err.println(SpaceThred.class.getName()+
+                        ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
             } else {
-                if(DateUtil.lessThan20H(latestGalaxyToView.get().updated)) {
-                    System.err.println(SpaceThred.class.getName()+
-                            ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
-                } else {
-                    instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));
-                }
+                instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));
             }
-            instance.session.sleep(TimeUnit.SECONDS, 30);
         }
     }
 
