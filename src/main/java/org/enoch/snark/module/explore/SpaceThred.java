@@ -22,7 +22,7 @@ public class SpaceThred extends AbstractThred {
 
     @Override
     protected int getPauseInSeconds() {
-        return 30;
+        return 120;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class SpaceThred extends AbstractThred {
         if(!latestGalaxyToView.isPresent()) {
             System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
         } else {
-            if(DateUtil.lessThan20H(latestGalaxyToView.get().updated)) {
+            if(DateUtil.lessThanDays(4, latestGalaxyToView.get().updated)) {
                 System.err.println(SpaceThred.class.getName()+
                         ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
             } else {

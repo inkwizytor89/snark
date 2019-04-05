@@ -20,7 +20,7 @@ public class ScanThred extends AbstractThred {
 
     @Override
     protected int getPauseInSeconds() {
-        return 60;
+        return 120;
     }
 
     @Override

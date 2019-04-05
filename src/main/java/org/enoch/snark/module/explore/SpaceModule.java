@@ -80,7 +80,7 @@ public class SpaceModule extends AbstractModule {
 //        if(latestGalaxyToView.isEmpty()) {
 //                generateViewArea(new ArrayList<>());
 //        } else {
-//            if(DateUtil.lessThan20H(latestGalaxyToView.get(0).getUpdated())) {
+//            if(DateUtil.lessThanHours(latestGalaxyToView.get(0).getUpdated())) {
 //                log.info("No new galaxy to scan");
 //                return;
 //            } else {
@@ -100,7 +100,7 @@ public class SpaceModule extends AbstractModule {
 //    private List<SystemView> onlyNewest(List<GalaxyEntity> latestGalaxyToView) {
 //        List<SystemView> result = new ArrayList<>();
 //        latestGalaxyToView.forEach(galaxyEntity -> {
-//            if(DateUtil.lessThan20H(galaxyEntity.getUpdated())) {
+//            if(DateUtil.lessThanHours(galaxyEntity.getUpdated())) {
 //                result.add(galaxyEntity.toSystemView());
 //            }
 //        });

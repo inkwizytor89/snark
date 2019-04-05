@@ -41,7 +41,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
     public boolean execute() {
         final Optional<GalaxyEntity> galaxyEntity = galaxyDAO.find(systemView);
 
-        if(galaxyEntity.isPresent() && DateUtil.lessThan20H(galaxyEntity.get().updated)) {
+        if(galaxyEntity.isPresent() && DateUtil.lessThanHours(22, galaxyEntity.get().updated)) {
             return true;
         }
         giUrlBuilder.openGalaxy(systemView.galaxy, systemView.system);
@@ -79,10 +79,6 @@ public class GalaxyAnalyzeCommand extends GICommand {
 
         galaxyDAO.update(systemView);
         return true;
-    }
-
-    private boolean isAvailableFarm(String status) {
-        return !status.contains("u") && (status.contains("i") || status.contains("I"));
     }
 
     private String setStatus(String status) {

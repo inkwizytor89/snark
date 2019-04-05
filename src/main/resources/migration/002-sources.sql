@@ -14,6 +14,7 @@ create table sources
   metal       integer,
   crystal     integer,
   deuterium   integer,
+  resources   integer,
   power       integer,
   cp          integer   not null
 );
