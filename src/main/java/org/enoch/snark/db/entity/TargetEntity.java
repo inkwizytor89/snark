@@ -56,6 +56,17 @@ public class TargetEntity extends PlanetEntity {
                 Objects.equals(updated, entity.updated);
     }
 
+    public void update(TargetEntity targetEntity) {
+        this.metal = targetEntity.metal;
+        this.crystal = targetEntity.crystal;
+        this.deuterium = targetEntity.deuterium;
+        this.resources = 3 * metal + 2 * crystal + deuterium;
+        this.power = targetEntity.power;
+
+        this.fleetSum = targetEntity.fleetSum;
+        this.defenseSum = targetEntity.defenseSum;
+    }
+
     @Override
     public int hashCode() {
 

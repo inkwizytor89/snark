@@ -2,6 +2,8 @@ package org.enoch.snark.model;
 
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.text.Marker;
+import org.enoch.snark.gi.text.Text;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -41,11 +43,11 @@ public class SpyInfoParser {
     }
 
     private void extractFleet() {//section_title
-        Optional<Element> oFleet = document.getElementsByClass("section_title").stream()
-                .filter(element -> element.text().contains("Floty"))
+        Optional<Element> oFleet = document.getElementsByClass(Marker.SECTION_TITLE).stream()
+                .filter(element -> element.text().contains(Text.FLEET_TAG))
                 .findFirst();
         if(oFleet.isPresent()) {
-            String fleetText = oFleet.get().text().replace("Floty", "").trim();
+            String fleetText = oFleet.get().text().replace(Text.FLEET_TAG, Text.EMPTY).trim();
             if(fleetText.isEmpty()) {
                 planet.fleetSum = 0L;
             }
@@ -53,11 +55,11 @@ public class SpyInfoParser {
     }
 
     private void extractDefense() {
-        Optional<Element> oDefense = document.getElementsByClass("section_title").stream()
-                .filter(element -> element.text().contains("Obrona"))
+        Optional<Element> oDefense = document.getElementsByClass(Marker.SECTION_TITLE).stream()
+                .filter(element -> element.text().contains(Text.DEFENSE_TAG))
                 .findFirst();
         if(oDefense.isPresent()) {
-            String defenseText = oDefense.get().text().replace("Obrona", "").trim();
+            String defenseText = oDefense.get().text().replace(Text.DEFENSE_TAG, Text.EMPTY).trim();
             if(defenseText.isEmpty()) {
                 planet.defenseSum = 0L;
             }

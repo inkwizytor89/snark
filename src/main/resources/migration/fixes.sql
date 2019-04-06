@@ -14,3 +14,6 @@ insert into sources (universe_id, galaxy, "system", "position", cp)
 values (1, 3, 129, 9, 33745997);
 insert into sources (universe_id, galaxy, "system", "position", cp)
 values (1, 3, 379, 9,33721019);
+
+update targets set fleet_sum = 0 , defense_sum = 0
+where type = 'IN_ACTIVE';

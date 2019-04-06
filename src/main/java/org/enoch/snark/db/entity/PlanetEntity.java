@@ -51,14 +51,6 @@ public class PlanetEntity extends BaseEntity{
         loadPlanetCoordinate(input);
     }
 
-    public void update(PlanetEntity planetEntity) {
-        this.metal = planetEntity.metal;
-        this.crystal = planetEntity.crystal;
-        this.deuterium = planetEntity.deuterium;
-        this.resources = 3 * metal + 2 * crystal + deuterium;
-        this.power = planetEntity.power;
-    }
-
     public Integer calculateDistance(PlanetEntity planet) {
         if(!galaxy.equals(planet.galaxy)) {
             return roundDistance(galaxy, planet.galaxy, 6) *20000;

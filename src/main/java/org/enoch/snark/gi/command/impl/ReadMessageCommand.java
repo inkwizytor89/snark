@@ -83,7 +83,7 @@ public class ReadMessageCommand extends AbstractCommand {
         instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
 
         if(MessageEntity.SPY.equals(messageEntity.type)) {
-            PlanetEntity planet = messageEntity.getPlanet();
+            TargetEntity planet = messageEntity.getPlanet();
             Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.galaxy, planet.system, planet.position);
             targetEntity.get().update(planet);
             instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
