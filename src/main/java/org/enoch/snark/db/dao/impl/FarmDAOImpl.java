@@ -23,7 +23,7 @@ public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO 
         if(farmEntities.size() > 0) {
             return farmEntities.get(0);
         } else {
-            return new FarmEntity();
+            return null;
         }
     }
 
@@ -33,7 +33,7 @@ public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO 
         if(farmEntities.size() > 0) {
             return farmEntities.get(0);
         } else {
-            return new FarmEntity();
+            return null;
         }
     }
 }

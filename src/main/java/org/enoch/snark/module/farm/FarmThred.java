@@ -10,7 +10,6 @@ import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.request.SendFleetRequest;
-import org.enoch.snark.instance.CommanderImpl;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThred;
 
@@ -34,13 +33,29 @@ public class FarmThred extends AbstractThred {
         farmDAO = new FarmDAOImpl(si.getInstance().universeEntity);
         targetDAO = new TargetDAOImpl(si.getInstance().universeEntity);
         fleetDAO = new FleetDAOImpl(si.getInstance().universeEntity);
-        actualFarm = farmDAO.getActualState();
-        previousFarm = farmDAO.getPreviousState();
     }
 
     @Override
     protected int getPauseInSeconds() {
         return 1;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(farmDAO.getActualState() == null) {
+            farmDAO.saveOrUpdate(createFarmEntity());
+            farmDAO.saveOrUpdate(createFarmEntity());
+        }
+        actualFarm = farmDAO.getActualState();
+        previousFarm = farmDAO.getPreviousState();
+    }
+
+    private FarmEntity createFarmEntity() {
+        FarmEntity farmEntity = new FarmEntity();
+        farmEntity.universe = si.getInstance().universeEntity;
+        farmEntity.start = LocalDateTime.now();
+        return farmEntity;
     }
 
     @Override

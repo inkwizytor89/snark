@@ -22,9 +22,13 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
     @Override
     public Long genereteNewCode() {
         synchronized (JPAUtility.dbSynchro) {
-            return entityManager.createQuery("" +
+            Long singleResult = entityManager.createQuery("" +
                     "select max(e.code) from FleetEntity e", Long.class)
-                    .getSingleResult() + 1;
+                    .getSingleResult();
+            if(singleResult == null) {
+                singleResult = 0L;
+            }
+            return singleResult + 1;
         }
     }
 
