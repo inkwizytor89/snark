@@ -32,6 +32,14 @@ public class TargetEntity extends PlanetEntity {
     @Column(name = "updated")
     public LocalDateTime updated;
 
+    public TargetEntity() {
+        super();
+    }
+
+    public TargetEntity(String input) {
+        super(input);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

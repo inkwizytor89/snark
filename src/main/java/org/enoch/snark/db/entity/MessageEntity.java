@@ -43,7 +43,7 @@ public class MessageEntity extends BaseEntity {
         return messageEntity;
     }
 
-    public PlanetEntity getPlanet() {
+    public TargetEntity getPlanet() {
         return new SpyInfoParser(content).extractPlanetEntity();
 //        PlanetEntity planet = new PlanetEntity();
 //        Document document = Jsoup.parse(content);
