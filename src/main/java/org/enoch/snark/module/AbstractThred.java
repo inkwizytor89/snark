@@ -9,6 +9,7 @@ public abstract class AbstractThred extends Thread {
 
     public AbstractThred(SI si) {
         this.si = si;
+        setName(this.getClass().getName());
     }
 
     protected abstract int getPauseInSeconds();

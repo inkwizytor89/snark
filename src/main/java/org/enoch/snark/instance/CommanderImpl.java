@@ -151,7 +151,7 @@ public class CommanderImpl implements Commander {
             calculationActionQueue.offer(command);
             log.info("Inserted "+command+" into queue calculationActionQueue size "+calculationActionQueue.size());
         }else {
-            throw new RuntimeException("Invalid typeShip of command");
+            throw new RuntimeException("Invalid type of command");
         }
     }
 

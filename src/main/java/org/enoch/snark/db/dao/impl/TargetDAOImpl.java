@@ -62,7 +62,8 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
                     "from TargetEntity " +
                     "where universe = :universe and " +
                     "       fleet_sum = 0 and " +
-                    "       defense_sum = 0 " +
+                    "       defense_sum = 0 and " +
+                    "       type = 'IN_ACTIVE '" +
                     "order by power desc ", TargetEntity.class)
                     .setParameter("universe", universeEntity)
                     .setMaxResults(limit)
