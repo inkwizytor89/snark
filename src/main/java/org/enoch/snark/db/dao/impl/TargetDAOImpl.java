@@ -63,7 +63,7 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
                     "where universe = :universe and " +
                     "       fleet_sum = 0 and " +
                     "       defense_sum = 0 and " +
-                    "       type = 'IN_ACTIVE '" +
+                    "       type = 'IN_ACTIVE' " +
                     "order by power desc ", TargetEntity.class)
                     .setParameter("universe", universeEntity)
                     .setMaxResults(limit)
@@ -77,10 +77,9 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
             return entityManager.createQuery("" +
                     "from TargetEntity " +
                     "where universe = :universe and " +
-                    "       fleet_sum = 0" +
-                    "       defense_sum = 0" +
-                    "order by resources desc " +
-                    "limit :limit", TargetEntity.class)
+                    "       fleet_sum = 0 and " +
+                    "       defense_sum = 0 " +
+                    "order by resources desc ", TargetEntity.class)
                     .setParameter("universe", universeEntity)
                     .setMaxResults(limit)
                     .getResultList();

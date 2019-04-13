@@ -89,7 +89,7 @@ public class FarmThred extends AbstractThred {
             // i podajesz ile ma z tego ruszyc, bo jak by jakis byl nie wypalem z powodu
             // bledu albo pozniej ze z falangi sie nie oplaca to zeby wziol nastepny
         } else if(LocalDateTime.now().isAfter(actualFarm.start)) {
-            List<TargetEntity> farmTargets = targetDAO.findFarms(50);
+            List<TargetEntity> farmTargets = targetDAO.findFarms(10);
             actualFarm.spyRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.SPY, farmTargets)
                     .sendAndWait();
             farmDAO.saveOrUpdate(actualFarm);

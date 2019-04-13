@@ -101,6 +101,10 @@ public class CommanderImpl implements Commander {
         if(command.requiredGI() && !session.isLoggedIn()) {
             session.open();
         }
+        // każdy wyjątek powinien miec czy powtórzyć procedure
+        // jesli nie ma tego to nalezy powtorzyc
+        // poza tym wprost mozna zwrocic falsz czyli nie powtarzac
+        //
         try {
             success = command.execute();
         }catch (Exception e) {
