@@ -36,7 +36,7 @@ public class PlanetEntity extends BaseEntity{
 
     @Basic
     @Column(name = "resources")
-    public Long resources;
+    public Long resources = 0L;
 
     @Basic
     @Column(name = "power")

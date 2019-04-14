@@ -17,3 +17,5 @@ values (1, 3, 379, 9,33721019);
 
 update targets set fleet_sum = 0 , defense_sum = 0
 where type = 'IN_ACTIVE';
+
+alter table targets add column spy_level integer default 4;

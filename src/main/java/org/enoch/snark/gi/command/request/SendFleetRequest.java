@@ -5,8 +5,8 @@ import org.enoch.snark.db.dao.impl.FleetDAOImpl;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,11 +35,15 @@ public class SendFleetRequest {
     public Long sendAndWait() {
         code = fleetDAO.genereteNewCode();
         for(TargetEntity target : targets) {
-            if(limit <= 0)  break;
-            FleetEntity fleet = generateFleet(target);
-            fleet.code = code;
-            fleetDAO.saveOrUpdate(fleet);
-            limit--;
+            try {
+                if (limit <= 0) break;
+                FleetEntity fleet = generateFleet(target);
+                fleet.code = code;
+                fleetDAO.saveOrUpdate(fleet);
+                limit--;
+            } catch (TargetMissingResourceInfoException e) {
+                e.printStackTrace();
+            }
         }
         while(!isFinished()) {
             try {

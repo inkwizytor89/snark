@@ -99,6 +99,13 @@ public class SendFleetCommand extends GICommand {
     }
 
     @Override
+    public void onInterrupt() {
+        super.onInterrupt();
+        fleet.code = null;
+        instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
+    }
+
+    @Override
     public String toString() {
         return mission.name()+" "+fleet.target+" form "+fleet.source;
     }

@@ -19,5 +19,6 @@ create table targets
   type        varchar(15) not null,
   fleet_sum   bigint default 0,
   defense_sum bigint default 0,
+  spy_level integer default 4,
   updated     timestamp
 );

@@ -45,4 +45,7 @@ public abstract class AbstractCommand {
     public boolean requiredGI() {
         return type == CommandType.FLEET_REQUIERED || type ==CommandType.INTERFACE_REQUIERED;
     }
+
+    public void onInterrupt() {
+    }
 }

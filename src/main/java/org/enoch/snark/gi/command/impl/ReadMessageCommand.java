@@ -87,6 +87,10 @@ public class ReadMessageCommand extends AbstractCommand {
             Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.galaxy, planet.system, planet.position);
             targetEntity.get().update(planet);
             instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
+            if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
+                targetEntity.get().spyLevel += 4;
+                instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
+            }
         }
     }
 

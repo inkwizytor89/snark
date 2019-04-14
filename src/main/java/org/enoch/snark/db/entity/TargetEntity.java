@@ -1,9 +1,9 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
+
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -27,6 +27,10 @@ public class TargetEntity extends PlanetEntity {
     @Basic
     @Column(name = "defense_sum")
     public Long defenseSum;
+
+    @Basic
+    @Column(name = "spy_level")
+    public Integer spyLevel;
 
     @Basic
     @Column(name = "updated")
@@ -74,6 +78,9 @@ public class TargetEntity extends PlanetEntity {
     }
 
     public Long calculateTransportByLt() {
+        if (metal == null || crystal == null || deuterium == null) {
+            throw new TargetMissingResourceInfoException();
+        }
         return (long) Math.ceil((double) (metal+crystal+deuterium)/10000);
     }
 }

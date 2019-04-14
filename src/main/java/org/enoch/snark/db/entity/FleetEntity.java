@@ -98,7 +98,7 @@ public class FleetEntity extends BaseEntity {
     }
 
     public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
-        return createSpyFleet(instance, target, 1);
+        return createSpyFleet(instance, target, target.spyLevel);
     }
 
     public static FleetEntity createSpyFleet(@Nonnull Instance instance,

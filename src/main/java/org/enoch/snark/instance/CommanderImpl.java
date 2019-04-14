@@ -117,9 +117,10 @@ public class CommanderImpl implements Commander {
             log.info("Executed "+command+ " prepare "+ command.getAfterCommand());
         } else {
             command.failed++;
-            if (command.failed < 5) {
+            if (command.failed < 3) {
                 push(new PauseCommand(instance, command, 10));
             } else {
+                command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
             }
         }
