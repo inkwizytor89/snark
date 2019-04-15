@@ -25,7 +25,7 @@ public class FleetSelector {
     }
 
     public void next() {
-        session.sleep(TimeUnit.SECONDS, 1);
+        session.gi.sleep(TimeUnit.SECONDS, 1);
 
         final WebElement continueButton = session.getWebDriver().findElement(By.id("continue"));
         if(continueButton.getAttribute("class").equals("off"))
@@ -34,13 +34,13 @@ public class FleetSelector {
     }
 
     public boolean start() {
-        session.sleep(TimeUnit.SECONDS, 2);
+        session.gi.sleep(TimeUnit.SECONDS, 2);
         final WebElement startInput = session.getWebDriver().findElement(By.id("start"));
         if(startInput.getTagName().equals("td")) {
             throw new PlanetDoNotExistException();
         }
         startInput.click();
-        session.sleep(TimeUnit.SECONDS, 1);
+        session.gi.sleep(TimeUnit.SECONDS, 1);
         final WebElement errorBoxDecisionNo = session.getWebDriver().findElement(By.id("errorBoxDecisionNo"));
         if(errorBoxDecisionNo.isDisplayed()) throw new ToStrongPlayerException();
         return true;

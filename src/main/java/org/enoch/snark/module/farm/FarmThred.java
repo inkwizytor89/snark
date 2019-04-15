@@ -61,14 +61,13 @@ public class FarmThred extends AbstractThred {
     @Override
     public void onStep() {
         if(targetDAO.findFarms(100).size()<80) {
-            si.getInstance().session.sleep(TimeUnit.SECONDS, 60);
+            si.getInstance().gi.sleep(TimeUnit.SECONDS, 60);
             return;
         }
 
         if(actualFarm.warRequestCode != null) {
             previousFarm = actualFarm;
-            actualFarm = new FarmEntity();
-            actualFarm.start = LocalDateTime.now();
+            actualFarm = createFarmEntity();
             farmDAO.saveOrUpdate(actualFarm);
             // x = przylot ostatniego statku
             // stworz nowy farm entity

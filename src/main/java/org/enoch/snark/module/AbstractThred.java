@@ -30,7 +30,7 @@ public abstract class AbstractThred extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            si.getInstance().session.sleep(TimeUnit.SECONDS, getPauseInSeconds());
+            si.getInstance().gi.sleep(TimeUnit.SECONDS, getPauseInSeconds());
         }
     }
 }

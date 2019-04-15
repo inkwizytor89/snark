@@ -58,12 +58,12 @@ public class SendFleetCommand extends GICommand {
         }
         fleetSelector.next();
 
-        instance.session.sleep(TimeUnit.SECONDS, 1);
+        instance.gi.sleep(TimeUnit.SECONDS, 1);
         final String duration = webDriver.findElement(By.id("duration")).getText();
         final LocalTime durationTime = DateUtil.parse(duration);
          String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         if(arrivalTimeString.contains("-")) {
-            instance.session.sleep(TimeUnit.SECONDS, 2);
+            instance.gi.sleep(TimeUnit.SECONDS, 2);
             arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         }
         fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);

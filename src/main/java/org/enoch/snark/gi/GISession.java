@@ -1,12 +1,19 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.Test;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.text.Marker;
+import org.enoch.snark.gi.text.Text;
 import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
@@ -15,16 +22,15 @@ public class GISession {
 
     private final WebDriver webDriver;
     private final Instance instance;
-    private final SessionHelper sessionHelper;
+    public GI gi;
 
     private boolean isLoggedIn = false;
 
 
     public GISession(Instance instance) {
         this.instance = instance;
-        System.setProperty(WEBDRIVER_CHROME_DRIVER, "C:/Program Files (x86)/Google/Chrome/chromedriver.exe");
-        webDriver = new ChromeDriver();
-        sessionHelper = new SessionHelper(instance, this);
+        gi = instance.gi;
+        webDriver = gi.webDriver;
 
         while(!isLoggedIn) {
             try {
@@ -48,14 +54,24 @@ public class GISession {
 
     public void close() {
         logOut();
-//        seleniumDriver.close();
-//        webDriver.quit();
     }
 
     private void logIn() {
-        sessionHelper.skipBannersIfExists();
-        sessionHelper.insertLoginData(instance.universeEntity.login, instance.universeEntity.pass);
-        sessionHelper.chooseServer(instance.universeEntity.name);
+        //skipBannersIfExists
+        instance.gi.clickTextIfExists(Text.X);
+        instance.gi.clickTextIfExists(Text.AGREE);
+
+        //insertLoginData
+        instance.gi.clickIdElement(Marker.LOGIN_TAB_ID);
+        instance.gi.typeByIdText(Marker.USERNAME_LOGIN_ID, instance.universeEntity.login);
+        instance.gi.typeByIdText(Marker.PASSWORD_LOGIN_ID, instance.universeEntity.pass);
+        instance.gi.clickIdElement(Marker.LOGIN_SUBMIT_ID);
+
+        //chooseServer
+        instance.gi.clickTextIfExists(Text.AGREE);
+        instance.gi.clickText(Test.PLAY_TEXT);
+        instance.gi.doubleClickText(instance.universeEntity.name);
+
         isLoggedIn = true;
     }
 
@@ -63,14 +79,6 @@ public class GISession {
         new GIUrlBuilder(instance).openOverview();
         webDriver.findElement(By.linkText("Wyloguj")).click();
         isLoggedIn = false;
-    }
-
-    public void sleep(TimeUnit timeUnit, int i) {
-        try {
-            timeUnit.sleep(i);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public boolean isLoggedIn() {

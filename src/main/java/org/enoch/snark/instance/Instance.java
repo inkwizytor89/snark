@@ -6,6 +6,7 @@ import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.SourceEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
+import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -20,6 +21,7 @@ public class Instance {
 
     public UniverseEntity universeEntity;
     public Commander commander;
+    public GI gi;
     public GISession session;
 //    public MessageService messageService;
     public DAOFactory daoFactory;
@@ -33,6 +35,7 @@ public class Instance {
         this.universeEntity = universeEntity;
         sources = ImmutableList.copyOf(universeEntity.sources);
         daoFactory = new DAOFactory(universeEntity);
+        gi = new GI();
         session = new GISession(this);
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);

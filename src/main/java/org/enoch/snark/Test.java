@@ -6,6 +6,8 @@ import org.enoch.snark.instance.Instance;
 
 public class Test {
 
+    public static final String PLAY_TEXT = "Graj";
+
     public static void main(String[] args) {
         for(UniverseEntity universeEntity : new UniverseDAOImpl().fetchAllUniverses()) {
             if(universeEntity.name.equals("Fenrir")){

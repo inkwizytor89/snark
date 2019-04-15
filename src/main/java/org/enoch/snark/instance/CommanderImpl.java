@@ -40,6 +40,7 @@ public class CommanderImpl implements Commander {
 
     private void startInterfaceQueue() {
         Runnable task = () -> {
+            int tooManyFleetActions = 0;
             while(true) {
                 if(fleetActionQueue.isEmpty()) {
                     for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
@@ -49,14 +50,17 @@ public class CommanderImpl implements Commander {
                         }
                     }
                 }
-                if(!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
+                if(!fleetActionQueue.isEmpty() && isFleetFreeSlot() && tooManyFleetActions < 8) {
                     resolve(fleetActionQueue.poll());
                     fleetCount++;
+                    tooManyFleetActions++;
                     continue;
                 } else if(!interfaceActionQueue.isEmpty()) {
                     resolve(interfaceActionQueue.poll());
+                    tooManyFleetActions = 0;
                     continue;
                 }
+                tooManyFleetActions = 0;
 
 //                if(session.isLoggedIn())    session.close();
                 try {
