@@ -23,7 +23,7 @@ public class FleetSelector {
     public void typeShip(ShipEnum shipEnum, Long count) {
         WebElement element = webDriver.findElement(By.id(shipEnum.getId()));
         if(!element.isEnabled()) {
-            throw new RuntimeException("Missings ships "+shipEnum.getId());
+            throw new ShipDoNotExists("Missings ships " + shipEnum.getId());
         }
         element.sendKeys(count.toString());
     }

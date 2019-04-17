@@ -27,12 +27,12 @@ public class ResourceSI implements SI {
     }
 
     public void run() {
-        Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(1, 266, 4);
-        FleetEntity farmFleet = FleetEntity.createFarmFleet(instance, targetEntity.get());
-        instance.daoFactory.fleetDAO.saveOrUpdate(farmFleet);
+//        Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(1, 266, 4);
+//        FleetEntity farmFleet = FleetEntity.createFarmFleet(instance, targetEntity.get());
+//        instance.daoFactory.fleetDAO.saveOrUpdate(farmFleet);
 //        new Thread(spaceThred).start();
 //        instance.session.sleep(TimeUnit.SECONDS, 2);
-//        new Thread(farmThred).start();
+        new Thread(farmThred).start();
 //        instance.session.sleep(TimeUnit.SECONDS, 1);
 //        new Thread(scanThred).start();
     }

@@ -7,6 +7,7 @@ import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.impl.PauseCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.model.exception.ShipDoNotExists;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -111,7 +112,11 @@ public class CommanderImpl implements Commander {
         //
         try {
             success = command.execute();
-        }catch (Exception e) {
+        } catch (ShipDoNotExists e) {
+            e.printStackTrace();
+            command.onInterrupt();
+            return;
+        } catch (Exception e) {
             e.printStackTrace();
             success = false;
         }
@@ -122,7 +127,7 @@ public class CommanderImpl implements Commander {
         } else {
             command.failed++;
             if (command.failed < 3) {
-                push(new PauseCommand(instance, command, 10));
+                push(new PauseCommand(instance, command, 2));
             } else {
                 command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");

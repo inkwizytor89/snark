@@ -102,6 +102,7 @@ public class SendFleetCommand extends GICommand {
     public void onInterrupt() {
         super.onInterrupt();
         fleet.code = null;
+        fleet.start = null;
         instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
     }
 

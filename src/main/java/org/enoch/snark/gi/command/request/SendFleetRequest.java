@@ -7,6 +7,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -18,11 +19,12 @@ public class SendFleetRequest {
     private String mission;
     private Long code;
     private Integer limit;
+    private int sendetFleet = 0;
 
     public SendFleetRequest(Instance instance, String mission, List<TargetEntity> targets) {
         fleetDAO = new FleetDAOImpl(instance.universeEntity);
         this.instance = instance;
-        this.targets = targets;
+        this.targets = new ArrayList<>(targets);
         this.mission = mission;
         this.limit = targets.size();
     }
@@ -34,26 +36,48 @@ public class SendFleetRequest {
 
     public Long sendAndWait() {
         code = fleetDAO.genereteNewCode();
+        // send x fleet
+
+        do{
+            sendLimitFleet(limit - sendetFleet);
+            while(!isFinished()) {
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+
+        } while (canSendMore());
+        return code;
+    }
+
+    private void sendLimitFleet(int limit) {
+        ArrayList<TargetEntity> toSend = new ArrayList<>();
+
         for(TargetEntity target : targets) {
             try {
                 if (limit <= 0) break;
-                FleetEntity fleet = generateFleet(target);
-                fleet.code = code;
-                fleetDAO.saveOrUpdate(fleet);
+                toSend.add(target);
                 limit--;
             } catch (TargetMissingResourceInfoException e) {
                 e.printStackTrace();
             }
         }
-        while(!isFinished()) {
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                break;
-            }
+
+        for (TargetEntity target : toSend) {
+            FleetEntity fleet = generateFleet(target);
+            fleet.code = code;
+            fleetDAO.saveOrUpdate(fleet);
+            targets.remove(target);
         }
-        return code;
+    }
+
+    private boolean canSendMore() {
+        List<FleetEntity> requesedFleet = fleetDAO.findWithCode(code);
+        sendetFleet = requesedFleet.size();
+        return !targets.isEmpty() && sendetFleet < limit;
     }
 
     private FleetEntity generateFleet(TargetEntity target) {

@@ -51,7 +51,8 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
             return entityManager.createQuery("" +
                     "from FleetEntity " +
                     "where  universe = :universe and " +
-                    "       start < :now and" +
+                    "       start is not null and " +
+                    "       start < :now and " +
                     "       visited is null", FleetEntity.class)
                     .setParameter("universe", universeEntity)
                     .setParameter("now", LocalDateTime.now())
