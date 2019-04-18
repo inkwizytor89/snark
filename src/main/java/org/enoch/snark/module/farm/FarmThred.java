@@ -75,7 +75,7 @@ public class FarmThred extends AbstractThred {
             // aktualny actualFarm ustaw jako nowy
         } else if (actualFarm.spyRequestCode != null) {
             int fleetNum = si.getAvailableFleetCount(this);
-            List<TargetEntity> farmTargets = targetDAO.findTopFarms(fleetNum);
+            List<TargetEntity> farmTargets = targetDAO.findTopFarms(3*fleetNum);
             actualFarm.warRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.ATTACK, farmTargets)
                     .setLimit(fleetNum)
                     .sendAndWait();
