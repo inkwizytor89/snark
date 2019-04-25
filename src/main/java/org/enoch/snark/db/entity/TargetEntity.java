@@ -83,4 +83,16 @@ public class TargetEntity extends PlanetEntity {
         }
         return (long) Math.ceil((double) (metal+crystal+deuterium)/10000);
     }
+
+    public void calculateDefenseAndShips() {
+        defenseSum =
+                (long) (defWr * (2000)) +
+                (long) (defLdl * (1500 + 750)) +
+                (long) (defCdl * (6000 + 3000)) +
+                (long) (defDg * (20000 + 22500 + 6000)) +
+                (long) (defDj * (2000 + 9000)) +
+                (long) (defWp * (50000 + 75000 + 90000)) +
+                (long) (defMpo * (10000 + 15000)) +
+                (long) (defDpo * (50000 + 75000));
+    }
 }

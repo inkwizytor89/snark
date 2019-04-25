@@ -9,6 +9,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SpyInfoParser {
     private String content;
@@ -27,6 +29,7 @@ public class SpyInfoParser {
         extractResource();
         extractFleet();
         extractDefense();
+        planet.calculateDefenseAndShips();
     }
 
     private String extractCoordinateFromTitle(String input) {
@@ -55,15 +58,27 @@ public class SpyInfoParser {
     }
 
     private void extractDefense() {
-        Optional<Element> oDefense = document.getElementsByClass(Marker.SECTION_TITLE).stream()
-                .filter(element -> element.text().contains(Text.DEFENSE_TAG))
-                .findFirst();
-        if(oDefense.isPresent()) {
-            String defenseText = oDefense.get().text().replace(Text.DEFENSE_TAG, Text.EMPTY).trim();
-            if(defenseText.isEmpty()) {
-                planet.defenseSum = 0L;
-            }
+        planet.defWr = getMessageElementValue(Text.DEF_WR);
+        planet.defLdl = getMessageElementValue(Text.DEF_LDL);
+        planet.defCdl = getMessageElementValue(Text.DEF_CDL);
+        planet.defDg = getMessageElementValue(Text.DEF_DG);
+        planet.defDj = getMessageElementValue(Text.DEF_DJ);
+        planet.defWp = getMessageElementValue(Text.DEF_WP);
+        planet.defMpo = getMessageElementValue(Text.DEF_MPO);
+        planet.defDpo = getMessageElementValue(Text.DEF_DPO);
+        planet.defPr = getMessageElementValue(Text.DEF_PR);
+        planet.defMr = getMessageElementValue(Text.DEF_MR);
+    }
+
+    private int getMessageElementValue(String elementTag) {
+        String textContent = document.text();
+        Pattern pattern = Pattern.compile(elementTag +"\\s([0-9]+)");
+        Matcher matcher = pattern.matcher(textContent);
+        if(matcher.find()) {
+            String group = matcher.group(1);
+            return Integer.parseInt(group);
         }
+        return 0;
     }
 
     public TargetEntity extractPlanetEntity() {

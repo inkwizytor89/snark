@@ -42,6 +42,18 @@ public class PlanetEntity extends BaseEntity{
     @Column(name = "power")
     public Long power;
 
+    public Integer defWr = 0;
+    public Integer defLdl = 0;
+    public Integer defCdl = 0;
+    public Integer defDg = 0;
+    public Integer defDj = 0;
+    public Integer defWp = 0;
+    public Integer defMpo = 0;
+    public Integer defDpo = 0;
+    public Integer defPr = 0;
+    public Integer defMr = 0;
+
+
     public PlanetEntity() {
         super();
     }
