@@ -111,30 +111,38 @@ public class TargetEntity extends PlanetEntity {
     }
 
     public void calculateDefenseAndShips() {
-        defenseSum =
-                (long) (defWr * (2000)) +
-                (long) (defLdl * (1500 + 750)) +
-                (long) (defCdl * (6000 + 3000)) +
-                (long) (defDg * (20000 + 22500 + 6000)) +
-                (long) (defDj * (2000 + 9000)) +
-                (long) (defWp * (50000 + 75000 + 90000)) +
-                (long) (defMpo * (10000 + 15000)) +
-                (long) (defDpo * (50000 + 75000));
+        if (unknownDefense) {
+            defenseSum = null;
+        } else {
+            defenseSum =
+                    (long) (defWr * (2000)) +
+                    (long) (defLdl * (1500 + 750)) +
+                    (long) (defCdl * (6000 + 3000)) +
+                    (long) (defDg * (20000 + 22500 + 6000)) +
+                    (long) (defDj * (2000 + 9000)) +
+                    (long) (defWp * (50000 + 75000 + 90000)) +
+                    (long) (defMpo * (10000 + 15000)) +
+                    (long) (defDpo * (50000 + 75000));
+        }
 
-        fleetSum =
-                (long) (lm * (3000 + 1500)) +
-                (long) (cm * (6000 + 3000)) +
-                (long) (kr * (20000 + 10500 + 6000)) +
-                (long) (ow * (45000 + 22500)) +
-                (long) (pan * (30000 + 60000 + 45000)) +
-                (long) (bom * (50000 + 37500 + 45000)) +
-                (long) (ni * (60000 + 75000 + 45000)) +
-                (long) (gs * (5000000 + 6000000 + 3000000)) +
-                (long) (mt * (50000 + 75000)) +
-                (long) (dt * (50000 + 75000)) +
-                (long) (kol * (50000 + 75000)) +
-                (long) (rec * (50000 + 75000)) +
-                (long) (son * (50000 + 75000)) +
-                (long) (sat * (50000 + 75000));
+        if(unknownFleet) {
+            fleetSum = null;
+        } else {
+            fleetSum =
+                    (long) (lm * (3000 + 1500)) +
+                    (long) (cm * (6000 + 3000)) +
+                    (long) (kr * (20000 + 10500 + 6000)) +
+                    (long) (ow * (45000 + 22500)) +
+                    (long) (pan * (30000 + 60000 + 45000)) +
+                    (long) (bom * (50000 + 37500 + 45000)) +
+                    (long) (ni * (60000 + 75000 + 45000)) +
+                    (long) (gs * (5000000 + 6000000 + 3000000)) +
+                    (long) (mt * (50000 + 75000)) +
+                    (long) (dt * (50000 + 75000)) +
+                    (long) (kol * (50000 + 75000)) +
+                    (long) (rec * (50000 + 75000)) +
+                    (long) (son * (50000 + 75000)) +
+                    (long) (sat * (50000 + 75000));
+        }
     }
 }

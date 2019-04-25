@@ -1,8 +1,5 @@
 package org.enoch.snark.db.entity;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.junit.Test;
 
 public class MessageEntityTest {
