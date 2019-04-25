@@ -42,6 +42,21 @@ public class PlanetEntity extends BaseEntity{
     @Column(name = "power")
     public Long power;
 
+    public Integer lm = 0;
+    public Integer cm = 0;
+    public Integer kr = 0;
+    public Integer ow = 0;
+    public Integer pan = 0;
+    public Integer bom = 0;
+    public Integer ni = 0;
+    public Integer gs = 0;
+    public Integer mt = 0;
+    public Integer dt = 0;
+    public Integer kol = 0;
+    public Integer rec = 0;
+    public Integer son = 0;
+    public Integer sat = 0;
+
     public Integer defWr = 0;
     public Integer defLdl = 0;
     public Integer defCdl = 0;

@@ -2,13 +2,10 @@ package org.enoch.snark.model;
 
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.text.Marker;
 import org.enoch.snark.gi.text.Text;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,15 +43,20 @@ public class SpyInfoParser {
     }
 
     private void extractFleet() {//section_title
-        Optional<Element> oFleet = document.getElementsByClass(Marker.SECTION_TITLE).stream()
-                .filter(element -> element.text().contains(Text.FLEET_TAG))
-                .findFirst();
-        if(oFleet.isPresent()) {
-            String fleetText = oFleet.get().text().replace(Text.FLEET_TAG, Text.EMPTY).trim();
-            if(fleetText.isEmpty()) {
-                planet.fleetSum = 0L;
-            }
-        }
+        planet.lm = getMessageElementValue(Text.LM);
+        planet.cm = getMessageElementValue(Text.CM);
+        planet.kr = getMessageElementValue(Text.KR);
+        planet.ow = getMessageElementValue(Text.OW);
+        planet.pan = getMessageElementValue(Text.PAN);
+        planet.bom = getMessageElementValue(Text.BOM);
+        planet.ni = getMessageElementValue(Text.NI);
+        planet.gs = getMessageElementValue(Text.GS);
+        planet.mt = getMessageElementValue(Text.LT);
+        planet.dt = getMessageElementValue(Text.DT);
+        planet.kol = getMessageElementValue(Text.KOL);
+        planet.rec = getMessageElementValue(Text.REC);
+        planet.son = getMessageElementValue(Text.SON);
+        planet.sat = getMessageElementValue(Text.SAT);
     }
 
     private void extractDefense() {
