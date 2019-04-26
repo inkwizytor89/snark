@@ -42,7 +42,6 @@ public class PlanetEntity extends BaseEntity{
     @Column(name = "power")
     public Long power;
 
-    public Boolean unknownFleet = true;
     public Integer lm;
     public Integer cm;
     public Integer kr;
@@ -58,17 +57,16 @@ public class PlanetEntity extends BaseEntity{
     public Integer son;
     public Integer sat;
 
-    public Boolean unknownDefense = true;
-    public Integer defWr;
-    public Integer defLdl;
-    public Integer defCdl;
-    public Integer defDg;
-    public Integer defDj;
-    public Integer defWp;
-    public Integer defMpo;
-    public Integer defDpo;
-    public Integer defPr ;
-    public Integer defMr;
+    public Integer wr;
+    public Integer ldl;
+    public Integer cdl;
+    public Integer dg;
+    public Integer dj;
+    public Integer wp;
+    public Integer mpo;
+    public Integer dpo;
+    public Integer pr;
+    public Integer mr;
 
 
     public PlanetEntity() {

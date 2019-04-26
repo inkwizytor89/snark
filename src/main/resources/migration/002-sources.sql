@@ -16,5 +16,31 @@ create table sources
   deuterium   integer,
   resources   integer,
   power       integer,
-  cp          integer   not null
+  cp          integer   not null,
+
+  lm   integer,
+  cm   integer,
+  kr   integer,
+  ow   integer,
+  pan   integer,
+  bom   integer,
+  ni   integer,
+  gs   integer,
+  mt   integer,
+  dt   integer,
+  kol   integer,
+  rec   integer,
+  son   integer,
+  sat   integer,
+
+  wr   integer,
+  ldl   integer,
+  cdl   integer,
+  dg   integer,
+  dj   integer,
+  wp   integer,
+  mpo   integer,
+  dpo   integer,
+  pr   integer,
+  mr   integer
 );

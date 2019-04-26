@@ -85,16 +85,16 @@ public class TargetEntity extends PlanetEntity {
         this.son = targetEntity.son;
         this.sat = targetEntity.sat;
 
-        this.defWr = targetEntity.defWr;
-        this.defLdl = targetEntity.defLdl;
-        this.defCdl = targetEntity.defCdl;
-        this.defDg = targetEntity.defDg;
-        this.defDj = targetEntity.defDj;
-        this.defWp = targetEntity.defWp;
-        this.defMpo = targetEntity.defMpo;
-        this.defDpo = targetEntity.defDpo;
-        this.defPr = targetEntity.defPr;
-        this.defMr = targetEntity.defMr;
+        this.wr = targetEntity.wr;
+        this.ldl = targetEntity.ldl;
+        this.cdl = targetEntity.cdl;
+        this.dg = targetEntity.dg;
+        this.dj = targetEntity.dj;
+        this.wp = targetEntity.wp;
+        this.mpo = targetEntity.mpo;
+        this.dpo = targetEntity.dpo;
+        this.pr = targetEntity.pr;
+        this.mr = targetEntity.mr;
     }
 
     @Override
@@ -111,23 +111,18 @@ public class TargetEntity extends PlanetEntity {
     }
 
     public void calculateDefenseAndShips() {
-        if (unknownDefense) {
-            defenseSum = null;
-        } else {
+        if (wr != null) {
             defenseSum =
-                    (long) (defWr * (2000)) +
-                    (long) (defLdl * (1500 + 750)) +
-                    (long) (defCdl * (6000 + 3000)) +
-                    (long) (defDg * (20000 + 22500 + 6000)) +
-                    (long) (defDj * (2000 + 9000)) +
-                    (long) (defWp * (50000 + 75000 + 90000)) +
-                    (long) (defMpo * (10000 + 15000)) +
-                    (long) (defDpo * (50000 + 75000));
+                    (long) (wr * (2000)) +
+                    (long) (ldl * (1500 + 750)) +
+                    (long) (cdl * (6000 + 3000)) +
+                    (long) (dg * (20000 + 22500 + 6000)) +
+                    (long) (dj * (2000 + 9000)) +
+                    (long) (wp * (50000 + 75000 + 90000)) +
+                    (long) (mpo * (10000 + 15000)) +
+                    (long) (dpo * (50000 + 75000));
         }
-
-        if(unknownFleet) {
-            fleetSum = null;
-        } else {
+        if(lm != null) {
             fleetSum =
                     (long) (lm * (3000 + 1500)) +
                     (long) (cm * (6000 + 3000)) +

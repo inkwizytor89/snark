@@ -20,5 +20,31 @@ create table targets
   fleet_sum   bigint default 0,
   defense_sum bigint default 0,
   spy_level integer default 4,
-  updated     timestamp
+  updated     timestamp,
+
+  lm   integer,
+  cm   integer,
+  kr   integer,
+  ow   integer,
+  pan   integer,
+  bom   integer,
+  ni   integer,
+  gs   integer,
+  mt   integer,
+  dt   integer,
+  kol   integer,
+  rec   integer,
+  son   integer,
+  sat   integer,
+
+  wr   integer,
+  ldl   integer,
+  cdl   integer,
+  dg   integer,
+  dj   integer,
+  wp   integer,
+  mpo   integer,
+  dpo   integer,
+  pr   integer,
+  mr   integer
 );

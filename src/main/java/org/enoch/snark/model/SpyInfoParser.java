@@ -43,8 +43,7 @@ public class SpyInfoParser {
     }
 
     private void extractFleet() {//section_title
-        planet.unknownFleet = isSectionAvavible(Text.FLEET_TAG);
-        if(!planet.unknownFleet) {
+        if(!isSectionAvavible(Text.FLEET_TAG)) {
             planet.lm = getMessageElementValue(Text.LM);
             planet.cm = getMessageElementValue(Text.CM);
             planet.kr = getMessageElementValue(Text.KR);
@@ -63,18 +62,17 @@ public class SpyInfoParser {
     }
 
     private void extractDefense() {
-        planet.unknownDefense = isSectionAvavible(Text.DEFENSE_TAG);
-        if(!planet.unknownDefense) {
-            planet.defWr = getMessageElementValue(Text.DEF_WR);
-            planet.defLdl = getMessageElementValue(Text.DEF_LDL);
-            planet.defCdl = getMessageElementValue(Text.DEF_CDL);
-            planet.defDg = getMessageElementValue(Text.DEF_DG);
-            planet.defDj = getMessageElementValue(Text.DEF_DJ);
-            planet.defWp = getMessageElementValue(Text.DEF_WP);
-            planet.defMpo = getMessageElementValue(Text.DEF_MPO);
-            planet.defDpo = getMessageElementValue(Text.DEF_DPO);
-            planet.defPr = getMessageElementValue(Text.DEF_PR);
-            planet.defMr = getMessageElementValue(Text.DEF_MR);
+        if(!isSectionAvavible(Text.DEFENSE_TAG)) {
+            planet.wr = getMessageElementValue(Text.DEF_WR);
+            planet.ldl = getMessageElementValue(Text.DEF_LDL);
+            planet.cdl = getMessageElementValue(Text.DEF_CDL);
+            planet.dg = getMessageElementValue(Text.DEF_DG);
+            planet.dj = getMessageElementValue(Text.DEF_DJ);
+            planet.wp = getMessageElementValue(Text.DEF_WP);
+            planet.mpo = getMessageElementValue(Text.DEF_MPO);
+            planet.dpo = getMessageElementValue(Text.DEF_DPO);
+            planet.pr = getMessageElementValue(Text.DEF_PR);
+            planet.mr = getMessageElementValue(Text.DEF_MR);
         }
     }
 
