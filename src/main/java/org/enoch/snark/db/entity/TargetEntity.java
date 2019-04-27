@@ -109,7 +109,7 @@ public class TargetEntity extends PlanetEntity {
         }
         return (long) Math.ceil((double) (metal+crystal+deuterium)/10000);
     }
-
+// todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila
     public void calculateDefenseAndShips() {
         if (wr != null) {
             defenseSum =

@@ -73,7 +73,7 @@ public class SendFleetRequest {
             targets.remove(target);
         }
     }
-
+// todo niedziala
     private boolean canSendMore() {
         List<FleetEntity> requesedFleet = fleetDAO.findWithCode(code);
         sendetFleet = requesedFleet.size();
