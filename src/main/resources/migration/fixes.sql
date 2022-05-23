@@ -72,3 +72,5 @@ alter table sources add column dpo int;
 alter table sources add column pr int;
 
 update targets set fleet_sum = 0, defense_sum = 0;
+
+alter table sources add column collecting_order int;

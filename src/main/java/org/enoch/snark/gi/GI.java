@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.exception.GIException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -23,6 +24,11 @@ public class GI {
 
     public void typeByIdText(String elementById, String text) {
         WebElement element = findElement(By.id(elementById));
+        element.sendKeys(text);
+    }
+
+    public void typeByNameText(String name, String text) {
+        WebElement element = findElement(By.name(name));
         element.sendKeys(text);
     }
 
@@ -87,6 +93,35 @@ public class GI {
             return ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]").get(0);
         } else if(elements.size() > 1) {
             System.err.println("Were many elements '" + text + "' to click");
+        }
+        return elements.get(0);
+    }
+
+    public WebElement findButtonContainsText(String text) {
+        return findByXPath("//button[contains(text(), '" + text + "')]");
+    }
+
+    public WebElement findElement(String tag, String attribute, String value) {
+        return findByXPath("//"+tag+"[@" + attribute + "='"+value+"']");
+    }
+
+    public WebElement findText(String text) {
+        return findByXPath("//*[contains(text(), '" + text + "')]");
+    }
+
+    private WebElement findByXPath(String using) {
+        List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
+        int i = 1;
+        while(elements.isEmpty() && i <= 10) {
+            sleep(TimeUnit.MILLISECONDS, 200 * i);
+            i++;
+            elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
+        }
+
+        if(elements.isEmpty()) {
+            throw new GIException(GIException.NOT_FOUND, using, "No element " + using);
+        } else if(elements.size() > 1) {
+            throw new GIException(GIException.TOO_MANY, using, "No element " + using);
         }
         return elements.get(0);
     }

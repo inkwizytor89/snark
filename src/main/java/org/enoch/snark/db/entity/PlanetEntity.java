@@ -1,10 +1,10 @@
 package org.enoch.snark.db.entity;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
-@MappedSuperclass
+@Entity
+//todo to powinna być kolonia a powinna być encja na abstakcyjna planete
+@Table(name = "planets", schema = "public", catalog = "snark")
 public class PlanetEntity extends BaseEntity{
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -35,38 +35,111 @@ public class PlanetEntity extends BaseEntity{
     public Long deuterium;
 
     @Basic
-    @Column(name = "resources")
-    public Long resources = 0L;
-
-    @Basic
     @Column(name = "power")
     public Long power;
 
-    public Integer lm;
-    public Integer cm;
-    public Integer kr;
-    public Integer ow;
-    public Integer pan;
-    public Integer bom;
-    public Integer ni;
-    public Integer gs;
-    public Integer mt;
-    public Integer dt;
-    public Integer kol;
-    public Integer rec;
-    public Integer son;
-    public Integer sat;
+    @OneToMany(mappedBy = "source")
+    public SourceEntity source;
 
-    public Integer wr;
-    public Integer ldl;
-    public Integer cdl;
-    public Integer dg;
-    public Integer dj;
-    public Integer wp;
-    public Integer mpo;
-    public Integer dpo;
-    public Integer pr;
-    public Integer mr;
+    @OneToMany(mappedBy = "target")
+    public TargetEntity target;
+
+    @Basic
+    @Column(name = "lm")
+    public Long lm;
+
+    @Basic
+    @Column(name = "cm")
+    public Long cm;
+
+    @Basic
+    @Column(name = "kr;")
+    public Long kr;
+
+    @Basic
+    @Column(name = "ow")
+    public Long ow;
+
+    @Basic
+    @Column(name = "pan")
+    public Long pan;
+
+    @Basic
+    @Column(name = "bom")
+    public Long bom;
+
+    @Basic
+    @Column(name = "ni")
+    public Long ni;
+
+    @Basic
+    @Column(name = "gs")
+    public Long gs;
+
+    @Basic
+    @Column(name = "mt")
+    public Long mt;
+
+    @Basic
+    @Column(name = "dt")
+    public Long dt;
+
+    @Basic
+    @Column(name = "kol")
+    public Long kol;
+
+    @Basic
+    @Column(name = "rec")
+    public Long rec;
+
+    @Basic
+    @Column(name = "son")
+    public Long son;
+
+    @Basic
+    @Column(name = "sat")
+    public Long sat;
+
+
+    @Basic
+    @Column(name = "wr")
+    public Long wr;
+
+    @Basic
+    @Column(name = "ldl")
+    public Long ldl;
+
+    @Basic
+    @Column(name = "cdl")
+    public Long cdl;
+
+    @Basic
+    @Column(name = "dg;")
+    public Long dg;
+
+    @Basic
+    @Column(name = "dj")
+    public Long dj;
+
+    @Basic
+    @Column(name = "wp")
+    public Long wp;
+
+    @Basic
+    @Column(name = "mpo")
+    public Long mpo;
+
+    @Basic
+    @Column(name = "dpo")
+    public Long dpo;
+
+    @Basic
+    @Column(name = "pr;")
+    public Long pr;
+
+    @Basic
+    @Column(name = "mr")
+    public Long mr;
 
 
     public PlanetEntity() {

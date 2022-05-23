@@ -18,13 +18,17 @@ public class FleetEntity extends BaseEntity {
     @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
     public TargetEntity target;
 
+    @Basic
+    @Column(name = "type")
+    public String type;
+
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
     public SourceEntity source;
 
     @Basic
-    @Column(name = "type")
-    public String type;
+    @Column(name = "space_target")
+    public String spaceTarget; // planet, moon, debris
 
     @Basic
     @Column(name = "start")

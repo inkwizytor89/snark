@@ -13,6 +13,8 @@ public class DAOFactory {
     public TargetDAO targetDAO;
     public SourceDAO sourceDAO;
     public MessageDAO messageDAO;
+    public CollectionDAO collectionDAO;
+    public ErrorDAO errorDAO;
 
     public DAOFactory(@Nonnull UniverseEntity entity) {
         farmDAO = new FarmDAOImpl(entity);
@@ -21,6 +23,8 @@ public class DAOFactory {
         targetDAO = new TargetDAOImpl(entity);
         sourceDAO = new SourceDAOImpl(entity);
         messageDAO = new MessageDAOImpl(entity);
+        collectionDAO = new CollectionDAOImpl(entity);
+        errorDAO = new ErrorDAOImpl(entity);
     }
 
 }

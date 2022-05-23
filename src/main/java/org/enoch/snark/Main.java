@@ -4,13 +4,14 @@ import org.enoch.snark.db.dao.impl.UniverseDAOImpl;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.instance.Instance;
 
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
-        for(UniverseEntity universeEntity : new UniverseDAOImpl().fetchAllUniverses()) {
-            if(universeEntity.name.equals("Fenrir")){
+        List<UniverseEntity> universes = new UniverseDAOImpl().fetchAllUniverses();
+        for(UniverseEntity universeEntity : universes) {
                 new Thread(new Instance(universeEntity)::runSI).start();
-            }
         }
     }
 }

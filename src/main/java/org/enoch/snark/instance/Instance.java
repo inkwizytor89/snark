@@ -10,6 +10,7 @@ import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.instance.actions.FleetBuilder;
 import org.enoch.snark.model.SystemView;
 
 import java.util.Collection;
@@ -78,5 +79,9 @@ public class Instance {
             daoFactory.targetDAO.remove(target);
             //TODO: remove messegas and others
         }
+    }
+
+    public FleetBuilder buildFleet(SourceEntity source, PlanetEntity planet) {
+        return new FleetBuilder(this, source, planet);
     }
 }

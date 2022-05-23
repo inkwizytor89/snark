@@ -1,22 +1,17 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.Test;
+import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Marker;
 import org.enoch.snark.gi.text.Text;
 import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
+import static org.enoch.snark.gi.text.HtmlElements.*;
 
 public class GISession {
 
@@ -49,7 +44,12 @@ public class GISession {
 
     public void open() {
         webDriver.get(instance.universeEntity.url);
-        logIn();
+        try {
+            logIn();
+        } catch (GIException e) {
+            System.err.println(e.getMessage());
+            instance.daoFactory.errorDAO.save(e);
+        }
     }
 
     public void close() {
@@ -62,15 +62,15 @@ public class GISession {
         instance.gi.clickTextIfExists(Text.AGREE);
 
         //insertLoginData
-        instance.gi.clickIdElement(Marker.LOGIN_TAB_ID);
-        instance.gi.typeByIdText(Marker.USERNAME_LOGIN_ID, instance.universeEntity.login);
-        instance.gi.typeByIdText(Marker.PASSWORD_LOGIN_ID, instance.universeEntity.pass);
-        instance.gi.clickIdElement(Marker.LOGIN_SUBMIT_ID);
+        gi.findText("Login").click();
+        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_MAIL_NAME).sendKeys(instance.universeEntity.login);
+        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_PASSWORD_NAME).sendKeys(instance.universeEntity.pass);
+        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
         //chooseServer
-        instance.gi.clickTextIfExists(Text.AGREE);
-        instance.gi.clickText(Test.PLAY_TEXT);
-        instance.gi.doubleClickText(instance.universeEntity.name);
+        gi.clickTextIfExists(Text.AGREE);
+        gi.clickText(Test.PLAY_TEXT);
+        gi.doubleClickText(instance.universeEntity.name);
 
         isLoggedIn = true;
     }

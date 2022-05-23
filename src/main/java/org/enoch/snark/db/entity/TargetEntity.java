@@ -8,13 +8,17 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "targets", schema = "public", catalog = "snark")
-public class TargetEntity extends PlanetEntity {
+public class TargetEntity extends BaseEntity {
 
     public final static String ADMIN = "ADMIN";
     public final static String NORMAL = "NORMAL";
     public final static String ABSENCE = "ABSENCE";
     public final static String WEAK = "WEAK";
     public final static String IN_ACTIVE = "IN_ACTIVE";
+
+    @ManyToOne
+    @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
+    public PlanetEntity planet;
 
     @Basic
     @Column(name = "type")

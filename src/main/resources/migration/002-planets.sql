@@ -1,4 +1,4 @@
-create table targets
+create table planets
 (
   id          bigserial   not null
     constraint targets_pkey
@@ -14,13 +14,7 @@ create table targets
   metal       integer,
   crystal     integer,
   deuterium   integer,
-  resources   integer,
   power       integer,
-  type        varchar(15) not null,
-  fleet_sum   bigint default 0,
-  defense_sum bigint default 0,
-  spy_level integer default 4,
-  updated     timestamp,
 
   lm   integer,
   cm   integer,
@@ -47,4 +41,28 @@ create table targets
   dpo   integer,
   pr   integer,
   mr   integer
+);
+
+create table sources
+(
+  id          bigserial not null
+    constraint sources_pkey
+    primary key,
+  planet_id bigint references planets,
+  cp          integer   not null,
+  collecting_order    integer
+);
+
+create table targets
+(
+  id          bigserial   not null
+    constraint targets_pkey
+    primary key,
+  planet_id bigint references planets,
+  resources   integer,
+  type        varchar(15) not null,
+  fleet_sum   bigint default 0,
+  defense_sum bigint default 0,
+  spy_level integer default 4,
+  updated     timestamp
 );

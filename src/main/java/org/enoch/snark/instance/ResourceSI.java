@@ -21,9 +21,9 @@ public class ResourceSI implements SI {
 
     public ResourceSI(Instance instance) {
         this.instance = instance;
-//        spaceThred = new SpaceThred(this);
-//        scanThred = new ScanThred(this);
-        farmThred = new FarmThred(this);
+//        spaceThred = new SpaceThred(this); //przeglada przestrzeń
+//        scanThred = new ScanThred(this); //szpieguje ...
+//        farmThred = new FarmThred(this); // zbieranie z idkow surowcow
     }
 
     public void run() {
