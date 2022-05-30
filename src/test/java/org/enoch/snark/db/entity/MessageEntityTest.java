@@ -8,7 +8,7 @@ public class MessageEntityTest {
     public void getPlanet() {
         MessageEntity messageEntity = new MessageEntity();
         messageEntity.content = text;
-        PlanetEntity planet = messageEntity.getPlanet();
+        PlanetEntity planet = messageEntity.getPlanet().planet;
         System.err.println(planet);
     }
 
@@ -16,7 +16,7 @@ public class MessageEntityTest {
     public void getPlanet2() {
         MessageEntity messageEntity = new MessageEntity();
         messageEntity.content = text2;
-        PlanetEntity planet = messageEntity.getPlanet();
+        PlanetEntity planet = messageEntity.getPlanet().planet;
         System.err.println(planet);
     }
 

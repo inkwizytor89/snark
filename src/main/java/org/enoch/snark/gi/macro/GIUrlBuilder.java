@@ -25,9 +25,9 @@ public class GIUrlBuilder {
         String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
-                "&galaxy=" + target.galaxy +
-                "&system=" + target.system +
-                "&position=" + target.position +
+                "&galaxy=" + target.planet.galaxy +
+                "&system=" + target.planet.system +
+                "&position=" + target.planet.position +
                 "&type=1&mission=" + mission.getValue();
         instance.session.getWebDriver().get(builder);
 

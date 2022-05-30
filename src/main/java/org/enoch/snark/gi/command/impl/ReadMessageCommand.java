@@ -84,7 +84,7 @@ public class ReadMessageCommand extends AbstractCommand {
 
         if(MessageEntity.SPY.equals(messageEntity.type)) {
             TargetEntity planet = messageEntity.getPlanet();
-            Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.galaxy, planet.system, planet.position);
+            Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.planet.galaxy, planet.planet.system, planet.planet.position);
             targetEntity.get().update(planet);
             instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
             if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji

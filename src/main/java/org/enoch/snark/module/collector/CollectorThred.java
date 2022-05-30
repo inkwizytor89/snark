@@ -7,7 +7,7 @@ import org.enoch.snark.module.AbstractThred;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-
+//todo nieskonczone
 public class CollectorThred extends AbstractThred {
 
     private final Instance instance;
@@ -43,7 +43,7 @@ public class CollectorThred extends AbstractThred {
             return;
         }
 
-        instance.daoFactory.fleetDAO.saveOrUpdate();
+//        instance.daoFactory.fleetDAO.saveOrUpdate();
 
         //todo powinien leciec przez ksiezyce
 

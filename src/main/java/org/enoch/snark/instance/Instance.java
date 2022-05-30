@@ -58,10 +58,10 @@ public class Instance {
         List<SourceEntity> sources = daoFactory.sourceDAO.fetchAll();
 
         SourceEntity nearestPlanet = sources.get(0);
-        Integer minDistance = planet.calculateDistance(sources.get(0));
+        Integer minDistance = planet.calculateDistance(sources.get(0).planet);
 
         for(SourceEntity source : sources) {
-            Integer distance = planet.calculateDistance(source);
+            Integer distance = planet.calculateDistance(source.planet);
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestPlanet = source;
@@ -71,7 +71,7 @@ public class Instance {
     }
 
     public void removePlanet(TargetEntity target) {
-        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.galaxy, target.system, target.position);
+        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.planet.galaxy, target.planet.system, target.planet.position);
         if(targetEntity.isPresent()) {
             daoFactory.fleetDAO.fetchAll().stream()
                     .filter(fleetEntity -> fleetEntity.target.id.equals(target.id))

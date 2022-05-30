@@ -36,43 +36,43 @@ public class SpyInfoParser {
 
     private void extractResource() {
         String[] resourcesParts = document.getElementsByAttributeValue("data-type", "resources").text().split("\\s+");
-        planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
-        planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
-        planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
-        planet.power = PlanetEntity.parseResource(resourcesParts[3]);
+        planet.planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
+        planet.planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
+        planet.planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
+        planet.planet.power = PlanetEntity.parseResource(resourcesParts[3]);
     }
 
     private void extractFleet() {//section_title
         if(!isSectionAvavible(Text.FLEET_TAG)) {
-            planet.lm = getMessageElementValue(Text.LM);
-            planet.cm = getMessageElementValue(Text.CM);
-            planet.kr = getMessageElementValue(Text.KR);
-            planet.ow = getMessageElementValue(Text.OW);
-            planet.pan = getMessageElementValue(Text.PAN);
-            planet.bom = getMessageElementValue(Text.BOM);
-            planet.ni = getMessageElementValue(Text.NI);
-            planet.gs = getMessageElementValue(Text.GS);
-            planet.mt = getMessageElementValue(Text.LT);
-            planet.dt = getMessageElementValue(Text.DT);
-            planet.kol = getMessageElementValue(Text.KOL);
-            planet.rec = getMessageElementValue(Text.REC);
-            planet.son = getMessageElementValue(Text.SON);
-            planet.sat = getMessageElementValue(Text.SAT);
+            planet.planet.lm = getMessageElementValue(Text.LM);
+            planet.planet.cm = getMessageElementValue(Text.CM);
+            planet.planet.kr = getMessageElementValue(Text.KR);
+            planet.planet.ow = getMessageElementValue(Text.OW);
+            planet.planet.pan = getMessageElementValue(Text.PAN);
+            planet.planet.bom = getMessageElementValue(Text.BOM);
+            planet.planet.ni = getMessageElementValue(Text.NI);
+            planet.planet.gs = getMessageElementValue(Text.GS);
+            planet.planet.mt = getMessageElementValue(Text.LT);
+            planet.planet.dt = getMessageElementValue(Text.DT);
+            planet.planet.kol = getMessageElementValue(Text.KOL);
+            planet.planet.rec = getMessageElementValue(Text.REC);
+            planet.planet.son = getMessageElementValue(Text.SON);
+            planet.planet.sat = getMessageElementValue(Text.SAT);
         }
     }
 
     private void extractDefense() {
         if(!isSectionAvavible(Text.DEFENSE_TAG)) {
-            planet.wr = getMessageElementValue(Text.DEF_WR);
-            planet.ldl = getMessageElementValue(Text.DEF_LDL);
-            planet.cdl = getMessageElementValue(Text.DEF_CDL);
-            planet.dg = getMessageElementValue(Text.DEF_DG);
-            planet.dj = getMessageElementValue(Text.DEF_DJ);
-            planet.wp = getMessageElementValue(Text.DEF_WP);
-            planet.mpo = getMessageElementValue(Text.DEF_MPO);
-            planet.dpo = getMessageElementValue(Text.DEF_DPO);
-            planet.pr = getMessageElementValue(Text.DEF_PR);
-            planet.mr = getMessageElementValue(Text.DEF_MR);
+            planet.planet.wr = getMessageElementValue(Text.DEF_WR);
+            planet.planet.ldl = getMessageElementValue(Text.DEF_LDL);
+            planet.planet.cdl = getMessageElementValue(Text.DEF_CDL);
+            planet.planet.dg = getMessageElementValue(Text.DEF_DG);
+            planet.planet.dj = getMessageElementValue(Text.DEF_DJ);
+            planet.planet.wp = getMessageElementValue(Text.DEF_WP);
+            planet.planet.mpo = getMessageElementValue(Text.DEF_MPO);
+            planet.planet.dpo = getMessageElementValue(Text.DEF_DPO);
+            planet.planet.pr = getMessageElementValue(Text.DEF_PR);
+            planet.planet.mr = getMessageElementValue(Text.DEF_MR);
         }
     }
 
@@ -83,15 +83,15 @@ public class SpyInfoParser {
         return matcher.find();
     }
 
-    private int getMessageElementValue(String elementTag) {
+    private Long getMessageElementValue(String elementTag) {
         String textContent = document.text();
         Pattern pattern = Pattern.compile(elementTag +"\\s([0-9]+)");
         Matcher matcher = pattern.matcher(textContent);
         if(matcher.find()) {
             String group = matcher.group(1);
-            return Integer.parseInt(group);
+            return Long.parseLong(group);
         }
-        return 0;
+        return 0L;
     }
 
     public TargetEntity extractPlanetEntity() {

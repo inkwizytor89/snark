@@ -110,7 +110,7 @@ public class FleetEntity extends BaseEntity {
                                              @Nonnull Integer count) {
         FleetEntity fleet = new FleetEntity(instance);
         fleet.target = target;
-        fleet.source = instance.findNearestSource(target);
+        fleet.source = instance.findNearestSource(target.planet);
         fleet.type = SPY;
         fleet.son = count.longValue();
         return fleet;
@@ -120,7 +120,7 @@ public class FleetEntity extends BaseEntity {
                                              @Nonnull TargetEntity target) {
         FleetEntity fleet = new FleetEntity(instance);
         fleet.target = target;
-        fleet.source = instance.findNearestSource(target);
+        fleet.source = instance.findNearestSource(target.planet);
         fleet.type = ATTACK;
         fleet.lt = target.calculateTransportByLt();
         return fleet;

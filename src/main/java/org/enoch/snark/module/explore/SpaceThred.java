@@ -70,9 +70,9 @@ public class SpaceThred extends AbstractThred {
     private Collection<SystemView> generateSystemToView(SourceEntity source) {
         List<SystemView> result = new ArrayList<>();
         int base = instance.universeEntity.systemMax;
-        int start = ((base + source.system - instance.universeEntity.explorationArea) % base) +1;
+        int start = ((base + source.planet.system - instance.universeEntity.explorationArea) % base) +1;
         for(int i = 0; i < 2*instance.universeEntity.explorationArea+2; i++ ) {
-            result.add(new SystemView(source.galaxy, ((start+i)%base)+1));
+            result.add(new SystemView(source.planet.galaxy, ((start+i)%base)+1));
         }
         return result;
     }

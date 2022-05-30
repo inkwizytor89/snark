@@ -50,7 +50,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
             final int position = Integer.parseInt(row.findElement(By.className("position")).getText());
             final String player = row.findElement(By.className("playername")).getText().trim();
             final String statusCode = row.findElement(By.className("status")).getText().trim();
-            Optional<TargetEntity> targetFromDb = targets.stream().filter(t -> t.position.equals(position)).findAny();
+            Optional<TargetEntity> targetFromDb = targets.stream().filter(t -> t.planet.position.equals(position)).findAny();
 
             if(StringUtils.isEmpty(player) && targetFromDb.isPresent()) {
                 instance.removePlanet(targetFromDb.get());
@@ -69,9 +69,9 @@ public class GalaxyAnalyzeCommand extends GICommand {
             } else {
                 entity = new TargetEntity();
                 entity.universe = instance.universeEntity;
-                entity.galaxy = systemView.galaxy;
-                entity.system = systemView.system;
-                entity.position = position;
+                entity.planet.galaxy = systemView.galaxy;
+                entity.planet.system = systemView.system;
+                entity.planet.position = position;
             }
             entity.type = status;
             targetDAO.saveOrUpdate(entity);

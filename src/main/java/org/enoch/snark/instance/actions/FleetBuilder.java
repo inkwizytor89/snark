@@ -7,7 +7,7 @@ import org.enoch.snark.instance.Instance;
 
 public class FleetBuilder {
 
-    private final Instance instance;
+    private final Instance instance = null;
     private final SourceEntity source;
     private final PlanetEntity planet;
     private final FleetEntity fleet;
