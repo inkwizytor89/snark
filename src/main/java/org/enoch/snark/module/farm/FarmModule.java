@@ -1,12 +1,7 @@
 package org.enoch.snark.module.farm;
 
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.AttackInfo;
-import org.enoch.snark.model.AttackPlan;
-import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.module.AbstractModule;
-import org.enoch.snark.module.ModuleStatus;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 import java.util.stream.Collectors;

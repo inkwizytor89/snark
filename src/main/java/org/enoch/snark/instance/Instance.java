@@ -8,13 +8,9 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.actions.FleetBuilder;
-import org.enoch.snark.model.SystemView;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +30,7 @@ public class Instance {
 
     public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
         this.universeEntity = universeEntity;
-        sources = ImmutableList.copyOf(universeEntity.sources);
+        sources = ImmutableList.copyOf(universeEntity.sourceEntities);
         daoFactory = new DAOFactory(universeEntity);
         gi = new GI();
         session = new GISession(this);

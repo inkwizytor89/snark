@@ -11,33 +11,43 @@ public class UniverseEntity extends IdEntity {
     @Basic
     @Column(name = "login")
     public String login;
+
     @Basic
     @Column(name = "pass")
     public String pass;
+
     @Basic
     @Column(name = "name")
     public String name;
+
     @Basic
     @Column(name = "tag")
     public String tag;
+
     @Basic
     @Column(name = "url")
     public String url;
+
     @Basic
     @Column(name = "galaxy_max")
     public Integer galaxyMax;
+
     @Basic
     @Column(name = "system_max")
     public Integer systemMax;
+
     @Basic
     @Column(name = "exploration_area")
     public Integer explorationArea;
+
     @OneToMany(mappedBy = "universe")
     public Collection<GalaxyEntity> galaxies;
-    @OneToMany(mappedBy = "universe")
-    public Collection<TargetEntity> planets;
-    @OneToMany(mappedBy = "universe")
-    public Collection<SourceEntity> sources;
+
+    @OneToMany(fetch=FetchType.LAZY,mappedBy = "universe")
+    public Collection<PlanetEntity> planets;
+
+    @OneToMany(mappedBy = "universe") // source entity nie maja universum
+    public Collection<SourceEntity> sourceEntities;
 
     @Override
     public boolean equals(Object o) {

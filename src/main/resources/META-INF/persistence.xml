@@ -4,17 +4,29 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
     <persistence-unit name="PERSISTENCE">
-        <class>org.enoch.snark.db.entity.ExplorationEntity</class>
-        <class>org.enoch.snark.db.entity.TargetEntity</class>
-        <class>org.enoch.snark.db.entity.SourceEntity</class>
-        <class>org.enoch.snark.db.entity.MessageEntity</class>
-        <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
+        <class>org.enoch.snark.db.entity.PlanetEntity</class>
+        <class>org.enoch.snark.db.entity.SourceEntity</class>
+        <class>org.enoch.snark.db.entity.TargetEntity</class>
+        <class>org.enoch.snark.db.entity.GalaxyEntity</class>
+        <class>org.enoch.snark.db.entity.ExplorationEntity</class>
+        <class>org.enoch.snark.db.entity.MessageEntity</class>
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
 
         <properties>
+<!--            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />-->
+<!--            <property name="javax.persistence.jdbc.url"    value="jdbc:h2:~/snarks" />-->
+<!--&lt;!&ndash;            <property name="javax.persistence.jdbc.url"    value="jdbc:h2:mem:test" />&ndash;&gt;-->
+<!--            <property name="javax.persistence.jdbc.user" value="sa" />-->
+<!--            <property name="javax.persistence.jdbc.password" value="" />-->
+
+<!--            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
+<!--            <property name="hibernate.hbm2ddl.auto" value="create-drop" />-->
+<!--            <property name="show_sql" value="true"/>-->
+<!--            <property name="hibernate.temp.use_jdbc_metadata_defaults" value="false"/>-->
+
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
             <!--<property name="hibernate.show_sql" value = "true" />-->
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
