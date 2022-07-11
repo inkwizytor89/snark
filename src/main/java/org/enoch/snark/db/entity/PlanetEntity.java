@@ -3,10 +3,8 @@ package org.enoch.snark.db.entity;
 import javax.persistence.*;
 import java.util.Collection;
 
-@Entity
-//todo to powinna być kolonia a powinna być encja na abstakcyjna planete
-@Table(name = "planets", schema = "public", catalog = "snark")
-public class PlanetEntity extends BaseEntity{
+@MappedSuperclass
+public abstract class PlanetEntity extends BaseEntity{
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
     public static final Integer POSITION_INDEX = 3;
@@ -39,12 +37,6 @@ public class PlanetEntity extends BaseEntity{
     @Column(name = "power")
     public Long power;
 
-    @OneToMany(mappedBy = "planet")
-    public Collection<SourceEntity> sourceEntities;
-
-    @OneToMany(mappedBy = "planet")
-    public Collection<TargetEntity> targetEntities;
-
     @Basic
     @Column(name = "lm")
     public Long lm;
@@ -54,7 +46,7 @@ public class PlanetEntity extends BaseEntity{
     public Long cm;
 
     @Basic
-    @Column(name = "kr;")
+    @Column(name = "kr")
     public Long kr;
 
     @Basic
@@ -115,7 +107,7 @@ public class PlanetEntity extends BaseEntity{
     public Long cdl;
 
     @Basic
-    @Column(name = "dg;")
+    @Column(name = "dg")
     public Long dg;
 
     @Basic
@@ -135,7 +127,7 @@ public class PlanetEntity extends BaseEntity{
     public Long dpo;
 
     @Basic
-    @Column(name = "pr;")
+    @Column(name = "pr")
     public Long pr;
 
     @Basic

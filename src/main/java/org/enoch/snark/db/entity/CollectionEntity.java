@@ -9,7 +9,7 @@ public class CollectionEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
-    public SourceEntity source;
+    public ColonyEntity source;
 
     @Basic
     @Column(name = "type")

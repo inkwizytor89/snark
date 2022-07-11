@@ -1,10 +1,8 @@
 package org.enoch.snark.gi.macro;
 
-import org.enoch.snark.db.entity.SourceEntity;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SourcePlanet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -21,13 +19,13 @@ public class GIUrlBuilder {
         this.instance = instance;
     }
 
-    public void openFleetView(SourceEntity source, TargetEntity target, Mission mission) {
+    public void openFleetView(ColonyEntity source, TargetEntity target, Mission mission) {
         String builder = instance.universeEntity.url + "?" +
                 "page=" + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
-                "&galaxy=" + target.planet.galaxy +
-                "&system=" + target.planet.system +
-                "&position=" + target.planet.position +
+                "&galaxy=" + target.galaxy +
+                "&system=" + target.system +
+                "&position=" + target.position +
                 "&type=1&mission=" + mission.getValue();
         instance.session.getWebDriver().get(builder);
 

@@ -2,7 +2,7 @@ package org.enoch.snark.module.explore;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.SourceEntity;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
@@ -55,7 +55,7 @@ public class SpaceThred extends AbstractThred {
 
     private Map<SystemView, GalaxyEntity> buildSpaceMap() {
         List<SystemView> toView = new LinkedList<>();
-        for(SourceEntity source : instance.sources) {
+        for(ColonyEntity source : instance.sources) {
             toView.addAll(generateSystemToView(source));
         }
         Map<SystemView, GalaxyEntity> spaceMap= new HashMap<>();
@@ -67,12 +67,12 @@ public class SpaceThred extends AbstractThred {
         return spaceMap;
     }
 
-    private Collection<SystemView> generateSystemToView(SourceEntity source) {
+    private Collection<SystemView> generateSystemToView(ColonyEntity source) {
         List<SystemView> result = new ArrayList<>();
         int base = instance.universeEntity.systemMax;
-        int start = ((base + source.planet.system - instance.universeEntity.explorationArea) % base) +1;
+        int start = ((base + source.system - instance.universeEntity.explorationArea) % base) +1;
         for(int i = 0; i < 2*instance.universeEntity.explorationArea+2; i++ ) {
-            result.add(new SystemView(source.planet.galaxy, ((start+i)%base)+1));
+            result.add(new SystemView(source.galaxy, ((start+i)%base)+1));
         }
         return result;
     }

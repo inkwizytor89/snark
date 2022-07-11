@@ -4,7 +4,7 @@ create table fleet(
     type text not null,
     target_id bigint not null references targets,
     space_target text,
-    source_id bigint not null references sources,
+    source_id bigint not null references colonies,
     start timestamp default null,
     visited timestamp default null,
     back timestamp default null,

@@ -8,17 +8,13 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "targets", schema = "public", catalog = "snark")
-public class TargetEntity extends BaseEntity {
+public class TargetEntity extends PlanetEntity {
 
     public final static String ADMIN = "ADMIN";
     public final static String NORMAL = "NORMAL";
     public final static String ABSENCE = "ABSENCE";
     public final static String WEAK = "WEAK";
     public final static String IN_ACTIVE = "IN_ACTIVE";
-
-    @ManyToOne
-    @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
-    public PlanetEntity planet;
 
     @Basic
     @Column(name = "resources")
@@ -49,7 +45,7 @@ public class TargetEntity extends BaseEntity {
     }
 
     public TargetEntity(String input) {
-        this.planet = new PlanetEntity(input);
+        super(input);
     }
 
     @Override
@@ -58,10 +54,10 @@ public class TargetEntity extends BaseEntity {
         if (o == null || getClass() != o.getClass()) return false;
         TargetEntity entity = (TargetEntity) o;
         return Objects.equals(id, entity.id) &&
-                Objects.equals(planet.galaxy, entity.planet.galaxy) &&
-                Objects.equals(planet.system, entity.planet.system) &&
-                Objects.equals(planet.position, entity.planet.position) &&
-                Objects.equals(planet.power, entity.planet.power) &&
+                Objects.equals(galaxy, entity.galaxy) &&
+                Objects.equals(system, entity.system) &&
+                Objects.equals(position, entity.position) &&
+                Objects.equals(power, entity.power) &&
                 Objects.equals(type, entity.type) &&
                 Objects.equals(fleetSum, entity.fleetSum) &&
                 Objects.equals(defenseSum, entity.defenseSum) &&
@@ -69,83 +65,83 @@ public class TargetEntity extends BaseEntity {
     }
 
     public void update(TargetEntity targetEntity) {
-        this.planet.metal = targetEntity.planet.metal;
-        this.planet.crystal = targetEntity.planet.crystal;
-        this.planet.deuterium = targetEntity.planet.deuterium;
-        this.resources = 3 * planet.metal + 2 * planet.crystal + planet.deuterium;
-        this.planet.power = targetEntity.planet.power;
+        this.metal = targetEntity.metal;
+        this.crystal = targetEntity.crystal;
+        this.deuterium = targetEntity.deuterium;
+        this.resources = 3 * metal + 2 * crystal + deuterium;
+        this.power = targetEntity.power;
 
         this.fleetSum = targetEntity.fleetSum;
         this.defenseSum = targetEntity.defenseSum;
 
-        this.planet.lm = targetEntity.planet.lm;
-        this.planet.cm = targetEntity.planet.cm;
-        this.planet.kr = targetEntity.planet.kr;
-        this.planet.ow = targetEntity.planet.ow;
-        this.planet.pan = targetEntity.planet.pan;
-        this.planet.bom = targetEntity.planet.bom;
-        this.planet.ni = targetEntity.planet.ni;
-        this.planet.gs = targetEntity.planet.gs;
-        this.planet.mt = targetEntity.planet.mt;
-        this.planet.dt = targetEntity.planet.dt;
-        this.planet.kol = targetEntity.planet.kol;
-        this.planet.rec = targetEntity.planet.rec;
-        this.planet.son = targetEntity.planet.son;
-        this.planet.sat = targetEntity.planet.sat;
+        this.lm = targetEntity.lm;
+        this.cm = targetEntity.cm;
+        this.kr = targetEntity.kr;
+        this.ow = targetEntity.ow;
+        this.pan = targetEntity.pan;
+        this.bom = targetEntity.bom;
+        this.ni = targetEntity.ni;
+        this.gs = targetEntity.gs;
+        this.mt = targetEntity.mt;
+        this.dt = targetEntity.dt;
+        this.kol = targetEntity.kol;
+        this.rec = targetEntity.rec;
+        this.son = targetEntity.son;
+        this.sat = targetEntity.sat;
 
-        this.planet.wr = targetEntity.planet.wr;
-        this.planet.ldl = targetEntity.planet.ldl;
-        this.planet.cdl = targetEntity.planet.cdl;
-        this.planet.dg = targetEntity.planet.dg;
-        this.planet.dj = targetEntity.planet.dj;
-        this.planet.wp = targetEntity.planet.wp;
-        this.planet.mpo = targetEntity.planet.mpo;
-        this.planet.dpo = targetEntity.planet.dpo;
-        this.planet.pr = targetEntity.planet.pr;
-        this.planet.mr = targetEntity.planet.mr;
+        this.wr = targetEntity.wr;
+        this.ldl = targetEntity.ldl;
+        this.cdl = targetEntity.cdl;
+        this.dg = targetEntity.dg;
+        this.dj = targetEntity.dj;
+        this.wp = targetEntity.wp;
+        this.mpo = targetEntity.mpo;
+        this.dpo = targetEntity.dpo;
+        this.pr = targetEntity.pr;
+        this.mr = targetEntity.mr;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, this.planet.galaxy, this.planet.system, this.planet.position, this.planet.power, type, fleetSum, defenseSum, updated);
+        return Objects.hash(id, this.galaxy, this.system, this.position, this.power, type, fleetSum, defenseSum, updated);
     }
 
     public Long calculateTransportByLt() {
-        if (this.planet.metal == null || this.planet.crystal == null || this.planet.deuterium == null) {
+        if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }
-        return (long) Math.ceil((double) (this.planet.metal+this.planet.crystal+this.planet.deuterium)/10000);
+        return (long) Math.ceil((double) (this.metal+this.crystal+this.deuterium)/10000);
     }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila
     public void calculateDefenseAndShips() {
-        if (this.planet.wr != null) {
+        if (this.wr != null) {
             defenseSum =
-                    (long) (this.planet.wr * (2000)) +
-                    (long) (this.planet.ldl * (1500 + 750)) +
-                    (long) (this.planet.cdl * (6000 + 3000)) +
-                    (long) (this.planet.dg * (20000 + 22500 + 6000)) +
-                    (long) (this.planet.dj * (2000 + 9000)) +
-                    (long) (this.planet.wp * (50000 + 75000 + 90000)) +
-                    (long) (this.planet.mpo * (10000 + 15000)) +
-                    (long) (this.planet.dpo * (50000 + 75000));
+                    (long) (this.wr * (2000)) +
+                    (long) (this.ldl * (1500 + 750)) +
+                    (long) (this.cdl * (6000 + 3000)) +
+                    (long) (this.dg * (20000 + 22500 + 6000)) +
+                    (long) (this.dj * (2000 + 9000)) +
+                    (long) (this.wp * (50000 + 75000 + 90000)) +
+                    (long) (this.mpo * (10000 + 15000)) +
+                    (long) (this.dpo * (50000 + 75000));
         }
-        if(this.planet.lm != null) {
+        if(this.lm != null) {
             fleetSum =
-                    (long) (this.planet.lm * (3000 + 1500)) +
-                    (long) (this.planet.cm * (6000 + 3000)) +
-                    (long) (this.planet.kr * (20000 + 10500 + 6000)) +
-                    (long) (this.planet.ow * (45000 + 22500)) +
-                    (long) (this.planet.pan * (30000 + 60000 + 45000)) +
-                    (long) (this.planet.bom * (50000 + 37500 + 45000)) +
-                    (long) (this.planet.ni * (60000 + 75000 + 45000)) +
-                    (long) (this.planet.gs * (5000000 + 6000000 + 3000000)) +
-                    (long) (this.planet.mt * (50000 + 75000)) +
-                    (long) (this.planet.dt * (50000 + 75000)) +
-                    (long) (this.planet.kol * (50000 + 75000)) +
-                    (long) (this.planet.rec * (50000 + 75000)) +
-                    (long) (this.planet.son * (50000 + 75000)) +
-                    (long) (this.planet.sat * (50000 + 75000));
+                    (long) (this.lm * (3000 + 1500)) +
+                    (long) (this.cm * (6000 + 3000)) +
+                    (long) (this.kr * (20000 + 10500 + 6000)) +
+                    (long) (this.ow * (45000 + 22500)) +
+                    (long) (this.pan * (30000 + 60000 + 45000)) +
+                    (long) (this.bom * (50000 + 37500 + 45000)) +
+                    (long) (this.ni * (60000 + 75000 + 45000)) +
+                    (long) (this.gs * (5000000 + 6000000 + 3000000)) +
+                    (long) (this.mt * (50000 + 75000)) +
+                    (long) (this.dt * (50000 + 75000)) +
+                    (long) (this.kol * (50000 + 75000)) +
+                    (long) (this.rec * (50000 + 75000)) +
+                    (long) (this.son * (50000 + 75000)) +
+                    (long) (this.sat * (50000 + 75000));
         }
     }
 }

@@ -6,7 +6,7 @@ import javax.persistence.*;
 public abstract class BaseEntity extends IdEntity {
 
     @ManyToOne
-    @JoinColumn(name = "universe_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "universe_id")
     public UniverseEntity universe;
 
 }

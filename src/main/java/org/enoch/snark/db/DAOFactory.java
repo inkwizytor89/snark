@@ -11,7 +11,7 @@ public class DAOFactory {
     public FleetDAO fleetDAO;
     public GalaxyDAO galaxyDAO;
     public TargetDAO targetDAO;
-    public SourceDAO sourceDAO;
+    public ColonyDAO colonyDAO;
     public MessageDAO messageDAO;
     public CollectionDAO collectionDAO;
     public ErrorDAO errorDAO;
@@ -21,7 +21,7 @@ public class DAOFactory {
         fleetDAO = new FleetDAOImpl(entity);
         galaxyDAO = new GalaxyDAOImpl(entity);
         targetDAO = new TargetDAOImpl(entity);
-        sourceDAO = new SourceDAOImpl(entity);
+        colonyDAO = new ColonyDAOImpl(entity);
         messageDAO = new MessageDAOImpl(entity);
         collectionDAO = new CollectionDAOImpl(entity);
         errorDAO = new ErrorDAOImpl(entity);

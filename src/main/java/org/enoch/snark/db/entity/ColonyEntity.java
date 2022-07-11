@@ -9,12 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sources", schema = "public", catalog = "snark")
-public class SourceEntity extends BaseEntity {
-
-    @ManyToOne
-    @JoinColumn(name = "planet_id", referencedColumnName = "id", nullable = false)
-    public PlanetEntity planet;
+@Table(name = "colonies", schema = "public", catalog = "snark")
+public class ColonyEntity extends PlanetEntity {
 
     @Basic
     @Column(name = "cp")
@@ -28,10 +24,10 @@ public class SourceEntity extends BaseEntity {
 
         List<SystemView> result = new ArrayList<>();
         // TODO: extend about begin-end circle
-        int begin = planet.system - universe.explorationArea;
-        int end = planet.system + universe.explorationArea;
+        int begin = system - universe.explorationArea;
+        int end = system + universe.explorationArea;
         for(int i = begin; i < end; i++ ) {
-            result.add(new SystemView(planet.galaxy, i));
+            result.add(new SystemView(galaxy, i));
         }
         return result;
     }

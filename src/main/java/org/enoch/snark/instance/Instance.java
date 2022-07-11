@@ -2,8 +2,8 @@ package org.enoch.snark.instance;
 
 import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
-import org.enoch.snark.db.entity.SourceEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GI;
@@ -22,7 +22,7 @@ public class Instance {
     public GISession session;
 //    public MessageService messageService;
     public DAOFactory daoFactory;
-    public ImmutableList<SourceEntity> sources;
+    public ImmutableList<ColonyEntity> sources;
 
     public Instance(UniverseEntity universeEntity) {
         this(universeEntity, true);
@@ -30,7 +30,7 @@ public class Instance {
 
     public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
         this.universeEntity = universeEntity;
-        sources = ImmutableList.copyOf(universeEntity.sourceEntities);
+        sources = ImmutableList.copyOf(universeEntity.colonyEntities);
         daoFactory = new DAOFactory(universeEntity);
         gi = new GI();
         session = new GISession(this);
@@ -49,15 +49,15 @@ public class Instance {
         new ResourceSI(this).run();
     }
 
-    public SourceEntity findNearestSource(PlanetEntity planet) {
+    public ColonyEntity findNearestSource(PlanetEntity planet) {
 
-        List<SourceEntity> sources = daoFactory.sourceDAO.fetchAll();
+        List<ColonyEntity> sources = daoFactory.colonyDAO.fetchAll();
 
-        SourceEntity nearestPlanet = sources.get(0);
-        Integer minDistance = planet.calculateDistance(sources.get(0).planet);
+        ColonyEntity nearestPlanet = sources.get(0);
+        Integer minDistance = planet.calculateDistance(sources.get(0));
 
-        for(SourceEntity source : sources) {
-            Integer distance = planet.calculateDistance(source.planet);
+        for(ColonyEntity source : sources) {
+            Integer distance = planet.calculateDistance(source);
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestPlanet = source;
@@ -67,7 +67,7 @@ public class Instance {
     }
 
     public void removePlanet(TargetEntity target) {
-        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.planet.galaxy, target.planet.system, target.planet.position);
+        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.galaxy, target.system, target.position);
         if(targetEntity.isPresent()) {
             daoFactory.fleetDAO.fetchAll().stream()
                     .filter(fleetEntity -> fleetEntity.target.id.equals(target.id))
@@ -77,7 +77,7 @@ public class Instance {
         }
     }
 
-    public FleetBuilder buildFleet(SourceEntity source, PlanetEntity planet) {
+    public FleetBuilder buildFleet(ColonyEntity source, PlanetEntity planet) {
         return new FleetBuilder(this, source, planet);
     }
 }

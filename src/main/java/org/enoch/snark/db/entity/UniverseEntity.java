@@ -1,5 +1,8 @@
 package org.enoch.snark.db.entity;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -43,11 +46,12 @@ public class UniverseEntity extends IdEntity {
     @OneToMany(mappedBy = "universe")
     public Collection<GalaxyEntity> galaxies;
 
-    @OneToMany(fetch=FetchType.LAZY,mappedBy = "universe")
-    public Collection<PlanetEntity> planets;
+    @OneToMany(mappedBy = "universe")
+    public Collection<TargetEntity> targets;
 
-    @OneToMany(mappedBy = "universe") // source entity nie maja universum
-    public Collection<SourceEntity> sourceEntities;
+//    @Fetch(value = FetchMode.JOIN)
+    @OneToMany(mappedBy = "universe")
+    public Collection<ColonyEntity> colonyEntities;
 
     @Override
     public boolean equals(Object o) {

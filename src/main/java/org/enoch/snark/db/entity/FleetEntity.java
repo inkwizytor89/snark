@@ -4,7 +4,6 @@ import org.enoch.snark.instance.Instance;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,7 +23,7 @@ public class FleetEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
-    public SourceEntity source;
+    public ColonyEntity source;
 
     @Basic
     @Column(name = "space_target")
@@ -110,7 +109,7 @@ public class FleetEntity extends BaseEntity {
                                              @Nonnull Integer count) {
         FleetEntity fleet = new FleetEntity(instance);
         fleet.target = target;
-        fleet.source = instance.findNearestSource(target.planet);
+        fleet.source = instance.findNearestSource(target);
         fleet.type = SPY;
         fleet.son = count.longValue();
         return fleet;
@@ -120,7 +119,7 @@ public class FleetEntity extends BaseEntity {
                                              @Nonnull TargetEntity target) {
         FleetEntity fleet = new FleetEntity(instance);
         fleet.target = target;
-        fleet.source = instance.findNearestSource(target.planet);
+        fleet.source = instance.findNearestSource(target);
         fleet.type = ATTACK;
         fleet.lt = target.calculateTransportByLt();
         return fleet;

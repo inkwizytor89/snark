@@ -5,8 +5,7 @@
              version="2.0">
     <persistence-unit name="PERSISTENCE">
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
-        <class>org.enoch.snark.db.entity.PlanetEntity</class>
-        <class>org.enoch.snark.db.entity.SourceEntity</class>
+        <class>org.enoch.snark.db.entity.ColonyEntity</class>
         <class>org.enoch.snark.db.entity.TargetEntity</class>
         <class>org.enoch.snark.db.entity.GalaxyEntity</class>
         <class>org.enoch.snark.db.entity.ExplorationEntity</class>
@@ -28,7 +27,7 @@
 <!--            <property name="hibernate.temp.use_jdbc_metadata_defaults" value="false"/>-->
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
-            <!--<property name="hibernate.show_sql" value = "true" />-->
+            <property name="hibernate.show_sql" value = "true" />
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/snark"/>
             <property name="javax.persistence.jdbc.user" value="postgres"/>
