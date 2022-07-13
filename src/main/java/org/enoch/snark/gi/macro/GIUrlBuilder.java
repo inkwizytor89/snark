@@ -8,8 +8,12 @@ import org.openqa.selenium.WebElement;
 
 public class GIUrlBuilder {
 
+    public static final String COMPONENT_TERM = "component=";
+    public static final String PAGE_TERM = "page=";
+
+    private static final String PAGE_INGAME = "ingame";
     private static final String PAGE_OVERVIEW = "overview";
-    private static final String PAGE_BASE_FLEET = "fleet1";
+    private static final String PAGE_BASE_FLEET = "fleetdispatch";
     private static final String PAGE_MESSAGES = "messages";
     private static final String PAGE_SPACE = "galaxy";
 
@@ -21,7 +25,8 @@ public class GIUrlBuilder {
 
     public void openFleetView(ColonyEntity source, TargetEntity target, Mission mission) {
         String builder = instance.universeEntity.url + "?" +
-                "page=" + PAGE_BASE_FLEET +
+                PAGE_TERM + PAGE_INGAME + "&" +
+                COMPONENT_TERM + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
                 "&galaxy=" + target.galaxy +
                 "&system=" + target.system +
@@ -34,7 +39,8 @@ public class GIUrlBuilder {
 
     public void updateFleetStatus() {
         String builder = instance.universeEntity.url + "?" +
-                "page=" + PAGE_BASE_FLEET ;
+                PAGE_TERM + PAGE_INGAME + "&" +
+                COMPONENT_TERM + PAGE_BASE_FLEET ;
         instance.session.getWebDriver().get(builder);
 
         loadFleetStatus();
@@ -57,13 +63,14 @@ public class GIUrlBuilder {
 
     public void openMessages() {
         String builder = instance.universeEntity.url + "?" +
-                "page=" + PAGE_MESSAGES;
+                PAGE_TERM + PAGE_MESSAGES;
         instance.session.getWebDriver().get(builder);
     }
 
     public void openOverview() {
         String builder = instance.universeEntity.url + "?" +
-                "page=" + PAGE_OVERVIEW;
+                PAGE_TERM + PAGE_INGAME + "&" +
+                COMPONENT_TERM + PAGE_OVERVIEW;
         instance.session.getWebDriver().get(builder);
     }
 
@@ -73,7 +80,8 @@ public class GIUrlBuilder {
 
     public void openGalaxy(int galaxy, int system, int position) {
         String builder = instance.universeEntity.url + "?" +
-                "page=" + PAGE_SPACE +
+                PAGE_TERM + PAGE_INGAME + "&" +
+                COMPONENT_TERM + PAGE_SPACE +
                 "&galaxy=" + galaxy +
                 "&system=" + system +
                 "&position=" + position;
