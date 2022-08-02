@@ -15,7 +15,7 @@ public class TargetPlanet extends Planet {
         String[] dataTable = informationString.split("\\s+");
         loadPlanetCoordinate(dataTable[COORDINATE_INDEX]);
         if(dataTable.length > 1) {
-            power = new Integer(dataTable[POWER_INDEX].replaceAll("\\.", ""));
+            power = Integer.parseInt(dataTable[POWER_INDEX].replaceAll("\\.", ""));
         }
     }
 

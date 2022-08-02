@@ -87,6 +87,9 @@ public class SendFleetRequest {
         if(FleetEntity.ATTACK.equals(mission)) {
             return FleetEntity.createFarmFleet(instance, target);
         }
+        if(FleetEntity.EXPEDITION.equals(mission)) {
+            return FleetEntity.createExpeditionFleet(instance, target.toPlanet());
+        }
         throw new RuntimeException("Unknown mission "+ mission);
     }
 

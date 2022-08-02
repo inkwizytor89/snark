@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 
 import javax.persistence.*;

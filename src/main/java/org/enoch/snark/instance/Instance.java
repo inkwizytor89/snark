@@ -9,7 +9,7 @@ import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.instance.actions.FleetBuilder;
+import org.enoch.snark.model.Planet;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,18 +46,22 @@ public class Instance {
     }
 
     public void runSI() {
-        new ResourceSI(this).run();
+        new BaseSI(this).run();
     }
 
     public ColonyEntity findNearestSource(PlanetEntity planet) {
+        return this.findNearestSource(planet.toPlanet());
+    }
+
+    public ColonyEntity findNearestSource(Planet planet) {
 
         List<ColonyEntity> sources = daoFactory.colonyDAO.fetchAll();
 
         ColonyEntity nearestPlanet = sources.get(0);
-        Integer minDistance = planet.calculateDistance(sources.get(0));
+        Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
 
         for(ColonyEntity source : sources) {
-            Integer distance = planet.calculateDistance(source);
+            Integer distance = planet.calculateDistance(source.toPlanet());
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestPlanet = source;
@@ -66,18 +70,18 @@ public class Instance {
         return nearestPlanet;
     }
 
-    public void removePlanet(TargetEntity target) {
+    public void removePlanet(Planet target) {
         Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.galaxy, target.system, target.position);
         if(targetEntity.isPresent()) {
             daoFactory.fleetDAO.fetchAll().stream()
-                    .filter(fleetEntity -> fleetEntity.target.id.equals(target.id))
+                    .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))
                     .forEach(fleetEntity -> daoFactory.fleetDAO.remove(fleetEntity));
-            daoFactory.targetDAO.remove(target);
+            daoFactory.targetDAO.remove(targetEntity.get());
             //TODO: remove messegas and others
         }
     }
 
-    public FleetBuilder buildFleet(ColonyEntity source, PlanetEntity planet) {
-        return new FleetBuilder(this, source, planet);
+    public Long calcutateExpeditionSize() {
+        return 1200L;
     }
 }

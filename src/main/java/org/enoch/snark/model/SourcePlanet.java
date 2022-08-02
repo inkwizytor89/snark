@@ -10,6 +10,6 @@ public class SourcePlanet extends Planet {
         super();
         String[] dataTable = informationString.split("#");
         loadPlanetCoordinate(dataTable[COORDINATE_INDEX]);
-        planetId = new Integer(dataTable[PLANET_ID_INDEX]);
+        planetId = Integer.parseInt(dataTable[PLANET_ID_INDEX]);
     }
 }

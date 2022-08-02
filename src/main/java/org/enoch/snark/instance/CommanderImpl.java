@@ -78,9 +78,9 @@ public class CommanderImpl implements Commander {
     private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {
         return fleetActionQueue.stream().anyMatch(command -> command instanceof SendFleetCommand &&
                 newSendFleet.mission.equals(((SendFleetCommand) command).mission) &&
-                newSendFleet.fleet.target.galaxy.equals(((SendFleetCommand) command).fleet.target.galaxy) &&
-                newSendFleet.fleet.target.system.equals(((SendFleetCommand) command).fleet.target.system) &&
-                newSendFleet.fleet.target.position.equals(((SendFleetCommand) command).fleet.target.position));
+                newSendFleet.fleet.targetGalaxy.equals(((SendFleetCommand) command).fleet.targetGalaxy) &&
+                newSendFleet.fleet.targetSystem.equals(((SendFleetCommand) command).fleet.targetSystem) &&
+                newSendFleet.fleet.targetPosition.equals(((SendFleetCommand) command).fleet.targetPosition));
     }
 
     private void startCalculationQueue() {

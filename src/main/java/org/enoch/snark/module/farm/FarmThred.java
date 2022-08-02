@@ -44,7 +44,7 @@ public class FarmThred extends AbstractThred {
     protected void onStart() {
         super.onStart();
         if(farmDAO.getActualState() == null) {
-            farmDAO.saveOrUpdate(createFarmEntity());
+//            farmDAO.saveOrUpdate(createFarmEntity());
             farmDAO.saveOrUpdate(createFarmEntity());
         }
         actualFarm = farmDAO.getActualState();

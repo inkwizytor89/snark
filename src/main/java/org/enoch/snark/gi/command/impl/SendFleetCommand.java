@@ -9,6 +9,7 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
@@ -51,7 +52,7 @@ public class SendFleetCommand extends GICommand {
         // musimy pobrac odpowiednia flote z bazy danych
         // uzupełnić odpowiednimi danymi
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
-        giUrlBuilder.openFleetView(fleet.source, fleet.target, mission);
+        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
 
         for(Map.Entry<ShipEnum, Long> entry : ShipEnum.createShipsMap(fleet).entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
@@ -72,7 +73,7 @@ public class SendFleetCommand extends GICommand {
         setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5);
         fleetSelector.next();
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
-            TargetEntity target = fleet.target;
+            TargetEntity target = new TargetEntity(fleet.getCoordinate());
             target.type = TargetEntity.WEAK;
             instance.daoFactory.targetDAO.saveOrUpdate(target);
             return true;
@@ -85,7 +86,7 @@ public class SendFleetCommand extends GICommand {
             fleetSelector.start();
         } catch(PlanetDoNotExistException e) {
             e.printStackTrace();
-            instance.removePlanet(fleet.target);
+            instance.removePlanet(new Planet(fleet.getCoordinate()));
             setAfterCommand(null);
             // TODO: thred don't get information about one fleet slot free
             return true;
@@ -108,6 +109,6 @@ public class SendFleetCommand extends GICommand {
 
     @Override
     public String toString() {
-        return mission.name()+" "+fleet.target+" form "+fleet.source;
+        return mission.name()+" "+fleet.getCoordinate()+" form "+fleet.source;
     }
 }

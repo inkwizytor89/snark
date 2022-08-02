@@ -53,7 +53,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
             Optional<TargetEntity> targetFromDb = targets.stream().filter(t -> t.position.equals(position)).findAny();
 
             if(StringUtils.isEmpty(player) && targetFromDb.isPresent()) {
-                instance.removePlanet(targetFromDb.get());
+                instance.removePlanet(targetFromDb.get().toPlanet());
                 continue;
             }
             if(StringUtils.isEmpty(player) && !targetFromDb.isPresent()) {

@@ -1,5 +1,7 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.model.Planet;
+
 import javax.persistence.*;
 import java.util.Collection;
 
@@ -36,6 +38,10 @@ public abstract class PlanetEntity extends BaseEntity{
     @Basic
     @Column(name = "power")
     public Long power;
+
+    @Basic
+    @Column(name = "is_planet")
+    public Boolean isPlanet;
 
     @Basic
     @Column(name = "lm")
@@ -93,7 +99,6 @@ public abstract class PlanetEntity extends BaseEntity{
     @Column(name = "sat")
     public Long sat;
 
-
     @Basic
     @Column(name = "wr")
     public Long wr;
@@ -144,25 +149,31 @@ public abstract class PlanetEntity extends BaseEntity{
         loadPlanetCoordinate(input);
     }
 
-    public Integer calculateDistance(PlanetEntity planet) {
-        if(!galaxy.equals(planet.galaxy)) {
-            return roundDistance(galaxy, planet.galaxy, 6) *20000;
-        }
-        if(!system.equals(planet.system)) {
-            return roundDistance(system, planet.system, 499) *95 +2700;
-        }
-        return roundDistance(position, planet.position, 15)*5+1000;
-    }
+//    public Integer calculateDistance(PlanetEntity planet) {
+//        return this.calculateDistance(planet.toPlanet());
+//    }
+
+//    public Integer calculateDistance(Planet planet) {
+//        return planet.calculateDistance()
+//        if(!galaxy.equals(planet.galaxy)) {
+//            return roundDistance(galaxy, planet.galaxy, 6) *20000;
+//        }
+//        if(!system.equals(planet.system)) {
+//            return roundDistance(system, planet.system, 499) *95 +2700;
+//        }
+//        return roundDistance(position, planet.position, 15)*5+1000;
+//    }
 
     private int roundDistance(Integer x1, Integer x2, Integer max) {
         return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
     }
 
+    @Deprecated
     protected void loadPlanetCoordinate(String coordinateString) {
         String[] numbersTable = coordinateString.split("\\D+");
-        galaxy = new Integer(numbersTable[GALAXY_INDEX]);
-        system = new Integer(numbersTable[SYSTEM_INDEX]);
-        position = new Integer(numbersTable[POSITION_INDEX]);
+        galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
+        system = Integer.parseInt(numbersTable[SYSTEM_INDEX]);
+        position = Integer.parseInt(numbersTable[POSITION_INDEX]);
     }
 
     public static Long parseResource(String input) {
@@ -176,6 +187,14 @@ public abstract class PlanetEntity extends BaseEntity{
         }
         Double result = Double.parseDouble(input) * base;
         return result.longValue();
+    }
+
+    public String getCordinate() {
+        return galaxy + ":" + system + ":" + position;
+    }
+
+    public Planet toPlanet() {
+        return new Planet(this.getCordinate());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Planet;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -12,10 +13,19 @@ public class FleetEntity extends BaseEntity {
 
     public static final String SPY = "SPY";
     public static final String ATTACK = "ATTACK";
+    public static final String EXPEDITION = "EXPEDITION";
 
-    @ManyToOne
-    @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
-    public TargetEntity target;
+    @Basic
+    @Column(name = "target_galaxy")
+    public Integer targetGalaxy;
+
+    @Basic
+    @Column(name = "target_system")
+    public Integer targetSystem;
+
+    @Basic
+    @Column(name = "target_position")
+    public Integer targetPosition;
 
     @Basic
     @Column(name = "type")
@@ -69,6 +79,12 @@ public class FleetEntity extends BaseEntity {
     @Column(name = "GS")
     public Long gs;
 
+    @Column(name = "RE")
+    public Long re;
+
+    @Column(name = "PF")
+    public Long pf;
+
     @Column(name = "LT")
     public Long lt;
 
@@ -84,12 +100,21 @@ public class FleetEntity extends BaseEntity {
     @Column(name = "SON")
     public Long son;
 
-    FleetEntity() {
+    @Transient
+    private Instance instance;
+
+    @Transient
+    private  Planet planet;
+
+
+    public FleetEntity() {
+        super();
         start = LocalDateTime.now();
     }
 
     public FleetEntity(Instance instance) {
         super();
+        this.instance = instance;
         universe = instance.universeEntity;
         start = LocalDateTime.now();
     }
@@ -100,6 +125,10 @@ public class FleetEntity extends BaseEntity {
                 (ATTACK.equals(type) && back != null && now.isAfter(back));
     }
 
+    public String getCoordinate() {
+        return "[" + targetGalaxy + ", " + targetSystem + ", " + targetPosition + "]";
+    }
+
     public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
         return createSpyFleet(instance, target, target.spyLevel);
     }
@@ -108,7 +137,9 @@ public class FleetEntity extends BaseEntity {
                                              @Nonnull TargetEntity target,
                                              @Nonnull Integer count) {
         FleetEntity fleet = new FleetEntity(instance);
-        fleet.target = target;
+        fleet.targetGalaxy = target.galaxy;
+        fleet.targetSystem = target.system;
+        fleet.targetPosition = target.position;
         fleet.source = instance.findNearestSource(target);
         fleet.type = SPY;
         fleet.son = count.longValue();
@@ -118,15 +149,53 @@ public class FleetEntity extends BaseEntity {
     public static FleetEntity createFarmFleet(@Nonnull Instance instance,
                                              @Nonnull TargetEntity target) {
         FleetEntity fleet = new FleetEntity(instance);
-        fleet.target = target;
+        fleet.targetGalaxy = target.galaxy;
+        fleet.targetSystem = target.system;
+        fleet.targetPosition = target.position;
         fleet.source = instance.findNearestSource(target);
         fleet.type = ATTACK;
         fleet.lt = target.calculateTransportByLt();
         return fleet;
     }
 
+    public static FleetEntity createExpeditionFleet(@Nonnull Instance instance,
+                                              @Nonnull Planet target) {
+        FleetEntity fleet = new FleetEntity(instance);
+        fleet.targetGalaxy = target.galaxy;
+        fleet.targetSystem = target.system;
+        fleet.targetPosition = 16;
+        fleet.source = instance.findNearestSource(target);
+        fleet.type = EXPEDITION;
+        fleet.pf = 1L;
+        fleet.son = 1L;
+        fleet.dt = instance.calcutateExpeditionSize();
+        return fleet;
+    }
+
+    public FleetEntity to(PlanetEntity planet) {
+        return to(planet.toPlanet());
+    }
+
+    public FleetEntity to(Planet planet) {
+        this.planet = planet;
+        this.targetGalaxy = planet.galaxy;
+        this.targetSystem = planet.system;
+        this.targetPosition = planet.position;
+        return this;
+    }
+
+    public void send() {
+        if(targetGalaxy == null || targetSystem == null || targetPosition == null) {
+            throw new RuntimeException("missing target for fleet in FleetBuilder");
+        }
+        if(source == null) {
+            this.source = instance.findNearestSource(planet);
+        }
+        this.instance.daoFactory.fleetDAO.saveOrUpdate(this);
+    }
+
     @Override
     public String toString() {
-        return "[" + id + ": " + type + " " + source + " -> " + target + "]";
+        return "[" + id + ": " + type + " " + source + " -> " + targetSystem.toString() + "]";
     }
 }

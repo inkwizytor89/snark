@@ -30,9 +30,9 @@ public class Planet {
 
     protected void loadPlanetCoordinate(String coordinateString) {
         String[] numbersTable = coordinateString.split("\\D+");
-        galaxy = new Integer(numbersTable[GALAXY_INDEX]);
-        system = new Integer(numbersTable[SYSTEM_INDEX]);
-        position = new Integer(numbersTable[POSITION_INDEX]);
+        galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
+        system = Integer.parseInt(numbersTable[SYSTEM_INDEX]);
+        position = Integer.parseInt(numbersTable[POSITION_INDEX]);
     }
 
     @Override
