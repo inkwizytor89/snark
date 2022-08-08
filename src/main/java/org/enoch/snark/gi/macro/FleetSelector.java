@@ -7,6 +7,7 @@ import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,7 +22,7 @@ public class FleetSelector {
     }
 
     public void typeShip(ShipEnum shipEnum, Long count) {
-        WebElement element = webDriver.findElement(By.id(shipEnum.getId()));
+        WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
         if(!element.isEnabled()) {
             throw new ShipDoNotExists("Missings ships " + shipEnum.getId());
         }
@@ -31,15 +32,20 @@ public class FleetSelector {
     public void next() {
         session.gi.sleep(TimeUnit.SECONDS, 1);
 
-        final WebElement continueButton = session.getWebDriver().findElement(By.id("continue"));
-        if(continueButton.getAttribute("class").equals("off"))
+        final WebElement continueButton = session.getWebDriver().findElement(By.id("continueToFleet2"));
+        if(continueButton.getAttribute("class").equals("continue off"))
             throw new ShipDoNotExists();
-        continueButton.click();
+//        continueButton.click();
+
+
+        Actions actions = new Actions(session.getWebDriver());
+
+        actions.moveToElement(continueButton).click().perform();
     }
 
     public boolean start() {
         session.gi.sleep(TimeUnit.SECONDS, 2);
-        final WebElement startInput = session.getWebDriver().findElement(By.id("start"));
+        final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
         if(startInput.getTagName().equals("td")) {
             throw new PlanetDoNotExistException();
         }

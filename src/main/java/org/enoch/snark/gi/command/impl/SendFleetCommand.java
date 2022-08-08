@@ -14,6 +14,7 @@ import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ public class SendFleetCommand extends GICommand {
 
     @Override
     public boolean execute() {
-        fleet = instance.daoFactory.fleetDAO.fetch(fleet);
+//        fleet = instance.daoFactory.fleetDAO.fetch(fleet);
         if(fleet.visited != null || fleet.back != null) {
             System.err.println("Fleet already send "+fleet);
             return true;
@@ -57,6 +58,10 @@ public class SendFleetCommand extends GICommand {
         for(Map.Entry<ShipEnum, Long> entry : ShipEnum.createShipsMap(fleet).entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
+
+        //Scroll down till the bottom of the page
+        ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
         fleetSelector.next();
 
         instance.gi.sleep(TimeUnit.SECONDS, 1);
@@ -71,7 +76,7 @@ public class SendFleetCommand extends GICommand {
         final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
         fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
         setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5);
-        fleetSelector.next();
+//        fleetSelector.next();
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
             TargetEntity target = new TargetEntity(fleet.getCoordinate());
             target.type = TargetEntity.WEAK;
@@ -102,8 +107,7 @@ public class SendFleetCommand extends GICommand {
     @Override
     public void onInterrupt() {
         super.onInterrupt();
-        fleet.code = null;
-        fleet.start = null;
+        fleet.code = -1L;
         instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
     }
 

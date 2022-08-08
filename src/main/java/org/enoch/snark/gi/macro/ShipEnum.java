@@ -6,21 +6,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ShipEnum {
-    LM("ship_204"),
-    CM("ship_205"),
-    KR("ship_206"),
-    OW("ship_207"),
-    PAN("ship_215"),
-    BOM("ship_211"),
-    NI("ship_213"),
-    GS("ship_214"),
+    LM("fighterLight"),
+    CM("fighterHeavy"),
+    KR("cruiser"),
+    OW("battleship"),
+    PAN("interceptor"),
+    BOM("bomber"),
+    NI("destroyer"),
+    GS("deathstar"),
     RE("reaper"),
     PF("explorer"),
-    LT("ship_202"),
-    DT("ship_203"),
-    KOL("ship_208"),
-    REC("ship_209"),
-    SON("ship_210");
+    LT("transporterSmall"),
+    DT("transporterLarge"),
+    KOL("colonyShip"),
+    REC("recycler"),
+    SON("espionageProbe");
 
     private String id;
 

@@ -3,16 +3,16 @@ package org.enoch.snark.module.collector;
 import org.enoch.snark.db.entity.CollectionEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
-import org.enoch.snark.module.AbstractThred;
+import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 //todo nieskonczone
-public class CollectorThred extends AbstractThred {
+public class CollectorThread extends AbstractThread {
 
     private final Instance instance;
 
-    public CollectorThred(SI si) {
+    public CollectorThread(SI si) {
         super(si);
         instance = si.getInstance();
     }

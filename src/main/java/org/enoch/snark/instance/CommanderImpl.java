@@ -9,7 +9,9 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -22,6 +24,7 @@ public class CommanderImpl implements Commander {
 
     private Instance instance;
     private GISession session;
+    private LocalDateTime lastUpdate = LocalDateTime.now();
 
     private int fleetCount = 0;
     private int fleetMax = 0;
@@ -55,6 +58,7 @@ public class CommanderImpl implements Commander {
                     resolve(fleetActionQueue.poll());
                     fleetCount++;
                     tooManyFleetActions++;
+                    update();
                     continue;
                 } else if(!interfaceActionQueue.isEmpty()) {
                     resolve(interfaceActionQueue.poll());
@@ -64,6 +68,7 @@ public class CommanderImpl implements Commander {
                 tooManyFleetActions = 0;
 
 //                if(session.isLoggedIn())    session.close();
+                update();
                 try {
                     TimeUnit.SECONDS.sleep(SLEEP_PAUSE);
                 } catch (InterruptedException e) {
@@ -73,6 +78,12 @@ public class CommanderImpl implements Commander {
         };
 
         new Thread(task).start();
+    }
+
+    private void update() {
+        if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(5))) {
+            new GIUrlBuilder(instance).updateFleetStatus();
+        }
     }
 
     private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {
@@ -118,6 +129,7 @@ public class CommanderImpl implements Commander {
             return;
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println(e.getMessage());
             success = false;
         }
 
@@ -146,15 +158,17 @@ public class CommanderImpl implements Commander {
     public void setFleetStatus(int fleetCount, int fleetMax) {
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
+        lastUpdate = LocalDateTime.now();
     }
 
     @Override
     public void setExpeditionStatus(int expeditionCount, int expeditionMax) {
         this.expeditionCount = expeditionCount;
         this.expeditionMax = expeditionMax;
+        lastUpdate = LocalDateTime.now();
     }
 
-    public void push(AbstractCommand command) {
+    public synchronized void push(AbstractCommand command) {
         if (CommandType.FLEET_REQUIERED.equals(command.getType())) {
             fleetActionQueue.offer(command);
             log.info("Inserted "+command+" into queue fleetActionQueue size "+fleetActionQueue.size());
@@ -167,6 +181,10 @@ public class CommanderImpl implements Commander {
         }else {
             throw new RuntimeException("Invalid type of command");
         }
+    }
+
+    public List<AbstractCommand> peekFleetQueue() {
+        return (LinkedList<AbstractCommand>)((LinkedList<AbstractCommand>) fleetActionQueue).clone();
     }
 
     public int getFleetFreeSlots() {

@@ -1,23 +1,16 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.command.impl.ReadMessageCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
-import org.enoch.snark.module.AbstractThred;
-import org.enoch.snark.module.explore.SpaceThred;
-import org.enoch.snark.module.farm.FarmThred;
-import org.enoch.snark.module.scan.ScanThred;
-
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.explore.SpaceThread;
+import org.enoch.snark.module.farm.FarmThread;
+import org.enoch.snark.module.scan.ScanThread;
 
 public class ResourceSI implements SI {
 
     public Instance instance;
-    private SpaceThred spaceThred;
-    private ScanThred scanThred;
-    private FarmThred farmThred;
+    private SpaceThread spaceThred;
+    private ScanThread scanThred;
+    private FarmThread farmThred;
 
     public ResourceSI(Instance instance) {
         this.instance = instance;
@@ -38,9 +31,9 @@ public class ResourceSI implements SI {
     }
 
     @Override
-    public int getAvailableFleetCount(AbstractThred thred) {
+    public int getAvailableFleetCount(AbstractThread thred) {
 
-        if(thred instanceof FarmThred) {
+        if(thred instanceof FarmThread) {
             return 4;//instance.commander.getFleetMax() - 2;
         }
         return 0;

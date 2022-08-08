@@ -2,11 +2,18 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.gi.command.AbstractCommand;
 
+import java.util.List;
+
 public class DumbCommanderImpl implements Commander {
 
     @Override
     public void push(AbstractCommand command) {
 
+    }
+
+    @Override
+    public List<AbstractCommand> peekFleetQueue() {
+        return null;
     }
 
     @Override

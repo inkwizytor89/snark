@@ -6,10 +6,10 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Marker;
 import org.enoch.snark.gi.text.Text;
 import org.enoch.snark.instance.Instance;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
 
@@ -26,6 +26,8 @@ public class GISession {
         this.instance = instance;
         gi = instance.gi;
         webDriver = gi.webDriver;
+
+        webDriver.manage().window().maximize();
 
         while(!isLoggedIn) {
             try {
@@ -45,6 +47,10 @@ public class GISession {
     public void open() {
         webDriver.get(instance.universeEntity.url);
         try {
+            Cookie cookie = new Cookie("gf-cookie-consent-4449562312", "|7|1",".gameforge.com",
+                    "/", null);
+            webDriver.manage().addCookie(cookie);
+
             logIn();
         } catch (GIException e) {
             System.err.println(e.getMessage());

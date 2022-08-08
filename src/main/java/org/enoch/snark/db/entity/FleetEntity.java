@@ -125,6 +125,10 @@ public class FleetEntity extends BaseEntity {
                 (ATTACK.equals(type) && back != null && now.isAfter(back));
     }
 
+    public boolean isItBack() {
+        return back != null && LocalDateTime.now().isAfter(back);
+    }
+
     public String getCoordinate() {
         return "[" + targetGalaxy + ", " + targetSystem + ", " + targetPosition + "]";
     }

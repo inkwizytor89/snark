@@ -190,7 +190,7 @@ public abstract class PlanetEntity extends BaseEntity{
     }
 
     public String getCordinate() {
-        return galaxy + ":" + system + ":" + position;
+        return Planet.getCordinate(galaxy, system, position);
     }
 
     public Planet toPlanet() {

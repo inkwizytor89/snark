@@ -44,9 +44,13 @@ public class Planet {
         return this.galaxy.equals(anotherPlanet.galaxy) && this.system.equals(anotherPlanet.system) && this.position.equals(anotherPlanet.position);
     }
 
+    public static String getCordinate(Integer galaxy, Integer system, Integer position) {
+        return "["+galaxy+":"+system+":"+position+"]";
+    }
+
     @Override
     public String toString() {
-        return "["+galaxy+":"+system+":"+position+"]";
+        return getCordinate(galaxy, system, position);
     }
     public String toFileName() {
         return toString().replace(":","_");

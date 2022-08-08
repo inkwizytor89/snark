@@ -7,15 +7,15 @@ import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.SystemView;
-import org.enoch.snark.module.AbstractThred;
+import org.enoch.snark.module.AbstractThread;
 
 import java.util.*;
 
-public class SpaceThred extends AbstractThred {
+public class SpaceThread extends AbstractThread {
 
     private final Instance instance;
 
-    public SpaceThred(SI si) {
+    public SpaceThread(SI si) {
         super(si);
         instance = si.getInstance();
     }
@@ -35,10 +35,10 @@ public class SpaceThred extends AbstractThred {
         final Optional<GalaxyEntity> latestGalaxyToView = instance.daoFactory.galaxyDAO.findLatestGalaxyToView();
 
         if(!latestGalaxyToView.isPresent()) {
-            System.err.println(SpaceThred.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
+            System.err.println(SpaceThread.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
         } else {
             if(DateUtil.lessThanDays(4, latestGalaxyToView.get().updated)) {
-                System.err.println(SpaceThred.class.getName()+
+                System.err.println(SpaceThread.class.getName()+
                         ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
             } else {
                 instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));

@@ -4,10 +4,10 @@ import org.enoch.snark.instance.SI;
 
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractThred extends Thread {
+public abstract class AbstractThread extends Thread {
     protected SI si;
 
-    public AbstractThred(SI si) {
+    public AbstractThread(SI si) {
         this.si = si;
         setName(this.getClass().getName());
     }

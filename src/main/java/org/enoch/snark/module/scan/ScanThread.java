@@ -4,16 +4,15 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
-import org.enoch.snark.module.AbstractThred;
+import org.enoch.snark.module.AbstractThread;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-public class ScanThred extends AbstractThred {
+public class ScanThread extends AbstractThread {
 
     private final Instance instance;
 
-    public ScanThred(SI si) {
+    public ScanThread(SI si) {
         super(si);
         instance = si.getInstance();
     }

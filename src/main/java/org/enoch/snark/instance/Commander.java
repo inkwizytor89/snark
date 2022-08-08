@@ -2,9 +2,13 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.gi.command.AbstractCommand;
 
+import java.util.List;
+
 public interface Commander {
 
     void push(AbstractCommand command);
+
+    public List<AbstractCommand> peekFleetQueue();
 
     void setFleetStatus(int fleetCount, int fleetMax);
 
