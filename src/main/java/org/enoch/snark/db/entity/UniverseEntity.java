@@ -1,8 +1,5 @@
 package org.enoch.snark.db.entity;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -24,8 +21,8 @@ public class UniverseEntity extends IdEntity {
     public String name;
 
     @Basic
-    @Column(name = "tag")
-    public String tag;
+    @Column(name = "mode")
+    public String mode;
 
     @Basic
     @Column(name = "url")
@@ -49,7 +46,6 @@ public class UniverseEntity extends IdEntity {
     @OneToMany(mappedBy = "universe")
     public Collection<TargetEntity> targets;
 
-//    @Fetch(value = FetchMode.JOIN)
     @OneToMany(mappedBy = "universe")
     public Collection<ColonyEntity> colonyEntities;
 
@@ -62,7 +58,7 @@ public class UniverseEntity extends IdEntity {
                 Objects.equals(login, that.login) &&
                 Objects.equals(pass, that.pass) &&
                 Objects.equals(name, that.name) &&
-                Objects.equals(tag, that.tag) &&
+                Objects.equals(mode, that.mode) &&
                 Objects.equals(url, that.url) &&
                 Objects.equals(galaxyMax, that.galaxyMax) &&
                 Objects.equals(explorationArea, that.explorationArea);
@@ -71,6 +67,6 @@ public class UniverseEntity extends IdEntity {
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, login, pass, name, tag, url, galaxyMax, explorationArea);
+        return Objects.hash(id, login, pass, name, mode, url, galaxyMax, explorationArea);
     }
 }

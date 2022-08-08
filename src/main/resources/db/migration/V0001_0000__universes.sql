@@ -6,7 +6,7 @@ create table universes
   login            text,
   pass             text,
   name             text,
-  tag              text default "run",
+  mode             text,
   url              text,
   galaxy_max       integer default 6   not null,
   exploration_area integer default 9   not null,
