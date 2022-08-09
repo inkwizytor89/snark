@@ -4,13 +4,12 @@ import org.enoch.snark.Test;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Marker;
-import org.enoch.snark.gi.text.Text;
 import org.enoch.snark.instance.Instance;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.WebDriver;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
 
@@ -21,7 +20,6 @@ public class GISession {
     public GI gi;
 
     private boolean isLoggedIn = false;
-    private LocalDateTime runStart = LocalDateTime.now();
 
     public GISession(Instance instance) {
         this.instance = instance;
@@ -64,9 +62,6 @@ public class GISession {
     }
 
     private void logIn() {
-        //skipBannersIfExists
-        instance.gi.clickTextIfExists(Text.X);
-        instance.gi.clickTextIfExists(Text.AGREE);
 
         //insertLoginData
         gi.findText("Login").click();
@@ -75,7 +70,6 @@ public class GISession {
         gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
         //chooseServer
-        gi.clickTextIfExists(Text.AGREE);
         gi.clickText(Test.PLAY_TEXT);
         gi.doubleClickText(instance.universeEntity.name);
 

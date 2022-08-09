@@ -11,6 +11,7 @@ import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,8 @@ public class Instance {
     public DAOFactory daoFactory;
     public ImmutableList<ColonyEntity> sources;
 
+    public LocalDateTime instanceStart = LocalDateTime.now();
+
     public Instance(UniverseEntity universeEntity) {
         this(universeEntity, true);
     }
@@ -32,14 +35,22 @@ public class Instance {
         this.universeEntity = universeEntity;
         sources = ImmutableList.copyOf(universeEntity.colonyEntities);
         daoFactory = new DAOFactory(universeEntity);
-        gi = new GI();
-        session = new GISession(this);
+        browserReset();
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);
         } else {
             commander = new DumbCommanderImpl();
         }
         new GIUrlBuilder(this).updateFleetStatus();
+    }
+
+    public void browserReset() {
+        if(session != null) {
+            session.getWebDriver().quit();
+        }
+        gi = new GI();
+        session = new GISession(this);
+        instanceStart = LocalDateTime.now();
     }
 
     public void runTest() {
