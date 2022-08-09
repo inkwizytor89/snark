@@ -1,4 +1,13 @@
 insert into universes (login, pass, name, mode, url, galaxy_max)
 values (
 '', '',
-'Gaspra', 'Gaspra', 'https://s185-pl.ogame.gameforge.com/game/index.php', 7);
+'Halley', null, 'https://s186-en.ogame.gameforge.com/game/index.php', 9);
+
+insert into universes (login, pass, name, mode, url, galaxy_max)
+values (
+'', '',
+'Isonoe', null, 'https://s187-pl.ogame.gameforge.com/game/index.php', 7);
+
+
+
+
