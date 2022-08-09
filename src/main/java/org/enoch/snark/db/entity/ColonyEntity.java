@@ -31,4 +31,9 @@ public class ColonyEntity extends PlanetEntity {
         }
         return result;
     }
+
+    public boolean canSent(FleetEntity fleet) {
+        // todo change hardcoded logic on rea logic checking if is possible send fleet from colony
+        return true;
+    }
 }

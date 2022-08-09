@@ -13,8 +13,11 @@ import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
 
 public class ExpeditionThread extends AbstractThread {
 
+    public static final String threadName = "expedition";
+
     private final Instance instance;
     private Queue<ColonyEntity> expedyctionQueue = new LinkedList<>();
+    private int pause = 120;
 
     public ExpeditionThread(SI si) {
         super(si);
@@ -23,7 +26,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 120;
+        return pause;
     }
 
     @Override
@@ -36,8 +39,14 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = expedyctionQueue.poll();
-            setExpeditionReadyToStart(colony);
+            FleetEntity expedition = FleetEntity.createExpeditionFleet(instance, colony.toPlanet());
+            if(colony.canSent(expedition)) {
+                setExpeditionReadyToStart(expedition);
+            }
             expedyctionQueue.add(colony);
+            pause = 20;
+        } else {
+            pause = 120;
         }
     }
 
@@ -51,10 +60,8 @@ public class ExpeditionThread extends AbstractThread {
         return instance.commander.getExpeditionFreeSlots() > 0;
     }
 
-    private void setExpeditionReadyToStart(ColonyEntity colony) {
-//        FleetEntity.createExpeditionFleet(instance, colony.toPlanet()).send();
-        FleetEntity expeditionFleet = FleetEntity.createExpeditionFleet(instance, colony.toPlanet());
-        instance.commander.push(new SendFleetCommand(instance, expeditionFleet));
+    private void setExpeditionReadyToStart(FleetEntity expedition) {
+        instance.commander.push(new SendFleetCommand(instance, expedition));
     }
 
     private void cleanExpeditions() {

@@ -20,11 +20,12 @@ public class CommanderImpl implements Commander {
 
     private static final Logger log = Logger.getLogger( CommanderImpl.class.getName() );
 
-    private static final int SLEEP_PAUSE = 10;
+    private static final int SLEEP_PAUSE = 5;
+    public static final int TIME_TO_UPDATE = 5;
 
     private Instance instance;
     private GISession session;
-    private LocalDateTime lastUpdate = LocalDateTime.now();
+    private LocalDateTime lastUpdate = LocalDateTime.now().minusMinutes(TIME_TO_UPDATE);
 
     private int fleetCount = 0;
     private int fleetMax = 0;
@@ -68,7 +69,9 @@ public class CommanderImpl implements Commander {
                 tooManyFleetActions = 0;
 
 //                if(session.isLoggedIn())    session.close();
-                update();
+                if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
+                    update();
+                }
                 try {
                     TimeUnit.SECONDS.sleep(SLEEP_PAUSE);
                 } catch (InterruptedException e) {
@@ -81,9 +84,7 @@ public class CommanderImpl implements Commander {
     }
 
     private void update() {
-        if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(5))) {
-            new GIUrlBuilder(instance).updateFleetStatus();
-        }
+        new GIUrlBuilder(instance).updateFleetStatus();
     }
 
     private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {
@@ -125,7 +126,6 @@ public class CommanderImpl implements Commander {
             success = command.execute();
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
-            command.onInterrupt();
             return;
         } catch (Exception e) {
             e.printStackTrace();
