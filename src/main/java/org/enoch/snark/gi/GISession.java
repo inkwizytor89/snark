@@ -8,6 +8,7 @@ import org.enoch.snark.gi.text.Text;
 import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +21,7 @@ public class GISession {
     public GI gi;
 
     private boolean isLoggedIn = false;
-
+    private LocalDateTime runStart = LocalDateTime.now();
 
     public GISession(Instance instance) {
         this.instance = instance;

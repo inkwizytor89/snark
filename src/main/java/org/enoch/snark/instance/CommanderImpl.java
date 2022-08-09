@@ -69,6 +69,8 @@ public class CommanderImpl implements Commander {
                 tooManyFleetActions = 0;
 
 //                if(session.isLoggedIn())    session.close();
+//                jak skonczy sie wartosc <5h to trzeba przelogowac wszystko
+//                        gisession zeby zadzialo sie to tak aby inne elementy nie dzialaly na gui
                 if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
                     update();
                 }
