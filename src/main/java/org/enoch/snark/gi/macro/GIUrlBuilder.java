@@ -94,10 +94,17 @@ public class GIUrlBuilder {
     }
 
     public void openOverview() {
-        String builder = instance.universeEntity.url + "?" +
-                PAGE_TERM + PAGE_INGAME + "&" +
-                COMPONENT_TERM + PAGE_OVERVIEW;
-        instance.session.getWebDriver().get(builder);
+        this.openOverview(null);
+    }
+
+    public void openOverview(ColonyEntity source) {
+        StringBuilder builder = new StringBuilder( instance.universeEntity.url + "?");
+        builder.append(PAGE_TERM + PAGE_INGAME + "&");
+        builder.append(COMPONENT_TERM + PAGE_OVERVIEW);
+        if(source != null) {
+            builder.append("&cp=" + source.cp);
+        }
+        instance.session.getWebDriver().get(builder.toString());
     }
 
     public void openGalaxy(int galaxy, int system) {

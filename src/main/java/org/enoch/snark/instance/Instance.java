@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Instance {
 
@@ -65,7 +66,9 @@ public class Instance {
 
     public ColonyEntity findNearestSource(Planet planet) {
 
-        List<ColonyEntity> sources = daoFactory.colonyDAO.fetchAll();
+        List<ColonyEntity> sources = daoFactory.colonyDAO.fetchAll().stream()
+                .filter(colony -> universeEntity.id.equals(colony.universe.id))
+                .collect(Collectors.toList());
 
         ColonyEntity nearestPlanet = sources.get(0);
         Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
