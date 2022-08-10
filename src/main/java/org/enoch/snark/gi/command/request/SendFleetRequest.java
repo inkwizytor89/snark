@@ -22,7 +22,7 @@ public class SendFleetRequest {
     private int sendetFleet = 0;
 
     public SendFleetRequest(Instance instance, String mission, List<TargetEntity> targets) {
-        fleetDAO = new FleetDAOImpl(instance.universeEntity);
+        fleetDAO = instance.daoFactory.fleetDAO;
         this.instance = instance;
         this.targets = new ArrayList<>(targets);
         this.mission = mission;

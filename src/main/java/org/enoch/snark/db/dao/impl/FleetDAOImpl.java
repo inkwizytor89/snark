@@ -5,13 +5,14 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetDAO {
 
-    public FleetDAOImpl(UniverseEntity universeEntity) {
-        super(universeEntity);
+    public FleetDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
+        super(universeEntity, entityManager);
     }
 
     @Override

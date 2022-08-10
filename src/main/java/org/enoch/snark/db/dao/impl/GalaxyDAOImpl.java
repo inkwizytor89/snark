@@ -6,13 +6,14 @@ import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.model.SystemView;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class GalaxyDAOImpl extends AbstractDAOImpl<GalaxyEntity> implements GalaxyDAO {
 
-    public GalaxyDAOImpl(UniverseEntity universeEntity) {
-        super(universeEntity);
+    public GalaxyDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
+        super(universeEntity, entityManager);
     }
 
     @Override

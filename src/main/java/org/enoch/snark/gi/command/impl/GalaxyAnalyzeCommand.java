@@ -21,13 +21,15 @@ import java.util.Optional;
 
 public class GalaxyAnalyzeCommand extends GICommand {
 
-    private TargetDAO targetDAO = new TargetDAOImpl(instance.universeEntity);
-    private GalaxyDAO galaxyDAO = new GalaxyDAOImpl(instance.universeEntity);
+    private TargetDAO targetDAO;
+    private GalaxyDAO galaxyDAO;
     private final GIUrlBuilder giUrlBuilder;
     private SystemView systemView;
 
     public GalaxyAnalyzeCommand(Instance instance, SystemView systemView) {
         super(instance, CommandType.INTERFACE_REQUIERED);
+        targetDAO = instance.daoFactory.targetDAO;
+        galaxyDAO = instance.daoFactory.galaxyDAO;
         giUrlBuilder = new GIUrlBuilder(instance);
         this.systemView = systemView;
         normalize(this.systemView);

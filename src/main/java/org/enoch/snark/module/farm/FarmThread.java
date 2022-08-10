@@ -30,9 +30,9 @@ public class FarmThread extends AbstractThread {
 
     public FarmThread(SI si) {
         super(si);
-        farmDAO = new FarmDAOImpl(si.getInstance().universeEntity);
-        targetDAO = new TargetDAOImpl(si.getInstance().universeEntity);
-        fleetDAO = new FleetDAOImpl(si.getInstance().universeEntity);
+        farmDAO = si.getInstance().daoFactory.farmDAO;
+        targetDAO = si.getInstance().daoFactory.targetDAO;
+        fleetDAO = si.getInstance().daoFactory.fleetDAO;
     }
 
     @Override

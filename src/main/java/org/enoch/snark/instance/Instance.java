@@ -9,6 +9,7 @@ import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,14 +26,14 @@ public class Instance {
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
-    public Instance(UniverseEntity universeEntity) {
-        this(universeEntity, true);
+    public Instance(UniverseEntity universeEntity, UniverseDAOImpl universeDAO) {
+        this(universeEntity,universeDAO, true);
     }
 
-    public Instance(UniverseEntity universeEntity, boolean isQueueEnabled) {
+    public Instance(UniverseEntity universeEntity,UniverseDAOImpl universeDAO,  boolean isQueueEnabled) {
         this.universeEntity = universeEntity;
         sources = ImmutableList.copyOf(universeEntity.colonyEntities);
-        daoFactory = new DAOFactory(universeEntity);
+        daoFactory = new DAOFactory(universeDAO ,universeEntity);
         browserReset();
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);
@@ -95,8 +96,9 @@ public class Instance {
     }
 
     public boolean isStopped() {
-        Optional<UniverseEntity> entity = new UniverseDAOImpl().fetchAllUniverses().stream()
-                .filter(uni -> universeEntity.name.equals(uni.name))
+        daoFactory.entityManager.refresh(universeEntity);
+        Optional<UniverseEntity> entity = daoFactory.universeDAO.fetchAllUniverses().stream()
+                .filter(uni -> this.universeEntity.name.equals(uni.name))
                 .findAny();
         String mode = entity.get().mode;
         return mode!= null && mode.contains("stop");

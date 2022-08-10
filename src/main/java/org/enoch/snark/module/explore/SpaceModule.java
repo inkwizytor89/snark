@@ -10,7 +10,7 @@ import java.util.*;
 
 public class SpaceModule extends AbstractModule {
 
-    private GalaxyDAO galaxyDAO = new GalaxyDAOImpl(instance.universeEntity);
+    private GalaxyDAO galaxyDAO = instance.daoFactory.galaxyDAO;
     Queue<SystemView> toView = new LinkedList<>();
 
     public SpaceModule(Instance instance) {

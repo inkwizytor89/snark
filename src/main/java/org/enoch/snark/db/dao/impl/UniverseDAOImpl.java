@@ -9,9 +9,14 @@ import java.util.List;
 
 public class UniverseDAOImpl implements UniverseDAO {
 
+    public EntityManager entityManager;
+
+    public UniverseDAOImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     @Override
-    public List<UniverseEntity> fetchAllUniverses() {
-        EntityManager entityManager = JPAUtility.getEntityManager();
+    public synchronized List<UniverseEntity> fetchAllUniverses() {
         return entityManager.createQuery("from UniverseEntity", UniverseEntity.class).getResultList();
     }
 }

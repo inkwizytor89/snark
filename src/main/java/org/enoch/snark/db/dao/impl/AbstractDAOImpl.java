@@ -15,9 +15,9 @@ public abstract class AbstractDAOImpl<T extends BaseEntity> implements AbstractD
     final EntityManager entityManager;
     protected UniverseEntity universeEntity;
 
-    AbstractDAOImpl(UniverseEntity universeEntity) {
+    AbstractDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
         this.universeEntity = universeEntity;
-        entityManager = JPAUtility.getEntityManager();
+        this.entityManager = entityManager;
     }
 
     protected abstract Class<T> getEntitylass();

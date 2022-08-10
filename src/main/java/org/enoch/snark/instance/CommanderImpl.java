@@ -50,6 +50,11 @@ public class CommanderImpl implements Commander {
 
                 if (instance.isStopped()){
                     System.err.println("Is stopped");
+                    try {
+                        TimeUnit.SECONDS.sleep(SLEEP_PAUSE * 4);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     continue;
                 }
 

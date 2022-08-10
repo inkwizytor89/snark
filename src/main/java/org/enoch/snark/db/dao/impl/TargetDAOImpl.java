@@ -5,13 +5,14 @@ import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.entity.UniverseEntity;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
 public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements TargetDAO {
 
-    public TargetDAOImpl(UniverseEntity universeEntity) {
-        super(universeEntity);
+    public TargetDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
+        super(universeEntity, entityManager);
     }
 
     @Override
