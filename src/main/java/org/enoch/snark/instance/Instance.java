@@ -2,10 +2,8 @@ package org.enoch.snark.instance;
 
 import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.db.entity.UniverseEntity;
+import org.enoch.snark.db.dao.impl.UniverseDAOImpl;
+import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -94,5 +92,13 @@ public class Instance {
 
     public Long calcutateExpeditionSize() {
         return 1200L;
+    }
+
+    public boolean isStopped() {
+        Optional<UniverseEntity> entity = new UniverseDAOImpl().fetchAllUniverses().stream()
+                .filter(uni -> universeEntity.name.equals(uni.name))
+                .findAny();
+        String mode = entity.get().mode;
+        return mode!= null && mode.contains("stop");
     }
 }

@@ -47,6 +47,12 @@ public class CommanderImpl implements Commander {
         Runnable task = () -> {
             int tooManyFleetActions = 0;
             while(true) {
+
+                if (instance.isStopped()){
+                    System.err.println("Is stopped");
+                    continue;
+                }
+
                 if(fleetActionQueue.isEmpty()) {
                     for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
                         SendFleetCommand newSendFleet = new SendFleetCommand(instance, fleet);
