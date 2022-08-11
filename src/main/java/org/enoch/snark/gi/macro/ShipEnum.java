@@ -47,6 +47,8 @@ public enum ShipEnum {
         if(fleet.kol != null && fleet.kol > 0) shipsMap.put(KOL, fleet.kol);
         if(fleet.rec != null && fleet.rec > 0) shipsMap.put(REC, fleet.rec);
         if(fleet.son != null && fleet.son > 0) shipsMap.put(SON, fleet.son);
+        if(fleet.pf != null && fleet.pf > 0) shipsMap.put(PF, fleet.pf);
+        if(fleet.re != null && fleet.re > 0) shipsMap.put(RE, fleet.re);
         return shipsMap;
     }
 }

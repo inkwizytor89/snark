@@ -55,12 +55,12 @@ public class SendFleetCommand extends GICommand {
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
         giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
 
+        //Scroll down till the bottom of the page
+        ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
         for(Map.Entry<ShipEnum, Long> entry : ShipEnum.createShipsMap(fleet).entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
-
-        //Scroll down till the bottom of the page
-        ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
         fleetSelector.next();
 
