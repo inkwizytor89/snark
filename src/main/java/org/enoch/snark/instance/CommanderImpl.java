@@ -46,7 +46,14 @@ public class CommanderImpl implements Commander {
     private void startInterfaceQueue() {
         Runnable task = () -> {
             int tooManyFleetActions = 0;
+            update();
             while(true) {
+                //timeout after 5h
+
+                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub") ||
+                        LocalDateTime.now().isAfter(instance.instanceStart.plusHours(4L))) {
+                    instance.browserReset();
+                }
 
                 if (instance.isStopped()){
                     System.err.println("Is stopped");
@@ -79,10 +86,6 @@ public class CommanderImpl implements Commander {
                 }
                 tooManyFleetActions = 0;
 
-                //timeout after 5h
-                if(LocalDateTime.now().isAfter(instance.instanceStart.plusHours(4L))) {
-                    instance.browserReset();
-                }
                 if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
                     update();
                 }
@@ -98,7 +101,12 @@ public class CommanderImpl implements Commander {
     }
 
     private void update() {
-        new GIUrlBuilder(instance).updateFleetStatus();
+        try {
+            new GIUrlBuilder(instance).updateFleetStatus();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getMessage());
+        }
     }
 
     private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {

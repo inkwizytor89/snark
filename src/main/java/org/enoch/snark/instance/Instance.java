@@ -41,7 +41,6 @@ public class Instance {
         } else {
             commander = new DumbCommanderImpl();
         }
-        new GIUrlBuilder(this).updateFleetStatus();
     }
 
     public void browserReset() {

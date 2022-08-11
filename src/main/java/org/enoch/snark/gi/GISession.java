@@ -9,6 +9,7 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
 
@@ -43,7 +44,8 @@ public class GISession {
     }
 
     public void open() {
-        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/");//instance.universeEntity.url);
+//        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/");//instance.universeEntity.url);
+        webDriver.get("https://gameforge.com/pl-PL/sign-in");//instance.universeEntity.url);
         try {
             Cookie cookie = new Cookie("gf-cookie-consent-4449562312", "|7|1",".gameforge.com",
                     "/", null);
@@ -63,10 +65,20 @@ public class GISession {
     private void logIn() {
 
         //insertLoginData
-        gi.findText("Login").click();
-        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_MAIL_NAME).sendKeys(instance.universeEntity.login);
-        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_PASSWORD_NAME).sendKeys(instance.universeEntity.pass);
-        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
+//        gi.findText("Login").click();
+//        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_MAIL_NAME).sendKeys(instance.universeEntity.login);
+//        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_PASSWORD_NAME).sendKeys(instance.universeEntity.pass);
+//        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
+
+//        gi.findText("Login").click();
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(instance.universeEntity.login);
+        gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
+        gi.sleep(TimeUnit.SECONDS, 2);
+
+
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(instance.universeEntity.pass);
+        gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
+        gi.sleep(TimeUnit.SECONDS, 2);
 
         //chooseServer
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
