@@ -171,7 +171,6 @@ public class FleetEntity extends BaseEntity {
         fleet.source = instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;
-        fleet.son = 1L;
         fleet.dt = instance.calcutateExpeditionSize();
         return fleet;
     }

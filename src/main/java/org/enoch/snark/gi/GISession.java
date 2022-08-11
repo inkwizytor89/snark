@@ -1,6 +1,5 @@
 package org.enoch.snark.gi;
 
-import org.enoch.snark.Test;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Marker;
@@ -44,7 +43,7 @@ public class GISession {
     }
 
     public void open() {
-        webDriver.get(instance.universeEntity.url);
+        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/");//instance.universeEntity.url);
         try {
             Cookie cookie = new Cookie("gf-cookie-consent-4449562312", "|7|1",".gameforge.com",
                     "/", null);
@@ -70,7 +69,7 @@ public class GISession {
         gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
         //chooseServer
-        gi.clickText(Test.PLAY_TEXT);
+        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
         gi.doubleClickText(instance.universeEntity.name);
 
         isLoggedIn = true;
