@@ -74,6 +74,10 @@ public class CommanderImpl implements Commander {
                     this.isRunning = true;
                 }
 
+                if(false) {
+                    instance.gi.readEventFleet();
+                }
+
                 //todo to remove {
                 if(fleetActionQueue.isEmpty()) {
                     for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
