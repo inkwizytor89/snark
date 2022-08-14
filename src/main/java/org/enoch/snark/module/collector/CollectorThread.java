@@ -10,11 +10,18 @@ import java.util.Optional;
 //todo nieskonczone
 public class CollectorThread extends AbstractThread {
 
+    public static final String threadName = "collector";
+
     private final Instance instance;
 
     public CollectorThread(SI si) {
         super(si);
         instance = si.getInstance();
+    }
+
+    @Override
+    public String getThreadName() {
+        return threadName;
     }
 
     @Override
@@ -24,6 +31,7 @@ public class CollectorThread extends AbstractThread {
 
     @Override
     protected void onStart() {
+        super.onStart();
 
     }
 

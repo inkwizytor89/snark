@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class CommanderImpl implements Commander {
 
-    private static final Logger log = Logger.getLogger( CommanderImpl.class.getName() );
+    private static final Logger log = Logger.getLogger(CommanderImpl.class.getName() );
 
     private static final int SLEEP_PAUSE = 5;
     public static final int TIME_TO_UPDATE = 5;
@@ -26,6 +26,7 @@ public class CommanderImpl implements Commander {
     private Instance instance;
     private GISession session;
     private LocalDateTime lastUpdate = LocalDateTime.now().minusMinutes(TIME_TO_UPDATE);
+    private boolean isRunning = true;
 
     private int fleetCount = 0;
     private int fleetMax = 0;
@@ -43,6 +44,10 @@ public class CommanderImpl implements Commander {
         startCalculationQueue();
     }
 
+    public synchronized boolean isRunning() {
+        return isRunning;
+    }
+
     private void startInterfaceQueue() {
         Runnable task = () -> {
             int tooManyFleetActions = 0;
@@ -52,19 +57,25 @@ public class CommanderImpl implements Commander {
 
                 if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub") ||
                         LocalDateTime.now().isAfter(instance.instanceStart.plusHours(4L))) {
+                    this.isRunning = false;
                     instance.browserReset();
+                    this.isRunning = true;
                 }
 
                 if (instance.isStopped()){
                     System.err.println("Is stopped");
+                    this.isRunning = false;
                     try {
                         TimeUnit.SECONDS.sleep(SLEEP_PAUSE * 4);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     continue;
+                } else {
+                    this.isRunning = true;
                 }
 
+                //todo to remove {
                 if(fleetActionQueue.isEmpty()) {
                     for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
                         SendFleetCommand newSendFleet = new SendFleetCommand(instance, fleet);
@@ -73,6 +84,7 @@ public class CommanderImpl implements Commander {
                         }
                     }
                 }
+                // }
                 if(!fleetActionQueue.isEmpty() && isFleetFreeSlot() && tooManyFleetActions < 8) {
                     resolve(fleetActionQueue.poll());
                     fleetCount++;

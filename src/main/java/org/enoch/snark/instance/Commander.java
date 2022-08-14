@@ -8,7 +8,9 @@ public interface Commander {
 
     void push(AbstractCommand command);
 
-    public List<AbstractCommand> peekFleetQueue();
+    List<AbstractCommand> peekFleetQueue();
+
+    boolean isRunning();
 
     void setFleetStatus(int fleetCount, int fleetMax);
 

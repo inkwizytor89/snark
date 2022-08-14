@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 public class FarmThread extends AbstractThread {
 
+    public static final String threadName = "farm";
     private static final Logger log = Logger.getLogger(FarmThread.class.getName());
 
     private final FarmDAO farmDAO;
@@ -33,6 +34,11 @@ public class FarmThread extends AbstractThread {
         farmDAO = si.getInstance().daoFactory.farmDAO;
         targetDAO = si.getInstance().daoFactory.targetDAO;
         fleetDAO = si.getInstance().daoFactory.fleetDAO;
+    }
+
+    @Override
+    public String getThreadName() {
+        return threadName;
     }
 
     @Override

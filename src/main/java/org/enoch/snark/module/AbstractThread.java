@@ -3,8 +3,12 @@ package org.enoch.snark.module;
 import org.enoch.snark.instance.SI;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public abstract class AbstractThread extends Thread {
+
+    private static final Logger log = Logger.getLogger( AbstractThread.class.getName() );
+
     protected SI si;
 
     public AbstractThread(SI si) {
@@ -12,10 +16,12 @@ public abstract class AbstractThread extends Thread {
         setName(this.getClass().getName());
     }
 
+    public abstract String getThreadName();
+
     protected abstract int getPauseInSeconds();
 
     protected void onStart() {
-
+        log.info("Thread " + getThreadName() + " starting on " + si.getInstance().universeEntity.name);
     }
 
     protected abstract void onStep();
@@ -30,7 +36,12 @@ public abstract class AbstractThread extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            si.getInstance().gi.sleep(TimeUnit.SECONDS, getPauseInSeconds());
+            do {
+                if(!si.getInstance().commander.isRunning()) {
+                    log.info("Thread " + getThreadName() + " stopping on " + si.getInstance().universeEntity.name);
+                }
+                si.getInstance().gi.sleep(TimeUnit.SECONDS, 5);
+            }while(!si.getInstance().commander.isRunning());
         }
     }
 }

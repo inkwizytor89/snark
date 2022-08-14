@@ -13,11 +13,17 @@ import java.util.*;
 
 public class SpaceThread extends AbstractThread {
 
+    public static final String threadName = "space";
     private final Instance instance;
 
     public SpaceThread(SI si) {
         super(si);
         instance = si.getInstance();
+    }
+
+    @Override
+    public String getThreadName() {
+        return threadName;
     }
 
     @Override
@@ -27,6 +33,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStart() {
+        super.onStart();
         checkMissing();
     }
 

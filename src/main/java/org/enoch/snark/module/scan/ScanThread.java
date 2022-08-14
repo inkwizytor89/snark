@@ -10,11 +10,17 @@ import java.util.Optional;
 
 public class ScanThread extends AbstractThread {
 
+    public static final String threadName = "scan";
     private final Instance instance;
 
     public ScanThread(SI si) {
         super(si);
         instance = si.getInstance();
+    }
+
+    @Override
+    public String getThreadName() {
+        return threadName;
     }
 
     @Override

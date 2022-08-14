@@ -25,12 +25,18 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     @Override
+    public String getThreadName() {
+        return threadName;
+    }
+
+    @Override
     protected int getPauseInSeconds() {
         return pause;
     }
 
     @Override
     protected void onStart() {
+        super.onStart();
         cleanExpeditions();
         expedyctionQueue.addAll(instance.universeEntity.colonyEntities);
     }

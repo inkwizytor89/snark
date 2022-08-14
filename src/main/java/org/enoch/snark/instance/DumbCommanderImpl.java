@@ -17,6 +17,11 @@ public class DumbCommanderImpl implements Commander {
     }
 
     @Override
+    public boolean isRunning() {
+        return true;
+    }
+
+    @Override
     public void setFleetStatus(int fleetCount, int fleetMax) {
 
     }
