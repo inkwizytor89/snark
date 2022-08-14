@@ -55,8 +55,7 @@ public class CommanderImpl implements Commander {
             while(true) {
                 //timeout after 5h
 
-                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub") ||
-                        LocalDateTime.now().isAfter(instance.instanceStart.plusHours(4L))) {
+                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub")) {
                     this.isRunning = false;
                     instance.browserReset();
                     this.isRunning = true;

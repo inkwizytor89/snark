@@ -50,7 +50,7 @@ public class ExpeditionThread extends AbstractThread {
                 setExpeditionReadyToStart(expedition);
             }
             expedyctionQueue.add(colony);
-            pause = 20;
+            pause = 40;
         } else {
             pause = 120;
         }
