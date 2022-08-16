@@ -168,7 +168,12 @@ public class FleetEntity extends BaseEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = 16;
-        fleet.source = instance.findNearestSource(target);
+        fleet.source = instance.daoFactory.colonyDAO.fetchAll().stream()
+                .filter(colonyEntity -> colonyEntity.galaxy.equals(target.galaxy) &&
+                        colonyEntity.system.equals(target.system) &&
+                        colonyEntity.position.equals(target.position))
+                .findFirst().get();
+    //instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;
         fleet.dt = instance.calcutateExpeditionSize();

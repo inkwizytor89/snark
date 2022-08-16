@@ -1,13 +1,17 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.exception.GIException;
+import org.enoch.snark.model.EventFleet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -147,8 +151,37 @@ public class GI {
         return elements.get(0);
     }
 
-    public void readEventFleet() {
+    public List<EventFleet> readEventFleet() {
+        List<EventFleet> eventFleets = new ArrayList<>();
+        try {
+            webDriver.findElement(By.className("event_list")).click();
 
+            List<WebElement> tableRows = new WebDriverWait(webDriver, 4)
+                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName("tr")));
+
+            for (WebElement webElement : tableRows) {
+                EventFleet eventFleet = new EventFleet();
+                WebElement countDown = webElement.findElement(By.className("countDown"));
+                eventFleet.isForeign = countDown.getAttribute("class").contains("hostile");
+                eventFleet.countDown =  countDown.getText();
+                eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
+                eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
+                eventFleet.missionFleet =  webElement.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute("title");
+                eventFleet.originFleet =  webElement.findElement(By.className("originFleet")).getText();
+                eventFleet.coordsOrigin =  webElement.findElement(By.className("coordsOrigin")).getText();
+                eventFleet.detailsFleet =  webElement.findElement(By.className("detailsFleet")).getText();
+                eventFleet.iconMovement =  "?";
+                eventFleet.destFleet =  webElement.findElement(By.className("destFleet")).getText();
+                eventFleet.destCoords =  webElement.findElement(By.className("destCoords")).getText();
+                eventFleet.sendProbe =  webElement.findElement(By.className("sendProbe")).getText();
+                eventFleet.sendMail =  eventFleet.isForeign ? webElement.findElement(By.className("data-playerid")).getAttribute("href") : "";
+
+                eventFleets.add(eventFleet);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return eventFleets;
     }
 
     public void sleep(TimeUnit timeUnit, int i) {

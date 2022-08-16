@@ -6,15 +6,21 @@ import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.impl.PauseCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.exception.ShipDoNotExists;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class CommanderImpl implements Commander {
 
@@ -37,6 +43,8 @@ public class CommanderImpl implements Commander {
     private Queue<AbstractCommand> interfaceActionQueue = new LinkedList<>();
     private Queue<AbstractCommand> calculationActionQueue = new LinkedList<>();
 
+    private List<String> aggressorsAttacks = new ArrayList<>();
+
     public CommanderImpl(Instance instance) {
         this.instance = instance;
         this.session = instance.session;
@@ -58,6 +66,7 @@ public class CommanderImpl implements Commander {
                 if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub")) {
                     this.isRunning = false;
                     instance.browserReset();
+                    aggressorsAttacks = new ArrayList<>();
                     this.isRunning = true;
                 }
 
@@ -74,8 +83,20 @@ public class CommanderImpl implements Commander {
                     this.isRunning = true;
                 }
 
-                if(false) {
-                    instance.gi.readEventFleet();
+                if(false && isUnderAttack()) {
+                    List<EventFleet> eventFleets = instance.gi.readEventFleet();
+                    List<EventFleet> aggressors = eventFleets.stream()
+                            .filter(eventFleet -> eventFleet.isForeign)
+                            .collect(Collectors.toList());
+                    aggressors.stream().forEach(
+                            eventFleet -> {
+                                if(!aggressorsAttacks.contains(eventFleet.arrivalTime)) {
+
+                                    this.push(new SendMessageToPlayerCommand(instance, eventFleet.sendMail, "Bazinga!"));
+                                    aggressorsAttacks.add(eventFleet.arrivalTime);
+                                }
+                            }
+                    );
                 }
 
                 //todo to remove {
@@ -113,6 +134,20 @@ public class CommanderImpl implements Commander {
         };
 
         new Thread(task).start();
+    }
+
+    private boolean isUnderAttack() {
+        try {
+            WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
+            List<WebElement> soonElements = attack_alert.findElements(By.className("soon"));
+            if(!soonElements.isEmpty()) {
+                log.warning("\nUnder Attack !! \n");
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void update() {
