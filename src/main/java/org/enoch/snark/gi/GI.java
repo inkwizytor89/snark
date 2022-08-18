@@ -154,12 +154,17 @@ public class GI {
     public List<EventFleet> readEventFleet() {
         List<EventFleet> eventFleets = new ArrayList<>();
         try {
+            //todo jesli nie jest juz kliknieniete czyli jesli nie ma elementu to szukaj jak jest to nie szukaj
             webDriver.findElement(By.className("event_list")).click();
+//            sleep(TimeUnit.SECONDS, 1);
+//            WebElement eventContent = new WebDriverWait(webDriver, 5).until(
+//                    ExpectedConditions.presenceOfElementLocated(By.id("eventContent")));
 
-            List<WebElement> tableRows = new WebDriverWait(webDriver, 4)
+            List<WebElement> tableRows = new WebDriverWait(webDriver, 5)
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName("tr")));
 
             for (WebElement webElement : tableRows) {
+                System.err.println("boom");
                 EventFleet eventFleet = new EventFleet();
                 WebElement countDown = webElement.findElement(By.className("countDown"));
                 eventFleet.isForeign = countDown.getAttribute("class").contains("hostile");

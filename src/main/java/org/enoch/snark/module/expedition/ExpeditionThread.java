@@ -14,12 +14,12 @@ import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadName = "expedition";
-    public static final int SHORT_PAUSE = 120;
-    public static final int LONG_PAUSE = 300;
+    public static final int SHORT_PAUSE = 20;
+    public static final int LONG_PAUSE = 40;
 
     private final Instance instance;
     private Queue<ColonyEntity> expedyctionQueue = new LinkedList<>();
-    private int pause = LONG_PAUSE;
+    private int pause = SHORT_PAUSE;
 
     public ExpeditionThread(SI si) {
         super(si);

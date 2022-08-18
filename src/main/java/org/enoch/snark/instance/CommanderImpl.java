@@ -84,6 +84,7 @@ public class CommanderImpl implements Commander {
                 }
 
                 if(false && isUnderAttack()) {
+//                if(true) {
                     List<EventFleet> eventFleets = instance.gi.readEventFleet();
                     List<EventFleet> aggressors = eventFleets.stream()
                             .filter(eventFleet -> eventFleet.isForeign)
@@ -139,7 +140,7 @@ public class CommanderImpl implements Commander {
     private boolean isUnderAttack() {
         try {
             WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
-            List<WebElement> soonElements = attack_alert.findElements(By.className("soon"));
+            List<WebElement> soonElements = attack_alert.findElements(By.className("soon")); //todo classname nie łapie jesli jest tylko jedno wyspecyfikowane musi byc wszystkie
             if(!soonElements.isEmpty()) {
                 log.warning("\nUnder Attack !! \n");
                 return true;

@@ -94,7 +94,7 @@ public class Instance {
     }
 
     public Long calcutateExpeditionSize() {
-        return 1200L;
+        return 1900L;
     }
 
     public boolean isStopped() {
