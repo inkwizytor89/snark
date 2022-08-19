@@ -13,13 +13,12 @@ public class Main {
 
     public static void main(String[] args) {
         List<String> unis = Arrays.asList(args);
-        final EntityManager entityManager = JPAUtility.getEntityManager();
+        List<UniverseEntity> universes = JPAUtility.getEntityManager()
+                .createQuery("from UniverseEntity", UniverseEntity.class).getResultList();
 
-        UniverseDAOImpl universeDAO = new UniverseDAOImpl(entityManager);
-        List<UniverseEntity> universes = universeDAO.fetchAllUniverses();
         for(UniverseEntity universeEntity : universes) {
             if(unis.isEmpty() || unis.contains(universeEntity.name)) {
-                new Thread(new Instance(universeEntity, universeDAO)::runSI).start();
+                new Thread(new Instance(universeEntity.id)::runSI).start();
             }
         }
     }

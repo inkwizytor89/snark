@@ -18,7 +18,7 @@ public class ExpeditionThread extends AbstractThread {
     public static final int LONG_PAUSE = 40;
 
     private final Instance instance;
-    private Queue<ColonyEntity> expedyctionQueue = new LinkedList<>();
+    private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
     private int pause = SHORT_PAUSE;
 
     public ExpeditionThread(SI si) {
@@ -40,18 +40,18 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         cleanExpeditions();
-        expedyctionQueue.addAll(instance.universeEntity.colonyEntities);
+        expeditionQueue.addAll(instance.universeEntity.colonyEntities);
     }
 
     @Override
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
-            ColonyEntity colony = expedyctionQueue.poll();
+            ColonyEntity colony = expeditionQueue.poll();
             FleetEntity expedition = FleetEntity.createExpeditionFleet(instance, colony.toPlanet());
             if(colony.canSent(expedition)) {
                 setExpeditionReadyToStart(expedition);
             }
-            expedyctionQueue.add(colony);
+            expeditionQueue.add(colony);
             pause = SHORT_PAUSE;
         } else {
             pause = LONG_PAUSE;

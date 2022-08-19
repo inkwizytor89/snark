@@ -12,13 +12,13 @@ public class Test {
     public static final String PLAY_TEXT = "Graj";
 
     public static void main(String[] args) {
-        final EntityManager entityManager = JPAUtility.getEntityManager();
-        UniverseDAOImpl universeDAO = new UniverseDAOImpl(entityManager);
-        for(UniverseEntity universeEntity : universeDAO.fetchAllUniverses()) {
-            if(universeEntity.name.equals("Fenrir")){
-                Runnable task = new Instance(universeEntity, universeDAO)::runTest;
-                new Thread(task).start();
-            }
-        }
+//        final EntityManager entityManager = JPAUtility.getEntityManager();
+//        UniverseDAOImpl universeDAO = new UniverseDAOImpl(entityManager);
+//        for(UniverseEntity universeEntity : universeDAO.fetchAllUniverses()) {
+//            if(universeEntity.name.equals("Fenrir")){
+//                Runnable task = new Instance(universeEntity)::runTest;
+//                new Thread(task).start();
+//            }
+//        }
     }
 }

@@ -63,7 +63,7 @@ public class CommanderImpl implements Commander {
             while(true) {
                 //timeout after 5h
 
-                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/pl_PL/hub")) {
+                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
                     this.isRunning = false;
                     instance.browserReset();
                     aggressorsAttacks = new ArrayList<>();
@@ -244,13 +244,13 @@ public class CommanderImpl implements Commander {
     public synchronized void push(AbstractCommand command) {
         if (CommandType.FLEET_REQUIERED.equals(command.getType())) {
             fleetActionQueue.offer(command);
-            log.info("Inserted "+command+" into queue fleetActionQueue size "+fleetActionQueue.size());
+//            log.info("Inserted "+command+" into queue fleetActionQueue size "+fleetActionQueue.size());
         } else if (CommandType.INTERFACE_REQUIERED.equals(command.getType())) {
             interfaceActionQueue.offer(command);
-            log.info("Inserted "+command+" into queue interfaceActionQueue size "+interfaceActionQueue.size());
+//            log.info("Inserted "+command+" into queue interfaceActionQueue size "+interfaceActionQueue.size());
         } else if (CommandType.CALCULATION.equals(command.getType())) {
             calculationActionQueue.offer(command);
-            log.info("Inserted "+command+" into queue calculationActionQueue size "+calculationActionQueue.size());
+//            log.info("Inserted "+command+" into queue calculationActionQueue size "+calculationActionQueue.size());
         }else {
             throw new RuntimeException("Invalid type of command");
         }

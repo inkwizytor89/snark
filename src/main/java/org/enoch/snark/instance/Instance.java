@@ -2,14 +2,11 @@ package org.enoch.snark.instance;
 
 import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
-import org.enoch.snark.db.dao.impl.UniverseDAOImpl;
 import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,14 +24,14 @@ public class Instance {
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
-    public Instance(UniverseEntity universeEntity, UniverseDAOImpl universeDAO) {
-        this(universeEntity,universeDAO, true);
+    public Instance(Long universeId) {
+        this(universeId, true);
     }
 
-    public Instance(UniverseEntity universeEntity,UniverseDAOImpl universeDAO,  boolean isQueueEnabled) {
-        this.universeEntity = universeEntity;
+    public Instance(Long universeId, boolean isQueueEnabled) {
+        daoFactory = new DAOFactory(universeId);
+        this.universeEntity = daoFactory.universeEntity;
         sources = ImmutableList.copyOf(universeEntity.colonyEntities);
-        daoFactory = new DAOFactory(universeDAO ,universeEntity);
         browserReset();
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);

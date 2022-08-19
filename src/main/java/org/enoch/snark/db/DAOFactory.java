@@ -2,6 +2,7 @@ package org.enoch.snark.db;
 
 import org.enoch.snark.db.dao.*;
 import org.enoch.snark.db.dao.impl.*;
+import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 
 import javax.annotation.Nonnull;
@@ -18,18 +19,20 @@ public class DAOFactory {
     public CollectionDAO collectionDAO;
     public ErrorDAO errorDAO;
     public final EntityManager entityManager;
+    public final UniverseEntity universeEntity;
 
-    public DAOFactory(UniverseDAOImpl universeDAO, @Nonnull UniverseEntity entity) {
-        this.universeDAO = universeDAO;
-        this.entityManager = universeDAO.entityManager;
-        farmDAO = new FarmDAOImpl(entity, entityManager);
-        fleetDAO = new FleetDAOImpl(entity, entityManager);
-        galaxyDAO = new GalaxyDAOImpl(entity, entityManager);
-        targetDAO = new TargetDAOImpl(entity, entityManager);
-        colonyDAO = new ColonyDAOImpl(entity, entityManager);
-        messageDAO = new MessageDAOImpl(entity, entityManager);
-        collectionDAO = new CollectionDAOImpl(entity, entityManager);
-        errorDAO = new ErrorDAOImpl(entity, entityManager);
+    public DAOFactory(@Nonnull Long universeId) {
+        this.entityManager = JPAUtility.getEntityManager();
+        universeDAO = new UniverseDAOImpl(entityManager);
+        universeEntity = entityManager.find(UniverseEntity.class, universeId);
+        farmDAO = new FarmDAOImpl(universeEntity, entityManager);
+        fleetDAO = new FleetDAOImpl(universeEntity, entityManager);
+        galaxyDAO = new GalaxyDAOImpl(universeEntity, entityManager);
+        targetDAO = new TargetDAOImpl(universeEntity, entityManager);
+        colonyDAO = new ColonyDAOImpl(universeEntity, entityManager);
+        messageDAO = new MessageDAOImpl(universeEntity, entityManager);
+        collectionDAO = new CollectionDAOImpl(universeEntity, entityManager);
+        errorDAO = new ErrorDAOImpl(universeEntity, entityManager);
     }
 
 }
