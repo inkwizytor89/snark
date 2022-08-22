@@ -1,7 +1,6 @@
 package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
@@ -50,42 +49,15 @@ public class GIUrlBuilder {
         loadFleetStatus();
     }
 
-//    public static void main(String[] args) {
-//
-//        Pattern pattern = Pattern.compile("^(.*)");
-//        String input = "Floty:17/20\n" + "Ekspedycje: 4/7";
-//        Matcher m = fleetStatusPattern.matcher(input);
-//        if(m.find()) {
-//            System.out.println(m.group(0));
-//            System.out.println(m.group(1));
-//            System.out.println(m.group(2));
-//            System.out.println(m.group(3));
-//            System.out.println(m.group(4));
-//            System.out.println(m.group(5));
-//            System.out.println(m.group(6));
-//            System.out.println(m.group(7));
-//            System.out.println(m.group(8));
-//        }
-//    }
-
     private void loadFleetStatus() {
         Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
         final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
         Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
-//        final String[] split = slotsLabel.getText().split("\\s");
         if(m.find()) {
             instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
             instance.commander.setExpeditionStatus(Integer.parseInt(m.group(3)), Integer.parseInt(m.group(4)));
         }
     }
-//
-//    private int returnValue(String status) {
-//        return Integer.parseInt(status.split("/")[0]);
-//    }
-//
-//    private int returnMax(String status) {
-//        return Integer.parseInt(status.split("/")[1]);
-//    }
 
     public void openMessages() {
         String builder = instance.universeEntity.url + "?" +

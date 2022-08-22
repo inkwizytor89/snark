@@ -1,6 +1,6 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
@@ -8,25 +8,28 @@ import org.enoch.snark.gi.command.impl.PauseCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 
 public class CommanderImpl implements Commander {
 
     private static final Logger log = Logger.getLogger(CommanderImpl.class.getName() );
 
-    private static final int SLEEP_PAUSE = 5;
+    private static final long SLEEP_PAUSE = 5;
     public static final int TIME_TO_UPDATE = 5;
 
     private Instance instance;
@@ -41,7 +44,6 @@ public class CommanderImpl implements Commander {
 
     private Queue<AbstractCommand> fleetActionQueue = new LinkedList<>();
     private Queue<AbstractCommand> interfaceActionQueue = new LinkedList<>();
-    private Queue<AbstractCommand> calculationActionQueue = new LinkedList<>();
 
     private List<String> aggressorsAttacks = new ArrayList<>();
 
@@ -49,7 +51,6 @@ public class CommanderImpl implements Commander {
         this.instance = instance;
         this.session = instance.session;
         startInterfaceQueue();
-        startCalculationQueue();
     }
 
     public synchronized boolean isRunning() {
@@ -58,91 +59,82 @@ public class CommanderImpl implements Commander {
 
     private void startInterfaceQueue() {
         Runnable task = () -> {
-            int tooManyFleetActions = 0;
             update();
             while(true) {
-                //timeout after 5h
-
-                if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
-                    this.isRunning = false;
-                    instance.browserReset();
-                    aggressorsAttacks = new ArrayList<>();
-                    this.isRunning = true;
-                }
+                restartIfSessionIsOver();
 
                 if (instance.isStopped()){
-                    System.err.println("Is stopped");
-                    this.isRunning = false;
-                    try {
-                        TimeUnit.SECONDS.sleep(SLEEP_PAUSE * 4);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    stopCommander();
                     continue;
-                } else {
-                    this.isRunning = true;
                 }
 
-                if(false && isUnderAttack()) {
-//                if(true) {
-                    List<EventFleet> eventFleets = instance.gi.readEventFleet();
-                    List<EventFleet> aggressors = eventFleets.stream()
-                            .filter(eventFleet -> eventFleet.isForeign)
-                            .collect(Collectors.toList());
-                    aggressors.stream().forEach(
-                            eventFleet -> {
-                                if(!aggressorsAttacks.contains(eventFleet.arrivalTime)) {
+                startCommander();
+                activateDefenseIfNeeded();
 
-                                    this.push(new SendMessageToPlayerCommand(instance, eventFleet.sendMail, "Bazinga!"));
-                                    aggressorsAttacks.add(eventFleet.arrivalTime);
-                                }
-                            }
-                    );
-                }
-
-                //todo to remove {
-                if(fleetActionQueue.isEmpty()) {
-                    for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
-                        SendFleetCommand newSendFleet = new SendFleetCommand(instance, fleet);
-                        if(!containsFleetCommand(newSendFleet, fleetActionQueue)) {
-                            fleetActionQueue.add(newSendFleet);
-                        }
-                    }
-                }
-                // }
-                if(!fleetActionQueue.isEmpty() && isFleetFreeSlot() && tooManyFleetActions < 8) {
+                if(!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
                     resolve(fleetActionQueue.poll());
                     fleetCount++;
-                    tooManyFleetActions++;
                     update();
                     continue;
                 } else if(!interfaceActionQueue.isEmpty()) {
                     resolve(interfaceActionQueue.poll());
-                    tooManyFleetActions = 0;
                     continue;
                 }
-                tooManyFleetActions = 0;
 
                 if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
                     update();
                 }
-                try {
-                    TimeUnit.SECONDS.sleep(SLEEP_PAUSE);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
+                Utils.secondsToSleep(SLEEP_PAUSE);
             }
         };
 
         new Thread(task).start();
     }
 
+    private void activateDefenseIfNeeded() {
+        if(isUnderAttack()) {
+            instance.gi.readEventFleet().stream()
+                    .filter(eventFleet -> eventFleet.isForeign)
+                    // ss scans
+                    .filter(eventFleet -> LocalTime.now().plusSeconds(120).isBefore(DateUtil.parse(eventFleet.arrivalTime)))
+                    .collect(Collectors.toList())
+                    .forEach(
+                    eventFleet -> {
+                        if(!aggressorsAttacks.contains(eventFleet.arrivalTime)) {
+                            log.warning(instance.getName()+" aggressor found "+eventFleet.toString());
+                            this.push(new SendMessageToPlayerCommand(instance, eventFleet.sendMail, Msg.get(BAZINGA_PL)));
+                            aggressorsAttacks.add(eventFleet.arrivalTime);
+                        }
+                    }
+            );
+        }
+    }
+
+    private void startCommander() {
+        this.isRunning = true;
+    }
+
+    private void stopCommander() {
+        System.err.println(instance.getName() + " is stopped");
+        this.isRunning = false;
+        Utils.secondsToSleep(SLEEP_PAUSE * 4);
+    }
+
+    private void restartIfSessionIsOver() {
+        if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
+            stopCommander();
+            instance.browserReset();
+            aggressorsAttacks = new ArrayList<>();
+            startCommander();
+        }
+    }
+
     private boolean isUnderAttack() {
         try {
             WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
-            List<WebElement> soonElements = attack_alert.findElements(By.className("soon")); //todo classname nie łapie jesli jest tylko jedno wyspecyfikowane musi byc wszystkie
-            if(!soonElements.isEmpty()) {
-                log.warning("\nUnder Attack !! \n");
+            if(attack_alert.getAttribute("class").contains("soon")) {
+                log.warning("\n"+instance.getName() + " Under Attack !! \n");
                 return true;
             }
         } catch (Exception e) {
@@ -166,24 +158,6 @@ public class CommanderImpl implements Commander {
                 newSendFleet.fleet.targetGalaxy.equals(((SendFleetCommand) command).fleet.targetGalaxy) &&
                 newSendFleet.fleet.targetSystem.equals(((SendFleetCommand) command).fleet.targetSystem) &&
                 newSendFleet.fleet.targetPosition.equals(((SendFleetCommand) command).fleet.targetPosition));
-    }
-
-    private void startCalculationQueue() {
-        Runnable task = () -> {
-            while(true) {
-
-                while(!calculationActionQueue.isEmpty()) {
-                    resolve(calculationActionQueue.poll());
-                }
-                try {
-                    TimeUnit.SECONDS.sleep(SLEEP_PAUSE);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        new Thread(task).start();
     }
 
     private void resolve(AbstractCommand command) {
@@ -248,15 +222,12 @@ public class CommanderImpl implements Commander {
         } else if (CommandType.INTERFACE_REQUIERED.equals(command.getType())) {
             interfaceActionQueue.offer(command);
 //            log.info("Inserted "+command+" into queue interfaceActionQueue size "+interfaceActionQueue.size());
-        } else if (CommandType.CALCULATION.equals(command.getType())) {
-            calculationActionQueue.offer(command);
-//            log.info("Inserted "+command+" into queue calculationActionQueue size "+calculationActionQueue.size());
-        }else {
+        } else {
             throw new RuntimeException("Invalid type of command");
         }
     }
 
-    public List<AbstractCommand> peekFleetQueue() {
+    public synchronized List<AbstractCommand> peekFleetQueue() {
         return (LinkedList<AbstractCommand>)((LinkedList<AbstractCommand>) fleetActionQueue).clone();
     }
 

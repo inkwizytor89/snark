@@ -66,6 +66,7 @@ public class SendFleetCommand extends GICommand {
 
         instance.gi.sleep(TimeUnit.SECONDS, 1);
         final String duration = webDriver.findElement(By.id("duration")).getText();
+        //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         final LocalTime durationTime = DateUtil.parse(duration);
          String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         if(arrivalTimeString.contains("-")) {

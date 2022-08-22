@@ -1,6 +1,7 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.exception.GIException;
+import org.enoch.snark.instance.Utils;
 import org.enoch.snark.model.EventFleet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,6 +20,9 @@ import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
 
 public class GI {
 
+    public static final String TR = "tr";
+    public static final String HREF_ATTRIBUTE = "href";
+    public static final String TITLE_ATTRIBUTE = "title";
     public final WebDriver webDriver;
 
     public GI() {
@@ -154,24 +158,26 @@ public class GI {
     public List<EventFleet> readEventFleet() {
         List<EventFleet> eventFleets = new ArrayList<>();
         try {
-            //todo jesli nie jest juz kliknieniete czyli jesli nie ma elementu to szukaj jak jest to nie szukaj
+            List<WebElement> eventHeader = webDriver.findElements(By.id("eventHeader"));
+            if(!eventHeader.isEmpty()) {
+                if(eventHeader.get(0).isDisplayed())
+                    webDriver.findElement(By.className("event_list")).click();
+            }
+            Utils.sleep();
             webDriver.findElement(By.className("event_list")).click();
-//            sleep(TimeUnit.SECONDS, 1);
-//            WebElement eventContent = new WebDriverWait(webDriver, 5).until(
-//                    ExpectedConditions.presenceOfElementLocated(By.id("eventContent")));
-
+            Utils.sleep();
             List<WebElement> tableRows = new WebDriverWait(webDriver, 5)
-                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName("tr")));
+                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR)));
 
             for (WebElement webElement : tableRows) {
-                System.err.println("boom");
                 EventFleet eventFleet = new EventFleet();
                 WebElement countDown = webElement.findElement(By.className("countDown"));
-                eventFleet.isForeign = countDown.getAttribute("class").contains("hostile");
+                List<WebElement> hostile = countDown.findElements(By.className("hostile"));
+                eventFleet.isForeign = !hostile.isEmpty();
                 eventFleet.countDown =  countDown.getText();
                 eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
                 eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
-                eventFleet.missionFleet =  webElement.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute("title");
+                eventFleet.missionFleet =  webElement.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute(TITLE_ATTRIBUTE);
                 eventFleet.originFleet =  webElement.findElement(By.className("originFleet")).getText();
                 eventFleet.coordsOrigin =  webElement.findElement(By.className("coordsOrigin")).getText();
                 eventFleet.detailsFleet =  webElement.findElement(By.className("detailsFleet")).getText();
@@ -179,7 +185,12 @@ public class GI {
                 eventFleet.destFleet =  webElement.findElement(By.className("destFleet")).getText();
                 eventFleet.destCoords =  webElement.findElement(By.className("destCoords")).getText();
                 eventFleet.sendProbe =  webElement.findElement(By.className("sendProbe")).getText();
-                eventFleet.sendMail =  eventFleet.isForeign ? webElement.findElement(By.className("data-playerid")).getAttribute("href") : "";
+                List<WebElement> player = webElement.findElements(By.className("sendMail"));
+                if(player.size() > 1) {
+                    eventFleet.sendMail =  player.get(1).getAttribute(HREF_ATTRIBUTE);
+                } else {
+                    eventFleet.sendMail = "";
+                }
 
                 eventFleets.add(eventFleet);
             }

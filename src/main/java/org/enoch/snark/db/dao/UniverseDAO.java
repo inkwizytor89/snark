@@ -7,4 +7,6 @@ import java.util.List;
 public interface UniverseDAO {
 
     List<UniverseEntity> fetchAllUniverses();
+
+    String getMode(final Long id);
 }

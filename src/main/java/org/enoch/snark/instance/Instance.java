@@ -91,15 +91,19 @@ public class Instance {
     }
 
     public Long calcutateExpeditionSize() {
-        return 1900L;
+        return 2300L;
     }
 
-    public boolean isStopped() {
-        daoFactory.entityManager.refresh(universeEntity);
-        Optional<UniverseEntity> entity = daoFactory.universeDAO.fetchAllUniverses().stream()
-                .filter(uni -> this.universeEntity.name.equals(uni.name))
-                .findAny();
-        String mode = entity.get().mode;
+    public synchronized boolean isStopped() {
+//        daoFactory.entityManager.refresh(universeEntity);
+//        Optional<UniverseEntity> entity = daoFactory.universeDAO.fetchAllUniverses().stream()
+//                .filter(uni -> this.universeEntity.name.equals(uni.name))
+//                .findAny();
+        String mode = daoFactory.universeDAO.getMode(universeEntity.id);//entity.get().mode;
         return mode!= null && mode.contains("stop");
+    }
+
+    public String getName() {
+        return universeEntity.name;
     }
 }
