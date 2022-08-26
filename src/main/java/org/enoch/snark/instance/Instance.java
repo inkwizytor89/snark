@@ -8,6 +8,7 @@ import org.enoch.snark.gi.GISession;
 import org.enoch.snark.model.Planet;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,7 +21,7 @@ public class Instance {
     public GISession session;
 //    public MessageService messageService;
     public DAOFactory daoFactory;
-    public ImmutableList<ColonyEntity> sources;
+    public List<ColonyEntity> sources;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
@@ -31,13 +32,36 @@ public class Instance {
     public Instance(Long universeId, boolean isQueueEnabled) {
         daoFactory = new DAOFactory(universeId);
         this.universeEntity = daoFactory.universeEntity;
-        sources = ImmutableList.copyOf(universeEntity.colonyEntities);
         browserReset();
+        sources = loadGameState();
+//        sources = new ArrayList<>(ImmutableList.copyOf(universeEntity.colonyEntities));
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);
         } else {
             commander = new DumbCommanderImpl();
         }
+    }
+
+    public List<ColonyEntity> loadGameState() {
+        List<ColonyEntity> colonies = new ArrayList<>();
+        try {
+            for(ColonyEntity colony : gi.loadPlanetList()) {
+                ColonyEntity colonyEntity = daoFactory.colonyDAO.find(colony.cp);
+                if(colonyEntity == null) {
+                    colonyEntity = colony;
+                    colonyEntity.universe = universeEntity;
+                } else if(colony.cpm != null && colonyEntity.cpm == null){
+                    colonyEntity.cpm = colony.cpm;
+                }
+                gi.updateColony(colonyEntity);
+                daoFactory.colonyDAO.saveOrUpdate(colonyEntity);
+                colonies.add(colonyEntity);
+            }
+            gi.updateResearch();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return colonies;
     }
 
     public void browserReset() {

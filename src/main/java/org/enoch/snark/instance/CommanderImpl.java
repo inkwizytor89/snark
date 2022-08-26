@@ -1,6 +1,7 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
@@ -58,33 +59,37 @@ public class CommanderImpl implements Commander {
 
     private void startInterfaceQueue() {
         Runnable task = () -> {
-            update();
+            update();// shold be load game status responsibility
             while(true) {
-                restartIfSessionIsOver();
+                try {
+                    restartIfSessionIsOver();
 
-                if (instance.isStopped()){
-                    stopCommander();
-                    continue;
+                    if (instance.isStopped()) {
+                        stopCommander();
+                        continue;
+                    }
+
+                    startCommander();
+                    activateDefenseIfNeeded();
+
+                    if (!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
+                        resolve(fleetActionQueue.poll());
+                        fleetCount++;
+                        update();
+                        continue;
+                    } else if (!interfaceActionQueue.isEmpty()) {
+                        resolve(interfaceActionQueue.poll());
+                        continue;
+                    }
+
+                    if (LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
+                        update();
+                    }
+
+                    Utils.secondsToSleep(SLEEP_PAUSE);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                startCommander();
-                activateDefenseIfNeeded();
-
-                if(!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
-                    resolve(fleetActionQueue.poll());
-                    fleetCount++;
-                    update();
-                    continue;
-                } else if(!interfaceActionQueue.isEmpty()) {
-                    resolve(interfaceActionQueue.poll());
-                    continue;
-                }
-
-                if(LocalDateTime.now().isAfter(lastUpdate.plusMinutes(TIME_TO_UPDATE))) {
-                    update();
-                }
-
-                Utils.secondsToSleep(SLEEP_PAUSE);
             }
         };
 

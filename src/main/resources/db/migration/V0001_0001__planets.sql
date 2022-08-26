@@ -92,6 +92,7 @@ create table colonies
 
 
   cp          integer   not null,
+  cpm          integer,
   collecting_order    integer
 );
 

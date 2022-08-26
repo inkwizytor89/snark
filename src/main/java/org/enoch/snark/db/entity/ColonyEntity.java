@@ -17,6 +17,10 @@ public class ColonyEntity extends PlanetEntity {
     public Integer cp;
 
     @Basic
+    @Column(name = "cpm")
+    public Integer cpm;
+
+    @Basic
     @Column(name = "collecting_order")
     public Integer collectingOrder;
 

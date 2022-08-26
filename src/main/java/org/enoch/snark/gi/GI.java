@@ -1,8 +1,10 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Utils;
 import org.enoch.snark.model.EventFleet;
+import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -20,9 +22,13 @@ import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
 
 public class GI {
 
-    public static final String TR = "tr";
+    public static final String DIV_TAG = "div";
+    public static final String TR_TAG = "tr";
+
     public static final String HREF_ATTRIBUTE = "href";
     public static final String TITLE_ATTRIBUTE = "title";
+    public static final String ID_ATTRIBUTE = "id";
+    public static final String A_TAG = "a";
     public final WebDriver webDriver;
 
     public GI() {
@@ -111,7 +117,7 @@ public class GI {
             webDriver.findElement(By.className("event_list")).click();
             Utils.sleep();
             List<WebElement> tableRows = new WebDriverWait(webDriver, 5)
-                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR)));
+                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
 
             for (WebElement webElement : tableRows) {
                 EventFleet eventFleet = new EventFleet();
@@ -150,5 +156,71 @@ public class GI {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateColony(ColonyEntity colony) {
+        updateResources(colony);
+        updateFacilities(colony);
+        if(isLifeformAvailable()) {
+            updateLifeform(colony);
+        }
+        updateFleet(colony);
+        updateDefence(colony);
+    }
+
+    private void updateDefence(ColonyEntity colony) {
+
+    }
+
+    private void updateFleet(ColonyEntity colony) {
+
+    }
+
+    private void updateLifeform(ColonyEntity colony) {
+
+    }
+
+    private boolean isLifeformAvailable() {
+        return true;
+    }
+
+    private void updateFacilities(ColonyEntity colony) {
+        
+    }
+
+    private void updateResources(ColonyEntity colony) {
+    }
+
+    public void updateResearch() {
+    }
+
+    public List<ColonyEntity> loadPlanetList() {
+        ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
+        List<WebElement> coloniesWebElements = new WebDriverWait(webDriver, 5)
+                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
+        for(WebElement colonyWebElement : coloniesWebElements) {
+            try {
+                ColonyEntity colonyEntity = new ColonyEntity();
+
+                colonyEntity.cp = Integer.parseInt(colonyWebElement.getAttribute(ID_ATTRIBUTE).split("-")[1]);
+                Planet planet = new Planet(colonyWebElement.findElement(By.className("planet-koords ")).getText());
+                colonyEntity.galaxy = planet.galaxy;
+                colonyEntity.system = planet.system;
+                colonyEntity.position = planet.position;
+
+                List<WebElement> moons = colonyWebElement.findElements(By.className("moonlink"));
+                if(!moons.isEmpty()) {
+                    String link = moons.get(0).getAttribute(HREF_ATTRIBUTE);
+                    int i = link.indexOf("cp=");
+                    colonyEntity.cpm = Integer.parseInt(link.substring(i+3));
+                }
+
+                colonyEntities.add(colonyEntity);
+                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return colonyEntities;
     }
 }
