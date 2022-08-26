@@ -25,6 +25,10 @@ public class UniverseEntity extends IdEntity {
     public String mode;
 
     @Basic
+    @Column(name = "config")
+    public String config;
+
+    @Basic
     @Column(name = "url")
     public String url;
 

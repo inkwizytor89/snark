@@ -1,12 +1,14 @@
 package org.enoch.snark.instance;
 
 public class PropertyNames {
-    public static final String USER_NAME_LOGIN = "usernameLogin";
-    public static final String PASSWORD_LOGIN = "passwordLogin";
-    public static final String SERVER_LOGIN = "serverLogin";
-    public static final String ACCOUNT_TAG = "accountTag";
+    public static final String SERVER = "server";
+    public static final String URL = "url";
+    public static final String LOGIN = "login";
+    public static final String PASSWORD = "password";
+    public static final String MODE = "mode";
+    public static final String CONFIG = "config";
+    public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 
-    public static final String LOGIN_URL = "login.url";
     public static final String PLANET_PATTERN_URL = "main.url";
 
     public static final String FLEET_NUMBER = "fleetNumber";
@@ -26,5 +28,4 @@ public class PropertyNames {
     public static final String SCAN_SPACE_MODULE = "spaceScanModule";
     public static final String SAMPLING_MODULE = "samplingModule";
 
-    public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 }

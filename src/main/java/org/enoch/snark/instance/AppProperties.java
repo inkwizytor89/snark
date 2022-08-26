@@ -44,12 +44,12 @@ public class AppProperties {
         FileInputStream fileInputStream = new FileInputStream(pathToProperties);
         properties.load(fileInputStream);
 
-        username = properties.getProperty(USER_NAME_LOGIN);
-        password = properties.getProperty(PASSWORD_LOGIN);
-        server = properties.getProperty(SERVER_LOGIN);
-        accountTag = properties.getProperty(ACCOUNT_TAG);
+        username = properties.getProperty(LOGIN);
+        password = properties.getProperty(PASSWORD);
+        server = properties.getProperty(SERVER);
+        accountTag = properties.getProperty(CONFIG);
 
-        loginUrl = properties.getProperty(LOGIN_URL);
+        loginUrl = properties.getProperty(URL);
         mainUrl = properties.getProperty(PLANET_PATTERN_URL);
 
         fleetNumber = Integer.parseInt(properties.getProperty(FLEET_NUMBER));
