@@ -10,14 +10,11 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SpyInfo;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -64,10 +61,9 @@ public class SendFleetCommand extends GICommand {
 
         fleetSelector.next();
 
-        instance.gi.sleep(TimeUnit.SECONDS, 1);
-        final String duration = webDriver.findElement(By.id("duration")).getText();
+        final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
-        final LocalTime durationTime = DateUtil.parse(duration);
+        final LocalTime durationTime = DateUtil.parseDuration(duration);
          String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         if(arrivalTimeString.contains("-")) {
             instance.gi.sleep(TimeUnit.SECONDS, 2);

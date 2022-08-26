@@ -12,8 +12,8 @@ public class Msg {
     public static final String BAZINGA_PL = "bazinga_pl";
 
     static {
-        msg.put(BAZINGA_PL, new String[]{"Bazinga!", "a kuku", "lepiej to zawrócić", "ping", "jestem", "szkoda czasu"});
-        msg.put(BAZINGA_EN, new String[]{"Bazinga!", "I am, you can turn it back", "I am"});
+        msg.put(BAZINGA_PL, new String[]{"Bazinga!", "a kuku", "lepiej to zawrocic", "ping", "jestem", "szkoda czasu", "chyba nie dzisiaj"});
+        msg.put(BAZINGA_EN, new String[]{"Bazinga!", "I am, you can turn it back", "I am", "Not today"});
     }
 
     public static String get(String key) {

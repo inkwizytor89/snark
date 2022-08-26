@@ -1,6 +1,5 @@
 package org.enoch.snark;
 
-import org.enoch.snark.db.dao.impl.UniverseDAOImpl;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.instance.Instance;
@@ -13,7 +12,8 @@ public class Main {
 
     public static void main(String[] args) {
         List<String> unis = Arrays.asList(args);
-        List<UniverseEntity> universes = JPAUtility.getEntityManager()
+        EntityManager onStartEntityManager = JPAUtility.getEntityManager();
+        List<UniverseEntity> universes = onStartEntityManager
                 .createQuery("from UniverseEntity", UniverseEntity.class).getResultList();
 
         for(UniverseEntity universeEntity : universes) {

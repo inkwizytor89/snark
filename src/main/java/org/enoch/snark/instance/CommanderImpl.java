@@ -9,7 +9,6 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Msg;
-import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -97,7 +96,7 @@ public class CommanderImpl implements Commander {
             instance.gi.readEventFleet().stream()
                     .filter(eventFleet -> eventFleet.isForeign)
                     // ss scans
-                    .filter(eventFleet -> LocalTime.now().plusSeconds(120).isBefore(DateUtil.parse(eventFleet.arrivalTime)))
+                    .filter(eventFleet -> LocalTime.now().plusSeconds(120).isBefore(DateUtil.parseTime(eventFleet.arrivalTime)))
                     .collect(Collectors.toList())
                     .forEach(
                     eventFleet -> {
@@ -182,7 +181,7 @@ public class CommanderImpl implements Commander {
 
         if(success) {
             command.doAfter();
-            log.info("Executed "+command+ " prepare "+ command.getAfterCommand());
+            log.info(instance.getName()+ " executed "+command+ " prepare "+ command.getAfterCommand());
         } else {
             command.failed++;
             if (command.failed < 3) {

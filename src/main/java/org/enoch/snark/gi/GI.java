@@ -30,45 +30,6 @@ public class GI {
         webDriver = new ChromeDriver();
     }
 
-    public void typeByIdText(String elementById, String text) {
-        WebElement element = findElement(By.id(elementById));
-        element.sendKeys(text);
-    }
-
-    public void typeByNameText(String name, String text) {
-        WebElement element = findElement(By.name(name));
-        element.sendKeys(text);
-    }
-
-    public void clickText(String text) {
-        try {
-            WebElement textToClick = findElement(By.linkText(text));
-            textToClick.click();
-        } catch (NoSuchElementException e) {
-            System.err.println("Skip text '" + text + "' to click");
-        }
-    }
-
-    public void clickTextIfExists(String text) {
-        try {
-            WebElement textToClick = findElementIfExists(By.linkText(text));
-            if(textToClick != null) {
-                textToClick.click();
-            }
-        } catch (NoSuchElementException e) {
-            System.err.println("Skip text '" + text + "' to click");
-        }
-    }
-
-    public void clickIdElement(String elementById) {
-        try {
-            WebElement elementToClick = findElement(By.id(elementById));
-            elementToClick.click();
-        } catch (NoSuchElementException e) {
-            System.err.println("Skip elementById '" + elementById + "' to click");
-        }
-    }
-
     public void doubleClickText(String text) {
         try {
             WebElement serverElement = findTextByXPath(text);
@@ -77,14 +38,6 @@ public class GI {
         } catch (NoSuchElementException e) {
             System.err.println("Skip text '" + text + "' to click");
         }
-    }
-
-    private WebElement findElement(By by) {
-        return findElement(by, 10);
-    }
-
-    private WebElement findElementIfExists(By by) {
-        return findElement(by, 0);
     }
 
     private WebElement findTextByXPath(String text) {
@@ -105,8 +58,20 @@ public class GI {
         return elements.get(0);
     }
 
-    public WebElement findButtonContainsText(String text) {
-        return findByXPath("//button[contains(text(), '" + text + "')]");
+    public WebElement findElement(String tag, String attribute, String value, String unacceptable) {
+        WebElement element = findByXPath("//" + tag + "[@" + attribute + "='" + value + "']");
+        for (int i = 1; i <= 10; i++) {
+             element = findByXPath("//" + tag + "[@" + attribute + "='" + value + "']");
+             if(!unacceptable.equals(element.getText())) {
+                 break;
+             }
+            sleep(TimeUnit.MILLISECONDS, 200 * i);
+        }
+        if(unacceptable.equals(element.getText())) {
+            throw new GIException(GIException.NOT_FOUND, "//"+tag+"[@" + attribute + "='"+value+"']",
+                    "Found " + element.getText() + " but unacceptable was "+ unacceptable);
+        }
+        return element;
     }
 
     public WebElement findElement(String tag, String attribute, String value) {
@@ -130,27 +95,6 @@ public class GI {
             throw new GIException(GIException.NOT_FOUND, using, "No element " + using);
         } else if(elements.size() > 1) {
             throw new GIException(GIException.TOO_MANY, using, "No element " + using);
-        }
-        return elements.get(0);
-    }
-
-    private WebElement findElement(By by, int toDelay) {
-        List<WebElement> elements = webDriver.findElements(by);
-        int i = 1;
-        while(elements.isEmpty() && i <= toDelay) {
-            sleep(TimeUnit.MILLISECONDS, 200 * i);
-            i++;
-            elements = webDriver.findElements(by);
-        }
-
-        if(elements.isEmpty()) {
-            System.err.println("No element '" + by.toString() + "' to click");
-            if(toDelay == 0 ) {
-                return null;
-            }
-            return webDriver.findElement(by);
-        } else if(elements.size() > 1) {
-            System.err.println("Were many elements '" + by.toString() + "' to click");
         }
         return elements.get(0);
     }
