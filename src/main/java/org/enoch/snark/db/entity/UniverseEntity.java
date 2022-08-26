@@ -1,5 +1,7 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.instance.AppProperties;
+
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -34,15 +36,15 @@ public class UniverseEntity extends IdEntity {
 
     @Basic
     @Column(name = "galaxy_max")
-    public Integer galaxyMax;
+    public Integer galaxyMax = 6;
 
     @Basic
     @Column(name = "system_max")
-    public Integer systemMax;
+    public Integer systemMax = 499;
 
     @Basic
     @Column(name = "exploration_area")
-    public Integer explorationArea;
+    public Integer explorationArea = 9;
 
     @OneToMany(mappedBy = "universe")
     public Collection<GalaxyEntity> galaxies;
@@ -52,6 +54,18 @@ public class UniverseEntity extends IdEntity {
 
     @OneToMany(mappedBy = "universe")
     public Collection<ColonyEntity> colonyEntities;
+
+    public static UniverseEntity loadPrperties(AppProperties appProperties) {
+        UniverseEntity universeEntity = new UniverseEntity();
+        universeEntity.name = appProperties.server;
+        universeEntity.url = appProperties.url;
+        universeEntity.login = appProperties.username;
+        universeEntity.pass = appProperties.password;
+        universeEntity.mode = appProperties.mode;
+        universeEntity.config = appProperties.config;
+        System.err.println("pathToDriver="+appProperties.pathToChromeWebdriver);
+        return universeEntity;
+    }
 
     @Override
     public boolean equals(Object o) {
