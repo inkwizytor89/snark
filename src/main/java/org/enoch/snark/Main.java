@@ -35,7 +35,6 @@ public class Main {
             onStartEntityManager.getTransaction().begin();
             onStartEntityManager.persist(universeProperties);
             onStartEntityManager.getTransaction().commit();
-            onStartEntityManager.close();
         }
 
         new Thread(new Instance(universeProperties.id)::runSI).start();
