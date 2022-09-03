@@ -27,7 +27,7 @@ public class GIUrlBuilder {
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
-        String builder = instance.universeEntity.url + "?" +
+        String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
@@ -41,7 +41,7 @@ public class GIUrlBuilder {
     }
 
     public void updateFleetStatus() {
-        String builder = instance.universeEntity.url + "?" +
+        String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_BASE_FLEET ;
         instance.session.getWebDriver().get(builder);
@@ -60,7 +60,7 @@ public class GIUrlBuilder {
     }
 
     public void openMessages() {
-        String builder = instance.universeEntity.url + "?" +
+        String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
         instance.session.getWebDriver().get(builder);
     }
@@ -70,7 +70,7 @@ public class GIUrlBuilder {
     }
 
     public void openOverview(ColonyEntity source) {
-        StringBuilder builder = new StringBuilder( instance.universeEntity.url + "?");
+        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + PAGE_OVERVIEW);
         if(source != null) {
@@ -84,7 +84,7 @@ public class GIUrlBuilder {
     }
 
     public void openGalaxy(int galaxy, int system, int position) {
-        String builder = instance.universeEntity.url + "?" +
+        String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_SPACE +
                 "&galaxy=" + galaxy +

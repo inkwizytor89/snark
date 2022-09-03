@@ -40,11 +40,10 @@ public class CollectorThread extends AbstractThread {
 
         // z bazy danych znajdz obecna planetę
         Optional<CollectionEntity> optionalCollection = instance.daoFactory.collectionDAO.fetchAll().stream()
-                .filter(collectionEntity -> collectionEntity.universe.name.equals(instance.universeEntity.name))
                 .findAny();
 
         if(!optionalCollection.isPresent()) {
-            throw new RuntimeException("Missing entry in table Collections for universe "+instance.universeEntity.name);
+            throw new RuntimeException("Missing entry in table Collections for universe "+instance.universe.name);
         }
         CollectionEntity collectionEntity = optionalCollection.get();
         if(LocalDateTime.now().isBefore(collectionEntity.start)) { // jeszcze flota nie przyszła

@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
-import org.enoch.snark.db.dao.impl.GalaxyDAOImpl;
-import org.enoch.snark.db.dao.impl.TargetDAOImpl;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.CommandType;
@@ -18,6 +16,8 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.enoch.snark.model.Universe.GALAXY_MAX;
 
 public class GalaxyAnalyzeCommand extends GICommand {
 
@@ -36,7 +36,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
     }
 
     private void normalize(SystemView systemView) {
-        systemView.galaxy = Math.floorMod(systemView.galaxy, instance.universeEntity.galaxyMax);
+        systemView.galaxy = Math.floorMod(systemView.galaxy, Integer.parseInt(instance.universe.getConfig(GALAXY_MAX)));
     }
 
     @Override
@@ -70,7 +70,6 @@ public class GalaxyAnalyzeCommand extends GICommand {
                 entity = targetFromDb.get();
             } else {
                 entity = new TargetEntity();
-                entity.universe = instance.universeEntity;
                 entity.galaxy = systemView.galaxy;
                 entity.system = systemView.system;
                 entity.position = position;

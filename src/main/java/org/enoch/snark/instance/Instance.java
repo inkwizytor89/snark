@@ -1,21 +1,30 @@
 package org.enoch.snark.instance;
 
-import com.google.common.collect.ImmutableList;
 import org.enoch.snark.db.DAOFactory;
 import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Universe;
+import org.enoch.snark.module.AbstractModule;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Instance {
 
-    public UniverseEntity universeEntity;
+    protected static final Logger LOG = Logger.getLogger( Instance.class.getName());
+
+    public String serverConfigPath;
+    public Universe universe;
     public Commander commander;
     public GI gi;
     public GISession session;
@@ -25,13 +34,15 @@ public class Instance {
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
-    public Instance(Long universeId) {
-        this(universeId, true);
+    public Instance(String serverConfigPath) {
+        this(serverConfigPath, true);
     }
 
-    public Instance(Long universeId, boolean isQueueEnabled) {
-        daoFactory = new DAOFactory(universeId);
-        this.universeEntity = daoFactory.universeEntity;
+    public Instance(String serverConfigPath, boolean isQueueEnabled) {
+        this.serverConfigPath = serverConfigPath;
+        LOG.info("Config file "+this.serverConfigPath);
+        this.universe = loadServerProperties(this.serverConfigPath);
+        daoFactory = new DAOFactory();
         browserReset();
         sources = loadGameState();
 //        sources = new ArrayList<>(ImmutableList.copyOf(universeEntity.colonyEntities));
@@ -42,6 +53,16 @@ public class Instance {
         }
     }
 
+    public Universe loadServerProperties(String serverConfigPath) {
+        AppProperties appProperties = null;
+        try {
+            appProperties = new AppProperties(serverConfigPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Universe.loadPrperties(appProperties);
+    }
+
     public List<ColonyEntity> loadGameState() {
         List<ColonyEntity> colonies = new ArrayList<>();
         try {
@@ -49,7 +70,6 @@ public class Instance {
                 ColonyEntity colonyEntity = daoFactory.colonyDAO.find(colony.cp);
                 if(colonyEntity == null) {
                     colonyEntity = colony;
-                    colonyEntity.universe = universeEntity;
                 } else if(colony.cpm != null && colonyEntity.cpm == null){
                     colonyEntity.cpm = colony.cpm;
                 }
@@ -73,9 +93,6 @@ public class Instance {
         instanceStart = LocalDateTime.now();
     }
 
-    public void runTest() {
-    }
-
     public void runSI() {
         new BaseSI(this).run();
     }
@@ -86,9 +103,7 @@ public class Instance {
 
     public ColonyEntity findNearestSource(Planet planet) {
 
-        List<ColonyEntity> sources = daoFactory.colonyDAO.fetchAll().stream()
-                .filter(colony -> universeEntity.id.equals(colony.universe.id))
-                .collect(Collectors.toList());
+        List<ColonyEntity> sources = new ArrayList<>(daoFactory.colonyDAO.fetchAll());
 
         ColonyEntity nearestPlanet = sources.get(0);
         Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
@@ -119,15 +134,11 @@ public class Instance {
     }
 
     public synchronized boolean isStopped() {
-//        daoFactory.entityManager.refresh(universeEntity);
-//        Optional<UniverseEntity> entity = daoFactory.universeDAO.fetchAllUniverses().stream()
-//                .filter(uni -> this.universeEntity.name.equals(uni.name))
-//                .findAny();
-        String mode = daoFactory.universeDAO.getMode(universeEntity.id);//entity.get().mode;
-        return mode!= null && mode.contains("stop");
+        this.universe = this.loadServerProperties(this.serverConfigPath);
+        return this.universe.mode!= null && this.universe.mode.contains("stop");
     }
 
     public String getName() {
-        return universeEntity.name;
+        return universe.name;
     }
 }

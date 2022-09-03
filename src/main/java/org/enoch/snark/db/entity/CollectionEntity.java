@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "collections", schema = "public", catalog = "snark")
-public class CollectionEntity extends BaseEntity {
+public class CollectionEntity extends IdEntity {
 
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)

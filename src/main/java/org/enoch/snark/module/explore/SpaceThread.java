@@ -7,6 +7,7 @@ import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.SystemView;
+import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.AbstractThread;
 
 import java.util.*;
@@ -69,16 +70,18 @@ public class SpaceThread extends AbstractThread {
         toView.forEach(view -> spaceMap.put(view, null));
 
         instance.daoFactory.galaxyDAO.fetchAll().stream()
-                .filter(galaxy -> galaxy.universe.equals(instance.universeEntity))
                 .forEach(galaxyEntity -> spaceMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         return spaceMap;
     }
 
     private Collection<SystemView> generateSystemToView(ColonyEntity source) {
         List<SystemView> result = new ArrayList<>();
-        int base = instance.universeEntity.systemMax;
-        int start = ((base + source.system - instance.universeEntity.explorationArea) % base) +1;
-        for(int i = 0; i < 2*instance.universeEntity.explorationArea+2; i++ ) {
+        int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
+        int explorationArea = Integer.parseInt(instance.universe.getConfig((Universe.EXPLORATION_AREA)));
+
+        int base = systemMax;
+        int start = ((base + source.system - explorationArea) % base) +1;
+        for(int i = 0; i < 2*explorationArea+2; i++ ) {
             result.add(new SystemView(source.galaxy, ((start+i)%base)+1));
         }
         return result;

@@ -2,13 +2,11 @@ package org.enoch.snark.gi.command.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.MessageEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SpyInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -78,7 +76,6 @@ public class ReadMessageCommand extends AbstractCommand {
         instance.session.getWebDriver().get(link);
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
-        messageEntity.universe = instance.universeEntity;
 
         instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
 

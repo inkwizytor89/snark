@@ -1,7 +1,6 @@
 package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.model.SystemView;
 
 import java.util.List;

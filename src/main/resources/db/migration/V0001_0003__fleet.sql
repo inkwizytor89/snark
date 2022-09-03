@@ -1,6 +1,5 @@
 create table fleet(
     id bigserial not null primary key,
-    universe_id bigint not null references universes,
     type text not null,
     target_galaxy int,
     target_system int,

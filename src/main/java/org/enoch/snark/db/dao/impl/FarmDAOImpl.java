@@ -3,15 +3,13 @@ package org.enoch.snark.db.dao.impl;
 import org.enoch.snark.db.dao.FarmDAO;
 import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.db.entity.UniverseEntity;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 public class FarmDAOImpl extends AbstractDAOImpl<FarmEntity> implements FarmDAO {
 
-    public FarmDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
-        super(universeEntity, entityManager);
+    public FarmDAOImpl() {
+        super();
     }
 
     @Override

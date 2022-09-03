@@ -7,7 +7,7 @@ import java.util.Collection;
 
 @Entity
 @Table(name = "farm_waves", schema = "public", catalog = "snark")
-public class FarmEntity extends BaseEntity {
+public class FarmEntity extends IdEntity {
 
     @Basic
     @Column(name = "start")

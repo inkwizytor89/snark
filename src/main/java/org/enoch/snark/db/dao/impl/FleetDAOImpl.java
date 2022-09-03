@@ -3,16 +3,14 @@ package org.enoch.snark.db.dao.impl;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.db.entity.UniverseEntity;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetDAO {
 
-    public FleetDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
-        super(universeEntity, entityManager);
+    public FleetDAOImpl() {
+        super();
     }
 
     @Override
@@ -38,9 +36,7 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from FleetEntity " +
-                    "where  universe = :universe and " +
-                    "       code = :code", FleetEntity.class)
-                    .setParameter("universe", universeEntity)
+                    "where code = :code", FleetEntity.class)
                     .setParameter("code", code)
                     .getResultList();
         }
@@ -51,11 +47,9 @@ public class FleetDAOImpl extends AbstractDAOImpl<FleetEntity> implements FleetD
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from FleetEntity " +
-                    "where  universe = :universe and " +
-                    "       start is not null and " +
+                    "where  start is not null and " +
                     "       start < :now and " +
                     "       visited is null", FleetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setParameter("now", LocalDateTime.now())
                     .getResultList();
         }

@@ -28,7 +28,7 @@ public class BaseSI implements SI {
 //        instance.daoFactory.fleetDAO.saveOrUpdate(farmFleet);
 //        new Thread(spaceThred).start();
 //        instance.session.sleep(TimeUnit.SECONDS, 2);
-        String mode = instance.universeEntity.mode;
+        String mode = instance.universe.mode;
         if(mode == null || mode.isEmpty() || mode.contains(ExpeditionThread.threadName)) {
             new Thread(expeditionThred).start();
         }

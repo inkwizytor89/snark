@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.Collection;
 
 @MappedSuperclass
-public abstract class PlanetEntity extends BaseEntity{
+public abstract class PlanetEntity extends IdEntity{
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
     public static final Integer POSITION_INDEX = 3;

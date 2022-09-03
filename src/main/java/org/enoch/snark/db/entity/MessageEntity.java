@@ -12,7 +12,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "messages", schema = "public", catalog = "snark")
-public class MessageEntity extends BaseEntity {
+public class MessageEntity extends IdEntity {
 
     public static final String SPY = "SPY";
 

@@ -2,7 +2,6 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.gi.text.Marker;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.Utils;
 import org.openqa.selenium.By;
@@ -10,7 +9,6 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
 
@@ -72,18 +70,18 @@ public class GISession {
 //        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
 //        gi.findText("Login").click();
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(instance.universeEntity.login);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(instance.universe.login);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
         Utils.secondsToSleep(2L);
 
 
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(instance.universeEntity.pass);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(instance.universe.pass);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
         Utils.secondsToSleep(2L);
 
         //chooseServer
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
-        gi.doubleClickText(instance.universeEntity.name);
+        gi.doubleClickText(instance.universe.name);
 
         isLoggedIn = true;
     }

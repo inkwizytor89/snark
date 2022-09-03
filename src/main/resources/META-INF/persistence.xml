@@ -3,7 +3,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
-    <persistence-unit name="PERSISTENCE">
+    <persistence-unit name="H2-PERSISTENCE">
         <class>org.enoch.snark.db.entity.UniverseEntity</class>
         <class>org.enoch.snark.db.entity.ColonyEntity</class>
         <class>org.enoch.snark.db.entity.TargetEntity</class>

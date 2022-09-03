@@ -3,9 +3,6 @@ package org.enoch.snark.module.farm;
 import org.enoch.snark.db.dao.FarmDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
-import org.enoch.snark.db.dao.impl.FarmDAOImpl;
-import org.enoch.snark.db.dao.impl.FleetDAOImpl;
-import org.enoch.snark.db.dao.impl.TargetDAOImpl;
 import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -59,7 +56,6 @@ public class FarmThread extends AbstractThread {
 
     private FarmEntity createFarmEntity() {
         FarmEntity farmEntity = new FarmEntity();
-        farmEntity.universe = si.getInstance().universeEntity;
         farmEntity.start = LocalDateTime.now();
         return farmEntity;
     }

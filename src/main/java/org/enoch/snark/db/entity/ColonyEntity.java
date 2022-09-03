@@ -28,8 +28,8 @@ public class ColonyEntity extends PlanetEntity {
 
         List<SystemView> result = new ArrayList<>();
         // TODO: extend about begin-end circle
-        int begin = system - universe.explorationArea;
-        int end = system + universe.explorationArea;
+        int begin = system - 5;
+        int end = system + 5;
         for(int i = begin; i < end; i++ ) {
             result.add(new SystemView(galaxy, i));
         }

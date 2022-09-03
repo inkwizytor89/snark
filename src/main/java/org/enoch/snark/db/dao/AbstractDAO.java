@@ -1,11 +1,11 @@
 package org.enoch.snark.db.dao;
 
-import org.enoch.snark.db.entity.BaseEntity;
+import org.enoch.snark.db.entity.IdEntity;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public interface AbstractDAO<T extends BaseEntity> {
+public interface AbstractDAO<T extends IdEntity> {
 
     @Nonnull
     T saveOrUpdate(@Nonnull T entity);

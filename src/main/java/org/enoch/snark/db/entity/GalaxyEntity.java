@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
-public class GalaxyEntity extends BaseEntity {
+public class GalaxyEntity extends IdEntity {
 
     @Basic
     @Column(name = "galaxy")

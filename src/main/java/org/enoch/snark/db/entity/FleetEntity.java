@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fleet", schema = "public", catalog = "snark")
-public class FleetEntity extends BaseEntity {
+public class FleetEntity extends IdEntity {
 
     public static final String SPY = "SPY";
     public static final String ATTACK = "ATTACK";
@@ -115,7 +115,6 @@ public class FleetEntity extends BaseEntity {
     public FleetEntity(Instance instance) {
         super();
         this.instance = instance;
-        universe = instance.universeEntity;
         start = LocalDateTime.now();
     }
 

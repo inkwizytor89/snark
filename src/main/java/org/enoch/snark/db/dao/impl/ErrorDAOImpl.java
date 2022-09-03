@@ -2,17 +2,15 @@ package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.db.entity.ErrorEntity;
-import org.enoch.snark.db.entity.UniverseEntity;
 import org.enoch.snark.exception.DatabseError;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class ErrorDAOImpl extends AbstractDAOImpl<ErrorEntity> implements ErrorDAO {
 
-    public ErrorDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
-        super(universeEntity, entityManager);
+    public ErrorDAOImpl() {
+        super();
     }
 
     @Override

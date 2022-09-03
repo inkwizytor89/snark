@@ -1,23 +1,20 @@
 package org.enoch.snark.db.dao.impl;
 
 import org.enoch.snark.db.dao.AbstractDAO;
-import org.enoch.snark.db.entity.BaseEntity;
+import org.enoch.snark.db.entity.IdEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.db.entity.UniverseEntity;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.List;
 
-public abstract class AbstractDAOImpl<T extends BaseEntity> implements AbstractDAO<T> {
+public abstract class AbstractDAOImpl<T extends IdEntity> implements AbstractDAO<T> {
 
     final EntityManager entityManager;
-    protected UniverseEntity universeEntity;
 
-    AbstractDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
-        this.universeEntity = universeEntity;
-        this.entityManager = entityManager;
+    AbstractDAOImpl() {
+        this.entityManager = JPAUtility.getEntityManager();
     }
 
     protected abstract Class<T> getEntitylass();

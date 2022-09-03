@@ -3,16 +3,14 @@ package org.enoch.snark.db.dao.impl;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.db.entity.UniverseEntity;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
 public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements TargetDAO {
 
-    public TargetDAOImpl(UniverseEntity universeEntity, EntityManager entityManager) {
-        super(universeEntity, entityManager);
+    public TargetDAOImpl() {
+        super();
     }
 
     @Override
@@ -25,11 +23,9 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         synchronized (JPAUtility.dbSynchro) {
             final List<TargetEntity> result = entityManager.createQuery("" +
                     "from TargetEntity " +
-                    "where universe = :universe and " +
-                    "       galaxy = :galaxy and " +
+                    "where galaxy = :galaxy and " +
                     "       system = :system and " +
                     "       position = :position ", TargetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setParameter("galaxy", galaxy)
                     .setParameter("system", system)
                     .setParameter("position", position)
@@ -46,10 +42,8 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
-                    "where universe = :universe and " +
-                    "       galaxy = :galaxy and " +
+                    "where galaxy = :galaxy and " +
                     "       system = :system ", TargetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setParameter("galaxy", galaxy)
                     .setParameter("system", system)
                     .getResultList();
@@ -61,12 +55,10 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
-                    "where universe = :universe and " +
-                    "       fleet_sum = 0 and " +
+                    "where fleet_sum = 0 and " +
                     "       defense_sum = 0 and " +
                     "       type = 'IN_ACTIVE' " +
                     "order by power desc ", TargetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setMaxResults(limit)
                     .getResultList();
         }
@@ -77,13 +69,11 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
-                    "where universe = :universe and " +
-                    "       fleet_sum = 0 and " +
+                    "where fleet_sum = 0 and " +
                     "       defense_sum = 0 and " +
                     "       resources is not null and " +
                     "       resources > 0 " +
                     "order by resources desc ", TargetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setMaxResults(limit)
                     .getResultList();
         }
@@ -94,12 +84,10 @@ public class TargetDAOImpl extends AbstractDAOImpl<TargetEntity> implements Targ
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
-                    "where universe = :universe and " +
-                    "       fleet_sum is null and " +
+                    "where fleet_sum is null and " +
                     "       defense_sum is null and " +
                     "       type = :type " +
                     "order by resources desc ", TargetEntity.class)
-                    .setParameter("universe", universeEntity)
                     .setParameter("type", TargetEntity.IN_ACTIVE)
                     .setMaxResults(1)
                     .getResultList().stream().findFirst();

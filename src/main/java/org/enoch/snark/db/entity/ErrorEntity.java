@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "errors", schema = "public", catalog = "snark")
-public class ErrorEntity extends BaseEntity {
+public class ErrorEntity extends IdEntity {
 
     @Basic
     @Column(name = "message")
