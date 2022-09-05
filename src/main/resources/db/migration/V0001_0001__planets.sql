@@ -51,8 +51,6 @@ create table targets
   id          bigserial   not null
     constraint targets_pkey
     primary key,
-  universe_id bigint      not null
-    references universes,
   galaxy      integer     not null,
   system      integer     not null,
   position    integer     not null,

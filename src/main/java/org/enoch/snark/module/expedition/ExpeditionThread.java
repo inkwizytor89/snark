@@ -40,7 +40,7 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         cleanExpeditions();
-        expeditionQueue.addAll(instance.sources);
+        expeditionQueue.addAll(instance.daoFactory.colonyDAO.fetchAll());
     }
 
     @Override

@@ -63,7 +63,7 @@ public class SpaceThread extends AbstractThread {
 
     private Map<SystemView, GalaxyEntity> buildSpaceMap() {
         List<SystemView> toView = new LinkedList<>();
-        for(ColonyEntity source : instance.sources) {
+        for(ColonyEntity source : instance.daoFactory.colonyDAO.fetchAll()) {
             toView.addAll(generateSystemToView(source));
         }
         Map<SystemView, GalaxyEntity> spaceMap= new HashMap<>();

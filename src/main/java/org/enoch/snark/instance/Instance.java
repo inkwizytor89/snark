@@ -1,23 +1,21 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.db.DAOFactory;
-import org.enoch.snark.db.entity.*;
+import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Universe;
-import org.enoch.snark.module.AbstractModule;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class Instance {
 
@@ -30,7 +28,7 @@ public class Instance {
     public GISession session;
 //    public MessageService messageService;
     public DAOFactory daoFactory;
-    public List<ColonyEntity> sources;
+//    public List<ColonyEntity> sources;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
@@ -44,7 +42,8 @@ public class Instance {
         this.universe = loadServerProperties(this.serverConfigPath);
         daoFactory = new DAOFactory();
         browserReset();
-        sources = loadGameState();
+        loadGameState();
+
 //        sources = new ArrayList<>(ImmutableList.copyOf(universeEntity.colonyEntities));
         if(isQueueEnabled) {
             commander = new CommanderImpl(this);
@@ -63,9 +62,11 @@ public class Instance {
         return Universe.loadPrperties(appProperties);
     }
 
+    @Transactional
     public List<ColonyEntity> loadGameState() {
         List<ColonyEntity> colonies = new ArrayList<>();
         try {
+
             for(ColonyEntity colony : gi.loadPlanetList()) {
                 ColonyEntity colonyEntity = daoFactory.colonyDAO.find(colony.cp);
                 if(colonyEntity == null) {
