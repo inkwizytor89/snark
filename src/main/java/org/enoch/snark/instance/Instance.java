@@ -23,6 +23,7 @@ public class Instance {
 
     public String serverConfigPath;
     public Universe universe;
+    public Integer level = 1;
     public Commander commander;
     public GI gi;
     public GISession session;

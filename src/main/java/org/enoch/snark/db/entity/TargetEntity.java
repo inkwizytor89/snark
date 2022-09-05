@@ -40,6 +40,10 @@ public class TargetEntity extends PlanetEntity {
     @Column(name = "updated")
     public LocalDateTime updated;
 
+    @ManyToOne
+    @JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
+    public PlayerEntity player;
+
     public TargetEntity() {
         super();
     }

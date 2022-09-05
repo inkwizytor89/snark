@@ -12,6 +12,11 @@ create table colonies
   power       integer,
   is_planet      boolean default true,
 
+  cp          integer   not null,
+  cpm          integer,
+  collecting_order    integer,
+
+  -- fleet
   lm    integer default 0,
   cm    integer default 0,
   kr    integer default 0,
@@ -29,6 +34,7 @@ create table colonies
   son   integer default 0,
   sat   integer default 0,
 
+  --defence
   wr    integer default 0,
   ldl   integer default 0,
   cdl   integer default 0,
@@ -40,10 +46,39 @@ create table colonies
   pr    integer default 0,
   mr    integer default 0,
 
+  -- Resources
+  metalMine             integer,
+  crystalMine           integer,
+  deuteriumSynthesizer  integer,
+  solarPlant            integer,
+  fusionPlant           integer,
+  solarSatellite        integer,
+  metalStorage          integer,
+  crystalStorage        integer,
+  deuteriumStorage      integer,
 
-  cp          integer   not null,
-  cpm          integer,
-  collecting_order    integer
+  --Facilities
+  roboticsFactory       integer,
+  shipyard              integer,
+  researchLaboratory    integer,
+  allianceDepot         integer,
+  missileSilo           integer,
+  naniteFactory         integer,
+  terraformer           integer,
+  repairDock            integer,
+
+  --Lifeform
+  lifeformTech14101 integer,
+  lifeformTech14102 integer,
+  lifeformTech14103 integer,
+  lifeformTech14104 integer,
+  lifeformTech14105 integer,
+  lifeformTech14106 integer,
+  lifeformTech14107 integer,
+  lifeformTech14109 integer,
+  lifeformTech14110 integer,
+  lifeformTech14111 integer,
+  lifeformTech14112 integer
 );
 
 create table targets
@@ -58,8 +93,9 @@ create table targets
   crystal     integer,
   deuterium   integer,
   power       integer,
-  is_planet      boolean default true,
+  player_id bigint not null references players,
 
+  -- fleet
   lm    integer default 0,
   cm    integer default 0,
   kr    integer default 0,
@@ -77,6 +113,7 @@ create table targets
   son   integer default 0,
   sat   integer default 0,
 
+  --defence
   wr    integer default 0,
   ldl   integer default 0,
   cdl   integer default 0,
@@ -88,6 +125,38 @@ create table targets
   pr    integer default 0,
   mr    integer default 0,
 
+  -- Resources
+  metalMine             integer,
+  crystalMine           integer,
+  deuteriumSynthesizer  integer,
+  solarPlant            integer,
+  fusionPlant           integer,
+  solarSatellite        integer,
+  metalStorage          integer,
+  crystalStorage        integer,
+  deuteriumStorage      integer,
+
+  --Facilities
+  roboticsFactory       integer,
+  shipyard              integer,
+  allianceDepot         integer,
+  missileSilo           integer,
+  naniteFactory         integer,
+  terraformer           integer,
+  repairDock            integer,
+
+  --Lifeform
+  lifeformTech14101 integer,
+  lifeformTech14102 integer,
+  lifeformTech14103 integer,
+  lifeformTech14104 integer,
+  lifeformTech14105 integer,
+  lifeformTech14106 integer,
+  lifeformTech14107 integer,
+  lifeformTech14109 integer,
+  lifeformTech14110 integer,
+  lifeformTech14111 integer,
+  lifeformTech14112 integer,
 
   resources   integer,
   type        varchar(15) not null,

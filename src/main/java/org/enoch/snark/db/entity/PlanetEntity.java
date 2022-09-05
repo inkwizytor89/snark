@@ -143,6 +143,117 @@ public abstract class PlanetEntity extends IdEntity{
     @Column(name = "mr")
     public Long mr = 0L;
 
+//    Resources
+    @Basic
+    @Column(name = "metalMine")
+    public Long metalMine;
+    @Basic
+    @Column(name = "crystalMine")
+    public Long crystalMine;
+
+    @Basic
+    @Column(name = "deuteriumSynthesizer")
+    public Long deuteriumSynthesizer;
+
+    @Basic
+    @Column(name = "solarPlant")
+    public Long solarPlant;
+
+    @Basic
+    @Column(name = "fusionPlant")
+    public Long fusionPlant;
+
+    @Basic
+    @Column(name = "solarSatellite")
+    public Long solarSatellite;
+
+    @Basic
+    @Column(name = "metalStorage")
+    public Long metalStorage;
+
+    @Basic
+    @Column(name = "crystalStorage")
+    public Long crystalStorage;
+
+    @Basic
+    @Column(name = "deuteriumStorage")
+    public Long deuteriumStorage;
+
+//    Facilities
+    @Basic
+    @Column(name = "roboticsFactory")
+    public Long roboticsFactory;
+
+    @Basic
+    @Column(name = "shipyard")
+    public Long shipyard;
+
+    @Basic
+    @Column(name = "allianceDepot")
+    public Long allianceDepot;
+
+    @Basic
+    @Column(name = "missileSilo")
+    public Long missileSilo;
+
+    @Basic
+    @Column(name = "naniteFactory")
+    public Long naniteFactory;
+
+    @Basic
+    @Column(name = "terraformer")
+    public Long terraformer;
+
+    @Basic
+    @Column(name = "repairDock")
+    public Long repairDock;
+
+
+//    Lifeform
+    @Basic
+    @Column(name = "lifeformTech14101")
+    public Long lifeformTech14101;
+
+    @Basic
+    @Column(name = "lifeformTech14102")
+    public Long lifeformTech14102;
+
+    @Basic
+    @Column(name = "lifeformTech14103")
+    public Long lifeformTech14103;
+
+    @Basic
+    @Column(name = "lifeformTech14104")
+    public Long lifeformTech14104;
+
+    @Basic
+    @Column(name = "lifeformTech14105")
+    public Long lifeformTech14105;
+
+    @Basic
+    @Column(name = "lifeformTech14106")
+    public Long lifeformTech14106;
+
+    @Basic
+    @Column(name = "lifeformTech14107")
+    public Long lifeformTech14107;
+
+    @Basic
+    @Column(name = "lifeformTech14109")
+    public Long lifeformTech14109;
+
+    @Basic
+    @Column(name = "lifeformTech14110")
+    public Long lifeformTech14110;
+
+    @Basic
+    @Column(name = "lifeformTech14111")
+    public Long lifeformTech14111;
+
+    @Basic
+    @Column(name = "lifeformTech14112")
+    public Long lifeformTech14112;
+
 
     public PlanetEntity() {
         super();
