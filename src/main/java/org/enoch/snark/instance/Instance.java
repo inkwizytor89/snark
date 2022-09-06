@@ -75,7 +75,7 @@ public class Instance {
                 mainPlayer = player;
             }
             if(mainPlayer.level == null) {
-                new GIUrlBuilder().open(PAGE_RESEARCH, mainPlayer);
+                new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
                 mainPlayer.level = 1L;
             }
             PlayerDAO.getInstance().saveOrUpdate(mainPlayer);

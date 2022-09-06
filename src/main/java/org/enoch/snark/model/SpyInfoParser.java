@@ -39,7 +39,7 @@ public class SpyInfoParser {
         planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
         planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
         planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
-        planet.power = PlanetEntity.parseResource(resourcesParts[3]);
+        planet.energy = PlanetEntity.parseResource(resourcesParts[3]);
     }
 
     private void extractFleet() {//section_title

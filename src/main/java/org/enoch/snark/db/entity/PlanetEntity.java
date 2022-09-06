@@ -37,7 +37,7 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Basic
     @Column(name = "power")
-    public Long power;
+    public Long energy;
 
     @Basic
     @Column(name = "lm")

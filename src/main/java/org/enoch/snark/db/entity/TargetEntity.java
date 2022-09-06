@@ -61,7 +61,7 @@ public class TargetEntity extends PlanetEntity {
                 Objects.equals(galaxy, entity.galaxy) &&
                 Objects.equals(system, entity.system) &&
                 Objects.equals(position, entity.position) &&
-                Objects.equals(power, entity.power) &&
+                Objects.equals(energy, entity.energy) &&
                 Objects.equals(type, entity.type) &&
                 Objects.equals(fleetSum, entity.fleetSum) &&
                 Objects.equals(defenseSum, entity.defenseSum) &&
@@ -73,7 +73,7 @@ public class TargetEntity extends PlanetEntity {
         this.crystal = targetEntity.crystal;
         this.deuterium = targetEntity.deuterium;
         this.resources = 3 * metal + 2 * crystal + deuterium;
-        this.power = targetEntity.power;
+        this.energy = targetEntity.energy;
 
         this.fleetSum = targetEntity.fleetSum;
         this.defenseSum = targetEntity.defenseSum;
@@ -108,7 +108,7 @@ public class TargetEntity extends PlanetEntity {
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, this.galaxy, this.system, this.position, this.power, type, fleetSum, defenseSum, updated);
+        return Objects.hash(id, this.galaxy, this.system, this.position, this.energy, type, fleetSum, defenseSum, updated);
     }
 
     public Long calculateTransportByLt() {

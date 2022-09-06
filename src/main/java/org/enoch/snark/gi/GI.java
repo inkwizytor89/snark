@@ -32,6 +32,7 @@ public class GI {
     public static final String TITLE_ATTRIBUTE = "title";
     public static final String ID_ATTRIBUTE = "id";
     public static final String A_TAG = "a";
+    public static final String TECHNOLOGIES = "technologies";
     public final WebDriver webDriver;
 
     public GI() {
@@ -171,8 +172,16 @@ public class GI {
         new GIUrlBuilder().open(PAGE_DEFENSES, colony);
     }
 
+    public void updateResources(ColonyEntity colony) {
+        WebElement resources = webDriver.findElement(By.id("resources"));
+        colony.metal = getLong(resources.findElement(By.id("resources_metal")).getText());
+        colony.crystal = getLong(resources.findElement(By.id("resources_crystal")).getText());
+        colony.deuterium = getLong(resources.findElement(By.id("resources_deuterium")).getText());
+        colony.energy = getLong(resources.findElement(By.id("resources_energy")).getText());
+    }
+
     public void updateDefence(ColonyEntity colony) {
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.rocketLauncher = getAmount(technologies,"rocketLauncher");
         colony.laserCannonLight = getAmount(technologies,"laserCannonLight");
         colony.laserCannonHeavy = getAmount(technologies,"laserCannonHeavy");
@@ -189,7 +198,7 @@ public class GI {
         if (webDriver.findElements(By.id("warning")).size() > 0) {
             return;
         }
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.fighterLight = getAmount(technologies,"fighterLight");
         colony.fighterHeavy = getAmount(technologies,"fighterHeavy");
         colony.cruiser = getAmount(technologies,"cruiser");
@@ -209,7 +218,7 @@ public class GI {
     }
 
     public void updateLifeform(ColonyEntity colony) {
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.lifeformTech14101 = getLevel(technologies,"lifeformTech14101");
         colony.lifeformTech14102 = getLevel(technologies,"lifeformTech14102");
         colony.lifeformTech14103 = getLevel(technologies,"lifeformTech14103");
@@ -229,7 +238,7 @@ public class GI {
     }
 
     public void updateFacilities(ColonyEntity colony) {
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.roboticsFactory = getLevel(technologies,"roboticsFactory");
         colony.shipyard = getLevel(technologies,"shipyard");
         colony.researchLaboratory = getLevel(technologies,"researchLaboratory");
@@ -240,8 +249,8 @@ public class GI {
         colony.repairDock = getLevel(technologies,"repairDock");
     }
 
-    public void updateResources(ColonyEntity colony) {
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+    public void updateResourcesProducers(ColonyEntity colony) {
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.metalMine = getLevel(technologies,"metalMine");
         colony.crystalMine = getLevel(technologies,"crystalMine");
         colony.deuteriumSynthesizer = getLevel(technologies,"deuteriumSynthesizer");
@@ -254,7 +263,7 @@ public class GI {
     }
 
     public void updateResearch(PlayerEntity player) {
-        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         player.energyTechnology = getLevel(technologies,"energyTechnology");
         player.laserTechnology = getLevel(technologies,"laserTechnology");
         player.ionTechnology = getLevel(technologies,"ionTechnology");
@@ -280,6 +289,11 @@ public class GI {
     private Long getAmount(WebElement element, String name) {
         String amount = element.findElement(By.className(name)).findElement(By.className("amount")).getText();
         return Long.parseLong(amount.replace(".", ""));
+    }
+
+    private Long getLong(String input) {
+        String resultString = input.replace("Mln", "000000").replace(".", "");
+        return Long.parseLong(resultString);
     }
 
     public List<ColonyEntity> loadPlanetList() {

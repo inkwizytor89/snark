@@ -64,7 +64,7 @@ public class ReadMessageCommand extends AbstractCommand {
         for(String link : links) {
             storeSpyMessage(link);
         }
-        new GIUrlBuilder(instance).openOverview();
+        new GIUrlBuilder(instance).open(GIUrlBuilder.PAGE_OVERVIEW, null);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie

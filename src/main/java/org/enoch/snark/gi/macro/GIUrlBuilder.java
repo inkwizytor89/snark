@@ -7,7 +7,6 @@ import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,20 +75,6 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder);
     }
 
-    public void openOverview() {
-        this.openOverview(null);
-    }
-
-    public void openOverview(ColonyEntity source) {
-        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
-        builder.append(PAGE_TERM + PAGE_INGAME + "&");
-        builder.append(COMPONENT_TERM + PAGE_OVERVIEW);
-        if(source != null) {
-            builder.append("&cp=" + source.cp);
-        }
-        instance.session.getWebDriver().get(builder.toString());
-    }
-
     public void open(String page, ColonyEntity colony) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
@@ -100,14 +85,17 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder.toString());
 
         if(colony != null) {
+            instance.gi.updateResources(colony);
             if (PAGE_RESOURCES.equals(page)) {
-                instance.gi.updateResources(colony);
+                instance.gi.updateResourcesProducers(colony);
             } else if (PAGE_FACILITIES.equals(page)) {
                 instance.gi.updateFacilities(colony);
             } else if (PAGE_LIFEFORM.equals(page)) {
                 instance.gi.updateLifeform(colony);
             } else if (PAGE_BASE_FLEET.equals(page)) {
-                loadFleetStatus();
+                if(instance.commander != null) {
+                    loadFleetStatus();
+                }
                 Instance.getInstance().gi.updateFleet(colony);
             } else if (PAGE_DEFENSES.equals(page)) {
                 Instance.getInstance().gi.updateDefence(colony);
@@ -115,7 +103,7 @@ public class GIUrlBuilder {
         }
     }
 
-    public void open(String page, PlayerEntity player) {
+    public void openWithPlayerInfo(String page, PlayerEntity player) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
