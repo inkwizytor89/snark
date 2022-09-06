@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
@@ -53,7 +54,7 @@ public class GISession {
             logIn();
         } catch (GIException e) {
             System.err.println(e.getMessage());
-            instance.daoFactory.errorDAO.save(e);
+            ErrorDAO.getInstance().save(e);
         }
     }
 

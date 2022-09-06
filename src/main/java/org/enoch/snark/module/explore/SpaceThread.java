@@ -1,6 +1,8 @@
 package org.enoch.snark.module.explore;
 
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
@@ -40,7 +42,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        final Optional<GalaxyEntity> latestGalaxyToView = instance.daoFactory.galaxyDAO.findLatestGalaxyToView();
+        final Optional<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView();
 
         if(!latestGalaxyToView.isPresent()) {
             System.err.println(SpaceThread.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
@@ -63,13 +65,13 @@ public class SpaceThread extends AbstractThread {
 
     private Map<SystemView, GalaxyEntity> buildSpaceMap() {
         List<SystemView> toView = new LinkedList<>();
-        for(ColonyEntity source : instance.daoFactory.colonyDAO.fetchAll()) {
+        for(ColonyEntity source : ColonyDAO.getInstance().fetchAll()) {
             toView.addAll(generateSystemToView(source));
         }
         Map<SystemView, GalaxyEntity> spaceMap= new HashMap<>();
         toView.forEach(view -> spaceMap.put(view, null));
 
-        instance.daoFactory.galaxyDAO.fetchAll().stream()
+        GalaxyDAO.getInstance().fetchAll().stream()
                 .forEach(galaxyEntity -> spaceMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         return spaceMap;
     }

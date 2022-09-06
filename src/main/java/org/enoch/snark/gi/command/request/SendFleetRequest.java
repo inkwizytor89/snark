@@ -1,7 +1,6 @@
 package org.enoch.snark.gi.command.request;
 
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.dao.impl.FleetDAOImpl;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
@@ -22,7 +21,7 @@ public class SendFleetRequest {
     private int sendetFleet = 0;
 
     public SendFleetRequest(Instance instance, String mission, List<TargetEntity> targets) {
-        fleetDAO = instance.daoFactory.fleetDAO;
+        fleetDAO = FleetDAO.getInstance();
         this.instance = instance;
         this.targets = new ArrayList<>(targets);
         this.mission = mission;

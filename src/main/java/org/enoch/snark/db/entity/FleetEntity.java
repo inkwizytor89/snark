@@ -1,5 +1,7 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 
@@ -167,7 +169,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = 16;
-        fleet.source = instance.daoFactory.colonyDAO.fetchAll().stream()
+        fleet.source = ColonyDAO.getInstance().fetchAll().stream()
                 .filter(colonyEntity -> colonyEntity.galaxy.equals(target.galaxy) &&
                         colonyEntity.system.equals(target.system) &&
                         colonyEntity.position.equals(target.position))
@@ -198,7 +200,7 @@ public class FleetEntity extends IdEntity {
         if(source == null) {
             this.source = instance.findNearestSource(planet);
         }
-        this.instance.daoFactory.fleetDAO.saveOrUpdate(this);
+        FleetDAO.getInstance().saveOrUpdate(this);
     }
 
     @Override

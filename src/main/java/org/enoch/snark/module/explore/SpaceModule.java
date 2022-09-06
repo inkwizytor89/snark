@@ -1,7 +1,6 @@
 package org.enoch.snark.module.explore;
 
 import org.enoch.snark.db.dao.GalaxyDAO;
-import org.enoch.snark.db.dao.impl.GalaxyDAOImpl;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.module.AbstractModule;
@@ -10,7 +9,7 @@ import java.util.*;
 
 public class SpaceModule extends AbstractModule {
 
-    private GalaxyDAO galaxyDAO = instance.daoFactory.galaxyDAO;
+    private GalaxyDAO galaxyDAO = GalaxyDAO.getInstance();
     Queue<SystemView> toView = new LinkedList<>();
 
     public SpaceModule(Instance instance) {

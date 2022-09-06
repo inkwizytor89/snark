@@ -1,6 +1,8 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.db.dao.MessageDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -68,7 +70,7 @@ public class ReadMessageCommand extends AbstractCommand {
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie
     private void storeSpyMessage(String link) {
         Long messageId = Long.parseLong(getMessageIdFromLink(link));
-        boolean alreadyExists = instance.daoFactory.messageDAO.fetchAll().stream().anyMatch(
+        boolean alreadyExists = MessageDAO.getInstance().fetchAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) {
             return;
@@ -77,16 +79,16 @@ public class ReadMessageCommand extends AbstractCommand {
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
 
-        instance.daoFactory.messageDAO.saveOrUpdate(messageEntity);
+        MessageDAO.getInstance().saveOrUpdate(messageEntity);
 
         if(MessageEntity.SPY.equals(messageEntity.type)) {
             TargetEntity planet = messageEntity.getPlanet();
-            Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(planet.galaxy, planet.system, planet.position);
+            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(planet.galaxy, planet.system, planet.position);
             targetEntity.get().update(planet);
-            instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
+            TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
             if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
                 targetEntity.get().spyLevel += 4;
-                instance.daoFactory.targetDAO.saveOrUpdate(targetEntity.get());
+                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
             }
         }
     }

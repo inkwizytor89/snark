@@ -1,6 +1,8 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.GICommand;
@@ -42,7 +44,7 @@ public class SendFleetCommand extends GICommand {
 
     @Override
     public boolean execute() {
-//        fleet = instance.daoFactory.fleetDAO.fetch(fleet);
+//        fleet = FleetDAO.getInstance().fetch(fleet);
         if(fleet.visited != null || fleet.back != null) {
             System.err.println("Fleet already send "+fleet);
             return true;
@@ -77,7 +79,7 @@ public class SendFleetCommand extends GICommand {
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
             TargetEntity target = new TargetEntity(fleet.getCoordinate());
             target.type = TargetEntity.WEAK;
-            instance.daoFactory.targetDAO.saveOrUpdate(target);
+            TargetDAO.getInstance().saveOrUpdate(target);
             return true;
         }
         if(Mission.SPY.equals(mission)) {
@@ -97,7 +99,7 @@ public class SendFleetCommand extends GICommand {
             System.err.println(e);
             setAfterCommand(null);
         }
-        instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
+        FleetDAO.getInstance().saveOrUpdate(fleet);
         return true;
     }
 
@@ -105,7 +107,7 @@ public class SendFleetCommand extends GICommand {
     public void onInterrupt() {
         super.onInterrupt();
         fleet.code = -1L;
-        instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
+        FleetDAO.getInstance().saveOrUpdate(fleet);
     }
 
     @Override

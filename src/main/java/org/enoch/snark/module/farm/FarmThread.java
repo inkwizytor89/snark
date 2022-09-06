@@ -28,9 +28,9 @@ public class FarmThread extends AbstractThread {
 
     public FarmThread(SI si) {
         super(si);
-        farmDAO = si.getInstance().daoFactory.farmDAO;
-        targetDAO = si.getInstance().daoFactory.targetDAO;
-        fleetDAO = si.getInstance().daoFactory.fleetDAO;
+        farmDAO = FarmDAO.getInstance();
+        targetDAO = TargetDAO.getInstance();
+        fleetDAO = FleetDAO.getInstance();
     }
 
     @Override

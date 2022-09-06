@@ -1,5 +1,7 @@
 package org.enoch.snark.module.expedition;
 
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
@@ -40,7 +42,7 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         cleanExpeditions();
-        expeditionQueue.addAll(instance.daoFactory.colonyDAO.fetchAll());
+        expeditionQueue.addAll(ColonyDAO.getInstance().fetchAll());
     }
 
     @Override
@@ -73,9 +75,9 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void cleanExpeditions() {
-        for(FleetEntity fleet : this.instance.daoFactory.fleetDAO.fetchAll()) {
+        for(FleetEntity fleet : FleetDAO.getInstance().fetchAll()) {
             if(EXPEDITION.equals(fleet.type)) {
-                this.instance.daoFactory.fleetDAO.remove(fleet);
+                FleetDAO.getInstance().remove(fleet);
             }
         }
     }

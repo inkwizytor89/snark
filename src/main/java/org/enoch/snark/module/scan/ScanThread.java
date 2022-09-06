@@ -1,5 +1,7 @@
 package org.enoch.snark.module.scan;
 
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
@@ -30,10 +32,10 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        Optional<TargetEntity> target = instance.daoFactory.targetDAO.findNotScaned();
+        Optional<TargetEntity> target = TargetDAO.getInstance().findNotScaned();
         if(target.isPresent()) {
             FleetEntity fleet = FleetEntity.createSpyFleet(instance, target.get());
-            instance.daoFactory.fleetDAO.saveOrUpdate(fleet);
+            FleetDAO.getInstance().saveOrUpdate(fleet);
         }
     }
 }

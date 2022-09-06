@@ -30,7 +30,7 @@ public class GICommandQueue {
 //        Runnable task = () -> {
 //            while(true) {
 //                if(fleetActionQueue.isEmpty()) {
-//                    for(FleetEntity fleet : instance.daoFactory.fleetDAO.findToProcess()) {
+//                    for(FleetEntity fleet : FleetDAO.getInstance().findToProcess()) {
 //                        SendFleetCommand newSendFleet = new SendFleetCommand(instance, fleet);
 //                        if(!containsFleetCommand(newSendFleet, fleetActionQueue)) {
 //                            fleetActionQueue.add(newSendFleet);

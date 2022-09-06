@@ -1,6 +1,9 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.db.DAOFactory;
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.PlayerDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
@@ -34,7 +37,6 @@ public class Instance {
     public static GISession session;
     public static Integer level = 1;
     //    public MessageService messageService;
-    public DAOFactory daoFactory;
 //    public List<ColonyEntity> sources;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
@@ -42,7 +44,6 @@ public class Instance {
     private Instance() {
         LOG.info("Config file " + serverConfigPath);
         loadServerProperties();
-        daoFactory = new DAOFactory();
     }
 
     public static Instance getInstance() {
@@ -69,7 +70,7 @@ public class Instance {
         List<ColonyEntity> colonies = new ArrayList<>();
         try {
             PlayerEntity player = PlayerEntity.mainPlayer();
-            PlayerEntity mainPlayer = daoFactory.playerDAO.fetch(player);
+            PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(player);
             if(mainPlayer == null) {
                 mainPlayer = player;
             }
@@ -77,10 +78,10 @@ public class Instance {
                 new GIUrlBuilder().open(PAGE_RESEARCH, mainPlayer);
                 mainPlayer.level = 1L;
             }
-            daoFactory.playerDAO.saveOrUpdate(mainPlayer);
+            PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
 
             for(ColonyEntity colony : gi.loadPlanetList()) {
-                ColonyEntity colonyEntity = daoFactory.colonyDAO.find(colony.cp);
+                ColonyEntity colonyEntity = ColonyDAO.getInstance().find(colony.cp);
                 if(colonyEntity == null) {
                     colonyEntity = colony;
                 } else if(colony.cpm != null && colonyEntity.cpm == null){
@@ -90,7 +91,7 @@ public class Instance {
                     gi.updateColony(colonyEntity);
                     colonyEntity.level = 1L;
                 }
-                daoFactory.colonyDAO.saveOrUpdate(colonyEntity);
+                ColonyDAO.getInstance().saveOrUpdate(colonyEntity);
                 colonies.add(colonyEntity);
             }
         } catch (Exception e) {
@@ -125,7 +126,7 @@ public class Instance {
 
     public ColonyEntity findNearestSource(Planet planet) {
 
-        List<ColonyEntity> sources = new ArrayList<>(daoFactory.colonyDAO.fetchAll());
+        List<ColonyEntity> sources = new ArrayList<>(ColonyDAO.getInstance().fetchAll());
 
         ColonyEntity nearestPlanet = sources.get(0);
         Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
@@ -141,12 +142,12 @@ public class Instance {
     }
 
     public void removePlanet(Planet target) {
-        Optional<TargetEntity> targetEntity = daoFactory.targetDAO.find(target.galaxy, target.system, target.position);
+        Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(target.galaxy, target.system, target.position);
         if(targetEntity.isPresent()) {
-            daoFactory.fleetDAO.fetchAll().stream()
+            FleetDAO.getInstance().fetchAll().stream()
                     .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))
-                    .forEach(fleetEntity -> daoFactory.fleetDAO.remove(fleetEntity));
-            daoFactory.targetDAO.remove(targetEntity.get());
+                    .forEach(fleetEntity -> FleetDAO.getInstance().remove(fleetEntity));
+            TargetDAO.getInstance().remove(targetEntity.get());
             //TODO: remove messegas and others
         }
     }

@@ -1,5 +1,6 @@
 package org.enoch.snark.module.collector;
 
+import org.enoch.snark.db.dao.CollectionDAO;
 import org.enoch.snark.db.entity.CollectionEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
@@ -39,7 +40,7 @@ public class CollectorThread extends AbstractThread {
     protected void onStep() {
 
         // z bazy danych znajdz obecna planetę
-        Optional<CollectionEntity> optionalCollection = instance.daoFactory.collectionDAO.fetchAll().stream()
+        Optional<CollectionEntity> optionalCollection = CollectionDAO.getInstance().fetchAll().stream()
                 .findAny();
 
         if(!optionalCollection.isPresent()) {

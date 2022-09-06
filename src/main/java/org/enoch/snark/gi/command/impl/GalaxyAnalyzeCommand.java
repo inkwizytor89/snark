@@ -28,8 +28,8 @@ public class GalaxyAnalyzeCommand extends GICommand {
 
     public GalaxyAnalyzeCommand(Instance instance, SystemView systemView) {
         super(instance, CommandType.INTERFACE_REQUIERED);
-        targetDAO = instance.daoFactory.targetDAO;
-        galaxyDAO = instance.daoFactory.galaxyDAO;
+        targetDAO = TargetDAO.getInstance();
+        galaxyDAO = GalaxyDAO.getInstance();
         giUrlBuilder = new GIUrlBuilder(instance);
         this.systemView = systemView;
         normalize(this.systemView);
@@ -47,7 +47,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
             return true;
         }
         giUrlBuilder.openGalaxy(systemView.galaxy, systemView.system);
-        List<TargetEntity> targets = instance.daoFactory.targetDAO.find(systemView.galaxy, systemView.system);
+        List<TargetEntity> targets = TargetDAO.getInstance().find(systemView.galaxy, systemView.system);
         for(WebElement row : webDriver.findElements(By.className("row"))) {
             final int position = Integer.parseInt(row.findElement(By.className("position")).getText());
             final String player = row.findElement(By.className("playername")).getText().trim();

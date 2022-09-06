@@ -1,14 +1,62 @@
 package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.JPAUtility;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-public interface FleetDAO extends AbstractDAO<FleetEntity> {
+public class FleetDAO extends AbstractDAO<FleetEntity> {
 
-    Long genereteNewCode();
+    private static FleetDAO INSTANCE;
 
-    List<FleetEntity> findWithCode(Long code);
+    private FleetDAO() {
+        super();
+    }
 
-    List<FleetEntity> findToProcess();
+    public static FleetDAO getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new FleetDAO();
+        }
+        return INSTANCE;
+    }
+
+    @Override
+    protected Class<FleetEntity> getEntitylass() {
+        return FleetEntity.class;
+    }
+
+    public Long genereteNewCode() {
+        synchronized (JPAUtility.dbSynchro) {
+            Long singleResult = entityManager.createQuery("" +
+                    "select max(e.code) from FleetEntity e", Long.class)
+                    .getSingleResult();
+            if(singleResult == null) {
+                singleResult = 0L;
+            }
+            return singleResult + 1;
+        }
+    }
+
+    public List<FleetEntity> findWithCode(Long code) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where code = :code", FleetEntity.class)
+                    .setParameter("code", code)
+                    .getResultList();
+        }
+    }
+
+    public List<FleetEntity> findToProcess() {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where  start is not null and " +
+                    "       start < :now and " +
+                    "       visited is null", FleetEntity.class)
+                    .setParameter("now", LocalDateTime.now())
+                    .getResultList();
+        }
+    }
 }
