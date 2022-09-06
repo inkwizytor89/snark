@@ -8,16 +8,18 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 
 public class DAOFactory {
-    public FarmDAO farmDAO;
-    public FleetDAO fleetDAO;
-    public GalaxyDAO galaxyDAO;
-    public TargetDAO targetDAO;
-    public ColonyDAO colonyDAO;
-    public MessageDAO messageDAO;
-    public CollectionDAO collectionDAO;
-    public ErrorDAO errorDAO;
+    public final PlayerDAO playerDAO;
+    public final FarmDAO farmDAO;
+    public final FleetDAO fleetDAO;
+    public final GalaxyDAO galaxyDAO;
+    public final TargetDAO targetDAO;
+    public final ColonyDAO colonyDAO;
+    public final MessageDAO messageDAO;
+    public final CollectionDAO collectionDAO;
+    public final ErrorDAO errorDAO;
 
     public DAOFactory() {
+        playerDAO = new PlayerDAOImpl();
         farmDAO = new FarmDAOImpl();
         fleetDAO = new FleetDAOImpl();
         galaxyDAO = new GalaxyDAOImpl();

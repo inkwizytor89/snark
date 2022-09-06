@@ -1,7 +1,10 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.exception.GIException;
+import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.Utils;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
 import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
 
 public class GI {
@@ -158,11 +162,11 @@ public class GI {
         }
     }
 
-    public void updateColony(ColonyEntity colony) {
-        updateResources(colony);
-        updateFacilities(colony);
+    public void updateColony(ColonyEntity colony, Instance instance) {
+        updateResources(colony, instance);
+        updateFacilities(colony, instance);
         if(isLifeformAvailable()) {
-            updateLifeform(colony);
+            updateLifeform(colony, instance);
         }
         updateFleet(colony);
         updateDefence(colony);
@@ -176,22 +180,81 @@ public class GI {
 
     }
 
-    private void updateLifeform(ColonyEntity colony) {
-
+    private void updateLifeform(ColonyEntity colony, Instance instance) {
+        new GIUrlBuilder(instance).open(colony, PAGE_LIFEFORM);
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        colony.lifeformTech14101 = getLevel(technologies,"lifeformTech14101");
+        colony.lifeformTech14102 = getLevel(technologies,"lifeformTech14102");
+        colony.lifeformTech14103 = getLevel(technologies,"lifeformTech14103");
+        colony.lifeformTech14104 = getLevel(technologies,"lifeformTech14104");
+        colony.lifeformTech14105 = getLevel(technologies,"lifeformTech14105");
+        colony.lifeformTech14106 = getLevel(technologies,"lifeformTech14106");
+        colony.lifeformTech14107 = getLevel(technologies,"lifeformTech14107");
+        colony.lifeformTech14108 = getLevel(technologies,"lifeformTech14108");
+        colony.lifeformTech14109 = getLevel(technologies,"lifeformTech14109");
+        colony.lifeformTech14110 = getLevel(technologies,"lifeformTech14110");
+        colony.lifeformTech14111 = getLevel(technologies,"lifeformTech14111");
+        colony.lifeformTech14112 = getLevel(technologies,"lifeformTech14112");
     }
 
     private boolean isLifeformAvailable() {
         return true;
     }
 
-    private void updateFacilities(ColonyEntity colony) {
-        
+    private void updateFacilities(ColonyEntity colony, Instance instance) {
+        new GIUrlBuilder(instance).open(colony, PAGE_FACILITIES);
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        colony.roboticsFactory = getLevel(technologies,"roboticsFactory");
+        colony.shipyard = getLevel(technologies,"shipyard");
+        colony.researchLaboratory = getLevel(technologies,"researchLaboratory");
+        colony.allianceDepot = getLevel(technologies,"allianceDepot");
+        colony.missileSilo = getLevel(technologies,"missileSilo");
+        colony.naniteFactory = getLevel(technologies,"naniteFactory");
+        colony.terraformer = getLevel(technologies,"terraformer");
+        colony.repairDock = getLevel(technologies,"repairDock");
     }
 
-    private void updateResources(ColonyEntity colony) {
+    private void updateResources(ColonyEntity colony, Instance instance) {
+        new GIUrlBuilder(instance).open(colony, PAGE_RESOURCES);
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        colony.metalMine = getLevel(technologies,"metalMine");
+        colony.crystalMine = getLevel(technologies,"crystalMine");
+        colony.deuteriumSynthesizer = getLevel(technologies,"deuteriumSynthesizer");
+        colony.solarPlant = getLevel(technologies,"solarPlant");
+        colony.fusionPlant = getLevel(technologies,"fusionPlant");
+        colony.solarSatellite = getAmount(technologies,"solarSatellite");
+        colony.metalStorage = getLevel(technologies,"metalStorage");
+        colony.crystalStorage = getLevel(technologies,"crystalStorage");
+        colony.deuteriumStorage = getLevel(technologies,"deuteriumStorage");
     }
 
-    public void updateResearch() {
+    public void updateResearch(PlayerEntity player, Instance instance) {
+        new GIUrlBuilder(instance).open(PAGE_RESEARCH);
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        player.energyTechnology = getLevel(technologies,"energyTechnology");
+        player.laserTechnology = getLevel(technologies,"laserTechnology");
+        player.ionTechnology = getLevel(technologies,"ionTechnology");
+        player.hyperspaceTechnology = getLevel(technologies,"hyperspaceTechnology");
+        player.plasmaTechnology = getLevel(technologies,"plasmaTechnology");
+        player.combustionDriveTechnology = getLevel(technologies,"combustionDriveTechnology");
+        player.impulseDriveTechnology = getLevel(technologies,"impulseDriveTechnology");
+        player.hyperspaceDriveTechnology = getLevel(technologies,"hyperspaceDriveTechnology");
+        player.espionageTechnology = getLevel(technologies,"espionageTechnology");
+        player.computerTechnology = getLevel(technologies,"computerTechnology");
+        player.astrophysicsTechnology = getLevel(technologies,"astrophysicsTechnology");
+        player.researchNetworkTechnology = getLevel(technologies,"researchNetworkTechnology");
+        player.gravitonTechnology = getLevel(technologies,"gravitonTechnology");
+        player.weaponsTechnology = getLevel(technologies,"weaponsTechnology");
+        player.shieldingTechnology = getLevel(technologies,"shieldingTechnology");
+        player.armorTechnology = getLevel(technologies,"armorTechnology");
+    }
+
+    private Long getLevel(WebElement element, String name) {
+        return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("level")).getText());
+    }
+
+    private Long getAmount(WebElement element, String name) {
+        return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("amount")).getText());
     }
 
     public List<ColonyEntity> loadPlanetList() {

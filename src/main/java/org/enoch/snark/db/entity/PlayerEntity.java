@@ -40,6 +40,10 @@ public class PlayerEntity extends IdEntity {
     public Long hyperspaceTechnology;
 
     @Basic
+    @Column(name = "plasmaTechnology")
+    public Long plasmaTechnology;
+
+    @Basic
     @Column(name = "combustionDriveTechnology")
     public Long combustionDriveTechnology;
 
@@ -83,4 +87,11 @@ public class PlayerEntity extends IdEntity {
     @Column(name = "armorTechnology")
     public Long armorTechnology;
 
+    public static PlayerEntity mainPlayer() {
+        PlayerEntity player = new PlayerEntity();
+        player.id = 1L;
+        player.name = "";
+        player.code = "";
+        return player;
+    }
 }

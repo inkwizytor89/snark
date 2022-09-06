@@ -10,7 +10,7 @@ create table colonies
   crystal     integer,
   deuterium   integer,
   power       integer,
-  is_planet      boolean default true,
+  level       integer,
 
   cp          integer   not null,
   cpm          integer,
@@ -75,6 +75,7 @@ create table colonies
   lifeformTech14105 integer,
   lifeformTech14106 integer,
   lifeformTech14107 integer,
+  lifeformTech14108 integer,
   lifeformTech14109 integer,
   lifeformTech14110 integer,
   lifeformTech14111 integer,

@@ -12,6 +12,7 @@ create table players
   laserTechnology               integer,
   ionTechnology                 integer,
   hyperspaceTechnology          integer,
+  plasmaTechnology              integer,
   combustionDriveTechnology     integer,
   impulseDriveTechnology        integer,
   hyperspaceDriveTechnology     integer,

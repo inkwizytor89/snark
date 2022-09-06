@@ -24,6 +24,10 @@ public class ColonyEntity extends PlanetEntity {
     @Column(name = "collecting_order")
     public Integer collectingOrder;
 
+    @Basic
+    @Column(name = "level")
+    public Long level;
+
     public Collection<SystemView> generateSystemToView() {
 
         List<SystemView> result = new ArrayList<>();

@@ -189,6 +189,10 @@ public abstract class PlanetEntity extends IdEntity{
     public Long shipyard;
 
     @Basic
+    @Column(name = "researchLaboratory")
+    public Long researchLaboratory;
+
+    @Basic
     @Column(name = "allianceDepot")
     public Long allianceDepot;
 
@@ -237,6 +241,10 @@ public abstract class PlanetEntity extends IdEntity{
     @Basic
     @Column(name = "lifeformTech14107")
     public Long lifeformTech14107;
+
+    @Basic
+    @Column(name = "lifeformTech14108")
+    public Long lifeformTech14108;
 
     @Basic
     @Column(name = "lifeformTech14109")

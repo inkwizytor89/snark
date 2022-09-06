@@ -3,6 +3,7 @@ package org.enoch.snark.instance;
 import org.enoch.snark.db.DAOFactory;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
@@ -67,6 +68,16 @@ public class Instance {
     public List<ColonyEntity> loadGameState() {
         List<ColonyEntity> colonies = new ArrayList<>();
         try {
+            PlayerEntity player = PlayerEntity.mainPlayer();
+            PlayerEntity mainPlayer = daoFactory.playerDAO.fetch(player);
+            if(mainPlayer == null) {
+                mainPlayer = player;
+            }
+            if(mainPlayer.level == null) {
+                gi.updateResearch(mainPlayer, this);
+                mainPlayer.level = 1L;
+            }
+            daoFactory.playerDAO.saveOrUpdate(mainPlayer);
 
             for(ColonyEntity colony : gi.loadPlanetList()) {
                 ColonyEntity colonyEntity = daoFactory.colonyDAO.find(colony.cp);
@@ -75,11 +86,13 @@ public class Instance {
                 } else if(colony.cpm != null && colonyEntity.cpm == null){
                     colonyEntity.cpm = colony.cpm;
                 }
-                gi.updateColony(colonyEntity);
+                if(colonyEntity.level == null) {
+                    gi.updateColony(colonyEntity, this);
+                    colonyEntity.level = 1L;
+                }
                 daoFactory.colonyDAO.saveOrUpdate(colonyEntity);
                 colonies.add(colonyEntity);
             }
-            gi.updateResearch();
         } catch (Exception e) {
             e.printStackTrace();
         }

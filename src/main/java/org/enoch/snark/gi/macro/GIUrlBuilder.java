@@ -6,6 +6,7 @@ import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,11 +15,15 @@ public class GIUrlBuilder {
     public static final String COMPONENT_TERM = "component=";
     public static final String PAGE_TERM = "page=";
 
-    private static final String PAGE_INGAME = "ingame";
-    private static final String PAGE_OVERVIEW = "overview";
-    private static final String PAGE_BASE_FLEET = "fleetdispatch";
-    private static final String PAGE_MESSAGES = "messages";
-    private static final String PAGE_SPACE = "galaxy";
+    public static final String PAGE_INGAME = "ingame";
+    public static final String PAGE_OVERVIEW = "overview";
+    public static final String PAGE_RESOURCES = "supplies";
+    public static final String PAGE_LIFEFORM = "lfbuildings";
+    public static final String PAGE_FACILITIES = "facilities";
+    public static final String PAGE_RESEARCH = "research";
+    public static final String PAGE_BASE_FLEET = "fleetdispatch";
+    public static final String PAGE_MESSAGES = "messages";
+    public static final String PAGE_SPACE = "galaxy";
 
     private Instance instance;
 
@@ -76,6 +81,23 @@ public class GIUrlBuilder {
         if(source != null) {
             builder.append("&cp=" + source.cp);
         }
+        instance.session.getWebDriver().get(builder.toString());
+    }
+
+    public void open(ColonyEntity source, String page) {
+        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
+        builder.append(PAGE_TERM + PAGE_INGAME + "&");
+        builder.append(COMPONENT_TERM + page);
+        if(source != null) {
+            builder.append("&cp=" + source.cp);
+        }
+        instance.session.getWebDriver().get(builder.toString());
+    }
+
+    public void open(String page) {
+        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
+        builder.append(PAGE_TERM + PAGE_INGAME + "&");
+        builder.append(COMPONENT_TERM + page);
         instance.session.getWebDriver().get(builder.toString());
     }
 
