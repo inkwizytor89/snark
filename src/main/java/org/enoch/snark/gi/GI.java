@@ -162,26 +162,25 @@ public class GI {
         }
     }
 
-    public void updateColony(ColonyEntity colony, Instance instance) {
-        updateResources(colony, instance);
-        updateFacilities(colony, instance);
+    public void updateColony(ColonyEntity colony) {
+        new GIUrlBuilder().open(colony, PAGE_RESOURCES);
+        new GIUrlBuilder().open(colony, PAGE_FACILITIES);
         if(isLifeformAvailable()) {
-            updateLifeform(colony, instance);
+            new GIUrlBuilder().open(colony, PAGE_LIFEFORM);
         }
         updateFleet(colony);
         updateDefence(colony);
     }
 
-    private void updateDefence(ColonyEntity colony) {
+    public void updateDefence(ColonyEntity colony) {
 
     }
 
-    private void updateFleet(ColonyEntity colony) {
+    public void updateFleet(ColonyEntity colony) {
 
     }
 
-    private void updateLifeform(ColonyEntity colony, Instance instance) {
-        new GIUrlBuilder(instance).open(colony, PAGE_LIFEFORM);
+    public void updateLifeform(ColonyEntity colony) {
         WebElement technologies = webDriver.findElement(By.id("technologies"));
         colony.lifeformTech14101 = getLevel(technologies,"lifeformTech14101");
         colony.lifeformTech14102 = getLevel(technologies,"lifeformTech14102");
@@ -197,12 +196,11 @@ public class GI {
         colony.lifeformTech14112 = getLevel(technologies,"lifeformTech14112");
     }
 
-    private boolean isLifeformAvailable() {
+    public boolean isLifeformAvailable() {
         return true;
     }
 
-    private void updateFacilities(ColonyEntity colony, Instance instance) {
-        new GIUrlBuilder(instance).open(colony, PAGE_FACILITIES);
+    public void updateFacilities(ColonyEntity colony) {
         WebElement technologies = webDriver.findElement(By.id("technologies"));
         colony.roboticsFactory = getLevel(technologies,"roboticsFactory");
         colony.shipyard = getLevel(technologies,"shipyard");
@@ -214,8 +212,7 @@ public class GI {
         colony.repairDock = getLevel(technologies,"repairDock");
     }
 
-    private void updateResources(ColonyEntity colony, Instance instance) {
-        new GIUrlBuilder(instance).open(colony, PAGE_RESOURCES);
+    public void updateResources(ColonyEntity colony) {
         WebElement technologies = webDriver.findElement(By.id("technologies"));
         colony.metalMine = getLevel(technologies,"metalMine");
         colony.crystalMine = getLevel(technologies,"crystalMine");
@@ -228,8 +225,7 @@ public class GI {
         colony.deuteriumStorage = getLevel(technologies,"deuteriumStorage");
     }
 
-    public void updateResearch(PlayerEntity player, Instance instance) {
-        new GIUrlBuilder(instance).open(PAGE_RESEARCH);
+    public void updateResearch(PlayerEntity player) {
         WebElement technologies = webDriver.findElement(By.id("technologies"));
         player.energyTechnology = getLevel(technologies,"energyTechnology");
         player.laserTechnology = getLevel(technologies,"laserTechnology");

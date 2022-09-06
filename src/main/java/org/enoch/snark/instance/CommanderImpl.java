@@ -47,8 +47,8 @@ public class CommanderImpl implements Commander {
 
     private List<String> aggressorsAttacks = new ArrayList<>();
 
-    public CommanderImpl(Instance instance) {
-        this.instance = instance;
+    public CommanderImpl() {
+        this.instance = Instance.getInstance();
         this.session = instance.session;
         startInterfaceQueue();
     }

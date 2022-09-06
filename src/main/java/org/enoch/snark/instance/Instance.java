@@ -7,6 +7,7 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
+import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Universe;
 
@@ -18,50 +19,49 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
+
 public class Instance {
 
     protected static final Logger LOG = Logger.getLogger( Instance.class.getName());
 
-    public String serverConfigPath;
-    public Universe universe;
-    public Integer level = 1;
-    public Commander commander;
-    public GI gi;
-    public GISession session;
-//    public MessageService messageService;
+    private static Instance INSTANCE;
+    private static String serverConfigPath = "server.properties";
+    private static Boolean isQueueEnabled = true;
+    public static Universe universe;
+    public static Commander commander;
+    public static GI gi;
+    public static GISession session;
+    public static Integer level = 1;
+    //    public MessageService messageService;
     public DAOFactory daoFactory;
 //    public List<ColonyEntity> sources;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
 
-    public Instance(String serverConfigPath) {
-        this(serverConfigPath, true);
-    }
-
-    public Instance(String serverConfigPath, boolean isQueueEnabled) {
-        this.serverConfigPath = serverConfigPath;
-        LOG.info("Config file "+this.serverConfigPath);
-        this.universe = loadServerProperties(this.serverConfigPath);
+    private Instance() {
+        LOG.info("Config file " + serverConfigPath);
+        loadServerProperties();
         daoFactory = new DAOFactory();
-        browserReset();
-        loadGameState();
-
-//        sources = new ArrayList<>(ImmutableList.copyOf(universeEntity.colonyEntities));
-        if(isQueueEnabled) {
-            commander = new CommanderImpl(this);
-        } else {
-            commander = new DumbCommanderImpl();
-        }
     }
 
-    public Universe loadServerProperties(String serverConfigPath) {
-        AppProperties appProperties = null;
+    public static Instance getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new Instance();
+        }
+        return INSTANCE;
+    }
+
+    public static void setServerProperties(String serverConfigPath) {
+        Instance.serverConfigPath = serverConfigPath;
+    }
+
+    public synchronized void loadServerProperties() {
         try {
-            appProperties = new AppProperties(serverConfigPath);
+            universe = Universe.loadPrperties(new AppProperties(serverConfigPath));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Universe.loadPrperties(appProperties);
     }
 
     @Transactional
@@ -74,7 +74,7 @@ public class Instance {
                 mainPlayer = player;
             }
             if(mainPlayer.level == null) {
-                gi.updateResearch(mainPlayer, this);
+                new GIUrlBuilder().open(PAGE_RESEARCH, mainPlayer);
                 mainPlayer.level = 1L;
             }
             daoFactory.playerDAO.saveOrUpdate(mainPlayer);
@@ -87,7 +87,7 @@ public class Instance {
                     colonyEntity.cpm = colony.cpm;
                 }
                 if(colonyEntity.level == null) {
-                    gi.updateColony(colonyEntity, this);
+                    gi.updateColony(colonyEntity);
                     colonyEntity.level = 1L;
                 }
                 daoFactory.colonyDAO.saveOrUpdate(colonyEntity);
@@ -108,7 +108,14 @@ public class Instance {
         instanceStart = LocalDateTime.now();
     }
 
-    public void runSI() {
+    public void run() {
+        browserReset();
+        loadGameState();
+        if(isQueueEnabled) {
+            commander = new CommanderImpl();
+        } else {
+            commander = new DumbCommanderImpl();
+        }
         new BaseSI(this).run();
     }
 
@@ -149,8 +156,8 @@ public class Instance {
     }
 
     public synchronized boolean isStopped() {
-        this.universe = this.loadServerProperties(this.serverConfigPath);
-        return this.universe.mode!= null && this.universe.mode.contains("stop");
+        loadServerProperties();
+        return universe.mode!= null && universe.mode.contains("stop");
     }
 
     public String getName() {

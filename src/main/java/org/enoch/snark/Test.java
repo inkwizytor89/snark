@@ -12,6 +12,7 @@ public class Test {
 
     public static void main(String[] args) throws IOException {
         JPAUtility.setPersistence(POSTGRES_PERSISTENCE);
-        new Thread(new Instance(setServerProperties(args))::runSI).start();
+        Instance.setServerProperties(setServerProperties(args));
+        new Thread(Instance.getInstance()::run).start();
     }
 }

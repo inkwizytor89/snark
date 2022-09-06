@@ -1,8 +1,6 @@
 package org.enoch.snark;
 
-import org.enoch.snark.instance.AppProperties;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Universe;
 import org.flywaydb.core.Flyway;
 
 import java.io.IOException;
@@ -13,7 +11,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         migrateDatabase();
-        new Thread(new Instance(setServerProperties(args))::runSI).start();
+        Instance.setServerProperties(setServerProperties(args));
+        new Thread(Instance.getInstance()::run).start();
     }
 
     public static String setServerProperties(String[] args) throws IOException {

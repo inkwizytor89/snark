@@ -39,8 +39,7 @@ jar {
 
 flyway {
     //postgres
-//    url = 'jdbc:postgresql://localhost:5432/snark?user=postgres&password=postgres'
-    url = 'jdbc:postgresql://localhost:5432/test?user=postgres&password=postgres'
+    url = 'jdbc:postgresql://localhost:5432/snark?user=postgres&password=postgres'
 
     // base config
     baselineOnMigrate = true

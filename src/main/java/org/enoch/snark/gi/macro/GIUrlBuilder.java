@@ -1,6 +1,7 @@
 package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
@@ -27,8 +28,12 @@ public class GIUrlBuilder {
 
     private Instance instance;
 
+    public GIUrlBuilder() {
+        instance = Instance.getInstance();
+    }
+
     public GIUrlBuilder(Instance instance) {
-        this.instance = instance;
+        this();
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
@@ -92,13 +97,23 @@ public class GIUrlBuilder {
             builder.append("&cp=" + source.cp);
         }
         instance.session.getWebDriver().get(builder.toString());
+        if(PAGE_RESOURCES.equals(page)) {
+            instance.gi.updateResources(source);
+        } else if(PAGE_FACILITIES.equals(page)) {
+            instance.gi.updateFacilities(source);
+        } else if(PAGE_LIFEFORM.equals(page)) {
+            instance.gi.updateLifeform(source);
+        }
     }
 
-    public void open(String page) {
+    public void open(String page, PlayerEntity player) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         instance.session.getWebDriver().get(builder.toString());
+        if(PAGE_RESEARCH.equals(page) && player != null) {
+            instance.gi.updateResearch(player);
+        }
     }
 
     public void openGalaxy(int galaxy, int system) {
