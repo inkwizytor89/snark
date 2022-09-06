@@ -41,55 +41,55 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Basic
     @Column(name = "lm")
-    public Long lm = 0L;
+    public Long fighterLight = 0L;
 
     @Basic
     @Column(name = "cm")
-    public Long cm = 0L;
+    public Long fighterHeavy = 0L;
 
     @Basic
     @Column(name = "kr")
-    public Long kr = 0L;
+    public Long cruiser = 0L;
 
     @Basic
     @Column(name = "ow")
-    public Long ow = 0L;
+    public Long battleship = 0L;
 
     @Basic
     @Column(name = "pan")
-    public Long pan = 0L;
+    public Long interceptor = 0L;
 
     @Basic
     @Column(name = "bom")
-    public Long bom = 0L;
+    public Long bomber = 0L;
 
     @Basic
     @Column(name = "ni")
-    public Long ni = 0L;
+    public Long destroyer = 0L;
 
     @Basic
     @Column(name = "gs")
-    public Long gs = 0L;
+    public Long deathstar = 0L;
 
     @Basic
     @Column(name = "mt")
-    public Long mt = 0L;
+    public Long transporterSmall = 0L;
 
     @Basic
     @Column(name = "dt")
-    public Long dt = 0L;
+    public Long transporterLarge = 0L;
 
     @Basic
     @Column(name = "kol")
-    public Long kol = 0L;
+    public Long colonyShip = 0L;
 
     @Basic
     @Column(name = "rec")
-    public Long rec = 0L;
+    public Long recycler = 0L;
 
     @Basic
     @Column(name = "son")
-    public Long son = 0L;
+    public Long espionageProbe = 0L;
 
     @Basic
     @Column(name = "sat")
@@ -97,51 +97,51 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Basic
     @Column(name = "pf")
-    public Long pf = 0L;
+    public Long explorer = 0L;
 
     @Basic
     @Column(name = "re")
-    public Long re = 0L;
+    public Long reaper = 0L;
 
     @Basic
     @Column(name = "wr")
-    public Long wr = 0L;
+    public Long rocketLauncher = 0L;
 
     @Basic
     @Column(name = "ldl")
-    public Long ldl = 0L;
+    public Long laserCannonLight = 0L;
 
     @Basic
     @Column(name = "cdl")
-    public Long cdl = 0L;
+    public Long laserCannonHeavy = 0L;
 
     @Basic
     @Column(name = "dg")
-    public Long dg = 0L;
+    public Long gaussCannon = 0L;
 
     @Basic
     @Column(name = "dj")
-    public Long dj = 0L;
+    public Long ionCannon = 0L;
 
     @Basic
     @Column(name = "wp")
-    public Long wp = 0L;
+    public Long plasmaCannon = 0L;
 
     @Basic
     @Column(name = "mpo")
-    public Long mpo = 0L;
+    public Long shieldDomeSmall = 0L;
 
     @Basic
     @Column(name = "dpo")
-    public Long dpo = 0L;
+    public Long shieldDomeLarge = 0L;
 
     @Basic
     @Column(name = "pr")
-    public Long pr = 0L;
+    public Long missileInterceptor = 0L;
 
     @Basic
     @Column(name = "mr")
-    public Long mr = 0L;
+    public Long missileInterplanetary = 0L;
 
 //    Resources
     @Basic

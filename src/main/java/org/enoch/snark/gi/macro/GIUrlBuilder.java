@@ -23,6 +23,7 @@ public class GIUrlBuilder {
     public static final String PAGE_FACILITIES = "facilities";
     public static final String PAGE_RESEARCH = "research";
     public static final String PAGE_BASE_FLEET = "fleetdispatch";
+    public static final String PAGE_DEFENSES = "defenses";
     public static final String PAGE_MESSAGES = "messages";
     public static final String PAGE_SPACE = "galaxy";
 
@@ -89,20 +90,28 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder.toString());
     }
 
-    public void open(ColonyEntity source, String page) {
+    public void open(String page, ColonyEntity colony) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
-        if(source != null) {
-            builder.append("&cp=" + source.cp);
+        if(colony != null) {
+            builder.append("&cp=" + colony.cp);
         }
         instance.session.getWebDriver().get(builder.toString());
-        if(PAGE_RESOURCES.equals(page)) {
-            instance.gi.updateResources(source);
-        } else if(PAGE_FACILITIES.equals(page)) {
-            instance.gi.updateFacilities(source);
-        } else if(PAGE_LIFEFORM.equals(page)) {
-            instance.gi.updateLifeform(source);
+
+        if(colony != null) {
+            if (PAGE_RESOURCES.equals(page)) {
+                instance.gi.updateResources(colony);
+            } else if (PAGE_FACILITIES.equals(page)) {
+                instance.gi.updateFacilities(colony);
+            } else if (PAGE_LIFEFORM.equals(page)) {
+                instance.gi.updateLifeform(colony);
+            } else if (PAGE_BASE_FLEET.equals(page)) {
+                loadFleetStatus();
+                Instance.getInstance().gi.updateFleet(colony);
+            } else if (PAGE_DEFENSES.equals(page)) {
+                Instance.getInstance().gi.updateDefence(colony);
+            }
         }
     }
 

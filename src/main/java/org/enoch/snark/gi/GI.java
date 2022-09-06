@@ -4,7 +4,6 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.Utils;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
@@ -163,20 +162,49 @@ public class GI {
     }
 
     public void updateColony(ColonyEntity colony) {
-        new GIUrlBuilder().open(colony, PAGE_RESOURCES);
-        new GIUrlBuilder().open(colony, PAGE_FACILITIES);
+        new GIUrlBuilder().open(PAGE_RESOURCES, colony);
+        new GIUrlBuilder().open(PAGE_FACILITIES, colony);
         if(isLifeformAvailable()) {
-            new GIUrlBuilder().open(colony, PAGE_LIFEFORM);
+            new GIUrlBuilder().open(PAGE_LIFEFORM, colony);
         }
-        updateFleet(colony);
-        updateDefence(colony);
+        new GIUrlBuilder().open(PAGE_BASE_FLEET, colony);
+        new GIUrlBuilder().open(PAGE_DEFENSES, colony);
     }
 
     public void updateDefence(ColonyEntity colony) {
-
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        colony.rocketLauncher = getAmount(technologies,"rocketLauncher");
+        colony.laserCannonLight = getAmount(technologies,"laserCannonLight");
+        colony.laserCannonHeavy = getAmount(technologies,"laserCannonHeavy");
+        colony.gaussCannon = getAmount(technologies,"gaussCannon");
+        colony.ionCannon = getAmount(technologies,"ionCannon");
+        colony.plasmaCannon = getAmount(technologies,"plasmaCannon");
+        colony.shieldDomeSmall = getAmount(technologies,"shieldDomeSmall");
+        colony.shieldDomeLarge = getAmount(technologies,"shieldDomeLarge");
+        colony.missileInterceptor = getAmount(technologies,"missileInterceptor");
+        colony.missileInterplanetary = getAmount(technologies,"missileInterplanetary");
     }
 
     public void updateFleet(ColonyEntity colony) {
+        if (webDriver.findElements(By.id("warning")).size() > 0) {
+            return;
+        }
+        WebElement technologies = webDriver.findElement(By.id("technologies"));
+        colony.fighterLight = getAmount(technologies,"fighterLight");
+        colony.fighterHeavy = getAmount(technologies,"fighterHeavy");
+        colony.cruiser = getAmount(technologies,"cruiser");
+        colony.battleship = getAmount(technologies,"battleship");
+        colony.interceptor = getAmount(technologies,"interceptor");
+        colony.bomber = getAmount(technologies,"bomber");
+        colony.destroyer = getAmount(technologies,"destroyer");
+        colony.deathstar = getAmount(technologies,"deathstar");
+        colony.reaper = getAmount(technologies,"reaper");
+        colony.explorer = getAmount(technologies,"explorer");
+        colony.transporterSmall = getAmount(technologies,"transporterSmall");
+        colony.transporterLarge = getAmount(technologies,"transporterLarge");
+        colony.colonyShip = getAmount(technologies,"colonyShip");
+        colony.recycler = getAmount(technologies,"recycler");
+        colony.espionageProbe = getAmount(technologies,"espionageProbe");
 
     }
 
@@ -250,7 +278,8 @@ public class GI {
     }
 
     private Long getAmount(WebElement element, String name) {
-        return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("amount")).getText());
+        String amount = element.findElement(By.className(name)).findElement(By.className("amount")).getText();
+        return Long.parseLong(amount.replace(".", ""));
     }
 
     public List<ColonyEntity> loadPlanetList() {

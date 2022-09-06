@@ -78,31 +78,31 @@ public class TargetEntity extends PlanetEntity {
         this.fleetSum = targetEntity.fleetSum;
         this.defenseSum = targetEntity.defenseSum;
 
-        this.lm = targetEntity.lm;
-        this.cm = targetEntity.cm;
-        this.kr = targetEntity.kr;
-        this.ow = targetEntity.ow;
-        this.pan = targetEntity.pan;
-        this.bom = targetEntity.bom;
-        this.ni = targetEntity.ni;
-        this.gs = targetEntity.gs;
-        this.mt = targetEntity.mt;
-        this.dt = targetEntity.dt;
-        this.kol = targetEntity.kol;
-        this.rec = targetEntity.rec;
-        this.son = targetEntity.son;
+        this.fighterLight = targetEntity.fighterLight;
+        this.fighterHeavy = targetEntity.fighterHeavy;
+        this.cruiser = targetEntity.cruiser;
+        this.battleship = targetEntity.battleship;
+        this.interceptor = targetEntity.interceptor;
+        this.bomber = targetEntity.bomber;
+        this.destroyer = targetEntity.destroyer;
+        this.deathstar = targetEntity.deathstar;
+        this.transporterSmall = targetEntity.transporterSmall;
+        this.transporterLarge = targetEntity.transporterLarge;
+        this.colonyShip = targetEntity.colonyShip;
+        this.recycler = targetEntity.recycler;
+        this.espionageProbe = targetEntity.espionageProbe;
         this.sat = targetEntity.sat;
 
-        this.wr = targetEntity.wr;
-        this.ldl = targetEntity.ldl;
-        this.cdl = targetEntity.cdl;
-        this.dg = targetEntity.dg;
-        this.dj = targetEntity.dj;
-        this.wp = targetEntity.wp;
-        this.mpo = targetEntity.mpo;
-        this.dpo = targetEntity.dpo;
-        this.pr = targetEntity.pr;
-        this.mr = targetEntity.mr;
+        this.rocketLauncher = targetEntity.rocketLauncher;
+        this.laserCannonLight = targetEntity.laserCannonLight;
+        this.laserCannonHeavy = targetEntity.laserCannonHeavy;
+        this.gaussCannon = targetEntity.gaussCannon;
+        this.ionCannon = targetEntity.ionCannon;
+        this.plasmaCannon = targetEntity.plasmaCannon;
+        this.shieldDomeSmall = targetEntity.shieldDomeSmall;
+        this.shieldDomeLarge = targetEntity.shieldDomeLarge;
+        this.missileInterceptor = targetEntity.missileInterceptor;
+        this.missileInterplanetary = targetEntity.missileInterplanetary;
     }
 
     @Override
@@ -119,32 +119,32 @@ public class TargetEntity extends PlanetEntity {
     }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila
     public void calculateDefenseAndShips() {
-        if (this.wr != null) {
+        if (this.rocketLauncher != null) {
             defenseSum =
-                    (long) (this.wr * (2000)) +
-                    (long) (this.ldl * (1500 + 750)) +
-                    (long) (this.cdl * (6000 + 3000)) +
-                    (long) (this.dg * (20000 + 22500 + 6000)) +
-                    (long) (this.dj * (2000 + 9000)) +
-                    (long) (this.wp * (50000 + 75000 + 90000)) +
-                    (long) (this.mpo * (10000 + 15000)) +
-                    (long) (this.dpo * (50000 + 75000));
+                    (long) (this.rocketLauncher * (2000)) +
+                    (long) (this.laserCannonLight * (1500 + 750)) +
+                    (long) (this.laserCannonHeavy * (6000 + 3000)) +
+                    (long) (this.gaussCannon * (20000 + 22500 + 6000)) +
+                    (long) (this.ionCannon * (2000 + 9000)) +
+                    (long) (this.plasmaCannon * (50000 + 75000 + 90000)) +
+                    (long) (this.shieldDomeSmall * (10000 + 15000)) +
+                    (long) (this.shieldDomeLarge * (50000 + 75000));
         }
-        if(this.lm != null) {
+        if(this.fighterLight != null) {
             fleetSum =
-                    (long) (this.lm * (3000 + 1500)) +
-                    (long) (this.cm * (6000 + 3000)) +
-                    (long) (this.kr * (20000 + 10500 + 6000)) +
-                    (long) (this.ow * (45000 + 22500)) +
-                    (long) (this.pan * (30000 + 60000 + 45000)) +
-                    (long) (this.bom * (50000 + 37500 + 45000)) +
-                    (long) (this.ni * (60000 + 75000 + 45000)) +
-                    (long) (this.gs * (5000000 + 6000000 + 3000000)) +
-                    (long) (this.mt * (50000 + 75000)) +
-                    (long) (this.dt * (50000 + 75000)) +
-                    (long) (this.kol * (50000 + 75000)) +
-                    (long) (this.rec * (50000 + 75000)) +
-                    (long) (this.son * (50000 + 75000)) +
+                    (long) (this.fighterLight * (3000 + 1500)) +
+                    (long) (this.fighterHeavy * (6000 + 3000)) +
+                    (long) (this.cruiser * (20000 + 10500 + 6000)) +
+                    (long) (this.battleship * (45000 + 22500)) +
+                    (long) (this.interceptor * (30000 + 60000 + 45000)) +
+                    (long) (this.bomber * (50000 + 37500 + 45000)) +
+                    (long) (this.destroyer * (60000 + 75000 + 45000)) +
+                    (long) (this.deathstar * (5000000 + 6000000 + 3000000)) +
+                    (long) (this.transporterSmall * (50000 + 75000)) +
+                    (long) (this.transporterLarge * (50000 + 75000)) +
+                    (long) (this.colonyShip * (50000 + 75000)) +
+                    (long) (this.recycler * (50000 + 75000)) +
+                    (long) (this.espionageProbe * (50000 + 75000)) +
                     (long) (this.sat * (50000 + 75000));
         }
     }

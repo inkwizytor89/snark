@@ -44,35 +44,35 @@ public class SpyInfoParser {
 
     private void extractFleet() {//section_title
         if(!isSectionAvavible(Text.FLEET_TAG)) {
-            planet.lm = getMessageElementValue(Text.LM);
-            planet.cm = getMessageElementValue(Text.CM);
-            planet.kr = getMessageElementValue(Text.KR);
-            planet.ow = getMessageElementValue(Text.OW);
-            planet.pan = getMessageElementValue(Text.PAN);
-            planet.bom = getMessageElementValue(Text.BOM);
-            planet.ni = getMessageElementValue(Text.NI);
-            planet.gs = getMessageElementValue(Text.GS);
-            planet.mt = getMessageElementValue(Text.LT);
-            planet.dt = getMessageElementValue(Text.DT);
-            planet.kol = getMessageElementValue(Text.KOL);
-            planet.rec = getMessageElementValue(Text.REC);
-            planet.son = getMessageElementValue(Text.SON);
+            planet.fighterLight = getMessageElementValue(Text.LM);
+            planet.fighterHeavy = getMessageElementValue(Text.CM);
+            planet.cruiser = getMessageElementValue(Text.KR);
+            planet.battleship = getMessageElementValue(Text.OW);
+            planet.interceptor = getMessageElementValue(Text.PAN);
+            planet.bomber = getMessageElementValue(Text.BOM);
+            planet.destroyer = getMessageElementValue(Text.NI);
+            planet.deathstar = getMessageElementValue(Text.GS);
+            planet.transporterSmall = getMessageElementValue(Text.LT);
+            planet.transporterLarge = getMessageElementValue(Text.DT);
+            planet.colonyShip = getMessageElementValue(Text.KOL);
+            planet.recycler = getMessageElementValue(Text.REC);
+            planet.espionageProbe = getMessageElementValue(Text.SON);
             planet.sat = getMessageElementValue(Text.SAT);
         }
     }
 
     private void extractDefense() {
         if(!isSectionAvavible(Text.DEFENSE_TAG)) {
-            planet.wr = getMessageElementValue(Text.DEF_WR);
-            planet.ldl = getMessageElementValue(Text.DEF_LDL);
-            planet.cdl = getMessageElementValue(Text.DEF_CDL);
-            planet.dg = getMessageElementValue(Text.DEF_DG);
-            planet.dj = getMessageElementValue(Text.DEF_DJ);
-            planet.wp = getMessageElementValue(Text.DEF_WP);
-            planet.mpo = getMessageElementValue(Text.DEF_MPO);
-            planet.dpo = getMessageElementValue(Text.DEF_DPO);
-            planet.pr = getMessageElementValue(Text.DEF_PR);
-            planet.mr = getMessageElementValue(Text.DEF_MR);
+            planet.rocketLauncher = getMessageElementValue(Text.DEF_WR);
+            planet.laserCannonLight = getMessageElementValue(Text.DEF_LDL);
+            planet.laserCannonHeavy = getMessageElementValue(Text.DEF_CDL);
+            planet.gaussCannon = getMessageElementValue(Text.DEF_DG);
+            planet.ionCannon = getMessageElementValue(Text.DEF_DJ);
+            planet.plasmaCannon = getMessageElementValue(Text.DEF_WP);
+            planet.shieldDomeSmall = getMessageElementValue(Text.DEF_MPO);
+            planet.shieldDomeLarge = getMessageElementValue(Text.DEF_DPO);
+            planet.missileInterceptor = getMessageElementValue(Text.DEF_PR);
+            planet.missileInterplanetary = getMessageElementValue(Text.DEF_MR);
         }
     }
 
