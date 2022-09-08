@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.model.SystemView;
 
 import javax.persistence.*;
@@ -43,5 +44,15 @@ public class ColonyEntity extends PlanetEntity {
     public boolean canSent(FleetEntity fleet) {
         // todo change hardcoded logic on rea logic checking if is possible send fleet from colony
         return true;
+    }
+
+    public ColonyEntity refresh() {
+        JPAUtility.getEntityManager().refresh(this);
+        return this;
+    }
+
+    public ColonyEntity save() {
+        ColonyDAO.getInstance().saveOrUpdate(this);
+        return this;
     }
 }

@@ -88,7 +88,7 @@ public class GISession {
     }
 
     private void logOut() {
-        new GIUrlBuilder(instance).open(GIUrlBuilder.PAGE_OVERVIEW, null);
+        new GIUrlBuilder().open(GIUrlBuilder.PAGE_OVERVIEW, null);
         webDriver.findElement(By.linkText("Wyloguj")).click();
         isLoggedIn = false;
     }

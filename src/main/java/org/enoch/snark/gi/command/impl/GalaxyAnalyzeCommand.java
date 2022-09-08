@@ -30,7 +30,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
         super(instance, CommandType.INTERFACE_REQUIERED);
         targetDAO = TargetDAO.getInstance();
         galaxyDAO = GalaxyDAO.getInstance();
-        giUrlBuilder = new GIUrlBuilder(instance);
+        giUrlBuilder = new GIUrlBuilder();
         this.systemView = systemView;
         normalize(this.systemView);
     }

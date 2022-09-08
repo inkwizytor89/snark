@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.model.Planet;
 
 import javax.persistence.*;
@@ -318,6 +319,44 @@ public abstract class PlanetEntity extends IdEntity{
 
     public Planet toPlanet() {
         return new Planet(this.getCordinate());
+    }
+
+    public Long getBuildingLevel(BuildingEnum building) {
+        switch (building) {
+            case metalMine: return metalMine;
+            case crystalMine: return crystalMine;
+            case deuteriumSynthesizer: return deuteriumSynthesizer;
+            case solarPlant: return solarPlant;
+            case fusionPlant: return fusionPlant;
+            case solarSatellite: return solarSatellite;
+            case metalStorage: return metalStorage;
+            case crystalStorage: return crystalStorage;
+            case deuteriumStorage: return deuteriumStorage;
+
+            case roboticsFactory: return roboticsFactory;
+            case shipyard: return shipyard;
+            case researchLaboratory: return researchLaboratory;
+            case allianceDepot: return allianceDepot;
+            case missileSilo: return missileSilo;
+            case naniteFactory: return naniteFactory;
+            case terraformer: return terraformer;
+            case repairDock: return repairDock;
+
+            case lifeformTech14101: return lifeformTech14101;
+            case lifeformTech14102: return lifeformTech14102;
+            case lifeformTech14103: return lifeformTech14103;
+            case lifeformTech14104: return lifeformTech14104;
+            case lifeformTech14105: return lifeformTech14105;
+            case lifeformTech14106: return lifeformTech14106;
+            case lifeformTech14107: return lifeformTech14107;
+            case lifeformTech14108: return lifeformTech14108;
+            case lifeformTech14109: return lifeformTech14109;
+            case lifeformTech14110: return lifeformTech14110;
+            case lifeformTech14111: return lifeformTech14111;
+            case lifeformTech14112: return lifeformTech14112;
+
+            default: throw new RuntimeException("Unknown Building");
+        }
     }
 
     @Override

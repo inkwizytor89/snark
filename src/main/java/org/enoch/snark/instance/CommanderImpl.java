@@ -149,7 +149,7 @@ public class CommanderImpl implements Commander {
 
     private void update() {
         try {
-            new GIUrlBuilder(instance).updateFleetStatus();
+            new GIUrlBuilder().updateFleetStatus();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
@@ -201,7 +201,7 @@ public class CommanderImpl implements Commander {
     private boolean isFleetFreeSlot() {
         if(!session.isLoggedIn()) return false;
         if(getFleetFreeSlots() > 0)   return true;
-        new GIUrlBuilder(instance).updateFleetStatus();
+        new GIUrlBuilder().updateFleetStatus();
         if(getFleetFreeSlots() > 0)   return true;
         return false;
     }

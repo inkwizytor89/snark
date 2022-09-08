@@ -1,6 +1,7 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.explore.SpaceThread;
 import org.enoch.snark.module.farm.FarmThread;
@@ -13,10 +14,12 @@ public class BaseSI implements SI {
     private ScanThread scanThred;
     private FarmThread farmThred;
     private ExpeditionThread expeditionThred;
+    private BuildingThread buildingThread;
 
     public BaseSI(Instance instance) {
         this.instance = instance;
         this.expeditionThred = new ExpeditionThread(this);
+        this.buildingThread = new BuildingThread(this);
 //        spaceThred = new SpaceThred(this); //przeglada przestrzeń
 //        scanThred = new ScanThred(this); //szpieguje ...
 //        farmThred = new FarmThred(this); // zbieranie z idkow surowcow
@@ -31,6 +34,9 @@ public class BaseSI implements SI {
         String mode = instance.universe.mode;
         if(mode == null || mode.isEmpty() || mode.contains(ExpeditionThread.threadName)) {
             new Thread(expeditionThred).start();
+        }
+        if(mode == null || mode.isEmpty() || mode.contains(BuildingThread.threadName)) {
+            new Thread(buildingThread).start();
         }
 //        instance.session.sleep(TimeUnit.SECONDS, 1);
 //        new Thread(scanThred).start();

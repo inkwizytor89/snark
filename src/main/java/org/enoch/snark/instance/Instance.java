@@ -104,7 +104,7 @@ public class Instance {
         if(session != null) {
             session.getWebDriver().quit();
         }
-        gi = new GI();
+        gi = GI.getInstance();
         session = new GISession(this);
         instanceStart = LocalDateTime.now();
     }
@@ -150,6 +150,10 @@ public class Instance {
             TargetDAO.getInstance().remove(targetEntity.get());
             //TODO: remove messegas and others
         }
+    }
+
+    public ColonyEntity getMainColony() {
+        return ColonyDAO.getInstance().fetchAll().get(0);
     }
 
     public Long calcutateExpeditionSize() {

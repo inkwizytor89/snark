@@ -38,7 +38,7 @@ public class SendFleetCommand extends GICommand {
         this.fleet = fleet;
         this.mission = Mission.convertFromString(fleet.type);
 
-        giUrlBuilder = new GIUrlBuilder(instance);
+        giUrlBuilder = new GIUrlBuilder();
         fleetSelector = new FleetSelector(instance.session);
     }
 

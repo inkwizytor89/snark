@@ -43,7 +43,9 @@ public abstract class AbstractThread extends Thread {
                     log.info("Thread " + getThreadName() + " stopping on " + si.getInstance().universe.name);
                     wasSleeping = true;
                 }
-                si.getInstance().gi.sleep(TimeUnit.SECONDS, 10);
+                System.err.println("Sleep in sec "+getPauseInSeconds());
+                si.getInstance().gi.sleep(TimeUnit.SECONDS, getPauseInSeconds());
+                System.err.println("Sleep is end of "+getPauseInSeconds());
             }while(!si.getInstance().commander.isRunning());
             if(wasSleeping) {
                 log.info("Thread " + getThreadName() + " back to live on " + si.getInstance().universe.name);

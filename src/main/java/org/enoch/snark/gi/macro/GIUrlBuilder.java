@@ -3,10 +3,12 @@ package org.enoch.snark.gi.macro;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.ommander.QueueManger;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import javax.transaction.Transactional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,10 +32,6 @@ public class GIUrlBuilder {
 
     public GIUrlBuilder() {
         instance = Instance.getInstance();
-    }
-
-    public GIUrlBuilder(Instance instance) {
-        this();
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
@@ -75,6 +73,7 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder);
     }
 
+    @Transactional
     public void open(String page, ColonyEntity colony) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
@@ -88,10 +87,14 @@ public class GIUrlBuilder {
             instance.gi.updateResources(colony);
             if (PAGE_RESOURCES.equals(page)) {
                 instance.gi.updateResourcesProducers(colony);
+                instance.gi.updateQueue(colony, QueueManger.BUILDING);
+                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
             } else if (PAGE_FACILITIES.equals(page)) {
                 instance.gi.updateFacilities(colony);
+                instance.gi.updateQueue(colony, QueueManger.BUILDING);
             } else if (PAGE_LIFEFORM.equals(page)) {
                 instance.gi.updateLifeform(colony);
+                instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
             } else if (PAGE_BASE_FLEET.equals(page)) {
                 if(instance.commander != null) {
                     loadFleetStatus();
@@ -99,6 +102,7 @@ public class GIUrlBuilder {
                 Instance.getInstance().gi.updateFleet(colony);
             } else if (PAGE_DEFENSES.equals(page)) {
                 Instance.getInstance().gi.updateDefence(colony);
+                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
             }
         }
     }
@@ -110,6 +114,7 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder.toString());
         if(PAGE_RESEARCH.equals(page) && player != null) {
             instance.gi.updateResearch(player);
+            instance.gi.updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
         }
     }
 

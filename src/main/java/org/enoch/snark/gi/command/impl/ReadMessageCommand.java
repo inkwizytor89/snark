@@ -37,7 +37,7 @@ public class ReadMessageCommand extends AbstractCommand {
 //        SpyInfo lastSpyInfo = instance.messageService.getLastSpyInfo(planet);
 //
 //        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
-            new GIUrlBuilder(instance).openMessages();
+            new GIUrlBuilder().openMessages();
             instance.gi.sleep(TimeUnit.SECONDS, 5);
 
             List<String> spyReports = loadMessagesLinks();
@@ -64,7 +64,7 @@ public class ReadMessageCommand extends AbstractCommand {
         for(String link : links) {
             storeSpyMessage(link);
         }
-        new GIUrlBuilder(instance).open(GIUrlBuilder.PAGE_OVERVIEW, null);
+        new GIUrlBuilder().open(GIUrlBuilder.PAGE_OVERVIEW, null);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie

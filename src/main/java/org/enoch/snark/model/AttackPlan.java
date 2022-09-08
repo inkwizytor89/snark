@@ -14,6 +14,6 @@ public class AttackPlan {
 
         int lTCount = (int) ((info.getSumResourceCount()/ 5000) +3);
 
-        fleet = new Fleet().put(ShipEnum.LT, lTCount);
+        fleet = new Fleet().put(ShipEnum.transporterSmall, lTCount);
     }
 }

@@ -46,6 +46,7 @@ public class AppProperties {
         config = properties.getProperty(CONFIG);
 
         pathToChromeWebdriver = properties.getProperty(WEBDRIVER_CHROME_DRIVER);
+        System.setProperty(WEBDRIVER_CHROME_DRIVER, pathToChromeWebdriver);
 
 //
 //        fleetNumber = Integer.parseInt(properties.getProperty(FLEET_NUMBER));

@@ -1,12 +1,16 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.db.dao.CollectionDAO;
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Utils;
+import org.enoch.snark.instance.ommander.QueueManger;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -16,6 +20,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,20 +29,31 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
 import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
 
 public class GI {
+    private static GI INSTANCE;
 
+    public static final String A_TAG = "a";
     public static final String DIV_TAG = "div";
     public static final String TR_TAG = "tr";
+    public static final String SPAN_TAG = "span";
 
     public static final String HREF_ATTRIBUTE = "href";
     public static final String TITLE_ATTRIBUTE = "title";
     public static final String ID_ATTRIBUTE = "id";
-    public static final String A_TAG = "a";
+    public static final String CLASS_ATTRIBUTE = "class";
     public static final String TECHNOLOGIES = "technologies";
     public final WebDriver webDriver;
+    private QueueManger queueManger;
 
-    public GI() {
-        System.setProperty(WEBDRIVER_CHROME_DRIVER, "C:/Program Files (x86)/Google/Chrome/chromedriver.exe");
+    private GI() {
         webDriver = new ChromeDriver();
+        queueManger = QueueManger.getInstance();
+    }
+
+    public static GI getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new GI();
+        }
+        return INSTANCE;
     }
 
     public void doubleClickText(String text) {
@@ -109,6 +125,10 @@ public class GI {
         return elements.get(0);
     }
 
+    public Long getRawValue(WebElement root, By id) {
+        return Long.parseLong(root.findElement(id).getAttribute("data-raw"));
+    }
+
     public List<EventFleet> readEventFleet() {
         List<EventFleet> eventFleets = new ArrayList<>();
         try {
@@ -174,10 +194,11 @@ public class GI {
 
     public void updateResources(ColonyEntity colony) {
         WebElement resources = webDriver.findElement(By.id("resources"));
-        colony.metal = getLong(resources.findElement(By.id("resources_metal")).getText());
-        colony.crystal = getLong(resources.findElement(By.id("resources_crystal")).getText());
-        colony.deuterium = getLong(resources.findElement(By.id("resources_deuterium")).getText());
-        colony.energy = getLong(resources.findElement(By.id("resources_energy")).getText());
+        colony.metal = getRawValue(resources, By.id("resources_metal"));
+        colony.crystal = getRawValue(resources, By.id("resources_crystal"));
+        colony.deuterium = getRawValue(resources, By.id("resources_deuterium"));
+        colony.energy = getRawValue(resources, By.id("resources_energy"));
+        colony.save();
     }
 
     public void updateDefence(ColonyEntity colony) {
@@ -192,6 +213,7 @@ public class GI {
         colony.shieldDomeLarge = getAmount(technologies,"shieldDomeLarge");
         colony.missileInterceptor = getAmount(technologies,"missileInterceptor");
         colony.missileInterplanetary = getAmount(technologies,"missileInterplanetary");
+        colony.save();
     }
 
     public void updateFleet(ColonyEntity colony) {
@@ -214,6 +236,7 @@ public class GI {
         colony.colonyShip = getAmount(technologies,"colonyShip");
         colony.recycler = getAmount(technologies,"recycler");
         colony.espionageProbe = getAmount(technologies,"espionageProbe");
+        colony.save();
 
     }
 
@@ -231,6 +254,7 @@ public class GI {
         colony.lifeformTech14110 = getLevel(technologies,"lifeformTech14110");
         colony.lifeformTech14111 = getLevel(technologies,"lifeformTech14111");
         colony.lifeformTech14112 = getLevel(technologies,"lifeformTech14112");
+        colony.save();
     }
 
     public boolean isLifeformAvailable() {
@@ -247,6 +271,7 @@ public class GI {
         colony.naniteFactory = getLevel(technologies,"naniteFactory");
         colony.terraformer = getLevel(technologies,"terraformer");
         colony.repairDock = getLevel(technologies,"repairDock");
+        colony.save();
     }
 
     public void updateResourcesProducers(ColonyEntity colony) {
@@ -260,6 +285,7 @@ public class GI {
         colony.metalStorage = getLevel(technologies,"metalStorage");
         colony.crystalStorage = getLevel(technologies,"crystalStorage");
         colony.deuteriumStorage = getLevel(technologies,"deuteriumStorage");
+        colony.save();
     }
 
     public void updateResearch(PlayerEntity player) {
@@ -280,6 +306,7 @@ public class GI {
         player.weaponsTechnology = getLevel(technologies,"weaponsTechnology");
         player.shieldingTechnology = getLevel(technologies,"shieldingTechnology");
         player.armorTechnology = getLevel(technologies,"armorTechnology");
+        PlayerDAO.getInstance().saveOrUpdate(player);
     }
 
     private Long getLevel(WebElement element, String name) {
@@ -324,5 +351,30 @@ public class GI {
             }
         }
         return colonyEntities;
+    }
+
+    public boolean upgrade(BuildRequirements requirements) {
+        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
+        WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.getName()));
+        Long buildingLevel = getLevel(technologies, requirements.request.building.getName());
+        if(buildingLevel >= requirements.request.level) {
+            return true;
+        }
+        List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
+        if(upgrades.isEmpty()) {
+            return false;
+        }
+        upgrades.get(0).click();
+        return true;
+    }
+
+    public void updateQueue(ColonyEntity colony, String queueType) {
+        WebElement queueElement = webDriver.findElement(By.id(queueType));
+        List<WebElement> dataDetails = queueElement.findElements(By.className("data"));
+        if (dataDetails.isEmpty()) {
+            queueManger.clean(colony, queueType);
+        } else {
+            queueManger.set(colony, queueType, LocalDateTime.now().plusYears(1));
+        }
     }
 }
