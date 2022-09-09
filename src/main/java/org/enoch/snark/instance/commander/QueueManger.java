@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.ommander;
+package org.enoch.snark.instance.commander;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -17,22 +17,30 @@ public class QueueManger {
     private static QueueManger INSTANCE;
     private final ColonyDAO colonyDAO;
 
-    private Map<ColonyEntity,Map<String, QueueMonitor>> queues;
+    private Map<ColonyEntity,Map<String, QueueMonitor>> queueMap;
+    private final QueueMonitor researchMonitor;
 
 
     private QueueManger() {
         colonyDAO = ColonyDAO.getInstance();
-        queues = new HashMap<>();
-        QueueMonitor researchMonitor = new QueueMonitor();
+        queueMap = new HashMap<>();
+        researchMonitor = new QueueMonitor();
 
-        for(ColonyEntity colony : colonyDAO.fetchAll()) {
+    }
+
+    private void updateQueueMap(ColonyEntity colony) {
+        if(!queueMap.containsKey(colony)) {
             HashMap<String, QueueMonitor> planetQueues = new HashMap<>();
             planetQueues.put(RESEARCH, researchMonitor);
             planetQueues.put(BUILDING, new QueueMonitor());
             planetQueues.put(SHIPYARD, new QueueMonitor());
             planetQueues.put(LIFEFORM_BUILDINGS, new QueueMonitor());
             planetQueues.put(LIFEFORM_RESEARCH, new QueueMonitor());
-            queues.put(colony, planetQueues);
+            queueMap.put(colony, planetQueues);
+
+            if(queueMap.size() > 20) {
+                throw new RuntimeException("QueueManger leak: too many queue");
+            }
         }
     }
 
@@ -44,22 +52,25 @@ public class QueueManger {
     }
 
     public boolean isFree(ColonyEntity colony, String name) {
-        return queues.get(colony).get(name).isFree();
+        updateQueueMap(colony);
+        return queueMap.get(colony).get(name).isFree();
     }
 
     public void clean(ColonyEntity colony, String name) {
-        queues.get(colony).get(name).clean();
+        updateQueueMap(colony);
+        queueMap.get(colony).get(name).clean();
     }
 
     public void set(ColonyEntity colony, String name, LocalDateTime date) {
-        queues.get(colony).get(name).setDate(date);
+        updateQueueMap(colony);
+        queueMap.get(colony).get(name).setDate(date);
     }
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for(ColonyEntity colony : colonyDAO.fetchAll()) {
-            result.append(colony+" BUILDING queue is free "+queues.get(colony).get(BUILDING).isFree());
+        StringBuilder result = new StringBuilder("QueueManger"+queueMap.keySet().size()+" :\n");
+        for(ColonyEntity colony : queueMap.keySet()) {
+            result.append(colony+" BUILDING queue is free "+ queueMap.get(colony).get(BUILDING).isFree());
             result.append("\n");
         }
         return result.toString();

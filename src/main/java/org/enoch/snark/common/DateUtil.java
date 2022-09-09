@@ -34,6 +34,22 @@ public class DateUtil {
         return LocalTime.parse(time);
     }
 
+    /**
+     *
+     * @param input 4h 27m 10s
+     * @return nanos
+     */
+    public static Long parseCountDownToSec(String input) {
+        final String[] split = input.split("\\D+");
+        Long result = 0L;
+        Long multiply = 1L;
+        for(int i=1;i<=split.length;i++) {
+            result = result + (Long.parseLong(split[split.length-i]) * multiply);
+            multiply = multiply * 60;
+        }
+        return result;
+    }
+
     public static boolean lessThanHours(int hour, LocalDateTime updated) {
         LocalDateTime now = LocalDateTime.now();
         return now.minusHours(hour).isBefore(updated);

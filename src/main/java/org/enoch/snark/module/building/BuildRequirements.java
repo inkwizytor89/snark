@@ -23,6 +23,6 @@ public class BuildRequirements {
 
     @Override
     public String toString() {
-        return request + "(with " + resources + ")";
+        return request + " (with " + resources + ")";
     }
 }

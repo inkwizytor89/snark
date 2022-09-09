@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.ommander;
+package org.enoch.snark.instance.commander;
 
 import java.time.LocalDateTime;
 

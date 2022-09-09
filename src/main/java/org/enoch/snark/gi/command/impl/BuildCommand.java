@@ -6,14 +6,13 @@ import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.ommander.QueueManger;
+import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.enoch.snark.module.building.BuildingCost;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -67,6 +66,6 @@ public class BuildCommand extends AbstractCommand {
 
     @Override
     public String toString() {
-        return "Build " + requirements + " on " + colony;
+        return "build " + requirements + " on " + colony;
     }
 }

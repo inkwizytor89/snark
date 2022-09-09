@@ -5,7 +5,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
-import org.enoch.snark.instance.ommander.QueueManger;
+import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.AbstractThread;
 
@@ -40,7 +40,7 @@ public class BuildingThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return pause; //maybe should wait number of colonies *10 or min level of colonies
     }
 
     @Override
@@ -51,12 +51,17 @@ public class BuildingThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        System.err.println(queueManger);
-        System.err.println("Building start step");
-        pause = LONG_PAUSE;
+//        System.err.println("Building start step ");
+//        System.err.println(queueManger);
+        pause = 10;//LONG_PAUSE;
         for(ColonyEntity colony : colonyMap.keySet()) {
 
-            if(!queueManger.isFree(colony, QueueManger.BUILDING)) {
+            if(colony.level > buildingManager.getColonyLastLevelToProcess()) {
+                continue;
+            }
+
+            if(isColonyNotYetLoaded(colony) || isQueueBusy(colony)) {
+//                System.err.println("colony "+colony+" not ready "+ isColonyNotYetLoaded(colony) +" "+ isQueueBusy(colony));
                 continue;
             }
 
@@ -74,6 +79,14 @@ public class BuildingThread extends AbstractThread {
                 colonyMap.put(colony, null);
             }
         }
-        System.err.println("Building end step");
+//        System.err.println("Building end step, sleep in "+pause);
+    }
+
+    private boolean isColonyNotYetLoaded(ColonyEntity colony) {
+        return colony.level == null;
+    }
+
+    private boolean isQueueBusy(ColonyEntity colony) {
+        return !queueManger.isFree(colony, QueueManger.BUILDING);
     }
 }

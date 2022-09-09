@@ -65,39 +65,44 @@ public class Instance {
         }
     }
 
-    @Transactional
-    public List<ColonyEntity> loadGameState() {
-        List<ColonyEntity> colonies = new ArrayList<>();
+//    @Transactional
+    public void loadGameState() {
         try {
             PlayerEntity player = PlayerEntity.mainPlayer();
             PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(player);
             if(mainPlayer == null) {
                 mainPlayer = player;
             }
-            if(mainPlayer.level == null) {
-                new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
-                mainPlayer.level = 1L;
-            }
-            PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
 
+            // init database with colonies to not get NPE
+            ColonyDAO colonyDAO = ColonyDAO.getInstance();
             for(ColonyEntity colony : gi.loadPlanetList()) {
-                ColonyEntity colonyEntity = ColonyDAO.getInstance().find(colony.cp);
-                if(colonyEntity == null) {
+                ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
+                if (colonyEntity == null) {
                     colonyEntity = colony;
-                } else if(colony.cpm != null && colonyEntity.cpm == null){
+                } else if (colony.cpm != null && colonyEntity.cpm == null) {
                     colonyEntity.cpm = colony.cpm;
                 }
-                if(colonyEntity.level == null) {
-                    gi.updateColony(colonyEntity);
-                    colonyEntity.level = 1L;
+                colonyDAO.saveOrUpdate(colonyEntity);
+            }
+
+            // update colonies
+            for(ColonyEntity colony : colonyDAO.fetchAll()) {
+                if(colony.level == null) {
+                    gi.updateColony(colony);
+                    colony.level = 1L;
                 }
-                ColonyDAO.getInstance().saveOrUpdate(colonyEntity);
-                colonies.add(colonyEntity);
+                colonyDAO.saveOrUpdate(colony);
+
+                if(mainPlayer.level == null) {
+                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
+                    mainPlayer.level = 1L;
+                }
+                PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return colonies;
     }
 
     public void browserReset() {
@@ -163,9 +168,5 @@ public class Instance {
     public synchronized boolean isStopped() {
         loadServerProperties();
         return universe.mode!= null && universe.mode.contains("stop");
-    }
-
-    public String getName() {
-        return universe.name;
     }
 }

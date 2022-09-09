@@ -29,7 +29,7 @@ public class CommanderImpl implements Commander {
 
     private static final Logger log = Logger.getLogger(CommanderImpl.class.getName() );
 
-    private static final long SLEEP_PAUSE = 5;
+    private static final long SLEEP_PAUSE = 1;
     public static final int TIME_TO_UPDATE = 5;
 
     private Instance instance;
@@ -106,7 +106,7 @@ public class CommanderImpl implements Commander {
                     .forEach(
                     eventFleet -> {
                         if(!aggressorsAttacks.contains(eventFleet.arrivalTime)) {
-                            log.warning(instance.getName()+" aggressor found "+eventFleet.toString());
+                            log.warning("Aggressor found "+eventFleet.toString());
                             this.push(new SendMessageToPlayerCommand(instance, eventFleet.sendMail, Msg.get(BAZINGA_PL)));
                             aggressorsAttacks.add(eventFleet.arrivalTime);
                         }
@@ -120,9 +120,9 @@ public class CommanderImpl implements Commander {
     }
 
     private void stopCommander() {
-        System.err.println(instance.getName() + " is stopped");
+        System.err.println("Commander is stopped");
         this.isRunning = false;
-        Utils.secondsToSleep(SLEEP_PAUSE * 4);
+        Utils.secondsToSleep(SLEEP_PAUSE * 30);
     }
 
     private void restartIfSessionIsOver() {
@@ -138,7 +138,7 @@ public class CommanderImpl implements Commander {
         try {
             WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
             if(attack_alert.getAttribute("class").contains("soon")) {
-                log.warning("\n"+instance.getName() + " Under Attack !! \n");
+                log.warning("\nUnder Attack !! \n");
                 return true;
             }
         } catch (Exception e) {
@@ -186,7 +186,7 @@ public class CommanderImpl implements Commander {
 
         if(success) {
             command.doAfter();
-            log.info(instance.getName()+ " executed "+command+ " prepare "+ command.getAfterCommand());
+            log.info(command+ ". Next move is "+ command.getAfterCommand());
         } else {
             command.failed++;
             if (command.failed < 3) {

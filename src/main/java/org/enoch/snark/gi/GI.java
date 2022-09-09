@@ -1,13 +1,13 @@
 package org.enoch.snark.gi;
 
-import org.enoch.snark.db.dao.CollectionDAO;
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Utils;
-import org.enoch.snark.instance.ommander.QueueManger;
+import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.module.building.BuildRequirements;
@@ -20,13 +20,14 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.awt.dnd.DragSource;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
-import static org.enoch.snark.instance.PropertyNames.WEBDRIVER_CHROME_DRIVER;
 
 public class GI {
     private static GI INSTANCE;
@@ -102,10 +103,6 @@ public class GI {
 
     public WebElement findElement(String tag, String attribute, String value) {
         return findByXPath("//"+tag+"[@" + attribute + "='"+value+"']");
-    }
-
-    public WebElement findText(String text) {
-        return findByXPath("//*[contains(text(), '" + text + "')]");
     }
 
     private WebElement findByXPath(String using) {
@@ -241,6 +238,10 @@ public class GI {
     }
 
     public void updateLifeform(ColonyEntity colony) {
+        List<WebElement> raceToChoose = webDriver.findElements(By.className("lfsettingsContent"));
+        if(!raceToChoose.isEmpty()) {
+            return;
+        }
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.lifeformTech14101 = getLevel(technologies,"lifeformTech14101");
         colony.lifeformTech14102 = getLevel(technologies,"lifeformTech14102");
@@ -315,7 +316,7 @@ public class GI {
 
     private Long getAmount(WebElement element, String name) {
         String amount = element.findElement(By.className(name)).findElement(By.className("amount")).getText();
-        return Long.parseLong(amount.replace(".", ""));
+        return Long.parseLong(amount.replaceAll("\\D", ""));
     }
 
     private Long getLong(String input) {
@@ -369,12 +370,18 @@ public class GI {
     }
 
     public void updateQueue(ColonyEntity colony, String queueType) {
-        WebElement queueElement = webDriver.findElement(By.id(queueType));
+        List<WebElement> elements = webDriver.findElements(By.id(queueType));
+        if(elements.isEmpty()) {
+            return;
+        }
+        WebElement queueElement = elements.get(0);
         List<WebElement> dataDetails = queueElement.findElements(By.className("data"));
         if (dataDetails.isEmpty()) {
             queueManger.clean(colony, queueType);
         } else {
-            queueManger.set(colony, queueType, LocalDateTime.now().plusYears(1));
+            String timeString = queueElement.findElement(By.className("timer")).getText();
+            Long second = DateUtil.parseCountDownToSec(timeString);
+            queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
         }
     }
 }

@@ -3,7 +3,7 @@ package org.enoch.snark.gi.macro;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.ommander.QueueManger;
+import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -73,7 +73,7 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder);
     }
 
-    @Transactional
+//    @Transactional
     public void open(String page, ColonyEntity colony) {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
