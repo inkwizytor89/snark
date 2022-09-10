@@ -67,7 +67,7 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.solarPlant, 10),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
                 new BuildingRequest(BuildingEnum.roboticsFactory, 2),
-                new BuildingRequest(BuildingEnum.researchLaboratory, 2),
+                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
                 new BuildingRequest(BuildingEnum.shipyard, 2),
                 new BuildingRequest(BuildingEnum.metalMine, 1)));
     }

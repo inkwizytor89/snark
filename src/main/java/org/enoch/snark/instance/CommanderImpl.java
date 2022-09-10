@@ -226,6 +226,8 @@ public class CommanderImpl implements Commander {
         } else if (CommandType.INTERFACE_REQUIERED.equals(command.getType())) {
             interfaceActionQueue.offer(command);
 //            log.info("Inserted "+command+" into queue interfaceActionQueue size "+interfaceActionQueue.size());
+        } else if (CommandType.CALCULATION.equals(command.getType())) {
+            interfaceActionQueue.offer(command);
         } else {
             throw new RuntimeException("Invalid type of command");
         }

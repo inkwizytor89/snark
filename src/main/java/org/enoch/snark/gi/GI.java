@@ -259,7 +259,7 @@ public class GI {
     }
 
     public boolean isLifeformAvailable() {
-        return true;
+        return !webDriver.findElements(By.id("lifeform")).isEmpty();
     }
 
     public void updateFacilities(ColonyEntity colony) {
