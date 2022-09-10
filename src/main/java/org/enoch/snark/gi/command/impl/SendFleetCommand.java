@@ -74,7 +74,7 @@ public class SendFleetCommand extends GICommand {
         fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);
         final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
         fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
-        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5);
+        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5L);
 //        fleetSelector.next();
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
             TargetEntity target = new TargetEntity(fleet.getCoordinate());

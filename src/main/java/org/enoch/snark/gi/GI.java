@@ -20,9 +20,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.awt.dnd.DragSource;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -369,10 +367,10 @@ public class GI {
         return true;
     }
 
-    public void updateQueue(ColonyEntity colony, String queueType) {
+    public Long updateQueue(ColonyEntity colony, String queueType) {
         List<WebElement> elements = webDriver.findElements(By.id(queueType));
         if(elements.isEmpty()) {
-            return;
+            return null;
         }
         WebElement queueElement = elements.get(0);
         List<WebElement> dataDetails = queueElement.findElements(By.className("data"));
@@ -382,6 +380,8 @@ public class GI {
             String timeString = queueElement.findElement(By.className("timer")).getText();
             Long second = DateUtil.parseCountDownToSec(timeString);
             queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
+            return second;
         }
+        return null;
     }
 }

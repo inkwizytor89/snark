@@ -1,13 +1,14 @@
 package org.enoch.snark.gi.command;
 
-import org.enoch.snark.gi.command.impl.PauseCommand;
+import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.Utils;
 
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractCommand {
     private AbstractCommand afterCommand;
-    private int secoundToDelay;
+    private Long secondsToDelay;
     protected Instance instance;
     private CommandType type;
     public int failed = 0;
@@ -23,11 +24,30 @@ public abstract class AbstractCommand {
         if(afterCommand == null) {
             return;
         }
-        instance.commander.push(new PauseCommand(instance, afterCommand, secoundToDelay));
+        Runnable task = () -> {
+            try {
+                if (secondsToDelay > 0) {
+                    TimeUnit.SECONDS.sleep(secondsToDelay);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            instance.commander.push(afterCommand);
+        };
+
+        new WaitingThread(task, secondsToDelay).start();
     }
 
-    protected void setSecoundToDelayAfterCommand(int secoundToDelay) {
-        this.secoundToDelay = secoundToDelay;
+    public void retry(Long secondsToDelay) {
+        Runnable task = () -> {
+            instance.commander.push(this);
+        };
+
+        new WaitingThread(task, secondsToDelay).start();
+    }
+
+    protected void setSecoundToDelayAfterCommand(Long secoundToDelay) {
+        this.secondsToDelay = secoundToDelay;
     }
 
     public AbstractCommand getAfterCommand() {

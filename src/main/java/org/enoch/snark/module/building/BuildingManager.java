@@ -2,6 +2,7 @@ package org.enoch.snark.module.building;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.macro.BuildingEnum;
 
 import java.util.Arrays;
@@ -66,9 +67,16 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.metalMine, 10),
                 new BuildingRequest(BuildingEnum.solarPlant, 10),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
+                new BuildingRequest(BuildingEnum.solarPlant, 11),
                 new BuildingRequest(BuildingEnum.roboticsFactory, 2),
                 new BuildingRequest(BuildingEnum.researchLaboratory, 1),
                 new BuildingRequest(BuildingEnum.shipyard, 2),
                 new BuildingRequest(BuildingEnum.metalMine, 1)));
+    }
+
+    public void temporare() {
+        PlayerEntity playerEntity = new PlayerEntity();
+        playerEntity.energyTechnology=1L;
+        playerEntity.combustionDriveTechnology=2L;
     }
 }

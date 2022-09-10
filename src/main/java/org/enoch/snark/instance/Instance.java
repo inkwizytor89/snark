@@ -117,12 +117,15 @@ public class Instance {
     public void run() {
         browserReset();
         loadGameState();
+        LOG.info("loading game state successful");
         if(isQueueEnabled) {
             commander = new CommanderImpl();
         } else {
             commander = new DumbCommanderImpl();
         }
+        LOG.info("Commander start successful");
         new BaseSI(this).run();
+        LOG.info("SI start successful");
     }
 
     public ColonyEntity findNearestSource(PlanetEntity planet) {

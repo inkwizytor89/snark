@@ -1,11 +1,9 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.DateUtil;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
-import org.enoch.snark.gi.command.impl.PauseCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
@@ -190,7 +188,7 @@ public class CommanderImpl implements Commander {
         } else {
             command.failed++;
             if (command.failed < 3) {
-                push(new PauseCommand(instance, command, 2));
+                command.retry(2L);
             } else {
                 command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
@@ -226,8 +224,6 @@ public class CommanderImpl implements Commander {
         } else if (CommandType.INTERFACE_REQUIERED.equals(command.getType())) {
             interfaceActionQueue.offer(command);
 //            log.info("Inserted "+command+" into queue interfaceActionQueue size "+interfaceActionQueue.size());
-        } else if (CommandType.CALCULATION.equals(command.getType())) {
-            interfaceActionQueue.offer(command);
         } else {
             throw new RuntimeException("Invalid type of command");
         }

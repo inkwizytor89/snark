@@ -37,7 +37,14 @@ public class BuildCommand extends AbstractCommand {
     public boolean execute() {
         new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
         boolean upgraded = gi.upgrade(requirements);
-        if(!upgraded) {
+        if(upgraded) {
+            // resource in database refresh
+            new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
+
+            Long seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            this.setSecoundToDelayAfterCommand(seconds);
+            this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
+        } else {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
 //            WebElement buildingIcon = gi.findElement(SPAN_TAG, CLASS_ATTRIBUTE, requirements.request.building.getName());
@@ -49,8 +56,6 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
             BuildingCost.getInstance().put(requirements.request, resources);
-        } else {
-            new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
         }
         return true;
     }
