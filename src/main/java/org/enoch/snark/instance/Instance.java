@@ -65,7 +65,7 @@ public class Instance {
         }
     }
 
-//    @Transactional
+    @Transactional
     public void loadGameState() {
         try {
             PlayerEntity player = PlayerEntity.mainPlayer();

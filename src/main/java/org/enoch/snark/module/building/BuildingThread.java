@@ -65,7 +65,7 @@ public class BuildingThread extends AbstractThread {
                 continue;
             }
 
-            BuildRequirements requirements = colonyMap.get(colony.refresh());
+            BuildRequirements requirements = colonyMap.get(colony);
             if(requirements == null || requirements.isResourceUnknown()) {
                 BuildingRequest buildRequest = buildingManager.getBuildRequest(colony);
                 if (buildRequest == null) continue; //nothing to build

@@ -183,8 +183,12 @@ public class CommanderImpl implements Commander {
         }
 
         if(success) {
-            command.doAfter();
-            log.info(command+ ". Next move is "+ command.getAfterCommand());
+            String commandMessage = command.toString();
+            log.info(command.toString());
+            if(command.isAfterCommand()) {
+                log.info("Next move in "+ command.secondsToDelay+"s is "+ command.getAfterCommand());
+                command.doAfter();
+            }
         } else {
             command.failed++;
             if (command.failed < 3) {

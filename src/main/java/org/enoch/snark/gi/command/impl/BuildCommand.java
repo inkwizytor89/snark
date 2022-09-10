@@ -42,6 +42,9 @@ public class BuildCommand extends AbstractCommand {
             new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
 
             Long seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            if(seconds == null) {
+                System.err.println("wrong seconds read");
+            }
             this.setSecoundToDelayAfterCommand(seconds);
             this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
         } else {

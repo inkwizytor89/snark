@@ -20,7 +20,7 @@
 <!--            <property name="javax.persistence.jdbc.url"    value="jdbc:h2:mem:test" />-->
             <property name="javax.persistence.jdbc.user" value="sa" />
             <property name="javax.persistence.jdbc.password" value="" />
-            <property name="hibernate.connection.autocommit" value="true" />
+            <property name="hibernate.connection.autocommit" value="false" />
 
         </properties>
     </persistence-unit>
@@ -42,7 +42,7 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/snark"/>
             <property name="javax.persistence.jdbc.user" value="postgres"/>
             <property name="javax.persistence.jdbc.password" value=""/>
-            <property name="hibernate.connection.autocommit" value="true" />
+            <property name="hibernate.connection.autocommit" value="false" />
         </properties>
     </persistence-unit>
 </persistence>

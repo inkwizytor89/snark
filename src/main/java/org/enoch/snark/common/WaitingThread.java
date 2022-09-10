@@ -4,9 +4,9 @@ import org.enoch.snark.instance.Utils;
 
 public class WaitingThread extends Thread {
 
-    private final Long secondsToDelay;
+    private final long secondsToDelay;
 
-    public WaitingThread(Runnable task, Long secondsToDelay) {
+    public WaitingThread(Runnable task, long secondsToDelay) {
         super(task);
         this.secondsToDelay = secondsToDelay;
     }

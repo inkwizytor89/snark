@@ -2,13 +2,10 @@ package org.enoch.snark.gi.command;
 
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.Utils;
-
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractCommand {
-    private AbstractCommand afterCommand;
-    private Long secondsToDelay;
+    public AbstractCommand afterCommand;
+    public Long secondsToDelay = 0L;
     protected Instance instance;
     private CommandType type;
     public int failed = 0;
@@ -25,17 +22,14 @@ public abstract class AbstractCommand {
             return;
         }
         Runnable task = () -> {
-            try {
-                if (secondsToDelay > 0) {
-                    TimeUnit.SECONDS.sleep(secondsToDelay);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             instance.commander.push(afterCommand);
         };
-
+        System.err.println(afterCommand + " with delay " + secondsToDelay);
         new WaitingThread(task, secondsToDelay).start();
+    }
+
+    public boolean isAfterCommand() {
+        return afterCommand != null;
     }
 
     public void retry(Long secondsToDelay) {

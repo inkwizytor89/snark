@@ -28,7 +28,7 @@ public class BuildingManager {
             }
         }
         colony.level = colony.level +1;
-        ColonyDAO.getInstance().saveOrUpdate(colony);
+//        ColonyDAO.getInstance().saveOrUpdate(colony);
         return getBuildRequest(colony);
     }
 
@@ -69,14 +69,27 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
                 new BuildingRequest(BuildingEnum.solarPlant, 11),
                 new BuildingRequest(BuildingEnum.roboticsFactory, 2),
-                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
                 new BuildingRequest(BuildingEnum.shipyard, 2),
+                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
+                new BuildingRequest(BuildingEnum.metalMine, 1)));
+
+        levelUpMap.put(2L, Arrays.asList(
+                new BuildingRequest(BuildingEnum.metalStorage, 2),
+                new BuildingRequest(BuildingEnum.crystalStorage, 1),
+
                 new BuildingRequest(BuildingEnum.metalMine, 1)));
     }
 
-    public void temporare() {
+    public void temporare() {//kolonie nie mogą mieć wiekszy poziom niż gracza
         PlayerEntity playerEntity = new PlayerEntity();
         playerEntity.energyTechnology=1L;
-        playerEntity.combustionDriveTechnology=2L;
+        playerEntity.combustionDriveTechnology=2L; //mt i lm
+        //build mt and lm, after let go colony to level 2
+
+        //lvl 2
+        // zbiorniki zeby sie nie przepelnily
+        // wiecej fabryk na wiecej krysztalu i deuteru
+        // budowa 1 wyrzutni rakiet
+        new BuildingRequest(BuildingEnum.researchLaboratory, 3);
     }
 }
