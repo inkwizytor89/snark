@@ -46,6 +46,6 @@ public class Universe {
                 return configurtion[1];
             }
         }
-        return config;
+        return null;
     }
 }

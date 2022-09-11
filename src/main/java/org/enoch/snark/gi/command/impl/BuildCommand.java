@@ -58,6 +58,12 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "metal"),
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
+            String masterHerf = instance.universe.getConfig("master");
+            if(masterHerf != null) {
+                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(instance, masterHerf,
+                        "Master poprosze "+resources+ " na "+colony);
+                instance.commander.push(messageCommend);
+            }
             BuildingCost.getInstance().put(requirements.request, resources);
         }
         return true;
