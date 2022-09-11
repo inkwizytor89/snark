@@ -44,9 +44,9 @@ public class BuildCommand extends AbstractCommand {
             Long seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
             if(seconds == null) {
                 System.err.println("wrong seconds read");
+                this.setSecoundToDelayAfterCommand(seconds);
+                this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
             }
-            this.setSecoundToDelayAfterCommand(seconds);
-            this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
         } else {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
@@ -58,9 +58,9 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "metal"),
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
-            String masterHerf = instance.universe.getConfig("master");
-            if(masterHerf != null) {
-                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(instance, masterHerf,
+            String masterHref = instance.universe.getConfig("master_href");
+            if(masterHref != null && !masterHref.isEmpty()) {
+                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(instance, masterHref,
                         "Master poprosze "+resources+ " na "+colony);
                 instance.commander.push(messageCommend);
             }
