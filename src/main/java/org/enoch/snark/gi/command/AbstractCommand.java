@@ -21,11 +21,8 @@ public abstract class AbstractCommand {
         if(afterCommand == null) {
             return;
         }
-        Runnable task = () -> {
-            instance.commander.push(afterCommand);
-        };
         System.err.println(afterCommand + " with delay " + secondsToDelay);
-        new WaitingThread(task, secondsToDelay).start();
+        new WaitingThread(afterCommand, secondsToDelay).start();
     }
 
     public boolean isAfterCommand() {
@@ -33,11 +30,7 @@ public abstract class AbstractCommand {
     }
 
     public void retry(Long secondsToDelay) {
-        Runnable task = () -> {
-            instance.commander.push(this);
-        };
-
-        new WaitingThread(task, secondsToDelay).start();
+        new WaitingThread(this, secondsToDelay).start();
     }
 
     protected void setSecoundToDelayAfterCommand(Long secoundToDelay) {

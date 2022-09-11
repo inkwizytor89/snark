@@ -58,6 +58,7 @@ public class ExpeditionThread extends AbstractThread {
         } else {
             pause = LONG_PAUSE;
         }
+//        System.err.println("Expedition end step, sleep in "+pause);
     }
 
     private boolean noWaitingExpedition() {

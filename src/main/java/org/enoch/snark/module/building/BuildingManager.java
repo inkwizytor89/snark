@@ -5,10 +5,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.macro.BuildingEnum;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BuildingManager {
 
@@ -20,6 +17,9 @@ public class BuildingManager {
             return null;
         }
         List<BuildingRequest> levelUpList = levelUpMap.get(colony.level);
+        if (levelUpList == null) {
+            return null;
+        }
         for(BuildingRequest request : levelUpList) {
             Long buildingLevel = colony.getBuildingLevel(request.building);
             if(request.level > buildingLevel) {
@@ -70,14 +70,43 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.solarPlant, 11),
                 new BuildingRequest(BuildingEnum.roboticsFactory, 2),
                 new BuildingRequest(BuildingEnum.shipyard, 2),
-                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
-                new BuildingRequest(BuildingEnum.metalMine, 1)));
+                new BuildingRequest(BuildingEnum.researchLaboratory, 1)));
 
         levelUpMap.put(2L, Arrays.asList(
                 new BuildingRequest(BuildingEnum.metalStorage, 2),
                 new BuildingRequest(BuildingEnum.crystalStorage, 1),
+                new BuildingRequest(BuildingEnum.solarPlant, 12),
+                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 7),
+                new BuildingRequest(BuildingEnum.crystalMine, 10),
+                new BuildingRequest(BuildingEnum.solarPlant, 13),
+                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 8),
+                new BuildingRequest(BuildingEnum.crystalMine, 11),
+                new BuildingRequest(BuildingEnum.solarPlant, 14),
+                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 10),
+                new BuildingRequest(BuildingEnum.crystalMine, 12),
+                new BuildingRequest(BuildingEnum.solarPlant, 15),
+                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 12),
+                new BuildingRequest(BuildingEnum.crystalMine, 13),
 
+                // na odwal sie
+                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
+                new BuildingRequest(BuildingEnum.researchLaboratory, 4),
+                new BuildingRequest(BuildingEnum.shipyard, 4),
                 new BuildingRequest(BuildingEnum.metalMine, 1)));
+
+
+        List<BuildingRequest> maxList = new ArrayList<>();
+        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 10));
+        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 1));
+        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 12));
+        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 3));
+        for (int i = 1; i < 30; i++) {
+            maxList.add(new BuildingRequest(BuildingEnum.solarPlant, i+1));
+            maxList.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i));
+            maxList.add(new BuildingRequest(BuildingEnum.crystalMine, i));
+            maxList.add(new BuildingRequest(BuildingEnum.metalMine, i+3));
+        }
+        levelUpMap.put(3L, maxList);
     }
 
     public void temporare() {//kolonie nie mogą mieć wiekszy poziom niż gracza
