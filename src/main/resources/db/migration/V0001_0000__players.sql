@@ -6,6 +6,7 @@ create table players
   name             text,
   code              text,
   level             integer,
+  updated    timestamp default now(),
 
   --Research
   energyTechnology              integer,

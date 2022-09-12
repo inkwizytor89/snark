@@ -5,5 +5,6 @@ create table errors(
     created timestamp not null,
     action text,
     value text,
-    page text
+    page text,
+  updated    timestamp default now()
 );

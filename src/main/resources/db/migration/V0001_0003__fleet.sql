@@ -10,6 +10,7 @@ create table fleet(
     visited timestamp default null,
     back timestamp default null,
     code bigint,
+  updated    timestamp default now(),
     lm int default 0,
     cm int default 0,
     kr int default 0,

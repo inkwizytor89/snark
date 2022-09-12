@@ -43,7 +43,7 @@ public class Universe {
         for(int i = 0; i<configs.length; i++) {
             String[] configurtion = configs[i].split("=");
             if(key.equals(configurtion[0])) {
-                return configurtion[1];
+                return configurtion.length>1 ? configurtion[1]: "";
             }
         }
         return null;

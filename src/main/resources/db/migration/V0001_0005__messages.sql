@@ -3,5 +3,6 @@ create table messages(
     created timestamp not null,
     message_id bigint,
     type text not null,
-    content text
+    content text,
+  updated    timestamp default now()
 );

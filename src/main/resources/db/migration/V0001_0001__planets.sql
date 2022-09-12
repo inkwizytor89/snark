@@ -11,6 +11,7 @@ create table colonies
   deuterium   integer,
   power       integer,
   level       integer,
+  updated    timestamp default now(),
 
   cp          integer   not null,
   cpm          integer,
@@ -95,6 +96,7 @@ create table targets
   deuterium   integer,
   power       integer,
   player_id bigint not null references players,
+  updated    timestamp default now(),
 
   -- fleet
   lm    integer default 0,
@@ -163,6 +165,5 @@ create table targets
   type        varchar(15) not null,
   fleet_sum   bigint default 0,
   defense_sum bigint default 0,
-  spy_level integer default 4,
-  updated     timestamp
+  spy_level integer default 4
 );
