@@ -5,6 +5,9 @@ create table players
     primary key,
   name             text,
   code              text,
+  status              text,
+  type              text,
+  alliance              text,
   level             integer,
   updated    timestamp default now(),
 

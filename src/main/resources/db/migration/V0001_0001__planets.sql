@@ -142,6 +142,7 @@ create table targets
   --Facilities
   roboticsFactory       integer,
   shipyard              integer,
+  researchLaboratory    integer,
   allianceDepot         integer,
   missileSilo           integer,
   naniteFactory         integer,
@@ -156,6 +157,7 @@ create table targets
   lifeformTech14105 integer,
   lifeformTech14106 integer,
   lifeformTech14107 integer,
+  lifeformTech14108 integer,
   lifeformTech14109 integer,
   lifeformTech14110 integer,
   lifeformTech14111 integer,

@@ -19,6 +19,18 @@ public class PlayerEntity extends IdEntity {
     public String code;
 
     @Basic
+    @Column(name = "status")
+    public String status;
+
+    @Basic
+    @Column(name = "type")
+    public String type;
+
+    @Basic
+    @Column(name = "alliance")
+    public String alliance;
+
+    @Basic
     @Column(name = "level")
     public Long level;
 

@@ -37,7 +37,7 @@ public class DateUtil {
     /**
      *
      * @param input 4h 27m 10s
-     * @return nanos
+     * @return second
      */
     public static Long parseCountDownToSec(String input) {
         final String[] split = input.split("\\D+");

@@ -1,14 +1,17 @@
 package org.enoch.snark.gi.macro;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.SystemView;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,17 +48,19 @@ public class GIUrlBuilder {
                 "&type=1&mission=" + mission.getValue();
         instance.session.getWebDriver().get(builder);
 
+        updateColony(source);
         loadFleetStatus();
+        Instance.getInstance().gi.updateFleet(source);
     }
 
-    public void updateFleetStatus() {
-        String builder = instance.universe.url + "?" +
-                PAGE_TERM + PAGE_INGAME + "&" +
-                COMPONENT_TERM + PAGE_BASE_FLEET ;
-        instance.session.getWebDriver().get(builder);
-
-        loadFleetStatus();
-    }
+//    public void updateFleetStatus() {
+//        String builder = instance.universe.url + "?" +
+//                PAGE_TERM + PAGE_INGAME + "&" +
+//                COMPONENT_TERM + PAGE_BASE_FLEET ;
+//        instance.session.getWebDriver().get(builder);
+//
+//        loadFleetStatus();
+//    }
 
     private void loadFleetStatus() {
         Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
@@ -75,36 +80,41 @@ public class GIUrlBuilder {
 
 //    @Transactional
     public void open(String page, ColonyEntity colony) {
+        if(colony == null) {
+            colony = ColonyDAO.getInstance().getOldestUpdated();
+        }
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
-        if(colony != null) {
-            builder.append("&cp=" + colony.cp);
-        }
+        builder.append("&cp=" + colony.cp);
         instance.session.getWebDriver().get(builder.toString());
 
-        if(colony != null) {
-            instance.gi.updateResources(colony);
-            if (PAGE_RESOURCES.equals(page)) {
-                instance.gi.updateResourcesProducers(colony);
-                instance.gi.updateQueue(colony, QueueManger.BUILDING);
-                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
-            } else if (PAGE_FACILITIES.equals(page)) {
-                instance.gi.updateFacilities(colony);
-                instance.gi.updateQueue(colony, QueueManger.BUILDING);
-            } else if (PAGE_LIFEFORM.equals(page)) {
-                instance.gi.updateLifeform(colony);
-                instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
-            } else if (PAGE_BASE_FLEET.equals(page)) {
-                if(instance.commander != null) {
-                    loadFleetStatus();
-                }
-                Instance.getInstance().gi.updateFleet(colony);
-            } else if (PAGE_DEFENSES.equals(page)) {
-                Instance.getInstance().gi.updateDefence(colony);
-                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+        updateColony(colony);
+        if (PAGE_RESOURCES.equals(page)) {
+            instance.gi.updateResourcesProducers(colony);
+            instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+        } else if (PAGE_FACILITIES.equals(page)) {
+            instance.gi.updateFacilities(colony);
+            instance.gi.updateQueue(colony, QueueManger.BUILDING);
+        } else if (PAGE_LIFEFORM.equals(page)) {
+            instance.gi.updateLifeform(colony);
+            instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
+        } else if (PAGE_BASE_FLEET.equals(page)) {
+            if(instance.commander != null) {
+                loadFleetStatus();
             }
+            Instance.getInstance().gi.updateFleet(colony);
+        } else if (PAGE_DEFENSES.equals(page)) {
+            Instance.getInstance().gi.updateDefence(colony);
+            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         }
+    }
+
+    public void updateColony(ColonyEntity colony) {
+        instance.gi.updateResources(colony);
+        colony.updated = LocalDateTime.now();
+        colony.save();
     }
 
     public void openWithPlayerInfo(String page, PlayerEntity player) {
@@ -118,17 +128,18 @@ public class GIUrlBuilder {
         }
     }
 
-    public void openGalaxy(int galaxy, int system) {
-        openGalaxy(galaxy, system, 1);
-    }
-
-    public void openGalaxy(int galaxy, int system, int position) {
+    public void openGalaxy(SystemView systemView, ColonyEntity colony) {
+        if(colony == null) {
+            colony = ColonyDAO.getInstance().getOldestUpdated();
+        }
         String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_SPACE +
-                "&galaxy=" + galaxy +
-                "&system=" + system +
-                "&position=" + position;
+                "&galaxy=" + systemView.galaxy +
+                "&system=" + systemView.system +
+                "&cp=" + colony.cp;
         instance.session.getWebDriver().get(builder);
+        updateColony(colony);
+        instance.gi.updateGalaxy(systemView);
     }
 }

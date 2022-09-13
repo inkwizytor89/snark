@@ -4,7 +4,6 @@ import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Msg;
@@ -147,19 +146,11 @@ public class CommanderImpl implements Commander {
 
     private void update() {
         try {
-            new GIUrlBuilder().updateFleetStatus();
+            new GIUrlBuilder().open(GIUrlBuilder.PAGE_BASE_FLEET, null);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
         }
-    }
-
-    private boolean containsFleetCommand(SendFleetCommand newSendFleet, Queue<AbstractCommand> fleetActionQueue) {
-        return fleetActionQueue.stream().anyMatch(command -> command instanceof SendFleetCommand &&
-                newSendFleet.mission.equals(((SendFleetCommand) command).mission) &&
-                newSendFleet.fleet.targetGalaxy.equals(((SendFleetCommand) command).fleet.targetGalaxy) &&
-                newSendFleet.fleet.targetSystem.equals(((SendFleetCommand) command).fleet.targetSystem) &&
-                newSendFleet.fleet.targetPosition.equals(((SendFleetCommand) command).fleet.targetPosition));
     }
 
     private void resolve(AbstractCommand command) {
@@ -203,7 +194,7 @@ public class CommanderImpl implements Commander {
     private boolean isFleetFreeSlot() {
         if(!session.isLoggedIn()) return false;
         if(getFleetFreeSlots() > 0)   return true;
-        new GIUrlBuilder().updateFleetStatus();
+        new GIUrlBuilder().open(GIUrlBuilder.PAGE_BASE_FLEET, null);
         if(getFleetFreeSlots() > 0)   return true;
         return false;
     }

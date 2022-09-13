@@ -15,7 +15,7 @@ import java.util.Map;
 public class BuildingThread extends AbstractThread {
 
     public static final String threadName = "building";
-    public static final int SHORT_PAUSE = 40;
+    public static final int SHORT_PAUSE = 20;
     public static final int LONG_PAUSE = 600;
 
     private final Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
@@ -53,7 +53,7 @@ public class BuildingThread extends AbstractThread {
     protected void onStep() {
 //        System.err.println("Building start step ");
 //        System.err.println(queueManger);
-        pause = 10;//LONG_PAUSE;
+        pause = LONG_PAUSE;
         for(ColonyEntity colony : colonyMap.keySet()) {
 
             if(colony.level > buildingManager.getColonyLastLevelToProcess()) {

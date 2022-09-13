@@ -1,15 +1,21 @@
 package org.enoch.snark.gi;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.Utils;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.SystemView;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -23,6 +29,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
@@ -41,11 +48,19 @@ public class GI {
     public static final String CLASS_ATTRIBUTE = "class";
     public static final String TECHNOLOGIES = "technologies";
     public final WebDriver webDriver;
+    private final PlayerDAO playerDAO;
+    private final Instance instance;
+    private final GalaxyDAO galaxyDAO;
+    private final TargetDAO targetDAO;
     private QueueManger queueManger;
 
     private GI() {
         webDriver = new ChromeDriver();
         queueManger = QueueManger.getInstance();
+        instance = Instance.getInstance();
+        playerDAO = PlayerDAO.getInstance();
+        galaxyDAO = GalaxyDAO.getInstance();
+        targetDAO = TargetDAO.getInstance();
     }
 
     public static GI getInstance() {
@@ -383,5 +398,88 @@ public class GI {
             return second;
         }
         return null;
+    }
+
+    public void updateGalaxy(SystemView systemView) {
+        List<TargetEntity> targets = TargetDAO.getInstance().find(systemView.galaxy, systemView.system);
+        for(WebElement row : webDriver.findElements(By.className("galaxyRow"))) {
+            // skip table headers
+            if(row.findElements(By.className("cellPosition")).isEmpty()) {
+                continue;
+            }
+            //skip lear rows
+            WebElement cellPlayerName = row.findElement(By.className("cellPlayerName"));
+            if(cellPlayerName.getText().trim().isEmpty()) {
+                continue;
+            }
+            List<WebElement> targetElement = cellPlayerName.findElements(By.className("tooltipRel"));
+            // me on player list
+            if(targetElement.isEmpty()) {
+                continue;
+            }
+            final WebElement playerElement =targetElement.get(0);
+            final String playerName = playerElement.getText().trim();
+            final String playerCode = playerElement.getAttribute("rel");
+            List<WebElement> isStatus = cellPlayerName.findElements(By.tagName("pre"));
+            String status = "";
+            if(!isStatus.isEmpty()) {
+                status = isStatus.get(0).getText();
+            }
+            final int position = Integer.parseInt(row.findElement(By.className("cellPosition")).getText());
+            final String alliance = row.findElement(By.className("cellAlliance")).getText();
+
+            Optional<TargetEntity> targetFromDb = targets.stream()
+                    .filter(t -> t.position.equals(position))
+                    .findAny();
+
+
+            if(StringUtils.isEmpty(playerName) && targetFromDb.isPresent()) {
+                instance.removePlanet(targetFromDb.get().toPlanet());
+                continue;
+            }
+            if(StringUtils.isEmpty(playerName) && !targetFromDb.isPresent()) {
+                continue;
+            }
+            // nothing changed, nothing to process
+            if(targetFromDb.isPresent() && status.equals(targetFromDb.get().player.status)) {
+                continue;
+            }
+
+            TargetEntity entity;
+            if(targetFromDb.isPresent()) {
+                entity = targetFromDb.get();
+            } else {
+                entity = new TargetEntity();
+                entity.galaxy = systemView.galaxy;
+                entity.system = systemView.system;
+                entity.position = position;
+            }
+            PlayerEntity playerEntity = playerDAO.find(playerCode);
+            playerEntity.name = playerName;
+            playerEntity.alliance = alliance;
+            playerEntity.status = status;
+            playerEntity.type = setStatus(status);
+            PlayerEntity savedPlayer = playerDAO.saveOrUpdate(playerEntity);
+
+            entity.type = status;
+            entity.player = savedPlayer;
+            targetDAO.saveOrUpdate(entity);
+        }
+
+        galaxyDAO.update(systemView);
+    }
+
+    private String setStatus(String status) {
+        if (status.contains("A")) {
+            return TargetEntity.ADMIN;
+        } else if (status.contains("u")) {
+            return TargetEntity.ABSENCE;
+        } else if (status.contains("i") || status.contains("I")) {
+            return TargetEntity.IN_ACTIVE;
+        } else if (status.contains("s")) {
+            return TargetEntity.WEAK;
+        } else {
+            return TargetEntity.NORMAL;
+        }
     }
 }

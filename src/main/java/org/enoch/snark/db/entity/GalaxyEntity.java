@@ -19,10 +19,6 @@ public class GalaxyEntity extends IdEntity {
     @Column(name = "system")
     public Integer system;
 
-    @Basic
-    @Column(name = "updated")
-    public LocalDateTime updated = LocalDateTime.now();
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -36,6 +36,7 @@ public class BuildingCost {
     }
 
     public void put(BuildingRequest request, Resources resources) {
+        System.err.println("Putted costs "+resources+" for "+request);
         costs.get(request.building).put(request.level, resources);
     }
 }

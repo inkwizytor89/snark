@@ -1,6 +1,7 @@
 package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 
 import java.util.List;
@@ -36,6 +37,16 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
                 return null;
             }
             return resultList.get(0);
+        }
+    }
+
+    public ColonyEntity getOldestUpdated() {
+        synchronized (JPAUtility.dbSynchro) {
+            List<ColonyEntity> resultList = entityManager.createQuery(
+                    "from ColonyEntity " +
+                            "order by updated asc", ColonyEntity.class)
+                    .getResultList();
+            return resultList.stream().findFirst().get();
         }
     }
 }
