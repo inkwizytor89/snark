@@ -14,4 +14,10 @@ public abstract class GICommand extends AbstractCommand {
         session = instance.session;
         webDriver = session.getWebDriver();
     }
+
+    protected GICommand(CommandType type) {
+        super(type);
+        session = instance.session;
+        webDriver = session.getWebDriver();
+    }
 }

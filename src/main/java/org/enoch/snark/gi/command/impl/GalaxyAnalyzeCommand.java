@@ -16,31 +16,36 @@ import static org.enoch.snark.model.Universe.GALAXY_MAX;
 
 public class GalaxyAnalyzeCommand extends GICommand {
 
+    private final GalaxyEntity galaxyEntity;
     private GalaxyDAO galaxyDAO;
     private final GIUrlBuilder giUrlBuilder;
-    private SystemView systemView;
+//    private SystemView systemView;
 
-    public GalaxyAnalyzeCommand(Instance instance, SystemView systemView) {
-        super(instance, CommandType.INTERFACE_REQUIERED);
+    public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
+        super(CommandType.INTERFACE_REQUIERED);
+        this.galaxyEntity = galaxyEntity;
         galaxyDAO = GalaxyDAO.getInstance();
         giUrlBuilder = new GIUrlBuilder();
-        this.systemView = systemView;
-        normalize(this.systemView);
+//        this.systemView = systemView;
+//        normalize(this.systemView);
     }
 
-    private void normalize(SystemView systemView) {
-        systemView.galaxy = Math.floorMod(systemView.galaxy, Integer.parseInt(instance.universe.getConfig(GALAXY_MAX)));
-    }
+//    private void normalize(SystemView systemView) {
+//        systemView.galaxy = Math.floorMod(systemView.galaxy, Integer.parseInt(instance.universe.getConfig(GALAXY_MAX)));
+//    }
 
     @Override
     public boolean execute() {
-        final Optional<GalaxyEntity> galaxyEntity = galaxyDAO.find(systemView);
-
-        if(galaxyEntity.isPresent() && DateUtil.lessThanHours(22, galaxyEntity.get().updated)) {
+        if(galaxyEntity.updated != null && DateUtil.lessThanHours(22, galaxyEntity.updated)) {
             return true;
         }
-        giUrlBuilder.openGalaxy(systemView, null);
+        giUrlBuilder.openGalaxy(galaxyEntity.toSystemView(), null);
         Utils.sleep();
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Look at " + galaxyEntity;
     }
 }

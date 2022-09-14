@@ -56,7 +56,7 @@ public class CommanderImpl implements Commander {
 
     private void startInterfaceQueue() {
         Runnable task = () -> {
-            update();// shold be load game status responsibility
+            update();// should be load game status responsibility
             while(true) {
                 try {
                     restartIfSessionIsOver();
@@ -123,7 +123,15 @@ public class CommanderImpl implements Commander {
     }
 
     private void restartIfSessionIsOver() {
-        if(instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
+        try {
+            if (instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
+                stopCommander();
+                instance.browserReset();
+                aggressorsAttacks = new ArrayList<>();
+                startCommander();
+            }
+        } catch (org.openqa.selenium.NoSuchSessionException e) {
+            e.printStackTrace();
             stopCommander();
             instance.browserReset();
             aggressorsAttacks = new ArrayList<>();

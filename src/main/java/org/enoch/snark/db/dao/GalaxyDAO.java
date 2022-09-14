@@ -4,7 +4,10 @@ import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.model.SystemView;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class GalaxyDAO extends AbstractDAO<GalaxyEntity> {
@@ -58,6 +61,42 @@ public class GalaxyDAO extends AbstractDAO<GalaxyEntity> {
             return entityManager.createQuery(
                     "from GalaxyEntity order by updated asc", GalaxyEntity.class)
                     .getResultList().stream().findFirst();
+        }
+    }
+
+    public List<GalaxyEntity> findLatestGalaxyToView(int count) {
+        synchronized (JPAUtility.dbSynchro) {
+            List<GalaxyEntity> resultList = entityManager.createQuery(
+                    "from GalaxyEntity order by updated asc", GalaxyEntity.class)
+                    .getResultList();
+            if(resultList.isEmpty())    return new ArrayList<>();
+            return resultList.subList(0, count);
+        }
+    }
+
+    public List<GalaxyEntity> findNotExplored() {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery(
+                    "from GalaxyEntity where updated = null", GalaxyEntity.class)
+                    .getResultList();
+        }
+    }
+
+    public void persistGalaxyMap(int galaxyCount, int systemCount) {
+        synchronized (JPAUtility.dbSynchro) {
+            entityManager.getTransaction().begin();
+            for (int i = 1; i <= galaxyCount; i++) {
+                for (int j = 1; j <= systemCount; j++) {
+                    GalaxyEntity galaxyEntity = new GalaxyEntity();
+                    galaxyEntity.galaxy = i;
+                    galaxyEntity.system = j;
+                    galaxyEntity.updated = null;
+                    entityManager.persist(galaxyEntity);
+                    entityManager.flush();
+                    entityManager.clear();
+                }
+            }
+            entityManager.getTransaction().commit();
         }
     }
 }

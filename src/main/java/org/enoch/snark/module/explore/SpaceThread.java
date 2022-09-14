@@ -1,23 +1,23 @@
 package org.enoch.snark.module.explore;
 
-import org.enoch.snark.common.DateUtil;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
-import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.AbstractThread;
 
-import java.util.*;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class SpaceThread extends AbstractThread {
 
     public static final String threadName = "space";
+    public static final int DATA_COUNT = 50;
     private final Instance instance;
+    private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
 
     public SpaceThread(SI si) {
         super(si);
@@ -31,85 +31,32 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 120;
+        return 600;
     }
 
     @Override
     protected void onStart() {
-        super.onStart();
-        checkMissing();
+        List<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT);
+        if(latestGalaxyToView.isEmpty()) {
+            int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
+            int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
+            GalaxyDAO.getInstance().persistGalaxyMap(galaxyMax, systemMax);
+        }
+        notExplored.addAll(GalaxyDAO.getInstance().findNotExplored());
     }
 
     @Override
     protected void onStep() {
-        final Optional<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView();
-
-        if(!latestGalaxyToView.isPresent()) {
-            System.err.println(SpaceThread.class.getName()+": Database doesn't contains "+GalaxyEntity.class.getName());
-        } else {
-            if(DateUtil.lessThanDays(4, latestGalaxyToView.get().updated)) {
-                System.err.println(SpaceThread.class.getName()+
-                        ": No new galaxy to scan[oldest is from "+latestGalaxyToView.get().updated+"]");
-            } else {
-                instance.commander.push(new GalaxyAnalyzeCommand(instance, latestGalaxyToView.get().toSystemView()));
-            }
-        }
-    }
-
-    private void checkMissing() {
-        Map<SystemView, GalaxyEntity> spaceMap = buildSpaceMap();
-        spaceMap.entrySet().stream()
-                .filter(entry -> entry.getValue() == null)
-                .forEach(entry -> instance.commander.push(new GalaxyAnalyzeCommand(instance, entry.getKey())));
-    }
-
-    private Map<SystemView, GalaxyEntity> buildSpaceMap() {
-        List<SystemView> toView = new LinkedList<>();
-        for(ColonyEntity source : ColonyDAO.getInstance().fetchAll()) {
-            toView.addAll(generateSystemToView(source));
-        }
-        Map<SystemView, GalaxyEntity> spaceMap = new HashMap<>();
-        toView.forEach(view -> spaceMap.put(view, null));
-
-        GalaxyDAO.getInstance().fetchAll().stream()
-                .forEach(galaxyEntity -> spaceMap.put(galaxyEntity.toSystemView(), galaxyEntity));
-        return spaceMap;
-    }
-
-    private Collection<SystemView> generateSystemToView(ColonyEntity source) {
-        List<SystemView> result = new ArrayList<>();
-        int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
-        int explorationArea = Integer.parseInt(instance.universe.getConfig((Universe.EXPLORATION_AREA)));
-
-        int base = systemMax;
-        int start = ((base + source.system - explorationArea) % base) +1;
-        for(int i = 0; i < 2*explorationArea+2; i++ ) {
-            result.add(new SystemView(source.galaxy, ((start+i)%base)+1));
-        }
-        return result;
-    }
-
-    private void build() {
-        Optional<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView();
-        if(!latestGalaxyToView.isPresent()) {
-            int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
-            int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
-            for (int i = 1; i <= galaxyMax; i++) {
-                for (int j = 1; j <= systemMax; j++) {
-                    GalaxyEntity galaxyEntity = new GalaxyEntity();
-                    galaxyEntity.galaxy = i;
-                    galaxyEntity.system = j;
-                    galaxyEntity.updated = null;
-                    GalaxyDAO.getInstance().saveOrUpdate(galaxyEntity);
+        if(!notExplored.isEmpty()) {
+            for (int i = 0; i < DATA_COUNT; i++) {
+                GalaxyEntity poll = notExplored.poll();
+                if(poll != null) {
+                    instance.commander.push(new GalaxyAnalyzeCommand(poll));
                 }
-
             }
+            return;
         }
-    }
-
-    public void sterp2() {
-        // daj wszystkie puste
-        // aktualizuj 10 albo 20 galaktyk do przejrzenia
-
+        GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT)
+                .forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
     }
 }

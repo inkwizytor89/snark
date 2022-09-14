@@ -1,15 +1,20 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
-public class GalaxyEntity extends IdEntity /*implements Comparable<GalaxyEntity>*/ {
+public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
 
     @Basic
     @Column(name = "galaxy")
@@ -35,22 +40,31 @@ public class GalaxyEntity extends IdEntity /*implements Comparable<GalaxyEntity>
         return Objects.hash(id, galaxy, system, updated);
     }
 
-    @Override
-    public String toString() {
-        return "["+galaxy+", "+system+"]";
-    }
-
     public SystemView toSystemView() {
         return new SystemView(galaxy, system);
     }
 
-//    @Override
-//    public int compareTo(GalaxyEntity o) {
-//        return Integer.compare(getRanking(), otherPlayer.getRanking());
-//    }
+    @Override
+    public int compareTo(GalaxyEntity o) {
+        return Integer.compare(distance(), o.distance());
+    }
 
-//    private int distance(GalaxyEntity entity) {
-//        int result = 0;
-//
-//    }
+    private int distance() {
+        List<Planet> cachedPlaned = Instance.getInstance().cachedPlaned;
+        Optional<Planet> min = cachedPlaned.stream().min(Comparator.comparingInt(this::distance));
+        if(min.isPresent()) {
+            return distance(min.get());
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    private int distance(Planet planet) {
+        return Math.abs(planet.galaxy - galaxy) * 1000 + Math.abs(planet.system - system);
+    }
+
+    @Override
+    public String toString() {
+        return "["+galaxy+", "+system+"] updated at " + updated;
+    }
 }

@@ -15,6 +15,11 @@ public abstract class AbstractCommand {
         this.type = type;
     }
 
+    protected AbstractCommand(CommandType type) {
+        this.instance = Instance.getInstance();
+        this.type = type;
+    }
+
     public abstract boolean execute();
 
     public void doAfter() {

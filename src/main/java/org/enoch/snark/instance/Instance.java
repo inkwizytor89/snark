@@ -36,6 +36,7 @@ public class Instance {
     public static GI gi;
     public static GISession session;
     public static Integer level = 1;
+    public List<Planet> cachedPlaned = new ArrayList<>();
     //    public MessageService messageService;
 //    public List<ColonyEntity> sources;
 
@@ -88,6 +89,7 @@ public class Instance {
 
             // update colonies
             for(ColonyEntity colony : colonyDAO.fetchAll()) {
+                cachedPlaned.add(colony.toPlanet());
                 if(colony.level == null) {
                     gi.updateColony(colony);
                     colony.level = 1L;
