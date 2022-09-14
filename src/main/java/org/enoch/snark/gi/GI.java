@@ -70,6 +70,10 @@ public class GI {
         return INSTANCE;
     }
 
+    public static void restartInstance() {
+        INSTANCE = null;
+    }
+
     public void doubleClickText(String text) {
         try {
             WebElement serverElement = findTextByXPath(text);

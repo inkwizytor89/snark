@@ -111,6 +111,7 @@ public class Instance {
         if(session != null) {
             session.getWebDriver().quit();
         }
+        GI.restartInstance();
         gi = GI.getInstance();
         session = new GISession(this);
         instanceStart = LocalDateTime.now();

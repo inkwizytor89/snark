@@ -9,6 +9,7 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
@@ -130,7 +131,7 @@ public class CommanderImpl implements Commander {
                 aggressorsAttacks = new ArrayList<>();
                 startCommander();
             }
-        } catch (org.openqa.selenium.NoSuchSessionException e) {
+        } catch (WebDriverException e) {
             e.printStackTrace();
             stopCommander();
             instance.browserReset();
