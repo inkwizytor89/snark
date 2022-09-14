@@ -20,17 +20,12 @@ public class BaseSI implements SI {
         this.instance = instance;
         this.expeditionThred = new ExpeditionThread(this);
         this.buildingThread = new BuildingThread(this);
-        this.spaceThred = new SpaceThread(this); //przeglada przestrzeń
-        this.scanThred = new ScanThread(this); //szpieguje ...
-//        farmThred = new FarmThred(this); // zbieranie z idkow surowcow
+        this.spaceThred = new SpaceThread(this); // explore space
+        this.scanThred = new ScanThread(this); // in progres
+        this.farmThred = new FarmThread(this); // in progres
     }
 
     public void run() {
-//        Optional<TargetEntity> targetEntity = instance.daoFactory.targetDAO.find(1, 266, 4);
-//        FleetEntity farmFleet = FleetEntity.createFarmFleet(instance, targetEntity.get());
-//        instance.daoFactory.fleetDAO.saveOrUpdate(farmFleet);
-//        new Thread(spaceThred).start();
-//        instance.session.sleep(TimeUnit.SECONDS, 2);
         String mode = instance.universe.mode;
         if(mode == null || mode.isEmpty() || mode.contains(ExpeditionThread.threadName)) {
             new Thread(expeditionThred).start();
@@ -44,8 +39,9 @@ public class BaseSI implements SI {
         if(mode == null || mode.isEmpty() || mode.contains(ScanThread.threadName)) {
             new Thread(scanThred).start();
         }
-//        instance.session.sleep(TimeUnit.SECONDS, 1);
-//        new Thread(scanThred).start();
+        if(mode == null || mode.isEmpty() || mode.contains(FarmThread.threadName)) {
+            new Thread(farmThred).start();
+        }
     }
 
     @Override
