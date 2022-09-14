@@ -88,4 +88,28 @@ public class SpaceThread extends AbstractThread {
         }
         return result;
     }
+
+    private void build() {
+        Optional<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView();
+        if(!latestGalaxyToView.isPresent()) {
+            int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
+            int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
+            for (int i = 1; i <= galaxyMax; i++) {
+                for (int j = 1; j <= systemMax; j++) {
+                    GalaxyEntity galaxyEntity = new GalaxyEntity();
+                    galaxyEntity.galaxy = i;
+                    galaxyEntity.system = j;
+                    galaxyEntity.updated = null;
+                    GalaxyDAO.getInstance().saveOrUpdate(galaxyEntity);
+                }
+
+            }
+        }
+    }
+
+    public void sterp2() {
+        // daj wszystkie puste
+        // aktualizuj 10 albo 20 galaktyk do przejrzenia
+
+    }
 }

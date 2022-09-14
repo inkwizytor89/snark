@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
-public class GalaxyEntity extends IdEntity {
+public class GalaxyEntity extends IdEntity /*implements Comparable<GalaxyEntity>*/ {
 
     @Basic
     @Column(name = "galaxy")
@@ -43,4 +43,14 @@ public class GalaxyEntity extends IdEntity {
     public SystemView toSystemView() {
         return new SystemView(galaxy, system);
     }
+
+//    @Override
+//    public int compareTo(GalaxyEntity o) {
+//        return Integer.compare(getRanking(), otherPlayer.getRanking());
+//    }
+
+//    private int distance(GalaxyEntity entity) {
+//        int result = 0;
+//
+//    }
 }

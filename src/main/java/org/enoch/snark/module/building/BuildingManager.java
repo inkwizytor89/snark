@@ -120,5 +120,22 @@ public class BuildingManager {
         // wiecej fabryk na wiecej krysztalu i deuteru
         // budowa 1 wyrzutni rakiet
         new BuildingRequest(BuildingEnum.researchLaboratory, 3);
+        playerEntity.espionageTechnology=2L;
+        new BuildingRequest(BuildingEnum.shipyard, 3);
+        playerEntity.combustionDriveTechnology=3L;
+        // sonda
+
+        playerEntity.espionageTechnology=4L;
+        playerEntity.impulseDriveTechnology=3L;
+        playerEntity.astrophysicsTechnology=1L;
+        //expedition start
+
+        new BuildingRequest(BuildingEnum.shipyard, 4);
+        // kolonizator
+
+        playerEntity.astrophysicsTechnology=3L;
+
+
+        new BuildingRequest(BuildingEnum.roboticsFactory, 4); //?
     }
 }
