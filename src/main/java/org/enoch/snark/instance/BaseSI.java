@@ -21,7 +21,7 @@ public class BaseSI implements SI {
         this.expeditionThred = new ExpeditionThread(this);
         this.buildingThread = new BuildingThread(this);
         this.spaceThred = new SpaceThread(this); // explore space
-        this.scanThred = new ScanThread(this); // in progres
+        this.scanThred = new ScanThread(this); // checking i-player on defence
         this.farmThred = new FarmThread(this); // in progres
     }
 

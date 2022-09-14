@@ -34,7 +34,7 @@ public class TargetEntity extends PlanetEntity {
 
     @Basic
     @Column(name = "spy_level")
-    public Integer spyLevel;
+    public Integer spyLevel = 4;
 
     @Basic
     @Column(name = "updated")

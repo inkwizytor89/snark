@@ -89,7 +89,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "from TargetEntity " +
                     "where fleet_sum is null and " +
                     "       defense_sum is null and " +
-                    "       type = :type " +
+                    "       player.type = :type " +
                     "order by resources desc ", TargetEntity.class)
                     .setParameter("type", TargetEntity.IN_ACTIVE)
                     .setMaxResults(1)

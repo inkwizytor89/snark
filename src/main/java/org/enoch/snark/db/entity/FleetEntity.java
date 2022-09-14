@@ -135,7 +135,8 @@ public class FleetEntity extends IdEntity {
     }
 
     public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
-        return createSpyFleet(instance, target, target.spyLevel);
+        Integer spyLevel = target.spyLevel == null ? 4 : target.spyLevel;
+        return createSpyFleet(instance, target, spyLevel);
     }
 
     public static FleetEntity createSpyFleet(@Nonnull Instance instance,

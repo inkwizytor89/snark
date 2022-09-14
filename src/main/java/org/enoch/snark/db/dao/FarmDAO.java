@@ -37,7 +37,7 @@ public class FarmDAO extends AbstractDAO<FarmEntity> {
 
     public FarmEntity getPreviousState() {
         List<FarmEntity> farmEntities = getSorted();
-        if(farmEntities.size() > 0) {
+        if(farmEntities.size() > 1) {
             return farmEntities.get(1);
         } else {
             return null;

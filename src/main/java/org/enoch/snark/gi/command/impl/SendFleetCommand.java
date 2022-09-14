@@ -33,8 +33,8 @@ public class SendFleetCommand extends GICommand {
 
     public FleetEntity fleet;
 
-    public SendFleetCommand(Instance instance, FleetEntity fleet) {
-        super(instance, FLEET_REQUIERED);
+    public SendFleetCommand(FleetEntity fleet) {
+        super(FLEET_REQUIERED);
         this.fleet = fleet;
         this.mission = Mission.convertFromString(fleet.type);
 

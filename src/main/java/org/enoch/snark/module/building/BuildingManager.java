@@ -133,7 +133,16 @@ public class BuildingManager {
         new BuildingRequest(BuildingEnum.shipyard, 4);
         // kolonizator
 
+        playerEntity.computerTechnology=2L;
         playerEntity.astrophysicsTechnology=3L;
+
+        playerEntity.combustionDriveTechnology=6L;
+        //dt
+
+        playerEntity.computerTechnology=3L;
+        playerEntity.astrophysicsTechnology=5L;
+
+        //
 
 
         new BuildingRequest(BuildingEnum.roboticsFactory, 4); //?

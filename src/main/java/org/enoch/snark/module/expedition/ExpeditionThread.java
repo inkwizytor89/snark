@@ -72,7 +72,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        instance.commander.push(new SendFleetCommand(instance, expedition));
+        instance.commander.push(new SendFleetCommand(expedition));
     }
 
     private void cleanExpeditions() {

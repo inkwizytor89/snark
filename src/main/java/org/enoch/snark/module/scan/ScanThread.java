@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
@@ -27,7 +28,7 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 120;
+        return 60;
     }
 
     @Override
@@ -35,7 +36,8 @@ public class ScanThread extends AbstractThread {
         Optional<TargetEntity> target = TargetDAO.getInstance().findNotScaned();
         if(target.isPresent()) {
             FleetEntity fleet = FleetEntity.createSpyFleet(instance, target.get());
-            FleetDAO.getInstance().saveOrUpdate(fleet);
+            Instance.getInstance().commander.push(new SendFleetCommand(fleet));
+//            FleetDAO.getInstance().saveOrUpdate(fleet);
         }
     }
 }
