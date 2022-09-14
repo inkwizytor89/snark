@@ -1,6 +1,5 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.CommandType;
@@ -23,9 +22,6 @@ public class GalaxyAnalyzeCommand extends GICommand {
 
     @Override
     public boolean execute() {
-        if(galaxyEntity.updated != null && DateUtil.lessThanHours(22, galaxyEntity.updated)) {
-            return true;
-        }
         giUrlBuilder.openGalaxy(galaxyEntity.toSystemView(), null);
         Utils.sleep();
         return true;

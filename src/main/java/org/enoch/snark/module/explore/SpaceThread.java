@@ -1,5 +1,6 @@
 package org.enoch.snark.module.explore;
 
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
@@ -36,6 +37,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStart() {
+        super.onStart();
         List<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT);
         if(latestGalaxyToView.isEmpty()) {
             int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
@@ -56,7 +58,8 @@ public class SpaceThread extends AbstractThread {
             }
             return;
         }
-        GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT)
+        GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT).stream()
+                .filter(galaxyEntity -> !DateUtil.lessThanHours(22, galaxyEntity.updated))
                 .forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
     }
 }
