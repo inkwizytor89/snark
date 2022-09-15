@@ -17,7 +17,7 @@ public class CollectionDAO extends AbstractDAO<CollectionEntity> {
     }
 
     @Override
-    protected Class<CollectionEntity> getEntitylass() {
+    protected Class<CollectionEntity> getEntityClass() {
         return CollectionEntity.class;
     }
 

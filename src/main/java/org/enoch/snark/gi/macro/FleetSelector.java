@@ -31,6 +31,8 @@ public class FleetSelector {
 
     public void next() {
         session.gi.sleep(TimeUnit.SECONDS, 1);
+        // to button continue to recalculate
+        session.getWebDriver().findElement(By.className("planet-header")).click();
 
         final WebElement continueButton = session.getWebDriver().findElement(By.id("continueToFleet2"));
         if(continueButton.getAttribute("class").equals("continue off"))
@@ -52,7 +54,9 @@ public class FleetSelector {
         startInput.click();
         session.gi.sleep(TimeUnit.SECONDS, 1);
         final WebElement errorBoxDecisionNo = session.getWebDriver().findElement(By.id("errorBoxDecisionNo"));
-        if(errorBoxDecisionNo.isDisplayed()) throw new ToStrongPlayerException();
+        if(errorBoxDecisionNo.isDisplayed()) {
+            throw new ToStrongPlayerException();
+        }
         return true;
     }
 }

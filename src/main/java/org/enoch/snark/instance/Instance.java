@@ -167,8 +167,8 @@ public class Instance {
         return ColonyDAO.getInstance().fetchAll().get(0);
     }
 
-    public Long calcutateExpeditionSize() {
-        return 2500L;
+    public Long calcutateMinExpeditionSize() {
+        return 1700L;
     }
 
     public synchronized boolean isStopped() {

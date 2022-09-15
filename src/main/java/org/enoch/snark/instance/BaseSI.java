@@ -26,22 +26,26 @@ public class BaseSI implements SI {
     }
 
     public void run() {
-        String mode = instance.universe.mode;
-        if(mode == null || mode.isEmpty() || mode.contains(ExpeditionThread.threadName)) {
+        if(isModeOn(ExpeditionThread.threadName)) {
             new Thread(expeditionThred).start();
         }
-        if(mode == null || mode.isEmpty() || mode.contains(BuildingThread.threadName)) {
+        if(isModeOn(BuildingThread.threadName)) {
             new Thread(buildingThread).start();
         }
-        if(mode == null || mode.isEmpty() || mode.contains(SpaceThread.threadName)) {
+        if(isModeOn(SpaceThread.threadName)) {
             new Thread(spaceThred).start();
         }
-        if(mode == null || mode.isEmpty() || mode.contains(ScanThread.threadName)) {
+        if(isModeOn(ScanThread.threadName)) {
             new Thread(scanThred).start();
         }
-        if(mode == null || mode.isEmpty() || mode.contains(FarmThread.threadName)) {
+        if(isModeOn(FarmThread.threadName)) {
             new Thread(farmThred).start();
         }
+    }
+
+    public boolean isModeOn(String threadName) {
+        String mode = instance.universe.mode;
+        return mode == null || mode.isEmpty() || mode.contains(threadName);
     }
 
     @Override

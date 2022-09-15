@@ -22,7 +22,7 @@ public class ErrorDAO extends AbstractDAO<ErrorEntity> {
     }
 
     @Override
-    protected Class<ErrorEntity> getEntitylass() {
+    protected Class<ErrorEntity> getEntityClass() {
         return ErrorEntity.class;
     }
 

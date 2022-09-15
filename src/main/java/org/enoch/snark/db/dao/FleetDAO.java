@@ -22,7 +22,7 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
     }
 
     @Override
-    protected Class<FleetEntity> getEntitylass() {
+    protected Class<FleetEntity> getEntityClass() {
         return FleetEntity.class;
     }
 

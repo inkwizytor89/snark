@@ -178,7 +178,7 @@ public class FleetEntity extends IdEntity {
     //instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;
-        fleet.dt = instance.calcutateExpeditionSize();
+        fleet.dt = instance.calcutateMinExpeditionSize();
         return fleet;
     }
 

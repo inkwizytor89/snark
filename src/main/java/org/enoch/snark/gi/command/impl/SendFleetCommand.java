@@ -2,8 +2,10 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.FleetSelector;
@@ -12,6 +14,7 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
@@ -19,17 +22,18 @@ import org.openqa.selenium.JavascriptExecutor;
 
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.command.CommandType.FLEET_REQUIERED;
 
 public class SendFleetCommand extends GICommand {
 
-    private final FleetSelector fleetSelector;
+    protected final FleetSelector fleetSelector;
 //    protected TargetEntity target;
     public Mission mission;
 //    protected SourcePlanet source;
-    private GIUrlBuilder giUrlBuilder;
+protected GIUrlBuilder giUrlBuilder;
 
     public FleetEntity fleet;
 
@@ -57,7 +61,7 @@ public class SendFleetCommand extends GICommand {
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
-        for(Map.Entry<ShipEnum, Long> entry : ShipEnum.createShipsMap(fleet).entrySet()) {
+        for(Map.Entry<ShipEnum, Long> entry : buildShipsMap().entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
 
@@ -77,9 +81,15 @@ public class SendFleetCommand extends GICommand {
         setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5L);
 //        fleetSelector.next();
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
-            TargetEntity target = new TargetEntity(fleet.getCoordinate());
-            target.type = TargetEntity.WEAK;
-            TargetDAO.getInstance().saveOrUpdate(target);
+            Optional<TargetEntity> target = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            if (target.isPresent()) {
+                PlayerEntity player = target.get().player;
+                player.type = TargetEntity.WEAK;
+                PlayerDAO.getInstance().saveOrUpdate(player);
+            } else {
+                // look at galaxy to reload player
+                giUrlBuilder.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+            }
             return true;
         }
         if(Mission.SPY.equals(mission)) {
@@ -101,6 +111,10 @@ public class SendFleetCommand extends GICommand {
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
         return true;
+    }
+
+    public Map<ShipEnum, Long> buildShipsMap() {
+        return ShipEnum.createShipsMap(fleet);
     }
 
     @Override

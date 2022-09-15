@@ -22,7 +22,7 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
     }
 
     @Override
-    protected Class<ColonyEntity> getEntitylass() {
+    protected Class<ColonyEntity> getEntityClass() {
         return ColonyEntity.class;
     }
 

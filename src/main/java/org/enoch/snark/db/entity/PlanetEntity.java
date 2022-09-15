@@ -302,15 +302,15 @@ public abstract class PlanetEntity extends IdEntity{
 
     public static Long parseResource(String input) {
         double base = 1;
-        input = input.replace(".","");
-
-        if(input.contains("Mln")) {
+        String in = input.replace(".","");
+        if(in.contains("m") || in.contains("M")) {
+            in = in.replaceAll("[a-zA-Z]", "");
             base = 1000000;
-            input = input.replace("Mln","");
-            input = input.replace(",",".");
+            in = in.replace(",",".");
         }
-        Double result = Double.parseDouble(input) * base;
-        return result.longValue();
+        Double result = Double.parseDouble(in) * base;
+        long resultA = result.longValue();
+        return resultA;
     }
 
     public String getCordinate() {

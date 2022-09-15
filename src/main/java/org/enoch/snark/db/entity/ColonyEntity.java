@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.SystemView;
 
 import javax.persistence.*;
@@ -42,8 +43,7 @@ public class ColonyEntity extends PlanetEntity {
     }
 
     public boolean canSent(FleetEntity fleet) {
-        // todo change hardcoded logic on rea logic checking if is possible send fleet from colony
-        return true;
+        return fleet.source.transporterLarge > Instance.getInstance().calcutateMinExpeditionSize();
     }
 
     public ColonyEntity refresh() {

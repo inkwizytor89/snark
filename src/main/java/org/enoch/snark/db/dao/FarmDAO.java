@@ -21,7 +21,7 @@ public class FarmDAO extends AbstractDAO<FarmEntity> {
     }
 
     @Override
-    protected Class<FarmEntity> getEntitylass() {
+    protected Class<FarmEntity> getEntityClass() {
         return FarmEntity.class;
     }
 

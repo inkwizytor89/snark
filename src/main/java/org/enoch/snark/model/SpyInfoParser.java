@@ -36,10 +36,14 @@ public class SpyInfoParser {
 
     private void extractResource() {
         String[] resourcesParts = document.getElementsByAttributeValue("data-type", "resources").text().split("\\s+");
-        planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
-        planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
-        planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
-        planet.energy = PlanetEntity.parseResource(resourcesParts[3]);
+        try {
+            planet.metal = PlanetEntity.parseResource(resourcesParts[0]);
+            planet.crystal = PlanetEntity.parseResource(resourcesParts[1]);
+            planet.deuterium = PlanetEntity.parseResource(resourcesParts[2]);
+            planet.energy = PlanetEntity.parseResource(resourcesParts[3]);
+        } catch (NumberFormatException e) {
+            System.err.println("format problem");
+        }
     }
 
     private void extractFleet() {//section_title

@@ -18,7 +18,7 @@ public class MessageDAO extends AbstractDAO<MessageEntity> {
     }
 
     @Override
-    protected Class<MessageEntity> getEntitylass() {
+    protected Class<MessageEntity> getEntityClass() {
         return MessageEntity.class;
     }
 }

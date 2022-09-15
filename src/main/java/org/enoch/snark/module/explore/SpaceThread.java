@@ -9,6 +9,7 @@ import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.AbstractThread;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -32,7 +33,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 600;
+        return 300;
     }
 
     @Override
@@ -59,7 +60,14 @@ public class SpaceThread extends AbstractThread {
             return;
         }
         GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT).stream()
-                .filter(galaxyEntity -> !DateUtil.lessThanHours(22, galaxyEntity.updated))
+                .filter(galaxyEntity -> {
+                    int timeToBack = 47;
+                    // look at space in night
+                    if(LocalDateTime.now().getHour() < 5) {
+                        timeToBack = 20;
+                    }
+                    return !DateUtil.lessThanHours(timeToBack, galaxyEntity.updated);
+                })
                 .forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
     }
 }

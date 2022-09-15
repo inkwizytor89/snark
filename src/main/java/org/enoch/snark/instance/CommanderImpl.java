@@ -142,10 +142,14 @@ public class CommanderImpl implements Commander {
 
     private boolean isUnderAttack() {
         try {
-            WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
-            if(attack_alert.getAttribute("class").contains("soon")) {
-                log.warning("\nUnder Attack !! \n");
-                return true;
+            List<WebElement> attack_alerts = instance.gi.webDriver.findElements(By.id("attack_alert"));
+            if(!attack_alerts.isEmpty()) {
+                WebElement attack_alert = attack_alerts.get(0);
+                if(attack_alert.getAttribute("class").contains("soon")) {
+                    log.warning("\nUnder Attack !! \n");
+                    return true;
+                }
+
             }
         } catch (Exception e) {
             e.printStackTrace();

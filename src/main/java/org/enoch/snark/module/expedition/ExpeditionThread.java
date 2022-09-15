@@ -4,6 +4,8 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
+import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
@@ -12,6 +14,7 @@ import org.enoch.snark.module.AbstractThread;
 import java.util.*;
 
 import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class ExpeditionThread extends AbstractThread {
 
@@ -49,16 +52,22 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = expeditionQueue.poll();
+
             FleetEntity expedition = FleetEntity.createExpeditionFleet(instance, colony.toPlanet());
             if(colony.canSent(expedition)) {
                 setExpeditionReadyToStart(expedition);
+            } else {
+                checkColonyStatus(colony);
             }
             expeditionQueue.add(colony);
             pause = SHORT_PAUSE;
         } else {
             pause = LONG_PAUSE;
         }
-//        System.err.println("Expedition end step, sleep in "+pause);
+    }
+
+    private void checkColonyStatus(ColonyEntity colony) {
+        instance.commander.push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
     }
 
     private boolean noWaitingExpedition() {
@@ -72,7 +81,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        instance.commander.push(new SendFleetCommand(expedition));
+        instance.commander.push(new ExpeditionFleetCommand(expedition));
     }
 
     private void cleanExpeditions() {

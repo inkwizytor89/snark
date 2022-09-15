@@ -21,7 +21,7 @@ public class PlayerDAO extends AbstractDAO<PlayerEntity> {
     }
 
     @Override
-    protected Class<PlayerEntity> getEntitylass() {
+    protected Class<PlayerEntity> getEntityClass() {
         return PlayerEntity.class;
     }
 

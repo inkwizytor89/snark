@@ -26,7 +26,7 @@ public class GalaxyDAO extends AbstractDAO<GalaxyEntity> {
     }
 
     @Override
-    protected Class<GalaxyEntity> getEntitylass() {
+    protected Class<GalaxyEntity> getEntityClass() {
         return GalaxyEntity.class;
     }
 

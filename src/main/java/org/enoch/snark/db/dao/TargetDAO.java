@@ -22,7 +22,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
     }
 
     @Override
-    protected Class<TargetEntity> getEntitylass() {
+    protected Class<TargetEntity> getEntityClass() {
         return TargetEntity.class;
     }
 
@@ -83,7 +83,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
-    public Optional<TargetEntity> findNotScaned() {
+    public List<TargetEntity> findNotScanned(int count) {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
@@ -92,8 +92,8 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "       player.type = :type " +
                     "order by resources desc ", TargetEntity.class)
                     .setParameter("type", TargetEntity.IN_ACTIVE)
-                    .setMaxResults(1)
-                    .getResultList().stream().findFirst();
+                    .setMaxResults(count)
+                    .getResultList();
         }
     }
 
