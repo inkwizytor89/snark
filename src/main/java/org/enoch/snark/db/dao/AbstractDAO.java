@@ -22,7 +22,7 @@ public abstract class AbstractDAO<T extends IdEntity> {
     @Nonnull
     public T saveOrUpdate(@Nonnull final T entity) {
         T savedEntity = entity;
-        synchronized (getEntityClass()) {
+        synchronized (JPAUtility.dbSynchro) {
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
             if(entity.id == null) {

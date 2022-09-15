@@ -1,5 +1,7 @@
 package org.enoch.snark.model;
 
+import org.enoch.snark.instance.Instance;
+
 public class Planet {
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -16,7 +18,8 @@ public class Planet {
 
     public Integer calculateDistance(Planet planet) {
         if(!galaxy.equals(planet.galaxy)) {
-            return roundDistance(galaxy, planet.galaxy, 6) *20000;
+            int galaxyMax = Integer.parseInt(Instance.getInstance().universe.getConfig((Universe.GALAXY_MAX)));
+            return roundDistance(galaxy, planet.galaxy, galaxyMax) *20000;
         }
         if(!system.equals(planet.system)) {
             return roundDistance(system, planet.system, 499) *95 +2700;

@@ -168,7 +168,11 @@ public class Instance {
     }
 
     public Long calcutateMinExpeditionSize() {
-        return 1700L;
+        String minDt = this.universe.getConfig((Universe.MIN_DT));
+        if(minDt == null || minDt.isEmpty()) {
+            return 1700L;
+        }
+        return Long.parseLong(minDt);
     }
 
     public synchronized boolean isStopped() {

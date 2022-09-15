@@ -108,15 +108,9 @@ public class FleetEntity extends IdEntity {
     @Transient
     private  Planet planet;
 
-
     public FleetEntity() {
         super();
-        start = LocalDateTime.now();
-    }
-
-    public FleetEntity(Instance instance) {
-        super();
-        this.instance = instance;
+        this.instance = Instance.getInstance();
         start = LocalDateTime.now();
     }
 
@@ -134,19 +128,18 @@ public class FleetEntity extends IdEntity {
         return "[" + targetGalaxy + ", " + targetSystem + ", " + targetPosition + "]";
     }
 
-    public static FleetEntity createSpyFleet(@Nonnull Instance instance, @Nonnull TargetEntity target) {
+    public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
         Integer spyLevel = target.spyLevel == null ? 4 : target.spyLevel;
-        return createSpyFleet(instance, target, spyLevel);
+        return createSpyFleet(target, spyLevel);
     }
 
-    public static FleetEntity createSpyFleet(@Nonnull Instance instance,
-                                             @Nonnull TargetEntity target,
+    public static FleetEntity createSpyFleet(@Nonnull TargetEntity target,
                                              @Nonnull Integer count) {
-        FleetEntity fleet = new FleetEntity(instance);
+        FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = instance.findNearestSource(target);
+        fleet.source = Instance.getInstance().findNearestSource(target);
         fleet.type = SPY;
         fleet.son = count.longValue();
         return fleet;
@@ -154,7 +147,7 @@ public class FleetEntity extends IdEntity {
 
     public static FleetEntity createFarmFleet(@Nonnull Instance instance,
                                              @Nonnull TargetEntity target) {
-        FleetEntity fleet = new FleetEntity(instance);
+        FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
@@ -165,16 +158,12 @@ public class FleetEntity extends IdEntity {
     }
 
     public static FleetEntity createExpeditionFleet(@Nonnull Instance instance,
-                                              @Nonnull Planet target) {
-        FleetEntity fleet = new FleetEntity(instance);
+                                              @Nonnull ColonyEntity target) {
+        FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = 16;
-        fleet.source = ColonyDAO.getInstance().fetchAll().stream()
-                .filter(colonyEntity -> colonyEntity.galaxy.equals(target.galaxy) &&
-                        colonyEntity.system.equals(target.system) &&
-                        colonyEntity.position.equals(target.position))
-                .findFirst().get();
+        fleet.source = target;
     //instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;

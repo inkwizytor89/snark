@@ -83,7 +83,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
-    public List<TargetEntity> findNotScanned(int count) {
+    public List<TargetEntity> findNotScanned() {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
@@ -92,7 +92,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "       player.type = :type " +
                     "order by resources desc ", TargetEntity.class)
                     .setParameter("type", TargetEntity.IN_ACTIVE)
-                    .setMaxResults(count)
+//                    .setMaxResults(count)
                     .getResultList();
         }
     }

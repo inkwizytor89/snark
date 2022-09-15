@@ -24,12 +24,10 @@ import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
 
 public class ReadMessageCommand extends AbstractCommand {
 
-    private final Instance instance;
     private Planet planet;
 
-    public ReadMessageCommand(Instance instance) {
-        super(instance, INTERFACE_REQUIERED);
-        this.instance = instance;
+    public ReadMessageCommand() {
+        super(INTERFACE_REQUIERED);
     }
 
     @Override

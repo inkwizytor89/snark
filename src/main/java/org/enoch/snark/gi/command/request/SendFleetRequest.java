@@ -81,13 +81,10 @@ public class SendFleetRequest {
 
     private FleetEntity generateFleet(TargetEntity target) {
         if(FleetEntity.SPY.equals(mission)) {
-            return FleetEntity.createSpyFleet(instance, target);
+            return FleetEntity.createSpyFleet(target);
         }
         if(FleetEntity.ATTACK.equals(mission)) {
             return FleetEntity.createFarmFleet(instance, target);
-        }
-        if(FleetEntity.EXPEDITION.equals(mission)) {
-            return FleetEntity.createExpeditionFleet(instance, target.toPlanet());
         }
         throw new RuntimeException("Unknown mission "+ mission);
     }

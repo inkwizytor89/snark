@@ -17,6 +17,7 @@ import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
+import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 
@@ -78,7 +79,7 @@ protected GIUrlBuilder giUrlBuilder;
         fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);
         final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
         fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
-        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5L);
+//        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5L);
 //        fleetSelector.next();
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
             Optional<TargetEntity> target = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -93,7 +94,8 @@ protected GIUrlBuilder giUrlBuilder;
             return true;
         }
         if(Mission.SPY.equals(mission)) {
-            setAfterCommand(new ReadMessageCommand(instance));
+            MessageService.getInstance().put(durationTime.toSecondOfDay());
+//            setAfterCommand(new ReadMessageCommand(instance));
         }
 
         try {

@@ -25,14 +25,10 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
         Long dt = colony.transporterLarge;
         long possibleCount = dt / minSize;
 
-        System.err.println("dt is "+dt);
-        System.err.println("possibleCount is "+possibleCount);
         if(possibleCount == 0) {
             throw new ShipDoNotExists();
         }
         long toSend = dt / possibleCount;
-
-        System.err.println("to send "+toSend);
 
         shipsMap.put(transporterLarge, toSend);
         fleet.dt = toSend;
