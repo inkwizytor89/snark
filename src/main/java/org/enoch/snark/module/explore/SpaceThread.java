@@ -64,10 +64,10 @@ public class SpaceThread extends AbstractThread {
             return;
         }
         if (galaxyToView.isEmpty()) {
-            int timeToBack = 47;
+            int timeToBack = 71;
             // look at space in night
             if(LocalDateTime.now().getHour() < 6) {
-                timeToBack = 24;
+                timeToBack = 23;
             }
             galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusHours(timeToBack));
         }
