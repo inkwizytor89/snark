@@ -65,6 +65,6 @@ public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
 
     @Override
     public String toString() {
-        return "["+galaxy+", "+system+"] updated at " + updated;
+        return "["+galaxy+", "+system+"]";
     }
 }

@@ -1,6 +1,7 @@
 package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.gi.GISession;
+import org.enoch.snark.instance.Utils;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
@@ -9,6 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import javax.rmi.CORBA.Util;
 import java.util.concurrent.TimeUnit;
 
 public class FleetSelector {
@@ -46,7 +48,7 @@ public class FleetSelector {
     }
 
     public boolean start() {
-        session.gi.sleep(TimeUnit.SECONDS, 2);
+        Utils.sleep();
         final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
         if(startInput.getTagName().equals("td")) {
             throw new PlanetDoNotExistException();

@@ -10,16 +10,20 @@ import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 public class SpaceThread extends AbstractThread {
 
     public static final String threadName = "space";
+    protected static final Logger LOG = Logger.getLogger( SpaceThread.class.getName());
     public static final int DATA_COUNT = 50;
     private final Instance instance;
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
+    private List<GalaxyEntity> galaxyToView = new ArrayList<>();
 
     public SpaceThread(SI si) {
         super(si);
@@ -39,8 +43,7 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        List<GalaxyEntity> latestGalaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT);
-        if(latestGalaxyToView.isEmpty()) {
+        if( GalaxyDAO.getInstance().fetchAll().isEmpty()) {
             int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
             int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
             GalaxyDAO.getInstance().persistGalaxyMap(galaxyMax, systemMax);
@@ -51,6 +54,7 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStep() {
         if(!notExplored.isEmpty()) {
+            LOG.info(threadName+" still galaxy to look at "+notExplored.size());
             for (int i = 0; i < DATA_COUNT; i++) {
                 GalaxyEntity poll = notExplored.poll();
                 if(poll != null) {
@@ -59,15 +63,23 @@ public class SpaceThread extends AbstractThread {
             }
             return;
         }
-        GalaxyDAO.getInstance().findLatestGalaxyToView(DATA_COUNT).stream()
-                .filter(galaxyEntity -> {
-                    int timeToBack = 47;
-                    // look at space in night
-                    if(LocalDateTime.now().getHour() < 5) {
-                        timeToBack = 20;
-                    }
-                    return !DateUtil.lessThanHours(timeToBack, galaxyEntity.updated);
-                })
-                .forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
+        if (galaxyToView.isEmpty()) {
+            int timeToBack = 47;
+            // look at space in night
+            if(LocalDateTime.now().getHour() < 6) {
+                timeToBack = 24;
+            }
+            galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusHours(timeToBack));
+        }
+        LOG.info("Potential galaxy to view " + galaxyToView.size());
+        List<GalaxyEntity> toView = new ArrayList<>();
+        if(galaxyToView.size() <= DATA_COUNT) {
+            toView.addAll(galaxyToView);
+        } else {
+            toView.addAll(galaxyToView.subList(0,DATA_COUNT));
+        }
+
+        toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
+        toView.forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
     }
 }

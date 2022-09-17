@@ -56,21 +56,20 @@ public class GalaxyDAO extends AbstractDAO<GalaxyEntity> {
         }
     }
 
-    public Optional<GalaxyEntity> findLatestGalaxyToView() {
+    public List<GalaxyEntity> findLatestGalaxyToView() {
         synchronized (JPAUtility.dbSynchro) {
-            return entityManager.createQuery(
+            return  entityManager.createQuery(
                     "from GalaxyEntity order by updated asc", GalaxyEntity.class)
-                    .getResultList().stream().findFirst();
+                    .getResultList();
         }
     }
 
-    public List<GalaxyEntity> findLatestGalaxyToView(int count) {
+    public List<GalaxyEntity> findLatestGalaxyToView(LocalDateTime date) {
         synchronized (JPAUtility.dbSynchro) {
-            List<GalaxyEntity> resultList = entityManager.createQuery(
-                    "from GalaxyEntity order by updated asc", GalaxyEntity.class)
+            return  entityManager.createQuery(
+                    "from GalaxyEntity where updated < :date order by updated asc", GalaxyEntity.class)
+                    .setParameter("date", date)
                     .getResultList();
-            if(resultList.isEmpty())    return new ArrayList<>();
-            return resultList.subList(0, count);
         }
     }
 

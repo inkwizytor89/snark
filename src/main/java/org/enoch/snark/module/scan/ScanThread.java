@@ -13,10 +13,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 public class ScanThread extends AbstractThread {
 
     public static final String threadName = "scan";
+    protected static final Logger LOG = Logger.getLogger( ScanThread.class.getName());
     private final Instance instance;
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
@@ -32,7 +34,7 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 180;
+        return 300;
     }
 
     @Override
@@ -40,6 +42,7 @@ public class ScanThread extends AbstractThread {
         if(notScanned.isEmpty()) {
             notScanned =  new LinkedList<>(TargetDAO.getInstance().findNotScanned());
         }
+        LOG.info(threadName+" still id "+notScanned.size());
         for (int i = 0; i < 10; i++) {
             if(!notScanned.isEmpty()) {
                 FleetEntity fleet = FleetEntity.createSpyFleet(notScanned.poll());

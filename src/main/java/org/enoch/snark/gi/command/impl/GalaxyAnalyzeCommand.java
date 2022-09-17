@@ -7,15 +7,19 @@ import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Utils;
 
+import java.time.LocalDateTime;
+
 public class GalaxyAnalyzeCommand extends GICommand {
 
     private final GalaxyEntity galaxyEntity;
+    private final LocalDateTime lastUpdated;
     private GalaxyDAO galaxyDAO;
     private final GIUrlBuilder giUrlBuilder;
 
     public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
         super(CommandType.INTERFACE_REQUIERED);
         this.galaxyEntity = galaxyEntity;
+        lastUpdated = galaxyEntity.updated;
         galaxyDAO = GalaxyDAO.getInstance();
         giUrlBuilder = new GIUrlBuilder();
     }
@@ -29,6 +33,6 @@ public class GalaxyAnalyzeCommand extends GICommand {
 
     @Override
     public String toString() {
-        return "Look at " + galaxyEntity;
+        return "Look at " + galaxyEntity + " updated at "+lastUpdated;
     }
 }

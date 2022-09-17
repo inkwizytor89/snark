@@ -36,7 +36,7 @@ public class ReadMessageCommand extends AbstractCommand {
 //
 //        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
             new GIUrlBuilder().openMessages();
-            instance.gi.sleep(TimeUnit.SECONDS, 5);
+            instance.gi.sleep(TimeUnit.SECONDS, 1);
 
             List<String> spyReports = loadMessagesLinks();
             storeSpyMessage(spyReports);
