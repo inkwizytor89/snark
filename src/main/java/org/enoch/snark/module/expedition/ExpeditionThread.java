@@ -24,10 +24,10 @@ public class ExpeditionThread extends AbstractThread {
 
     private final Instance instance;
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
-    private int pause = SHORT_PAUSE;
 
     public ExpeditionThread(SI si) {
         super(si);
+        pause = SHORT_PAUSE;
         instance = si.getInstance();
     }
 
@@ -68,7 +68,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void checkColonyStatus(ColonyEntity colony) {
-        instance.commander.push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
+        instance.push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
     }
 
     private boolean noWaitingExpedition() {
@@ -82,7 +82,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        instance.commander.push(new ExpeditionFleetCommand(expedition));
+        instance.push(new ExpeditionFleetCommand(expedition));
     }
 
     private void cleanExpeditions() {

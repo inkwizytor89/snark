@@ -1,5 +1,6 @@
 package org.enoch.snark.module;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.SI;
 
 import java.util.concurrent.TimeUnit;
@@ -10,6 +11,7 @@ public abstract class AbstractThread extends Thread {
     private static final Logger log = Logger.getLogger( AbstractThread.class.getName() );
 
     protected SI si;
+    protected int pause = 0;
 
     public AbstractThread(SI si) {
         this.si = si;
@@ -43,7 +45,7 @@ public abstract class AbstractThread extends Thread {
                     log.info("Thread " + getThreadName() + " stopping on " + si.getInstance().universe.name);
                     wasSleeping = true;
                 }
-                si.getInstance().gi.sleep(TimeUnit.SECONDS, getPauseInSeconds());
+                SleepUtil.secondsToSleep(getPauseInSeconds());
             }while(!si.getInstance().commander.isRunning());
             if(wasSleeping) {
                 log.info("Thread " + getThreadName() + " back to live on " + si.getInstance().universe.name);

@@ -10,6 +10,8 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
+import org.enoch.snark.gi.command.AbstractCommand;
+import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Universe;
@@ -178,5 +180,9 @@ public class Instance {
     public synchronized boolean isStopped() {
         loadServerProperties();
         return universe.mode!= null && universe.mode.contains("stop");
+    }
+
+    public void push(AbstractCommand command) {
+        commander.push(command);
     }
 }

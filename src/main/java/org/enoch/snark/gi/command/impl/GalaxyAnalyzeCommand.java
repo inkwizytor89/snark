@@ -5,7 +5,7 @@ import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.instance.Utils;
+import org.enoch.snark.common.SleepUtil;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +27,7 @@ public class GalaxyAnalyzeCommand extends GICommand {
     @Override
     public boolean execute() {
         giUrlBuilder.openGalaxy(galaxyEntity.toSystemView(), null);
-        Utils.sleep();
+        SleepUtil.sleep();
         return true;
     }
 

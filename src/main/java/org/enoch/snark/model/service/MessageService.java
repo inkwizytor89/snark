@@ -2,7 +2,7 @@ package org.enoch.snark.model.service;
 
 import org.enoch.snark.gi.command.impl.ReadMessageCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.Utils;
+import org.enoch.snark.common.SleepUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ public class MessageService {
                     }
                 }
                 if(!enoughWaiting.isEmpty()) {
-                    Instance.getInstance().commander.push(new ReadMessageCommand());
+                    Instance.getInstance().push(new ReadMessageCommand());
                 }
-                Utils.secondsToSleep(60L);
+                SleepUtil.secondsToSleep(60);
             }
         };
 

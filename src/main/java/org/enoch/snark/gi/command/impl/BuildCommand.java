@@ -1,5 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.command.AbstractCommand;
@@ -41,7 +42,7 @@ public class BuildCommand extends AbstractCommand {
             // resource in database refresh
             new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
 
-            Long seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            Integer seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
             if(seconds == null) {
                 System.err.println("wrong seconds read");
                 this.setSecoundToDelayAfterCommand(seconds);
@@ -52,7 +53,7 @@ public class BuildCommand extends AbstractCommand {
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
 //            WebElement buildingIcon = gi.findElement(SPAN_TAG, CLASS_ATTRIBUTE, requirements.request.building.getName());
             buildingIcon.click();
-            gi.sleep(TimeUnit.SECONDS, 1);
+            SleepUtil.sleep();
             WebElement costs = gi.webDriver.findElement(By.className("costs"));
             Resources resources = new Resources(
                     getCost(costs, "metal"),

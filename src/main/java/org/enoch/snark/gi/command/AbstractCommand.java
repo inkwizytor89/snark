@@ -5,7 +5,7 @@ import org.enoch.snark.instance.Instance;
 
 public abstract class AbstractCommand {
     public AbstractCommand afterCommand;
-    public Long secondsToDelay = 0L;
+    public Integer secondsToDelay = 0;
     protected Instance instance;
     private CommandType type;
     public int failed = 0;
@@ -34,11 +34,11 @@ public abstract class AbstractCommand {
         return afterCommand != null;
     }
 
-    public void retry(Long secondsToDelay) {
+    public void retry(Integer secondsToDelay) {
         new WaitingThread(this, secondsToDelay).start();
     }
 
-    protected void setSecoundToDelayAfterCommand(Long secoundToDelay) {
+    protected void setSecoundToDelayAfterCommand(Integer secoundToDelay) {
         this.secondsToDelay = secoundToDelay;
     }
 

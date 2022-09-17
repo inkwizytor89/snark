@@ -1,6 +1,7 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -73,7 +74,7 @@ protected GIUrlBuilder giUrlBuilder;
         final LocalTime durationTime = DateUtil.parseDuration(duration);
          String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         if(arrivalTimeString.contains("-")) {
-            instance.gi.sleep(TimeUnit.SECONDS, 2);
+            SleepUtil.sleep();
             arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         }
         fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);

@@ -1,7 +1,7 @@
 package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.instance.Utils;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.model.exception.PlanetDoNotExistException;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
@@ -10,7 +10,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import javax.rmi.CORBA.Util;
 import java.util.concurrent.TimeUnit;
 
 public class FleetSelector {
@@ -32,7 +31,7 @@ public class FleetSelector {
     }
 
     public void next() {
-        session.gi.sleep(TimeUnit.SECONDS, 1);
+        SleepUtil.sleep();
         // to button continue to recalculate
         session.getWebDriver().findElement(By.className("planet-header")).click();
 
@@ -48,13 +47,13 @@ public class FleetSelector {
     }
 
     public boolean start() {
-        Utils.sleep();
+        SleepUtil.sleep();
         final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
         if(startInput.getTagName().equals("td")) {
             throw new PlanetDoNotExistException();
         }
         startInput.click();
-        session.gi.sleep(TimeUnit.SECONDS, 1);
+        SleepUtil.sleep();
         final WebElement errorBoxDecisionNo = session.getWebDriver().findElement(By.id("errorBoxDecisionNo"));
         if(errorBoxDecisionNo.isDisplayed()) {
             throw new ToStrongPlayerException();

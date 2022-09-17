@@ -37,7 +37,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 300;
+        return pause;
     }
 
     @Override
@@ -53,22 +53,23 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        int timeToBack = 71;
+        pause = 300;
+        if(LocalDateTime.now().getHour() < 5) {
+            timeToBack = 23;
+            pause = 60;
+        }
         if(!notExplored.isEmpty()) {
             LOG.info(threadName+" still galaxy to look at "+notExplored.size());
             for (int i = 0; i < DATA_COUNT; i++) {
                 GalaxyEntity poll = notExplored.poll();
                 if(poll != null) {
-                    instance.commander.push(new GalaxyAnalyzeCommand(poll));
+                    instance.push(new GalaxyAnalyzeCommand(poll));
                 }
             }
             return;
         }
         if (galaxyToView.isEmpty()) {
-            int timeToBack = 71;
-            // look at space in night
-            if(LocalDateTime.now().getHour() < 6) {
-                timeToBack = 23;
-            }
             galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusHours(timeToBack));
         }
         LOG.info("Potential galaxy to view " + galaxyToView.size());
@@ -80,6 +81,6 @@ public class SpaceThread extends AbstractThread {
         }
 
         toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
-        toView.forEach(galaxy -> instance.commander.push(new GalaxyAnalyzeCommand(galaxy)));
+        toView.forEach(galaxy -> instance.push(new GalaxyAnalyzeCommand(galaxy)));
     }
 }

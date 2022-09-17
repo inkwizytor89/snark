@@ -39,12 +39,12 @@ public class DateUtil {
      * @param input 4h 27m 10s
      * @return second
      */
-    public static Long parseCountDownToSec(String input) {
+    public static Integer parseCountDownToSec(String input) {
         final String[] split = input.split("\\D+");
-        Long result = 0L;
-        Long multiply = 1L;
+        Integer result = 0;
+        Integer multiply = 1;
         for(int i=1;i<=split.length;i++) {
-            result = result + (Long.parseLong(split[split.length-i]) * multiply);
+            result = result + (Integer.parseInt(split[split.length-i]) * multiply);
             multiply = multiply * 60;
         }
         return result;

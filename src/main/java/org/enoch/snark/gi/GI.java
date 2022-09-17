@@ -2,6 +2,7 @@ package org.enoch.snark.gi;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -11,7 +12,6 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.Utils;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
 
@@ -88,7 +87,7 @@ public class GI {
         List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
         int i = 1;
         while(elements.isEmpty() && i <= 10) {
-            sleep(TimeUnit.MILLISECONDS, 200 * i);
+            SleepUtil.pause(i);
             i++;
             elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
         }
@@ -109,7 +108,7 @@ public class GI {
              if(!unacceptable.equals(element.getText())) {
                  break;
              }
-            sleep(TimeUnit.MILLISECONDS, 200 * i);
+            SleepUtil.pause(i);
         }
         if(unacceptable.equals(element.getText())) {
             throw new GIException(GIException.NOT_FOUND, "//"+tag+"[@" + attribute + "='"+value+"']",
@@ -126,7 +125,7 @@ public class GI {
         List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
         int i = 1;
         while(elements.isEmpty() && i <= 10) {
-            sleep(TimeUnit.MILLISECONDS, 200 * i);
+            SleepUtil.pause(i);
             i++;
             elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
         }
@@ -151,9 +150,9 @@ public class GI {
                 if(eventHeader.get(0).isDisplayed())
                     webDriver.findElement(By.className("event_list")).click();
             }
-            Utils.sleep();
+            SleepUtil.sleep();
             webDriver.findElement(By.className("event_list")).click();
-            Utils.sleep();
+            SleepUtil.sleep();
             List<WebElement> tableRows = new WebDriverWait(webDriver, 5)
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
 
@@ -186,14 +185,6 @@ public class GI {
             e.printStackTrace();
         }
         return eventFleets;
-    }
-
-    public void sleep(TimeUnit timeUnit, int i) {
-        try {
-            timeUnit.sleep(i);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public void updateColony(ColonyEntity colony) {
@@ -386,7 +377,7 @@ public class GI {
         return true;
     }
 
-    public Long updateQueue(ColonyEntity colony, String queueType) {
+    public Integer updateQueue(ColonyEntity colony, String queueType) {
         List<WebElement> elements = webDriver.findElements(By.id(queueType));
         if(elements.isEmpty()) {
             return null;
@@ -397,7 +388,7 @@ public class GI {
             queueManger.clean(colony, queueType);
         } else {
             String timeString = queueElement.findElement(By.className("timer")).getText();
-            Long second = DateUtil.parseCountDownToSec(timeString);
+            Integer second = DateUtil.parseCountDownToSec(timeString);
             queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
             return second;
         }

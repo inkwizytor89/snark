@@ -4,7 +4,7 @@ import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.Utils;
+import org.enoch.snark.common.SleepUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
@@ -73,12 +73,12 @@ public class GISession {
 //        gi.findText("Login").click();
         gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(instance.universe.login);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
-        Utils.secondsToSleep(2L);
+        SleepUtil.secondsToSleep(2);
 
 
         gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(instance.universe.pass);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
-        Utils.secondsToSleep(2L);
+        SleepUtil.secondsToSleep(2);
 
         //chooseServer
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);

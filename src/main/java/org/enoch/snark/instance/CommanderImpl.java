@@ -1,6 +1,7 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.DateUtil;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.CommandType;
@@ -27,7 +28,7 @@ public class CommanderImpl implements Commander {
 
     private static final Logger log = Logger.getLogger(CommanderImpl.class.getName() );
 
-    private static final long SLEEP_PAUSE = 1;
+    private static final int SLEEP_PAUSE = 1;
     public static final int TIME_TO_UPDATE = 5;
 
     private Instance instance;
@@ -84,7 +85,7 @@ public class CommanderImpl implements Commander {
                         update();
                     }
 
-                    Utils.secondsToSleep(SLEEP_PAUSE);
+                    SleepUtil.secondsToSleep(SLEEP_PAUSE);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -120,7 +121,7 @@ public class CommanderImpl implements Commander {
     private void stopCommander() {
         System.err.println("Commander is stopped");
         this.isRunning = false;
-        Utils.secondsToSleep(SLEEP_PAUSE * 30);
+        SleepUtil.secondsToSleep(SLEEP_PAUSE * 30);
     }
 
     private void restartIfSessionIsOver() {
@@ -196,7 +197,7 @@ public class CommanderImpl implements Commander {
         } else {
             command.failed++;
             if (command.failed < 3) {
-                command.retry(2L);
+                command.retry(2);
             } else {
                 command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");

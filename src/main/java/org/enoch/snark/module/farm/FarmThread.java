@@ -1,5 +1,6 @@
 package org.enoch.snark.module.farm;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FarmDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -63,7 +64,7 @@ public class FarmThread extends AbstractThread {
     @Override
     public void onStep() {
         if(targetDAO.findFarms(100).size()<80) {
-            si.getInstance().gi.sleep(TimeUnit.SECONDS, 60);
+            SleepUtil.secondsToSleep(60);
             return;
         }
 

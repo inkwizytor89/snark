@@ -1,6 +1,7 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.MessageDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
@@ -36,7 +37,7 @@ public class ReadMessageCommand extends AbstractCommand {
 //
 //        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
             new GIUrlBuilder().openMessages();
-            instance.gi.sleep(TimeUnit.SECONDS, 1);
+            SleepUtil.sleep();
 
             List<String> spyReports = loadMessagesLinks();
             storeSpyMessage(spyReports);
