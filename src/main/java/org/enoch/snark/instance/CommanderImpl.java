@@ -74,7 +74,8 @@ public class CommanderImpl implements Commander {
                     if (!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
                         resolve(fleetActionQueue.poll());
                         fleetCount++;
-                        update();
+                        System.err.println("update");
+//                        update();
                         continue;
                     } else if (!interfaceActionQueue.isEmpty()) {
                         resolve(interfaceActionQueue.poll());

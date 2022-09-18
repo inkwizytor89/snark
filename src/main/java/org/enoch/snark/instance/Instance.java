@@ -161,6 +161,7 @@ public class Instance {
                     .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))
                     .forEach(fleetEntity -> FleetDAO.getInstance().remove(fleetEntity));
             TargetDAO.getInstance().remove(targetEntity.get());
+            LOG.info("Removed "+target);
             //TODO: remove messegas and others
         }
     }

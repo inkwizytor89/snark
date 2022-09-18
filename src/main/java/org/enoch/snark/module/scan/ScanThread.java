@@ -34,19 +34,23 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 300;
+        return pause;
     }
 
     @Override
     protected void onStep() {
+        pause = 120;
         if(notScanned.isEmpty()) {
             notScanned =  new LinkedList<>(TargetDAO.getInstance().findNotScanned());
+        }
+        if(notScanned.isEmpty()) {
+            pause = 1200;
         }
         LOG.info(threadName+" still id "+notScanned.size());
         for (int i = 0; i < 10; i++) {
             if(!notScanned.isEmpty()) {
                 FleetEntity fleet = FleetEntity.createSpyFleet(notScanned.poll());
-                Instance.getInstance().commander.push(new SendFleetCommand(fleet));
+                Instance.getInstance().push(new SendFleetCommand(fleet));
 //            FleetDAO.getInstance().saveOrUpdate(fleet);
             }
         }

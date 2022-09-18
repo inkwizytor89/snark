@@ -13,19 +13,18 @@ import org.enoch.snark.gi.macro.FleetSelector;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
-import org.enoch.snark.model.exception.PlanetDoNotExistException;
+import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.command.CommandType.FLEET_REQUIERED;
 
@@ -59,7 +58,6 @@ protected GIUrlBuilder giUrlBuilder;
         // uzupełnić odpowiednimi danymi
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
         giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
-
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
@@ -68,6 +66,14 @@ protected GIUrlBuilder giUrlBuilder;
         }
 
         fleetSelector.next();
+//        SleepUtil.pause();
+//        WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
+//        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
+//        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
+//        coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
+//        SleepUtil.pause();
+//        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
+        SleepUtil.pause();
 
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
@@ -101,11 +107,13 @@ protected GIUrlBuilder giUrlBuilder;
 
         try {
             fleetSelector.start();
-        } catch(PlanetDoNotExistException e) {
+        } catch(FleetCantStart e) {
             e.printStackTrace();
-            instance.removePlanet(new Planet(fleet.getCoordinate()));
+            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            System.err.println("Can not send fleer to target " + target);
+            instance.push(new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)));
+//            instance.removePlanet(new Planet(fleet.getCoordinate()));
             setAfterCommand(null);
-            // TODO: thred don't get information about one fleet slot free
             return true;
         }
         catch(ToStrongPlayerException e) {
@@ -113,6 +121,7 @@ protected GIUrlBuilder giUrlBuilder;
             setAfterCommand(null);
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
+        new GIUrlBuilder().loadFleetStatus();
         return true;
     }
 

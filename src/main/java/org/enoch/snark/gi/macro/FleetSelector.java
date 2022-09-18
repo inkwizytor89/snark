@@ -2,15 +2,13 @@ package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.model.exception.PlanetDoNotExistException;
+import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import java.util.concurrent.TimeUnit;
 
 public class FleetSelector {
 
@@ -31,7 +29,7 @@ public class FleetSelector {
     }
 
     public void next() {
-        SleepUtil.sleep();
+        SleepUtil.pause();
         // to button continue to recalculate
         session.getWebDriver().findElement(By.className("planet-header")).click();
 
@@ -47,13 +45,14 @@ public class FleetSelector {
     }
 
     public boolean start() {
-        SleepUtil.sleep();
+//        SleepUtil.sleep();
+        SleepUtil.secondsToSleep(1);
         final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
-        if(startInput.getTagName().equals("td")) {
-            throw new PlanetDoNotExistException();
+        if(startInput.getAttribute("class").contains("off")) {
+            throw new FleetCantStart();
         }
         startInput.click();
-        SleepUtil.sleep();
+//        SleepUtil.pause();
         final WebElement errorBoxDecisionNo = session.getWebDriver().findElement(By.id("errorBoxDecisionNo"));
         if(errorBoxDecisionNo.isDisplayed()) {
             throw new ToStrongPlayerException();

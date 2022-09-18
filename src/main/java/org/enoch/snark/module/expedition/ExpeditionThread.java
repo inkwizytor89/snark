@@ -56,11 +56,11 @@ public class ExpeditionThread extends AbstractThread {
             FleetEntity expedition = FleetEntity.createExpeditionFleet(instance, colony);
             if(colony.canSent(expedition)) {
                 setExpeditionReadyToStart(expedition);
-                pause = SHORT_PAUSE;
             } else {
                 checkColonyStatus(colony);
-                pause = 1;
+//                pause = 1;
             }
+            pause = SHORT_PAUSE;
             expeditionQueue.add(colony);
         } else {
             pause = LONG_PAUSE;

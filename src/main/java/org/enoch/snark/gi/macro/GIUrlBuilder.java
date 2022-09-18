@@ -62,7 +62,7 @@ public class GIUrlBuilder {
 //        loadFleetStatus();
 //    }
 
-    private void loadFleetStatus() {
+    public void loadFleetStatus() {
         Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
         final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
         Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
@@ -80,6 +80,7 @@ public class GIUrlBuilder {
 
 //    @Transactional
     public void open(String page, ColonyEntity colony) {
+        System.err.println("open " +page+ " with "+colony);
         if(colony == null) {
             colony = ColonyDAO.getInstance().getOldestUpdated();
         }

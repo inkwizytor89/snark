@@ -402,8 +402,16 @@ public class GI {
             if(row.findElements(By.className("cellPosition")).isEmpty()) {
                 continue;
             }
+
             //skip lear rows
+            final int position = Integer.parseInt(row.findElement(By.className("cellPosition")).getText());
+            Optional<TargetEntity> targetFromDb = targets.stream()
+                    .filter(t -> t.position.equals(position))
+                    .findAny();
             WebElement cellPlayerName = row.findElement(By.className("cellPlayerName"));
+            if(targetFromDb.isPresent() && cellPlayerName.getText().trim().isEmpty()) {
+                instance.removePlanet(targetFromDb.get().toPlanet());
+            }
             if(cellPlayerName.getText().trim().isEmpty()) {
                 continue;
             }
@@ -420,12 +428,8 @@ public class GI {
             if(!isStatus.isEmpty()) {
                 status = isStatus.get(0).getText();
             }
-            final int position = Integer.parseInt(row.findElement(By.className("cellPosition")).getText());
             final String alliance = row.findElement(By.className("cellAlliance")).getText();
 
-            Optional<TargetEntity> targetFromDb = targets.stream()
-                    .filter(t -> t.position.equals(position))
-                    .findAny();
 
 
             if(StringUtils.isEmpty(playerName) && targetFromDb.isPresent()) {

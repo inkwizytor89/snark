@@ -54,6 +54,7 @@ public class ReadMessageCommand extends AbstractCommand {
             final String href = element.getAttribute("href");
             if(href != null && href.contains("messageId") && href.contains("ajax=1")) {
                 spyReports.add(href);
+                System.err.println("link to messege "+href);
             }
         }
         return spyReports;
@@ -72,8 +73,10 @@ public class ReadMessageCommand extends AbstractCommand {
         boolean alreadyExists = MessageDAO.getInstance().fetchAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) {
+            System.err.println("Skipping alredy existing message id "+messageId);
             return;
         }
+        System.err.println("parsing message id "+messageId);
         instance.session.getWebDriver().get(link);
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;

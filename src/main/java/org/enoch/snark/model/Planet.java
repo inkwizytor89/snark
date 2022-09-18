@@ -16,6 +16,12 @@ public class Planet {
         loadPlanetCoordinate(input);
     }
 
+    public Planet(Integer galaxy, Integer system, Integer position) {
+        this.galaxy = galaxy;
+        this.system = system;
+        this.position = position;
+    }
+
     public Integer calculateDistance(Planet planet) {
         if(!galaxy.equals(planet.galaxy)) {
             int galaxyMax = Integer.parseInt(Instance.getInstance().universe.getConfig((Universe.GALAXY_MAX)));
