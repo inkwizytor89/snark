@@ -251,19 +251,22 @@ public class GI {
             return;
         }
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        colony.lifeformTech14101 = getLevel(technologies,"lifeformTech14101");
-        colony.lifeformTech14102 = getLevel(technologies,"lifeformTech14102");
-        colony.lifeformTech14103 = getLevel(technologies,"lifeformTech14103");
-        colony.lifeformTech14104 = getLevel(technologies,"lifeformTech14104");
-        colony.lifeformTech14105 = getLevel(technologies,"lifeformTech14105");
-        colony.lifeformTech14106 = getLevel(technologies,"lifeformTech14106");
-        colony.lifeformTech14107 = getLevel(technologies,"lifeformTech14107");
-        colony.lifeformTech14108 = getLevel(technologies,"lifeformTech14108");
-        colony.lifeformTech14109 = getLevel(technologies,"lifeformTech14109");
-        colony.lifeformTech14110 = getLevel(technologies,"lifeformTech14110");
-        colony.lifeformTech14111 = getLevel(technologies,"lifeformTech14111");
-        colony.lifeformTech14112 = getLevel(technologies,"lifeformTech14112");
-        colony.save();
+        List<WebElement> kaelsLifeFormChoosen = webDriver.findElements(By.id("lifeformTech14101"));
+        if(!kaelsLifeFormChoosen.isEmpty()) {
+            colony.lifeformTech14101 = getLevel(technologies, "lifeformTech14101");
+            colony.lifeformTech14102 = getLevel(technologies, "lifeformTech14102");
+            colony.lifeformTech14103 = getLevel(technologies, "lifeformTech14103");
+            colony.lifeformTech14104 = getLevel(technologies, "lifeformTech14104");
+            colony.lifeformTech14105 = getLevel(technologies, "lifeformTech14105");
+            colony.lifeformTech14106 = getLevel(technologies, "lifeformTech14106");
+            colony.lifeformTech14107 = getLevel(technologies, "lifeformTech14107");
+            colony.lifeformTech14108 = getLevel(technologies, "lifeformTech14108");
+            colony.lifeformTech14109 = getLevel(technologies, "lifeformTech14109");
+            colony.lifeformTech14110 = getLevel(technologies, "lifeformTech14110");
+            colony.lifeformTech14111 = getLevel(technologies, "lifeformTech14111");
+            colony.lifeformTech14112 = getLevel(technologies, "lifeformTech14112");
+            colony.save();
+        }
     }
 
     public boolean isLifeformAvailable() {

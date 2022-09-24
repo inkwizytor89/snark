@@ -3,6 +3,7 @@ package org.enoch.snark.gi.command.request;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 
@@ -35,10 +36,13 @@ public class SendFleetRequest {
 
     public Long sendAndWait() {
         code = fleetDAO.genereteNewCode();
+        System.err.println("SendFleetRequest generete code "+code);
         // send x fleet
 
         do{
-            sendLimitFleet(limit - sendetFleet);
+            int fleetCountToSend = this.limit - sendetFleet;
+            System.err.println("fleetCountToSend " + fleetCountToSend);
+            sendLimitFleet(fleetCountToSend);
             while(!isFinished()) {
                 try {
                     TimeUnit.SECONDS.sleep(10);
@@ -68,7 +72,8 @@ public class SendFleetRequest {
         for (TargetEntity target : toSend) {
             FleetEntity fleet = generateFleet(target);
             fleet.code = code;
-            fleetDAO.saveOrUpdate(fleet);
+//            fleetDAO.saveOrUpdate(fleet);
+            Instance.getInstance().push(new SendFleetCommand(fleet));
             targets.remove(target);
         }
     }

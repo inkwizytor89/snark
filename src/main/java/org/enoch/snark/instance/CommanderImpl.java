@@ -74,8 +74,6 @@ public class CommanderImpl implements Commander {
                     if (!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
                         resolve(fleetActionQueue.poll());
                         fleetCount++;
-                        System.err.println("update");
-//                        update();
                         continue;
                     } else if (!interfaceActionQueue.isEmpty()) {
                         resolve(interfaceActionQueue.poll());
@@ -168,7 +166,7 @@ public class CommanderImpl implements Commander {
         }
     }
 
-    private void resolve(AbstractCommand command) {
+    private synchronized void resolve(AbstractCommand command) {
         boolean success;
         if(command.requiredGI() && !session.isLoggedIn()) {
             session.open();
@@ -209,12 +207,12 @@ public class CommanderImpl implements Commander {
     private boolean isFleetFreeSlot() {
         if(!session.isLoggedIn()) return false;
         if(getFleetFreeSlots() > 0)   return true;
-        new GIUrlBuilder().open(GIUrlBuilder.PAGE_BASE_FLEET, null);
-        if(getFleetFreeSlots() > 0)   return true;
+//        new GIUrlBuilder().open(GIUrlBuilder.PAGE_BASE_FLEET, null);
         return false;
     }
 
     public void setFleetStatus(int fleetCount, int fleetMax) {
+        System.err.println("Fleet status "+fleetCount+"/"+fleetMax);
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
         lastUpdate = LocalDateTime.now();

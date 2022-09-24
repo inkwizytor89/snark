@@ -157,8 +157,7 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createExpeditionFleet(@Nonnull Instance instance,
-                                              @Nonnull ColonyEntity target) {
+    public static FleetEntity createExpeditionFleet(@Nonnull ColonyEntity target) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
@@ -167,7 +166,12 @@ public class FleetEntity extends IdEntity {
     //instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;
-        fleet.dt = instance.calcutateMinExpeditionSize();
+        Long expeditionShipsCount = Instance.getInstance().calcutateMinExpeditionSize();
+        if(expeditionShipsCount > 0) {
+            fleet.dt = expeditionShipsCount;
+        } else {
+            fleet.lt = -expeditionShipsCount;
+        }
         return fleet;
     }
 

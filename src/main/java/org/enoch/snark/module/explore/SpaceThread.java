@@ -53,7 +53,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        int timeToBack = 71;
+        int timeToBack = 95;
         pause = 300;
         if(LocalDateTime.now().getHour() < 5) {
             timeToBack = 23;
@@ -71,6 +71,9 @@ public class SpaceThread extends AbstractThread {
         }
         if (galaxyToView.isEmpty()) {
             galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusHours(timeToBack));
+        }
+        if (galaxyToView.isEmpty()) {
+            return;
         }
         LOG.info("Potential galaxy to view " + galaxyToView.size());
         List<GalaxyEntity> toView = new ArrayList<>();

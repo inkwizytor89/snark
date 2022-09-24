@@ -53,7 +53,7 @@ public class ExpeditionThread extends AbstractThread {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = expeditionQueue.poll();
 
-            FleetEntity expedition = FleetEntity.createExpeditionFleet(instance, colony);
+            FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
             if(colony.canSent(expedition)) {
                 setExpeditionReadyToStart(expedition);
             } else {

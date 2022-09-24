@@ -122,6 +122,7 @@ protected GIUrlBuilder giUrlBuilder;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
         new GIUrlBuilder().loadFleetStatus();
+        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet
         return true;
     }
 
