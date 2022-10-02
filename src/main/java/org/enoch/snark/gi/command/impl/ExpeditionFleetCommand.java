@@ -8,8 +8,7 @@ import org.enoch.snark.model.exception.ShipDoNotExists;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.enoch.snark.gi.macro.ShipEnum.explorer;
-import static org.enoch.snark.gi.macro.ShipEnum.transporterLarge;
+import static org.enoch.snark.gi.macro.ShipEnum.*;
 
 public class ExpeditionFleetCommand extends SendFleetCommand {
 
@@ -22,18 +21,32 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
         ColonyEntity colony = fleet.source;
         Map<ShipEnum, Long> shipsMap = new HashMap<>();
         Long minSize = instance.calcutateMinExpeditionSize();
-        Long dt = colony.transporterLarge;
-        long possibleCount = dt / minSize;
+        if (minSize > 0) {
+            Long dt = colony.transporterLarge;
+            long possibleCount = dt / minSize;
 
-        if(possibleCount == 0) {
-            throw new ShipDoNotExists();
+            if (possibleCount == 0) {
+                throw new ShipDoNotExists();
+            }
+            long toSend = dt / possibleCount;
+
+            shipsMap.put(transporterLarge, toSend);
+            fleet.dt = toSend;
+            shipsMap.put(explorer, 1L);
+            fleet.pf = 1L;
+        } else {
+            minSize = -minSize;
+            Long lt = colony.transporterSmall;
+            long possibleCount = lt / minSize;
+
+            if (possibleCount == 0) {
+                throw new ShipDoNotExists();
+            }
+            long toSend = lt / possibleCount;
+
+            shipsMap.put(transporterSmall, toSend);
+            fleet.dt = toSend;
         }
-        long toSend = dt / possibleCount;
-
-        shipsMap.put(transporterLarge, toSend);
-        fleet.dt = toSend;
-        shipsMap.put(explorer, 1L);
-        fleet.pf = 1L;
         return shipsMap;
     }
 

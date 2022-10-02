@@ -99,7 +99,7 @@ public class CommanderImpl implements Commander {
             instance.gi.readEventFleet().stream()
                     .filter(eventFleet -> eventFleet.isForeign)
                     // ss scans
-                    .filter(eventFleet -> LocalTime.now().plusSeconds(120).isBefore(DateUtil.parseTime(eventFleet.arrivalTime)))
+                    .filter(eventFleet -> LocalTime.now().plusSeconds(300).isBefore(DateUtil.parseTime(eventFleet.arrivalTime)))
                     .collect(Collectors.toList())
                     .forEach(
                     eventFleet -> {
@@ -127,6 +127,8 @@ public class CommanderImpl implements Commander {
         try {
             if (instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
                 stopCommander();
+                System.err.println("sleep 300 before restart");
+                SleepUtil.secondsToSleep(300);
                 instance.browserReset();
                 aggressorsAttacks = new ArrayList<>();
                 startCommander();
@@ -134,6 +136,8 @@ public class CommanderImpl implements Commander {
         } catch (WebDriverException e) {
             e.printStackTrace();
             stopCommander();
+            System.err.println("sleep 500 before restart");
+            SleepUtil.secondsToSleep(500);
             instance.browserReset();
             aggressorsAttacks = new ArrayList<>();
             startCommander();

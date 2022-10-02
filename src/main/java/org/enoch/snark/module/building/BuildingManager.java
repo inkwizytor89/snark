@@ -85,27 +85,27 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.crystalMine, 12),
                 new BuildingRequest(BuildingEnum.solarPlant, 15),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 12),
-                new BuildingRequest(BuildingEnum.crystalMine, 13),
-
-                // na odwal sie
-                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
-//                new BuildingRequest(BuildingEnum.researchLaboratory, 4),
-                new BuildingRequest(BuildingEnum.shipyard, 4),
-                new BuildingRequest(BuildingEnum.metalMine, 1)));
-
-
-        List<BuildingRequest> maxList = new ArrayList<>();
-        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 10));
-        for (int i = 1; i < 30; i++) {
-            maxList.add(new BuildingRequest(BuildingEnum.solarPlant, i+1));
-            maxList.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i));
-            maxList.add(new BuildingRequest(BuildingEnum.crystalMine, i));
-            maxList.add(new BuildingRequest(BuildingEnum.metalMine, i+3));
-        }
-        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 1));
-        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 12));
-        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 3));
-        levelUpMap.put(3L, maxList);
+                new BuildingRequest(BuildingEnum.crystalMine, 13)));//,
+// po co wiecej ??
+//                // na odwal sie
+//                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
+////                new BuildingRequest(BuildingEnum.researchLaboratory, 4),
+//                new BuildingRequest(BuildingEnum.shipyard, 4),
+//                new BuildingRequest(BuildingEnum.metalMine, 1)));
+//
+//
+//        List<BuildingRequest> maxList = new ArrayList<>();
+////        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 10));
+//        for (int i = 1; i < 30; i++) {
+//            maxList.add(new BuildingRequest(BuildingEnum.solarPlant, i+1));
+//            maxList.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i));
+//            maxList.add(new BuildingRequest(BuildingEnum.crystalMine, i));
+////            maxList.add(new BuildingRequest(BuildingEnum.metalMine, i+3));
+//        }
+//        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 1));
+//        maxList.add(new BuildingRequest(BuildingEnum.roboticsFactory, 12));
+//        maxList.add(new BuildingRequest(BuildingEnum.naniteFactory, 3));
+//        levelUpMap.put(3L, maxList);
     }
 
     public void temporare() {//kolonie nie mogą mieć wiekszy poziom niż gracza
@@ -127,19 +127,20 @@ public class BuildingManager {
         playerEntity.espionageTechnology=4L;
         playerEntity.impulseDriveTechnology=3L;
         playerEntity.astrophysicsTechnology=1L;
+        playerEntity.computerTechnology=2L;
         //expedition start
 
         new BuildingRequest(BuildingEnum.shipyard, 4);
         // kolonizator
 
-        playerEntity.computerTechnology=2L;
+        playerEntity.computerTechnology=3L;
         playerEntity.astrophysicsTechnology=3L;
 
         playerEntity.combustionDriveTechnology=6L;
         //dt
 
-        playerEntity.computerTechnology=3L;
-        playerEntity.astrophysicsTechnology=5L;
+        playerEntity.computerTechnology=4L;
+        playerEntity.astrophysicsTechnology=3L;
 
         //
 
