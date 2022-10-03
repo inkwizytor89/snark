@@ -10,6 +10,8 @@ public interface Commander {
 
     List<AbstractCommand> peekFleetQueue();
 
+    AbstractCommand getActualProcessedCommand();
+
     boolean isRunning();
 
     void setFleetStatus(int fleetCount, int fleetMax);

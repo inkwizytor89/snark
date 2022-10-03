@@ -43,6 +43,7 @@ public class CommanderImpl implements Commander {
 
     private Queue<AbstractCommand> fleetActionQueue = new LinkedList<>();
     private Queue<AbstractCommand> interfaceActionQueue = new LinkedList<>();
+    private AbstractCommand actualProcessedCommand = null;
 
     private List<String> aggressorsAttacks = new ArrayList<>();
 
@@ -72,11 +73,15 @@ public class CommanderImpl implements Commander {
                     activateDefenseIfNeeded();
 
                     if (!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
-                        resolve(fleetActionQueue.poll());
+                        actualProcessedCommand = fleetActionQueue.poll();
+                        resolve(actualProcessedCommand);
+                        actualProcessedCommand = null;
                         fleetCount++;
                         continue;
                     } else if (!interfaceActionQueue.isEmpty()) {
-                        resolve(interfaceActionQueue.poll());
+                        actualProcessedCommand = interfaceActionQueue.poll();
+                        resolve(actualProcessedCommand);
+                        actualProcessedCommand = null;
                         continue;
                     }
 
@@ -243,6 +248,10 @@ public class CommanderImpl implements Commander {
 
     public synchronized List<AbstractCommand> peekFleetQueue() {
         return (LinkedList<AbstractCommand>)((LinkedList<AbstractCommand>) fleetActionQueue).clone();
+    }
+
+    public synchronized AbstractCommand getActualProcessedCommand() {
+        return actualProcessedCommand;
     }
 
     public int getFleetFreeSlots() {

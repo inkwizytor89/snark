@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
@@ -19,8 +20,8 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadName = "expedition";
-    public static final int SHORT_PAUSE = 20;
-    public static final int LONG_PAUSE = 40;
+    public static final int SHORT_PAUSE = 1;
+    public static final int LONG_PAUSE = 1;
 
     private final Instance instance;
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
@@ -72,6 +73,12 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
+        AbstractCommand processedCommand = instance.commander.getActualProcessedCommand();
+        if(processedCommand != null && processedCommand instanceof SendFleetCommand) {
+            if (FleetEntity.EXPEDITION.equals(((SendFleetCommand) processedCommand).fleet.type)) {
+                return false;
+            }
+        }
         return instance.commander.peekFleetQueue().stream()
                 .filter(abstractCommand -> abstractCommand instanceof SendFleetCommand)
                 .noneMatch(command -> FleetEntity.EXPEDITION.equals(((SendFleetCommand) command).fleet.type));

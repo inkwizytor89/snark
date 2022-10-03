@@ -17,6 +17,11 @@ public class DumbCommanderImpl implements Commander {
     }
 
     @Override
+    public AbstractCommand getActualProcessedCommand() {
+        return null;
+    }
+
+    @Override
     public boolean isRunning() {
         return true;
     }
