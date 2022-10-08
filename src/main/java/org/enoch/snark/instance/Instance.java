@@ -170,12 +170,20 @@ public class Instance {
         return ColonyDAO.getInstance().fetchAll().get(0);
     }
 
-    public Long calcutateMinExpeditionSize() {
+    public Long calculateMinExpeditionSize() {
         String minDt = this.universe.getConfig((Universe.MIN_DT));
         if(minDt == null || minDt.isEmpty()) {
             return 1700L;
         }
         return Long.parseLong(minDt);
+    }
+
+    public Long calculateMaxExpeditionSize() {
+        String maxDt = this.universe.getConfig((Universe.MAX_DT));
+        if(maxDt == null || maxDt.isEmpty()) {
+            return 2500L;
+        }
+        return Long.parseLong(maxDt);
     }
 
     public synchronized boolean isStopped() {

@@ -8,7 +8,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "colonies", schema = "public", catalog = "snark")
@@ -42,9 +41,9 @@ public class ColonyEntity extends PlanetEntity {
         return result;
     }
 
-    public boolean canSent(FleetEntity fleet) {
-        return fleet.source.transporterLarge > Instance.getInstance().calcutateMinExpeditionSize();
-    }
+//    public boolean canSent(FleetEntity fleet) {
+//        return fleet.source.transporterLarge > Instance.getInstance().calculateMinExpeditionSize();
+//    }
 
     public ColonyEntity refresh() {
         JPAUtility.getEntityManager().refresh(this);

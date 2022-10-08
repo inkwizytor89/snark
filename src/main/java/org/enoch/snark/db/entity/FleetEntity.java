@@ -1,6 +1,5 @@
 package org.enoch.snark.db.entity;
 
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
@@ -166,7 +165,7 @@ public class FleetEntity extends IdEntity {
     //instance.findNearestSource(target);
         fleet.type = EXPEDITION;
         fleet.pf = 1L;
-        Long expeditionShipsCount = Instance.getInstance().calcutateMinExpeditionSize();
+        Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
         if(expeditionShipsCount > 0) {
             fleet.dt = expeditionShipsCount;
         } else {

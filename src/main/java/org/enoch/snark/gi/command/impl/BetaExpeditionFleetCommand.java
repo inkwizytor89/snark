@@ -3,22 +3,17 @@ package org.enoch.snark.gi.command.impl;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 import static org.enoch.snark.gi.macro.ShipEnum.*;
 
-public class ExpeditionFleetCommand extends SendFleetCommand {
+public class BetaExpeditionFleetCommand extends SendFleetCommand {
 
-    private ColonyEntity colony;
-
-    public ExpeditionFleetCommand(ColonyEntity colony) {
-        super(FleetEntity.createExpeditionFleet(colony));
-        this.colony = colony;
+    public BetaExpeditionFleetCommand(FleetEntity fleet) {
+        super(fleet);
     }
 
     @Override
@@ -35,7 +30,7 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
             }
             long toSend = dt / possibleCount;
 
-            shipsMap.put(transporterLarge, Math.min(Instance.getInstance().calculateMaxExpeditionSize(), toSend));
+            shipsMap.put(transporterLarge, toSend);
             fleet.dt = toSend;
             shipsMap.put(explorer, 1L);
             fleet.pf = 1L;
@@ -49,27 +44,10 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
             }
             long toSend = lt / possibleCount;
 
-            shipsMap.put(transporterSmall, Math.min(-Instance.getInstance().calculateMaxExpeditionSize(), toSend));
+            shipsMap.put(transporterSmall, toSend);
             fleet.dt = toSend;
         }
         return shipsMap;
     }
 
-    @Override
-    public boolean execute() {
-        giUrlBuilder.open(PAGE_BASE_FLEET, colony);
-        if(!canSendExpedition()) {
-            return true;
-        }
-        fleet = FleetEntity.createExpeditionFleet(colony);
-        return super.execute();
-    }
-
-    private boolean canSendExpedition() {
-        Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
-        return colony.explorer > 0 && (
-                (expeditionShipsCount > 0 && colony.transporterLarge >= expeditionShipsCount) ||
-                (expeditionShipsCount <= 0 && colony.transporterSmall >= -expeditionShipsCount )
-                );
-    }
 }

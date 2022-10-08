@@ -17,6 +17,7 @@ public class Universe {
     public static final String SYSTEM_MAX = "system_max";
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String MIN_DT = "min_dt";
+    public static final String MAX_DT = "max_dt";
     public String name;
     public String url;
 

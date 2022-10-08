@@ -322,7 +322,12 @@ public class GI {
     }
 
     private Long getLevel(WebElement element, String name) {
-        return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("level")).getText());
+        try {
+            return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("level")).getText());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0L;
+        }
     }
 
     private Long getAmount(WebElement element, String name) {

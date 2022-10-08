@@ -1,10 +1,12 @@
 package org.enoch.snark.module.expedition;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.AbstractCommand;
+import org.enoch.snark.gi.command.impl.BetaExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
@@ -22,6 +24,7 @@ public class ExpeditionThread extends AbstractThread {
     public static final String threadName = "expedition";
     public static final int SHORT_PAUSE = 1;
     public static final int LONG_PAUSE = 1;
+    private int failCount = 0;
 
     private final Instance instance;
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
@@ -53,18 +56,24 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = expeditionQueue.poll();
-
-            FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
-            if(colony.canSent(expedition)) {
-                setExpeditionReadyToStart(expedition);
-            } else {
-                checkColonyStatus(colony);
-//                pause = 1;
-            }
+            failCount++;
+            setExpeditionReadyToStart(colony);
+//            FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
+//            if(colony.canSent(expedition)) {
+//                setExpeditionReadyToStart(expedition);
+//                failCount = 0;
+//            } else {
+//                checkColonyStatus(colony);
+////                pause = 1;
+//            }
             pause = SHORT_PAUSE;
             expeditionQueue.add(colony);
         } else {
             pause = LONG_PAUSE;
+        }
+        if(failCount > 20) {
+            SleepUtil.secondsToSleep(600);
+            failCount = 0;
         }
     }
 
@@ -89,7 +98,11 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        instance.push(new ExpeditionFleetCommand(expedition));
+        instance.push(new BetaExpeditionFleetCommand(expedition));
+    }
+
+    private void setExpeditionReadyToStart(ColonyEntity colony) {
+        instance.push(new ExpeditionFleetCommand(colony));
     }
 
     private void cleanExpeditions() {
