@@ -11,7 +11,6 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Universe;
@@ -32,7 +31,6 @@ public class Instance {
 
     private static Instance INSTANCE;
     private static String serverConfigPath = "server.properties";
-    private static Boolean isQueueEnabled = true;
     public static Universe universe;
     public static Commander commander;
     public static GI gi;
@@ -123,11 +121,7 @@ public class Instance {
         browserReset();
         loadGameState();
         LOG.info("loading game state successful");
-        if(isQueueEnabled) {
-            commander = new CommanderImpl();
-        } else {
-            commander = new DumbCommanderImpl();
-        }
+        commander = new Commander();
         LOG.info("Commander start successful");
         new BaseSI(this).run();
         LOG.info("SI start successful");

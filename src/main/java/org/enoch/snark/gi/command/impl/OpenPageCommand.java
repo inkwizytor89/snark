@@ -24,6 +24,8 @@ public class OpenPageCommand extends AbstractCommand {
     private ColonyEntity colony;
     private GI gi;
 
+    private boolean checkEventFleet = false;
+
     public OpenPageCommand(String page, ColonyEntity colony) {
         super(Instance.getInstance(), CommandType.INTERFACE_REQUIERED);
         this.page = page;
@@ -31,9 +33,16 @@ public class OpenPageCommand extends AbstractCommand {
         this.gi = GI.getInstance();
     }
 
+    public OpenPageCommand setCheckEventFleet(boolean checkEventFleet) {
+        this.checkEventFleet = checkEventFleet;
+        return this;
+    }
+
     @Override
     public boolean execute() {
-        new GIUrlBuilder().open(page, colony);
+        new GIUrlBuilder()
+                .setCheckEventFleet(checkEventFleet)
+                .open(page, colony);
         return true;
     }
 

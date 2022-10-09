@@ -150,13 +150,16 @@ public class GI {
                 if(eventHeader.get(0).isDisplayed())
                     webDriver.findElement(By.className("event_list")).click();
             }
-            SleepUtil.sleep();
+//            SleepUtil.pause();
+            System.err.println("click event_list");
             webDriver.findElement(By.className("event_list")).click();
-            SleepUtil.sleep();
-            List<WebElement> tableRows = new WebDriverWait(webDriver, 5)
+            SleepUtil.pause();
+            List<WebElement> tableRows = new WebDriverWait(webDriver, 1)
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
 
+            System.err.println("load data");
             for (WebElement webElement : tableRows) {
+                System.err.println("ping");
                 EventFleet eventFleet = new EventFleet();
                 WebElement countDown = webElement.findElement(By.className("countDown"));
                 List<WebElement> hostile = countDown.findElements(By.className("hostile"));
@@ -181,9 +184,11 @@ public class GI {
 
                 eventFleets.add(eventFleet);
             }
+            webDriver.findElement(By.className("event_list")).click();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.err.println("done");
         return eventFleets;
     }
 

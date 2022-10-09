@@ -33,6 +33,8 @@ public class GIUrlBuilder {
 
     private Instance instance;
 
+    private boolean checkEventFleet = false;
+
     public GIUrlBuilder() {
         instance = Instance.getInstance();
     }
@@ -77,9 +79,10 @@ public class GIUrlBuilder {
                 PAGE_TERM + PAGE_MESSAGES;
         instance.session.getWebDriver().get(builder);
     }
-
-//    @Transactional
     public void open(String page, ColonyEntity colony) {
+        open(page, colony, true);
+    }
+    public void open(String page, ColonyEntity colony, boolean fromPlanet) {
         System.err.println("open " +page+ " with "+colony);
         if(colony == null) {
             colony = ColonyDAO.getInstance().getOldestUpdated();
@@ -87,28 +90,37 @@ public class GIUrlBuilder {
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
-        builder.append("&cp=" + colony.cp);
+        if(fromPlanet) {
+            builder.append("&cp=" + colony.cp);
+        } else {
+            builder.append("&cp=" + colony.cpm);
+        }
         instance.session.getWebDriver().get(builder.toString());
 
-        updateColony(colony);
-        if (PAGE_RESOURCES.equals(page)) {
-            instance.gi.updateResourcesProducers(colony);
-            instance.gi.updateQueue(colony, QueueManger.BUILDING);
-            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
-        } else if (PAGE_FACILITIES.equals(page)) {
-            instance.gi.updateFacilities(colony);
-            instance.gi.updateQueue(colony, QueueManger.BUILDING);
-        } else if (PAGE_LIFEFORM.equals(page)) {
-            instance.gi.updateLifeform(colony);
-            instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
-        } else if (PAGE_BASE_FLEET.equals(page)) {
-            if(instance.commander != null) {
-                loadFleetStatus();
+        if(fromPlanet) {
+            updateColony(colony);
+            if (PAGE_RESOURCES.equals(page)) {
+                instance.gi.updateResourcesProducers(colony);
+                instance.gi.updateQueue(colony, QueueManger.BUILDING);
+                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+            } else if (PAGE_FACILITIES.equals(page)) {
+                instance.gi.updateFacilities(colony);
+                instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            } else if (PAGE_LIFEFORM.equals(page)) {
+                instance.gi.updateLifeform(colony);
+                instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
+            } else if (PAGE_BASE_FLEET.equals(page)) {
+                if (instance.commander != null) {
+                    loadFleetStatus();
+                }
+                Instance.getInstance().gi.updateFleet(colony);
+            } else if (PAGE_DEFENSES.equals(page)) {
+                Instance.getInstance().gi.updateDefence(colony);
+                instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
             }
-            Instance.getInstance().gi.updateFleet(colony);
-        } else if (PAGE_DEFENSES.equals(page)) {
-            Instance.getInstance().gi.updateDefence(colony);
-            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+            if (checkEventFleet) {
+                instance.commander.informAboutEventFleets(instance.gi.readEventFleet());
+            }
         }
     }
 
@@ -142,5 +154,10 @@ public class GIUrlBuilder {
         instance.session.getWebDriver().get(builder);
         updateColony(colony);
         instance.gi.updateGalaxy(systemView);
+    }
+
+    public GIUrlBuilder setCheckEventFleet(boolean checkEventFleet) {
+        this.checkEventFleet = checkEventFleet;
+        return this;
     }
 }

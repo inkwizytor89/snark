@@ -4,6 +4,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 
 import java.util.HashMap;
@@ -56,16 +57,22 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
     }
 
     @Override
-    public boolean execute() {
-        giUrlBuilder.open(PAGE_BASE_FLEET, colony);
+    public boolean openFleetWindow() {
+        giUrlBuilder.open(PAGE_BASE_FLEET, colony, true);
         if(!canSendExpedition()) {
             return true;
         }
         fleet = FleetEntity.createExpeditionFleet(colony);
+        return false;
+    }
+
+    @Override
+    public boolean execute() {
         return super.execute();
     }
 
     private boolean canSendExpedition() {
+//        return true;
         Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
         return colony.explorer > 0 && (
                 (expeditionShipsCount > 0 && colony.transporterLarge >= expeditionShipsCount) ||

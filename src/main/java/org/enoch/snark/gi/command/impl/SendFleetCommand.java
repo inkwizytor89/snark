@@ -57,7 +57,9 @@ protected GIUrlBuilder giUrlBuilder;
         // musimy pobrac odpowiednia flote z bazy danych
         // uzupełnić odpowiednimi danymi
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
-        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
+        if(openFleetWindow()) {
+            return true;
+        };
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
@@ -66,11 +68,11 @@ protected GIUrlBuilder giUrlBuilder;
         }
 
         fleetSelector.next();
-//        SleepUtil.pause();
-//        WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
-//        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
-//        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
-//        coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
+        SleepUtil.pause();
+        WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
+        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
+        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
+        coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
 //        SleepUtil.pause();
 //        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
         SleepUtil.pause();
@@ -124,6 +126,11 @@ protected GIUrlBuilder giUrlBuilder;
         new GIUrlBuilder().loadFleetStatus();
         SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet
         return true;
+    }
+
+    public boolean openFleetWindow() {
+        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
+        return false;
     }
 
     public Map<ShipEnum, Long> buildShipsMap() {

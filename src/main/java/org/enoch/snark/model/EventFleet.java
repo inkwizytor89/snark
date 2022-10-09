@@ -17,18 +17,18 @@ public class EventFleet {
     @Override
     public String toString() {
         return "EventFleet{" +
-                " isForeign=" + isForeign +
-                ", countDown='" + countDown + '\'' +
-                ", arrivalTime='" + arrivalTime + '\'' +
-                ", missionFleet='" + missionFleet + '\'' +
-                ", originFleet='" + originFleet + '\'' +
-                ", coordsOrigin='" + coordsOrigin + '\'' +
-                ", detailsFleet='" + detailsFleet + '\'' +
-                ", iconMovement='" + iconMovement + '\'' +
-                ", destFleet='" + destFleet + '\'' +
-                ", destCoords='" + destCoords + '\'' +
-                ", sendProbe='" + sendProbe + '\'' +
-                ", sendMail='" + sendMail + '\'' +
+                " " + isForeign +
+                ", '" + countDown + '\'' +
+                ", '" + arrivalTime + '\'' +
+                ", '" + missionFleet + '\'' +
+                ", '" + originFleet + '\'' +
+                ", '" + coordsOrigin + '\'' +
+                ", '" + detailsFleet + '\'' +
+                ", '" + iconMovement + '\'' +
+                ", '" + destFleet + '\'' +
+                ", '" + destCoords + '\'' +
+                ", '" + sendProbe + '\'' +
+                ", '" + sendMail + '\'' +
                 '}';
     }
 }
