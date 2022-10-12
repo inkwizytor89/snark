@@ -195,7 +195,7 @@ public class GI {
     public void updateColony(ColonyEntity colony) {
         new GIUrlBuilder().open(PAGE_RESOURCES, colony);
         new GIUrlBuilder().open(PAGE_FACILITIES, colony);
-        if(isLifeformAvailable()) {
+        if(isLifeformAvailable() && colony.isPlanet) {
             new GIUrlBuilder().open(PAGE_LIFEFORM, colony);
         }
         new GIUrlBuilder().open(PAGE_BASE_FLEET, colony);
@@ -282,12 +282,18 @@ public class GI {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.roboticsFactory = getLevel(technologies,"roboticsFactory");
         colony.shipyard = getLevel(technologies,"shipyard");
-        colony.researchLaboratory = getLevel(technologies,"researchLaboratory");
-        colony.allianceDepot = getLevel(technologies,"allianceDepot");
-        colony.missileSilo = getLevel(technologies,"missileSilo");
-        colony.naniteFactory = getLevel(technologies,"naniteFactory");
-        colony.terraformer = getLevel(technologies,"terraformer");
-        colony.repairDock = getLevel(technologies,"repairDock");
+        if(colony.isPlanet) {
+            colony.researchLaboratory = getLevel(technologies, "researchLaboratory");
+            colony.allianceDepot = getLevel(technologies, "allianceDepot");
+            colony.missileSilo = getLevel(technologies, "missileSilo");
+            colony.naniteFactory = getLevel(technologies, "naniteFactory");
+            colony.terraformer = getLevel(technologies, "terraformer");
+            colony.repairDock = getLevel(technologies, "repairDock");
+        } else {
+            colony.moonbase = getLevel(technologies, "moonbase");
+            colony.sensorPhalanx = getLevel(technologies, "sensorPhalanx");
+            colony.jumpGate = getLevel(technologies, "jumpGate");
+        }
         colony.save();
     }
 
@@ -358,12 +364,22 @@ public class GI {
                 colonyEntity.galaxy = planet.galaxy;
                 colonyEntity.system = planet.system;
                 colonyEntity.position = planet.position;
+                colonyEntity.isPlanet = true;
 
                 List<WebElement> moons = colonyWebElement.findElements(By.className("moonlink"));
                 if(!moons.isEmpty()) {
                     String link = moons.get(0).getAttribute(HREF_ATTRIBUTE);
                     int i = link.indexOf("cp=");
                     colonyEntity.cpm = Integer.parseInt(link.substring(i+3));
+
+                    ColonyEntity moonColonyEntity = new ColonyEntity();
+                    moonColonyEntity.galaxy = planet.galaxy;
+                    moonColonyEntity.system = planet.system;
+                    moonColonyEntity.position = planet.position;
+                    moonColonyEntity.isPlanet = false;
+                    moonColonyEntity.cp = colonyEntity.cpm;
+                    moonColonyEntity.cpm = colonyEntity.cp;
+                    colonyEntities.add(moonColonyEntity);
                 }
 
                 colonyEntities.add(colonyEntity);

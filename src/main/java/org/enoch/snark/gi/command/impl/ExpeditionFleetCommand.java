@@ -58,7 +58,7 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
 
     @Override
     public boolean openFleetWindow() {
-        giUrlBuilder.open(PAGE_BASE_FLEET, colony, true);
+        giUrlBuilder.open(PAGE_BASE_FLEET, colony);
         if(!canSendExpedition()) {
             return true;
         }

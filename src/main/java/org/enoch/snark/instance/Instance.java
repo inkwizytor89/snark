@@ -89,7 +89,9 @@ public class Instance {
 
             // update colonies
             for(ColonyEntity colony : colonyDAO.fetchAll()) {
-                cachedPlaned.add(colony.toPlanet());
+                if(colony.isPlanet) {
+                    cachedPlaned.add(colony.toPlanet());
+                }
                 if(colony.level == null) {
                     gi.updateColony(colony);
                     colony.level = 1L;

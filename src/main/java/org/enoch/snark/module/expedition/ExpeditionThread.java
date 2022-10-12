@@ -15,6 +15,7 @@ import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
@@ -49,7 +50,11 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         cleanExpeditions();
-        expeditionQueue.addAll(ColonyDAO.getInstance().fetchAll());
+        List<ColonyEntity> moons = ColonyDAO.getInstance().fetchAll()
+                .stream().filter(colonyEntity -> !colonyEntity.isPlanet).collect(Collectors.toList());
+        System.err.println("list for expeditions");
+        moons.forEach(System.err::println);
+        expeditionQueue.addAll(moons);
     }
 
     @Override
