@@ -37,6 +37,10 @@ public abstract class PlanetEntity extends IdEntity{
     public Long deuterium;
 
     @Basic
+    @Column(name = "is_planet")
+    public boolean isPlanet = true;
+
+    @Basic
     @Column(name = "power")
     public Long energy;
 

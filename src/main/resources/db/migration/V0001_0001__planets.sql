@@ -15,6 +15,7 @@ create table colonies
 
   cp          integer   not null,
   cpm          integer,
+  is_planet boolean default true,
   collecting_order    integer,
 
   -- fleet
@@ -101,6 +102,7 @@ create table targets
   power       integer,
   player_id bigint not null references players,
   updated    timestamp default now(),
+  is_planet boolean default true,
 
   -- fleet
   fighterLight    integer default 0,
