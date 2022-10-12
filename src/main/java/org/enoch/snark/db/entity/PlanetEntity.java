@@ -41,55 +41,55 @@ public abstract class PlanetEntity extends IdEntity{
     public Long energy;
 
     @Basic
-    @Column(name = "lm")
+    @Column(name = "fighterLight")
     public Long fighterLight = 0L;
 
     @Basic
-    @Column(name = "cm")
+    @Column(name = "fighterHeavy")
     public Long fighterHeavy = 0L;
 
     @Basic
-    @Column(name = "kr")
+    @Column(name = "cruiser")
     public Long cruiser = 0L;
 
     @Basic
-    @Column(name = "ow")
+    @Column(name = "battleship")
     public Long battleship = 0L;
 
     @Basic
-    @Column(name = "pan")
+    @Column(name = "interceptor")
     public Long interceptor = 0L;
 
     @Basic
-    @Column(name = "bom")
+    @Column(name = "bomber")
     public Long bomber = 0L;
 
     @Basic
-    @Column(name = "ni")
+    @Column(name = "destroyer")
     public Long destroyer = 0L;
 
     @Basic
-    @Column(name = "gs")
+    @Column(name = "deathstar")
     public Long deathstar = 0L;
 
     @Basic
-    @Column(name = "mt")
+    @Column(name = "transporterSmall")
     public Long transporterSmall = 0L;
 
     @Basic
-    @Column(name = "dt")
+    @Column(name = "transporterLarge")
     public Long transporterLarge = 0L;
 
     @Basic
-    @Column(name = "kol")
+    @Column(name = "colonyShip")
     public Long colonyShip = 0L;
 
     @Basic
-    @Column(name = "rec")
+    @Column(name = "recycler")
     public Long recycler = 0L;
 
     @Basic
-    @Column(name = "son")
+    @Column(name = "espionageProbe")
     public Long espionageProbe = 0L;
 
     @Basic
@@ -97,51 +97,51 @@ public abstract class PlanetEntity extends IdEntity{
     public Long sat = 0L;
 
     @Basic
-    @Column(name = "pf")
+    @Column(name = "explorer")
     public Long explorer = 0L;
 
     @Basic
-    @Column(name = "re")
+    @Column(name = "reaper")
     public Long reaper = 0L;
 
     @Basic
-    @Column(name = "wr")
+    @Column(name = "rocketLauncher")
     public Long rocketLauncher = 0L;
 
     @Basic
-    @Column(name = "ldl")
+    @Column(name = "laserCannonLight")
     public Long laserCannonLight = 0L;
 
     @Basic
-    @Column(name = "cdl")
+    @Column(name = "laserCannonHeavy")
     public Long laserCannonHeavy = 0L;
 
     @Basic
-    @Column(name = "dg")
+    @Column(name = "gaussCannon")
     public Long gaussCannon = 0L;
 
     @Basic
-    @Column(name = "dj")
+    @Column(name = "ionCannon")
     public Long ionCannon = 0L;
 
     @Basic
-    @Column(name = "wp")
+    @Column(name = "plasmaCannon")
     public Long plasmaCannon = 0L;
 
     @Basic
-    @Column(name = "mpo")
+    @Column(name = "shieldDomeSmall")
     public Long shieldDomeSmall = 0L;
 
     @Basic
-    @Column(name = "dpo")
+    @Column(name = "shieldDomeLarge")
     public Long shieldDomeLarge = 0L;
 
     @Basic
-    @Column(name = "pr")
+    @Column(name = "missileInterceptor")
     public Long missileInterceptor = 0L;
 
     @Basic
-    @Column(name = "mr")
+    @Column(name = "missileInterplanetary")
     public Long missileInterplanetary = 0L;
 
 //    Resources
@@ -212,6 +212,18 @@ public abstract class PlanetEntity extends IdEntity{
     @Basic
     @Column(name = "repairDock")
     public Long repairDock;
+
+    @Basic
+    @Column(name = "moonbase")
+    public Long moonbase;
+
+    @Basic
+    @Column(name = "sensorPhalanx")
+    public Long sensorPhalanx;
+
+    @Basic
+    @Column(name = "jumpGate")
+    public Long jumpGate;
 
 
 //    Lifeform
