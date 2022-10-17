@@ -1,4 +1,4 @@
-package org.enoch.snark.gi.command;
+package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.instance.Instance;

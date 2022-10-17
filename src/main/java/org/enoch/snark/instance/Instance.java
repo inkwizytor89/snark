@@ -10,7 +10,7 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.AbstractCommand;
+import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Universe;
@@ -27,7 +27,7 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
 
 public class Instance {
 
-    protected static final Logger LOG = Logger.getLogger( Instance.class.getName());
+    protected static final Logger LOG = Logger.getLogger(Instance.class.getName());
 
     private static Instance INSTANCE;
     private static String serverConfigPath = "server.properties";
@@ -36,7 +36,9 @@ public class Instance {
     public static GI gi;
     public static GISession session;
     public static Integer level = 1;
+
     public List<Planet> cachedPlaned = new ArrayList<>();
+    public ColonyEntity lastVisited = null;
     //    public MessageService messageService;
 //    public List<ColonyEntity> sources;
 

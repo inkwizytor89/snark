@@ -2,8 +2,6 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.gi.command.CommandType;
-import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.model.SystemView;

@@ -1,18 +1,27 @@
 package org.enoch.snark.model;
 
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.types.ColonyType;
 
 public class Planet {
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
     public static final Integer POSITION_INDEX = 3;
+
+    public ColonyType type = ColonyType.PLANET;
     public Integer galaxy;
     public Integer system;
     public Integer position;
 
     protected Planet() {
     }
+
     public Planet(String input) {
+        this(input, ColonyType.PLANET);
+    }
+
+    public Planet(String input, ColonyType type) {
+        this.type = type;
         loadPlanetCoordinate(input);
     }
 
@@ -48,9 +57,12 @@ public class Planet {
     public boolean equals(Object obj) {
         if(!(obj instanceof Planet)) return false;
 
-        final String string = this.toString();
         Planet anotherPlanet = (Planet) obj;
         return this.galaxy.equals(anotherPlanet.galaxy) && this.system.equals(anotherPlanet.system) && this.position.equals(anotherPlanet.position);
+    }
+
+    public static String getCordinate(Planet planet) {
+        return getCordinate(planet.galaxy, planet.system, planet.position);
     }
 
     public static String getCordinate(Integer galaxy, Integer system, Integer position) {
@@ -59,7 +71,7 @@ public class Planet {
 
     @Override
     public String toString() {
-        return getCordinate(galaxy, system, position);
+        return type.getName()+" "+getCordinate(galaxy, system, position);
     }
     public String toFileName() {
         return toString().replace(":","_");

@@ -1,6 +1,8 @@
 package org.enoch.snark.module;
 
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.instance.Commander;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 
 import java.util.concurrent.TimeUnit;
@@ -9,12 +11,16 @@ import java.util.logging.Logger;
 public abstract class AbstractThread extends Thread {
 
     private static final Logger log = Logger.getLogger( AbstractThread.class.getName() );
+    protected final Instance instance;
+    protected final Commander commander;
 
     protected SI si;
     protected int pause = 0;
 
     public AbstractThread(SI si) {
         this.si = si;
+        instance = si.getInstance();
+        commander = instance.commander;
         setName(this.getClass().getName());
     }
 

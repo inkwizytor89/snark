@@ -2,21 +2,8 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueManger;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.module.building.BuildRequirements;
-import org.enoch.snark.module.building.BuildingCost;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.enoch.snark.gi.GI.TECHNOLOGIES;
 
 public class OpenPageCommand extends AbstractCommand {
 

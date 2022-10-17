@@ -1,20 +1,16 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.JavascriptExecutor;
 
-import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.INTERFACE_REQUIERED;
 
 public class SendMessageToPlayerCommand extends AbstractCommand {
 
-    private final Instance instance;
     private final String herf;
     private final String message;
 
-    public SendMessageToPlayerCommand(Instance instance, String herf, String message) {
-        super(instance, INTERFACE_REQUIERED);
-        this.instance = instance;
+    public SendMessageToPlayerCommand(String herf, String message) {
+        super(INTERFACE_REQUIERED);
         this.herf = herf;
         this.message = message;
     }

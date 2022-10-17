@@ -1,26 +1,32 @@
 package org.enoch.snark.model;
 
+import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.model.types.FleetDirectionType;
+import org.enoch.snark.model.types.MissionType;
+
+import java.time.LocalDateTime;
+
 public class EventFleet {
     public String countDown;
-    public String arrivalTime;
-    public String missionFleet;
-    public String originFleet;
+    public LocalDateTime arrivalTime;
+    public MissionType missionType;
+    public ColonyType originFleet;
     public String coordsOrigin;
     public String detailsFleet;
-    public String iconMovement;
-    public String destFleet;
+    public FleetDirectionType iconMovement;
+    public ColonyType destFleet;
     public String destCoords;
     public String sendProbe;
     public String sendMail;
-    public boolean isForeign = false;
+    public boolean isHostile = false;
 
     @Override
     public String toString() {
         return "EventFleet{" +
-                " " + isForeign +
+                " " + isHostile +
                 ", '" + countDown + '\'' +
                 ", '" + arrivalTime + '\'' +
-                ", '" + missionFleet + '\'' +
+                ", '" + missionType + '\'' +
                 ", '" + originFleet + '\'' +
                 ", '" + coordsOrigin + '\'' +
                 ", '" + detailsFleet + '\'' +
@@ -30,5 +36,17 @@ public class EventFleet {
                 ", '" + sendProbe + '\'' +
                 ", '" + sendMail + '\'' +
                 '}';
+    }
+
+    public boolean isFleetImpactOnColony() {
+        return FleetDirectionType.BACK == iconMovement || MissionType.STATION.equals(missionType) || MissionType.TRANSPORT.equals(missionType);
+    }
+
+    public Planet getEndingPlanet() {
+        if(FleetDirectionType.THERE.equals(iconMovement) &&
+                (MissionType.STATION.equals(missionType) || (MissionType.TRANSPORT.equals(missionType)))) {
+            return new Planet(destCoords, destFleet);
+        }
+        return new Planet(coordsOrigin, originFleet);
     }
 }

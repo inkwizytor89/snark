@@ -1,5 +1,6 @@
 package org.enoch.snark.common;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -28,10 +29,22 @@ public class DateUtil {
         return LocalTime.parse(time);
     }
 
-    public static LocalTime parseTime(String input) {
+    public static LocalTime parseStringToTime(String input) {
         final String[] split = input.split("\\s+");
         String time = split[0];
         return LocalTime.parse(time);
+    }
+
+    public static LocalDateTime parseTimeToDateTime(LocalTime input) {
+        LocalDate now = LocalDate.now();
+        if(LocalTime.now().isAfter(input)) {
+            now = now.plusDays(1);
+        }
+        return LocalDateTime.of(now, input);
+    }
+
+    public static LocalDateTime parseStringTimeToDateTime(String date) {
+        return parseTimeToDateTime(parseStringToTime(date));
     }
 
     /**

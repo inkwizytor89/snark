@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
@@ -70,7 +71,9 @@ public class GIUrlBuilder {
         Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
         if(m.find()) {
             instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
-            instance.commander.setExpeditionStatus(Integer.parseInt(m.group(3)), Integer.parseInt(m.group(4)));
+            int expeditionCount = Integer.parseInt(m.group(3));
+            System.err.println("update commander on expedition "+expeditionCount);
+            instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
         }
     }
 
@@ -83,13 +86,15 @@ public class GIUrlBuilder {
     public void open(String page, ColonyEntity colony) {
         System.err.println("open " +page+ " with "+colony);
         if(colony == null) {
-            colony = ColonyDAO.getInstance().getOldestUpdated();
+            colony = instance.lastVisited;
+            if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
         StringBuilder builder = new StringBuilder( instance.universe.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         builder.append("&cp=" + colony.cp);
         instance.session.getWebDriver().get(builder.toString());
+        instance.lastVisited = colony;
 
         updateColony(colony);
         if (PAGE_RESOURCES.equals(page)) {
@@ -112,7 +117,7 @@ public class GIUrlBuilder {
             instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         }
         if (checkEventFleet) {
-            instance.commander.informAboutEventFleets(instance.gi.readEventFleet());
+            Navigator.getInstance().informAboutEventFleets(instance.gi.readEventFleet());
         }
     }
 

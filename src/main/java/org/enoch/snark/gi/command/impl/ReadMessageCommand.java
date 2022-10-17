@@ -7,8 +7,6 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -17,11 +15,10 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.gi.command.CommandType.INTERFACE_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.INTERFACE_REQUIERED;
 
 public class ReadMessageCommand extends AbstractCommand {
 

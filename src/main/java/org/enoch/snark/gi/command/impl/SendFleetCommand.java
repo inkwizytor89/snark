@@ -8,7 +8,6 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.command.GICommand;
 import org.enoch.snark.gi.macro.FleetSelector;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
@@ -26,7 +25,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.enoch.snark.gi.command.CommandType.FLEET_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.FLEET_REQUIERED;
 
 public class SendFleetCommand extends GICommand {
 
@@ -40,6 +39,7 @@ protected GIUrlBuilder giUrlBuilder;
 
     public SendFleetCommand(FleetEntity fleet) {
         super(FLEET_REQUIERED);
+        this.priority = 40;
         this.fleet = fleet;
         this.mission = Mission.convertFromString(fleet.type);
 
@@ -70,12 +70,13 @@ protected GIUrlBuilder giUrlBuilder;
         fleetSelector.next();
         SleepUtil.pause();
         WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
-        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
-        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
+//        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
+//        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
         coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
 //        SleepUtil.pause();
 //        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
         SleepUtil.pause();
+        SleepUtil.sleep();
 
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
@@ -123,8 +124,10 @@ protected GIUrlBuilder giUrlBuilder;
             setAfterCommand(null);
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
-        new GIUrlBuilder().loadFleetStatus();
         SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet
+        new GIUrlBuilder().loadFleetStatus();
+        int expeditionCount = instance.commander.getExpeditionCount();
+        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
         return true;
     }
 

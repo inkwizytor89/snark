@@ -3,8 +3,6 @@ package org.enoch.snark.gi.command.impl;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.gi.command.AbstractCommand;
-import org.enoch.snark.gi.command.CommandType;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
@@ -15,7 +13,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.GI.*;
 
@@ -51,7 +48,6 @@ public class BuildCommand extends AbstractCommand {
         } else {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
-//            WebElement buildingIcon = gi.findElement(SPAN_TAG, CLASS_ATTRIBUTE, requirements.request.building.getName());
             buildingIcon.click();
             SleepUtil.sleep();
             WebElement costs = gi.webDriver.findElement(By.className("costs"));
@@ -61,7 +57,7 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "deuterium"));
             String masterHref = instance.universe.getConfig("master_href");
             if(masterHref != null && !masterHref.isEmpty()) {
-                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(instance, masterHref,
+                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(masterHref,
                         "Master poprosze "+resources+ " na "+colony);
                 instance.commander.push(messageCommend);
             }

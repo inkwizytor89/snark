@@ -16,6 +16,9 @@ import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
+import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.model.types.FleetDirectionType;
+import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -158,35 +161,37 @@ public class GI {
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
 
             System.err.println("load data");
-            for (WebElement webElement : tableRows) {
-                System.err.println("ping");
-                EventFleet eventFleet = new EventFleet();
-                WebElement countDown = webElement.findElement(By.className("countDown"));
-                List<WebElement> hostile = countDown.findElements(By.className("hostile"));
-                eventFleet.isForeign = !hostile.isEmpty();
-                eventFleet.countDown =  countDown.getText();
-                eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
-                eventFleet.arrivalTime =  webElement.findElement(By.className("arrivalTime")).getText();
-                eventFleet.missionFleet =  webElement.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute(TITLE_ATTRIBUTE);
-                eventFleet.originFleet =  webElement.findElement(By.className("originFleet")).getText();
-                eventFleet.coordsOrigin =  webElement.findElement(By.className("coordsOrigin")).getText();
-                eventFleet.detailsFleet =  webElement.findElement(By.className("detailsFleet")).getText();
-                eventFleet.iconMovement =  "?";
-                eventFleet.destFleet =  webElement.findElement(By.className("destFleet")).getText();
-                eventFleet.destCoords =  webElement.findElement(By.className("destCoords")).getText();
-                eventFleet.sendProbe =  webElement.findElement(By.className("sendProbe")).getText();
-                List<WebElement> player = webElement.findElements(By.className("sendMail"));
+            for (WebElement we : tableRows) {
+
+                EventFleet event = new EventFleet();
+                WebElement countDown = we.findElement(By.className("countDown"));
+                event.isHostile = !countDown.findElements(By.className("hostile")).isEmpty();
+                event.countDown =  countDown.getText();
+                event.arrivalTime =  DateUtil.parseStringTimeToDateTime(we.findElement(By.className("arrivalTime")).getText());
+                String missionText = we.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute(TITLE_ATTRIBUTE);
+                event.missionType = MissionType.convert(missionText);
+                WebElement figure = we.findElement(By.className("originFleet")).findElement(By.tagName("figure"));
+                event.originFleet = figure.getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                event.coordsOrigin =  we.findElement(By.className("coordsOrigin")).getText();
+                event.detailsFleet =  we.findElement(By.className("detailsFleet")).getText();
+                event.iconMovement =  missionText.contains("(R)") ? FleetDirectionType.BACK : FleetDirectionType.THERE;
+                WebElement destFigure = we.findElement(By.className("destFleet")).findElement(By.tagName("figure"));
+                event.destFleet =  destFigure.getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                event.destCoords =  we.findElement(By.className("destCoords")).getText();
+                event.sendProbe =  we.findElement(By.className("sendProbe")).getText();
+                List<WebElement> player = we.findElements(By.className("sendMail"));
                 if(player.size() > 1) {
-                    eventFleet.sendMail =  player.get(1).getAttribute(HREF_ATTRIBUTE);
+                    event.sendMail =  player.get(1).getAttribute(HREF_ATTRIBUTE);
                 } else {
-                    eventFleet.sendMail = "";
+                    event.sendMail = "";
                 }
 
-                eventFleets.add(eventFleet);
+                eventFleets.add(event);
             }
             webDriver.findElement(By.className("event_list")).click();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         System.err.println("done");
         return eventFleets;

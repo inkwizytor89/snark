@@ -5,16 +5,16 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.AbstractCommand;
 import org.enoch.snark.gi.command.impl.BetaExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
@@ -87,15 +87,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        AbstractCommand processedCommand = instance.commander.getActualProcessedCommand();
-        if(processedCommand != null && processedCommand instanceof SendFleetCommand) {
-            if (FleetEntity.EXPEDITION.equals(((SendFleetCommand) processedCommand).fleet.type)) {
-                return false;
-            }
-        }
-        return instance.commander.peekFleetQueue().stream()
-                .filter(abstractCommand -> abstractCommand instanceof SendFleetCommand)
-                .noneMatch(command -> FleetEntity.EXPEDITION.equals(((SendFleetCommand) command).fleet.type));
+        return commander.peekQueues().stream().noneMatch(command -> command.getTags().contains(threadName));
     }
 
     private boolean areFreeSlotsForExpedition() {
@@ -107,7 +99,9 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void setExpeditionReadyToStart(ColonyEntity colony) {
-        instance.push(new ExpeditionFleetCommand(colony));
+        ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(colony);
+        expeditionFleetCommand.addTag(threadName);
+        instance.push(expeditionFleetCommand);
     }
 
     private void cleanExpeditions() {
