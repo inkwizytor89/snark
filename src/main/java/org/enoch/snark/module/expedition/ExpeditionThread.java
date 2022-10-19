@@ -50,11 +50,24 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         cleanExpeditions();
-        List<ColonyEntity> moons = ColonyDAO.getInstance().fetchAll()
-                .stream().filter(colonyEntity -> !colonyEntity.isPlanet).collect(Collectors.toList());
-        System.err.println("list for expeditions");
-        moons.forEach(System.err::println);
-        expeditionQueue.addAll(moons);
+        chooseColoniesForExpeditionsStart();
+    }
+
+    private void chooseColoniesForExpeditionsStart() {
+        System.err.println("\nlist for expeditions:");
+        List<ColonyEntity> planetList = ColonyDAO.getInstance().fetchAll()
+                .stream()
+                .filter(colonyEntity -> colonyEntity.isPlanet)
+                .collect(Collectors.toList());
+        for(ColonyEntity planet : planetList) {
+            ColonyEntity colony = planet;
+            if(planet.cpm != null) {
+                colony = ColonyDAO.getInstance().find(planet.cpm);
+            }
+            expeditionQueue.add(colony);
+            System.err.println(colony);
+        }
+        System.err.println();
     }
 
     @Override
