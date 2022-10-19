@@ -1,10 +1,13 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.gi.macro.BuildingEnum;
+import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{
@@ -335,6 +338,27 @@ public abstract class PlanetEntity extends IdEntity{
 
     public Planet toPlanet() {
         return new Planet(this.getCordinate());
+    }
+
+    public Map<ShipEnum, Long> getShipsMap() {
+        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
+        shipsMap.put(ShipEnum.cruiser, cruiser);
+        shipsMap.put(ShipEnum.battleship, battleship);
+        shipsMap.put(ShipEnum.interceptor, interceptor);
+        shipsMap.put(ShipEnum.bomber, bomber);
+        shipsMap.put(ShipEnum.destroyer, destroyer);
+        shipsMap.put(ShipEnum.deathstar, deathstar);
+        shipsMap.put(ShipEnum.reaper, reaper);
+        shipsMap.put(ShipEnum.explorer, explorer);
+
+        shipsMap.put(ShipEnum.transporterSmall, transporterSmall);
+        shipsMap.put(ShipEnum.transporterLarge, transporterLarge);
+        shipsMap.put(ShipEnum.colonyShip, colonyShip);
+        shipsMap.put(ShipEnum.recycler, recycler);
+        shipsMap.put(ShipEnum.espionageProbe, espionageProbe);
+
+        return shipsMap;
     }
 
     public Long getBuildingLevel(BuildingEnum building) {

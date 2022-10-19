@@ -1,12 +1,15 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.types.ColonyType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "fleet", schema = "public", catalog = "snark")
@@ -57,49 +60,49 @@ public class FleetEntity extends IdEntity {
     public Long code;
 
     @Column(name = "LM")
-    public Long lm;
+    public Long fighterLight;
 
     @Column(name = "CM")
-    public Long cm;
+    public Long fighterHeavy;
 
     @Column(name = "KR")
-    public Long kr;
+    public Long cruiser;
 
     @Column(name = "OW")
-    public Long ow;
+    public Long battleship;
 
     @Column(name = "PAN")
-    public Long pan;
+    public Long interceptor;
 
     @Column(name = "BOM")
-    public Long bom;
+    public Long bomber;
 
     @Column(name = "NI")
-    public Long ni;
+    public Long destroyer;
 
     @Column(name = "GS")
-    public Long gs;
+    public Long deathstar;
 
     @Column(name = "RE")
-    public Long re;
+    public Long reaper;
 
     @Column(name = "PF")
-    public Long pf;
+    public Long explorer;
 
     @Column(name = "LT")
-    public Long lt;
+    public Long transporterSmall;
 
     @Column(name = "DT")
-    public Long dt;
+    public Long transporterLarge;
 
     @Column(name = "KOL")
-    public Long kol;
+    public Long colonyShip;
 
     @Column(name = "REC")
-    public Long rec;
+    public Long recycler;
 
     @Column(name = "SON")
-    public Long son;
+    public Long espionageProbe;
 
     @Transient
     private Instance instance;
@@ -127,6 +130,27 @@ public class FleetEntity extends IdEntity {
         return "[" + targetGalaxy + ", " + targetSystem + ", " + targetPosition + "]";
     }
 
+    public void setShips(Map<ShipEnum, Long> toApply) {
+        for(Map.Entry<ShipEnum, Long> entry : toApply.entrySet()) {
+            if(entry.getKey() == ShipEnum.fighterLight) fighterLight = entry.getValue();
+            else if(entry.getKey() == ShipEnum.fighterHeavy) fighterHeavy = entry.getValue();
+            else if(entry.getKey() == ShipEnum.cruiser) cruiser = entry.getValue();
+            else if(entry.getKey() == ShipEnum.battleship) battleship = entry.getValue();
+            else if(entry.getKey() == ShipEnum.interceptor) interceptor = entry.getValue();
+            else if(entry.getKey() == ShipEnum.bomber) bomber = entry.getValue();
+            else if(entry.getKey() == ShipEnum.destroyer) destroyer = entry.getValue();
+            else if(entry.getKey() == ShipEnum.deathstar) deathstar = entry.getValue();
+            else if(entry.getKey() == ShipEnum.reaper) reaper = entry.getValue();
+            else if(entry.getKey() == ShipEnum.explorer) explorer = entry.getValue();
+
+            else if(entry.getKey() == ShipEnum.transporterSmall) transporterSmall = entry.getValue();
+            else if(entry.getKey() == ShipEnum.transporterLarge) transporterLarge = entry.getValue();
+            else if(entry.getKey() == ShipEnum.colonyShip) colonyShip = entry.getValue();
+            else if(entry.getKey() == ShipEnum.recycler) recycler = entry.getValue();
+            else if(entry.getKey() == ShipEnum.espionageProbe) espionageProbe = entry.getValue();
+        }
+    }
+
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
         Integer spyLevel = target.spyLevel == null ? 4 : target.spyLevel;
         return createSpyFleet(target, spyLevel);
@@ -140,7 +164,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetPosition = target.position;
         fleet.source = Instance.getInstance().findNearestSource(target);
         fleet.type = SPY;
-        fleet.son = count.longValue();
+        fleet.espionageProbe = count.longValue();
         return fleet;
     }
 
@@ -152,25 +176,24 @@ public class FleetEntity extends IdEntity {
         fleet.targetPosition = target.position;
         fleet.source = instance.findNearestSource(target);
         fleet.type = ATTACK;
-        fleet.lt = target.calculateTransportByLt();
+        fleet.transporterSmall = target.calculateTransportByLt();
         return fleet;
     }
 
-    public static FleetEntity createExpeditionFleet(@Nonnull ColonyEntity target) {
+    public static FleetEntity createExpedition(@Nonnull ColonyEntity colony) {
         FleetEntity fleet = new FleetEntity();
-        fleet.targetGalaxy = target.galaxy;
-        fleet.targetSystem = target.system;
+        fleet.targetGalaxy = colony.galaxy;
+        fleet.targetSystem = colony.system;
         fleet.targetPosition = 16;
-        fleet.source = target;
-    //instance.findNearestSource(target);
+        fleet.source = colony;
         fleet.type = EXPEDITION;
-        fleet.pf = 1L;
-        Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
-        if(expeditionShipsCount > 0) {
-            fleet.dt = expeditionShipsCount;
-        } else {
-            fleet.lt = -expeditionShipsCount;
-        }
+//        fleet.explorer = 1L;
+//        Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
+//        if(expeditionShipsCount > 0) {
+//            fleet.transporterLarge = expeditionShipsCount;
+//        } else {
+//            fleet.transporterSmall = -expeditionShipsCount;
+//        }
         return fleet;
     }
 
@@ -184,6 +207,10 @@ public class FleetEntity extends IdEntity {
         this.targetSystem = planet.system;
         this.targetPosition = planet.position;
         return this;
+    }
+
+    public Planet getDestination() {
+        return new Planet(this.targetGalaxy, this.targetSystem, this.targetPosition, ColonyType.parse(spaceTarget));
     }
 
     public void send() {

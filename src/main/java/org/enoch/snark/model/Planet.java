@@ -26,9 +26,14 @@ public class Planet {
     }
 
     public Planet(Integer galaxy, Integer system, Integer position) {
+        this(galaxy, system, position, ColonyType.PLANET);
+    }
+
+    public Planet(Integer galaxy, Integer system, Integer position, ColonyType type) {
         this.galaxy = galaxy;
         this.system = system;
         this.position = position;
+        this.type = type;
     }
 
     public Integer calculateDistance(Planet planet) {

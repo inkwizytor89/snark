@@ -168,6 +168,7 @@ public class Instance {
         return ColonyDAO.getInstance().fetchAll().get(0);
     }
 
+    //to remove
     public Long calculateMinExpeditionSize() {
         String minDt = this.universe.getConfig((Universe.MIN_DT));
         if(minDt == null || minDt.isEmpty()) {

@@ -31,9 +31,9 @@ public class BetaExpeditionFleetCommand extends SendFleetCommand {
             long toSend = dt / possibleCount;
 
             shipsMap.put(transporterLarge, toSend);
-            fleet.dt = toSend;
+            fleet.transporterLarge = toSend;
             shipsMap.put(explorer, 1L);
-            fleet.pf = 1L;
+            fleet.explorer = 1L;
         } else {
             minSize = -minSize;
             Long lt = colony.transporterSmall;
@@ -45,7 +45,7 @@ public class BetaExpeditionFleetCommand extends SendFleetCommand {
             long toSend = lt / possibleCount;
 
             shipsMap.put(transporterSmall, toSend);
-            fleet.dt = toSend;
+            fleet.transporterLarge = toSend;
         }
         return shipsMap;
     }

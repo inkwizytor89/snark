@@ -34,21 +34,30 @@ public enum ShipEnum {
 
     public static Map<ShipEnum, Long> createShipsMap(FleetEntity fleet) {
         Map<ShipEnum, Long> shipsMap = new HashMap<>();
-        if(fleet.lm != null && fleet.lm > 0) shipsMap.put(fighterLight, fleet.lm);
-        if(fleet.cm != null && fleet.cm > 0) shipsMap.put(fighterHeavy, fleet.cm);
-        if(fleet.kr != null && fleet.kr > 0) shipsMap.put(cruiser, fleet.kr);
-        if(fleet.ow != null && fleet.ow > 0) shipsMap.put(battleship, fleet.ow);
-        if(fleet.pan != null && fleet.pan > 0) shipsMap.put(interceptor, fleet.pan);
-        if(fleet.bom != null && fleet.bom > 0) shipsMap.put(bomber, fleet.bom);
-        if(fleet.ni != null && fleet.ni > 0) shipsMap.put(destroyer, fleet.ni);
-        if(fleet.gs != null && fleet.gs > 0) shipsMap.put(deathstar, fleet.gs);
-        if(fleet.lt != null && fleet.lt > 0) shipsMap.put(transporterSmall, fleet.lt);
-        if(fleet.dt != null && fleet.dt > 0) shipsMap.put(transporterLarge, fleet.dt);
-        if(fleet.kol != null && fleet.kol > 0) shipsMap.put(colonyShip, fleet.kol);
-        if(fleet.rec != null && fleet.rec > 0) shipsMap.put(recycler, fleet.rec);
-        if(fleet.son != null && fleet.son > 0) shipsMap.put(espionageProbe, fleet.son);
-        if(fleet.pf != null && fleet.pf > 0) shipsMap.put(explorer, fleet.pf);
-        if(fleet.re != null && fleet.re > 0) shipsMap.put(reaper, fleet.re);
+        if(fleet.fighterLight != null && fleet.fighterLight > 0) shipsMap.put(fighterLight, fleet.fighterLight);
+        if(fleet.fighterHeavy != null && fleet.fighterHeavy > 0) shipsMap.put(fighterHeavy, fleet.fighterHeavy);
+        if(fleet.cruiser != null && fleet.cruiser > 0) shipsMap.put(cruiser, fleet.cruiser);
+        if(fleet.battleship != null && fleet.battleship > 0) shipsMap.put(battleship, fleet.battleship);
+        if(fleet.interceptor != null && fleet.interceptor > 0) shipsMap.put(interceptor, fleet.interceptor);
+        if(fleet.bomber != null && fleet.bomber > 0) shipsMap.put(bomber, fleet.bomber);
+        if(fleet.destroyer != null && fleet.destroyer > 0) shipsMap.put(destroyer, fleet.destroyer);
+        if(fleet.deathstar != null && fleet.deathstar > 0) shipsMap.put(deathstar, fleet.deathstar);
+        if(fleet.reaper != null && fleet.reaper > 0) shipsMap.put(reaper, fleet.reaper);
+        if(fleet.explorer != null && fleet.explorer > 0) shipsMap.put(explorer, fleet.explorer);
+
+        if(fleet.transporterSmall != null && fleet.transporterSmall > 0) shipsMap.put(transporterSmall, fleet.transporterSmall);
+        if(fleet.transporterLarge != null && fleet.transporterLarge > 0) shipsMap.put(transporterLarge, fleet.transporterLarge);
+        if(fleet.colonyShip != null && fleet.colonyShip > 0) shipsMap.put(colonyShip, fleet.colonyShip);
+        if(fleet.recycler != null && fleet.recycler > 0) shipsMap.put(recycler, fleet.recycler);
+        if(fleet.espionageProbe != null && fleet.espionageProbe > 0) shipsMap.put(espionageProbe, fleet.espionageProbe);
+        return shipsMap;
+    }
+
+    public static Map<ShipEnum, Long> createExpeditionMap(Long tl, Long ts, Long ex) {
+        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        shipsMap.put(ShipEnum.transporterLarge, tl);
+        shipsMap.put(ShipEnum.transporterSmall, ts);
+        shipsMap.put(ShipEnum.explorer, ex);
         return shipsMap;
     }
 }
