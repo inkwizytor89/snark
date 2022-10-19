@@ -1,13 +1,13 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.CommandType;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.WebDriverException;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,11 +19,10 @@ public class Commander {
     private static final Logger log = Logger.getLogger(Commander.class.getName() );
 
     private static final int SLEEP_PAUSE = 1;
-    public static final int TIME_TO_UPDATE = 5;
+    private static Commander INSTANCE;
 
     private Instance instance;
     private GISession session;
-    private LocalDateTime lastUpdate = LocalDateTime.now().minusMinutes(TIME_TO_UPDATE);
     private boolean isRunning = true;
 
     private int fleetCount = 0;
@@ -41,11 +40,18 @@ public class Commander {
         startInterfaceQueue();
     }
 
+    public static Commander getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new Commander();
+        }
+        return INSTANCE;
+    }
+
     public synchronized boolean isRunning() {
         return isRunning;
     }
 
-    private void startInterfaceQueue() {
+    void startInterfaceQueue() {
         Runnable task = () -> {
             while(true) {
                 try {
@@ -158,13 +164,11 @@ public class Commander {
         System.err.println("Fleet status "+fleetCount+"/"+fleetMax);
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
-        lastUpdate = LocalDateTime.now();
     }
 
     public void setExpeditionStatus(int expeditionCount, int expeditionMax) {
         this.expeditionCount = expeditionCount;
         this.expeditionMax = expeditionMax;
-        lastUpdate = LocalDateTime.now();
     }
 
     public synchronized void push(AbstractCommand command) {

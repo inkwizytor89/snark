@@ -1,6 +1,5 @@
 package org.enoch.snark.module.explore;
 
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
@@ -44,8 +43,8 @@ public class SpaceThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         if( GalaxyDAO.getInstance().fetchAll().isEmpty()) {
-            int galaxyMax = Integer.parseInt(instance.universe.getConfig((Universe.GALAXY_MAX)));
-            int systemMax = Integer.parseInt(instance.universe.getConfig((Universe.SYSTEM_MAX)));
+            int galaxyMax = Integer.parseInt(Instance.universe.getConfig((Universe.GALAXY_MAX)));
+            int systemMax = Integer.parseInt(Instance.universe.getConfig((Universe.SYSTEM_MAX)));
             GalaxyDAO.getInstance().persistGalaxyMap(galaxyMax, systemMax);
         }
         notExplored.addAll(GalaxyDAO.getInstance().findNotExplored());

@@ -105,14 +105,10 @@ public class FleetEntity extends IdEntity {
     public Long espionageProbe;
 
     @Transient
-    private Instance instance;
-
-    @Transient
     private  Planet planet;
 
     public FleetEntity() {
         super();
-        this.instance = Instance.getInstance();
         start = LocalDateTime.now();
     }
 
@@ -185,15 +181,9 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = colony.galaxy;
         fleet.targetSystem = colony.system;
         fleet.targetPosition = 16;
+        fleet.spaceTarget = ColonyType.PLANET.getName();
         fleet.source = colony;
         fleet.type = EXPEDITION;
-//        fleet.explorer = 1L;
-//        Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
-//        if(expeditionShipsCount > 0) {
-//            fleet.transporterLarge = expeditionShipsCount;
-//        } else {
-//            fleet.transporterSmall = -expeditionShipsCount;
-//        }
         return fleet;
     }
 
@@ -218,7 +208,7 @@ public class FleetEntity extends IdEntity {
             throw new RuntimeException("missing target for fleet in FleetBuilder");
         }
         if(source == null) {
-            this.source = instance.findNearestSource(planet);
+            this.source = Instance.getInstance().findNearestSource(planet);
         }
         FleetDAO.getInstance().saveOrUpdate(this);
     }

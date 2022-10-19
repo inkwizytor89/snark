@@ -4,8 +4,9 @@ import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
 
-import javax.persistence.*;
-import java.util.Collection;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -291,21 +292,6 @@ public abstract class PlanetEntity extends IdEntity{
         super();
         loadPlanetCoordinate(input);
     }
-
-//    public Integer calculateDistance(PlanetEntity planet) {
-//        return this.calculateDistance(planet.toPlanet());
-//    }
-
-//    public Integer calculateDistance(Planet planet) {
-//        return planet.calculateDistance()
-//        if(!galaxy.equals(planet.galaxy)) {
-//            return roundDistance(galaxy, planet.galaxy, 6) *20000;
-//        }
-//        if(!system.equals(planet.system)) {
-//            return roundDistance(system, planet.system, 499) *95 +2700;
-//        }
-//        return roundDistance(position, planet.position, 15)*5+1000;
-//    }
 
     private int roundDistance(Integer x1, Integer x2, Integer max) {
         return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);

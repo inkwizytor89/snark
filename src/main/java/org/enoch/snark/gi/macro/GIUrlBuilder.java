@@ -11,7 +11,6 @@ import org.enoch.snark.model.SystemView;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,15 +55,6 @@ public class GIUrlBuilder {
         Instance.getInstance().gi.updateFleet(source);
     }
 
-//    public void updateFleetStatus() {
-//        String builder = instance.universe.url + "?" +
-//                PAGE_TERM + PAGE_INGAME + "&" +
-//                COMPONENT_TERM + PAGE_BASE_FLEET ;
-//        instance.session.getWebDriver().get(builder);
-//
-//        loadFleetStatus();
-//    }
-
     public void loadFleetStatus() {
         Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
         final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
@@ -72,7 +62,6 @@ public class GIUrlBuilder {
         if(m.find()) {
             instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
             int expeditionCount = Integer.parseInt(m.group(3));
-            System.err.println("update commander on expedition "+expeditionCount);
             instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
         }
     }
@@ -140,7 +129,8 @@ public class GIUrlBuilder {
 
     public void openGalaxy(SystemView systemView, ColonyEntity colony) {
         if(colony == null) {
-            colony = ColonyDAO.getInstance().getOldestUpdated();
+            colony = instance.lastVisited;
+            if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
         String builder = instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
@@ -149,6 +139,7 @@ public class GIUrlBuilder {
                 "&system=" + systemView.system +
                 "&cp=" + colony.cp;
         instance.session.getWebDriver().get(builder);
+        instance.lastVisited = colony;
         updateColony(colony);
         instance.gi.updateGalaxy(systemView);
     }

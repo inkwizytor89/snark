@@ -54,7 +54,7 @@ public class GI {
     private final Instance instance;
     private final GalaxyDAO galaxyDAO;
     private final TargetDAO targetDAO;
-    private QueueManger queueManger;
+    private final QueueManger queueManger;
 
     private GI() {
         webDriver = new ChromeDriver();
@@ -153,14 +153,11 @@ public class GI {
                 if(eventHeader.get(0).isDisplayed())
                     webDriver.findElement(By.className("event_list")).click();
             }
-//            SleepUtil.pause();
-            System.err.println("click event_list");
             webDriver.findElement(By.className("event_list")).click();
             SleepUtil.pause();
             List<WebElement> tableRows = new WebDriverWait(webDriver, 1)
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
 
-            System.err.println("load data");
             for (WebElement we : tableRows) {
 
                 EventFleet event = new EventFleet();
@@ -193,7 +190,6 @@ public class GI {
             e.printStackTrace();
             return null;
         }
-        System.err.println("done");
         return eventFleets;
     }
 

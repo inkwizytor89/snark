@@ -5,7 +5,6 @@ import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public abstract class AbstractThread extends Thread {
@@ -20,7 +19,7 @@ public abstract class AbstractThread extends Thread {
     public AbstractThread(SI si) {
         this.si = si;
         instance = si.getInstance();
-        commander = instance.commander;
+        commander = Commander.getInstance();
         setName(this.getClass().getName());
     }
 
@@ -29,7 +28,7 @@ public abstract class AbstractThread extends Thread {
     protected abstract int getPauseInSeconds();
 
     protected void onStart() {
-        log.info("Thread " + getThreadName() + " starting on " + si.getInstance().universe.name);
+        log.info("Thread " + getThreadName() + " starting");
     }
 
     protected abstract void onStep();
@@ -47,14 +46,14 @@ public abstract class AbstractThread extends Thread {
             }
             // sleeping logic
             do {
-                if(!si.getInstance().commander.isRunning()) {
-                    log.info("Thread " + getThreadName() + " stopping on " + si.getInstance().universe.name);
+                if(!commander.isRunning()) {
+                    log.info("Thread " + getThreadName() + " stopping");
                     wasSleeping = true;
                 }
                 SleepUtil.secondsToSleep(getPauseInSeconds());
-            }while(!si.getInstance().commander.isRunning());
+            }while(!commander.isRunning());
             if(wasSleeping) {
-                log.info("Thread " + getThreadName() + " back to live on " + si.getInstance().universe.name);
+                log.info("Thread " + getThreadName() + " back to live");
                 wasSleeping = false;
             }
         }

@@ -1,25 +1,23 @@
 package org.enoch.snark.module.expedition;
 
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.macro.ShipEnum;
+import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.db.entity.FleetEntity.EXPEDITION;
-
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadName = "expedition";
 
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
-    private ColonyDAO colonyDAO;
+    private final ColonyDAO colonyDAO;
     private Long maxTL;
 
     public ExpeditionThread(SI si) {
@@ -41,16 +39,7 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        cleanExpeditions();
         chooseColoniesForExpeditionsStart();
-    }
-
-    private void cleanExpeditions() {
-        for(FleetEntity fleet : FleetDAO.getInstance().fetchAll()) {
-            if(EXPEDITION.equals(fleet.type)) {
-                FleetDAO.getInstance().remove(fleet);
-            }
-        }
     }
 
     private void chooseColoniesForExpeditionsStart() {
@@ -78,9 +67,7 @@ public class ExpeditionThread extends AbstractThread {
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {
                 System.err.println(colony+": "+expedition.source+" -> "+expedition.getDestination());
-//                if (colony.canSent(expedition)) {
                 setExpeditionReadyToStart(expedition);
-//                } else System.err.println("Colony " + colony + " can not sent expedition");
             }
             expeditionQueue.add(colony);
         }
@@ -91,14 +78,13 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean areFreeSlotsForExpedition() {
-        return instance.commander.getExpeditionFreeSlots() > 0;
+        return Commander.getInstance().getExpeditionFreeSlots() > 0;
     }
 
     private FleetEntity buildExpeditionFleet(ColonyEntity colony) {
         maxTL = instance.calculateMaxExpeditionSize();
         FleetEntity expeditionToSend = FleetEntity.createExpedition(colony);
 
-        // if can send max dt than choose else check other can send
         Map<ShipEnum, Long> expeditionMap = ShipEnum.createExpeditionMap(maxTL, 0L, 1L);
         if(colony.hasEnoughShips(expeditionMap)) {
 
@@ -109,7 +95,6 @@ public class ExpeditionThread extends AbstractThread {
             return null;
         }
         return sendWhatYouCan();
-//        return FleetEntity.createExpeditionFleet(colony);
     }
 
     private boolean anyExpeditionStartPointHasEnoughShips(Map<ShipEnum, Long> expeditionMap) {
@@ -139,14 +124,6 @@ public class ExpeditionThread extends AbstractThread {
         }
         return bestColony;
     }
-
-//    private void checkColonyStatus(ColonyEntity colony) {
-//        instance.push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
-//    }
-
-//    private void setExpeditionReadyToStart(FleetEntity expedition) {
-//        instance.push(new BetaExpeditionFleetCommand(expedition));
-//    }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition);

@@ -71,11 +71,7 @@ public class Instance {
     @Transactional
     public void loadGameState() {
         try {
-            PlayerEntity player = PlayerEntity.mainPlayer();
-            PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(player);
-            if(mainPlayer == null) {
-                mainPlayer = player;
-            }
+            PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
 
             // init database with colonies to not get NPE
             ColonyDAO colonyDAO = ColonyDAO.getInstance();
@@ -125,7 +121,9 @@ public class Instance {
         browserReset();
         loadGameState();
         LOG.info("loading game state successful");
-        commander = new Commander();
+
+        commander = Commander.getInstance();
+        commander.startInterfaceQueue();
         LOG.info("Commander start successful");
         new BaseSI(this).run();
         LOG.info("SI start successful");
@@ -168,17 +166,8 @@ public class Instance {
         return ColonyDAO.getInstance().fetchAll().get(0);
     }
 
-    //to remove
-    public Long calculateMinExpeditionSize() {
-        String minDt = this.universe.getConfig((Universe.MIN_DT));
-        if(minDt == null || minDt.isEmpty()) {
-            return 1700L;
-        }
-        return Long.parseLong(minDt);
-    }
-
     public Long calculateMaxExpeditionSize() {
-        String maxDt = this.universe.getConfig((Universe.MAX_DT));
+        String maxDt = universe.getConfig((Universe.MAX_DT));
         if(maxDt == null || maxDt.isEmpty()) {
             return 2500L;
         }
