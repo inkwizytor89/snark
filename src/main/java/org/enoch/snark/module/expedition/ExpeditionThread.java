@@ -1,6 +1,5 @@
 package org.enoch.snark.module.expedition;
 
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -8,10 +7,10 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.BetaExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -23,17 +22,12 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadName = "expedition";
-    public static final int SHORT_PAUSE = 1;
-    public static final int LONG_PAUSE = 1;
-    private int failCount = 0;
 
-    private final Instance instance;
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
 
     public ExpeditionThread(SI si) {
         super(si);
-        pause = SHORT_PAUSE;
-        instance = si.getInstance();
+        pause = 1;
     }
 
     @Override
@@ -58,6 +52,7 @@ public class ExpeditionThread extends AbstractThread {
         List<ColonyEntity> planetList = ColonyDAO.getInstance().fetchAll()
                 .stream()
                 .filter(colonyEntity -> colonyEntity.isPlanet)
+                .sorted(Comparator.comparing(o -> -o.galaxy))
                 .collect(Collectors.toList());
         for(ColonyEntity planet : planetList) {
             ColonyEntity colony = planet;
@@ -77,16 +72,9 @@ public class ExpeditionThread extends AbstractThread {
             FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
             if(colony.canSent(expedition)) {
                 setExpeditionReadyToStart(colony);
-                failCount++;
-//                setExpeditionReadyToStart(expedition);
             } else System.err.println("Colony "+colony+" can not sent expedition");
             expeditionQueue.add(colony);
         }
-//        if(failCount > 20) {
-//            System.err.println("Expedition pause");
-//            SleepUtil.secondsToSleep(600);
-//            failCount = 0;
-//        }
     }
 
     private void checkColonyStatus(ColonyEntity colony) {
