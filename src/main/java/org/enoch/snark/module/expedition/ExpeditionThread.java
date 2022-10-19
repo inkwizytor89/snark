@@ -61,25 +61,19 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = expeditionQueue.poll();
-            failCount++;
-            setExpeditionReadyToStart(colony);
-//            FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
-//            if(colony.canSent(expedition)) {
+            FleetEntity expedition = FleetEntity.createExpeditionFleet(colony);
+            if(colony.canSent(expedition)) {
+                setExpeditionReadyToStart(colony);
+                failCount++;
 //                setExpeditionReadyToStart(expedition);
-//                failCount = 0;
-//            } else {
-//                checkColonyStatus(colony);
-////                pause = 1;
-//            }
-            pause = SHORT_PAUSE;
+            } else System.err.println("Colony "+colony+" can not sent expedition");
             expeditionQueue.add(colony);
-        } else {
-            pause = LONG_PAUSE;
         }
-        if(failCount > 20) {
-            SleepUtil.secondsToSleep(600);
-            failCount = 0;
-        }
+//        if(failCount > 20) {
+//            System.err.println("Expedition pause");
+//            SleepUtil.secondsToSleep(600);
+//            failCount = 0;
+//        }
     }
 
     private void checkColonyStatus(ColonyEntity colony) {

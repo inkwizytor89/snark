@@ -30,10 +30,9 @@ import static org.enoch.snark.gi.command.impl.CommandType.FLEET_REQUIERED;
 public class SendFleetCommand extends GICommand {
 
     protected final FleetSelector fleetSelector;
-//    protected TargetEntity target;
     public Mission mission;
-//    protected SourcePlanet source;
-protected GIUrlBuilder giUrlBuilder;
+    protected GIUrlBuilder giUrlBuilder;
+    protected boolean autoComplete;
 
     public FleetEntity fleet;
 
@@ -57,7 +56,7 @@ protected GIUrlBuilder giUrlBuilder;
         // musimy pobrac odpowiednia flote z bazy danych
         // uzupełnić odpowiednimi danymi
         // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
-        if(openFleetWindow()) {
+        if(!prepere()) {
             return true;
         };
         //Scroll down till the bottom of the page
@@ -69,15 +68,16 @@ protected GIUrlBuilder giUrlBuilder;
 
         fleetSelector.next();
         SleepUtil.pause();
-        WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
+        if(!autoComplete) {
+            WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
 //        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
 //        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
-        coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
+            coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
 //        SleepUtil.pause();
 //        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
-        SleepUtil.pause();
-        SleepUtil.sleep();
-
+            SleepUtil.pause();
+            SleepUtil.sleep();
+        }
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         final LocalTime durationTime = DateUtil.parseDuration(duration);
@@ -124,16 +124,16 @@ protected GIUrlBuilder giUrlBuilder;
             setAfterCommand(null);
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
-        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet
+        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
         new GIUrlBuilder().loadFleetStatus();
         int expeditionCount = instance.commander.getExpeditionCount();
         System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
         return true;
     }
 
-    public boolean openFleetWindow() {
+    public boolean prepere() {
         giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
-        return false;
+        return true;
     }
 
     public Map<ShipEnum, Long> buildShipsMap() {

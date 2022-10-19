@@ -41,9 +41,9 @@ public class ColonyEntity extends PlanetEntity {
         return result;
     }
 
-//    public boolean canSent(FleetEntity fleet) {
-//        return fleet.source.transporterLarge > Instance.getInstance().calculateMinExpeditionSize();
-//    }
+    public boolean canSent(FleetEntity fleet) {
+        return fleet.source.transporterLarge > Instance.getInstance().calculateMinExpeditionSize();
+    }
 
     public ColonyEntity refresh() {
         JPAUtility.getEntityManager().refresh(this);

@@ -2,6 +2,7 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
@@ -20,6 +21,20 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
     public ExpeditionFleetCommand(ColonyEntity colony) {
         super(FleetEntity.createExpeditionFleet(colony));
         this.colony = colony;
+    }
+
+    @Override
+    public boolean prepere() {
+        Planet expeditionDest = colony.toPlanet();
+        expeditionDest.position = 16;
+        giUrlBuilder.openFleetView(colony, expeditionDest, Mission.EXPEDITION);
+        autoComplete = true;
+        if(!canSendExpedition()) {
+            System.err.println("Colony "+colony+" have not enough ships - skipping expedition");
+            return false;
+        }
+        fleet = FleetEntity.createExpeditionFleet(colony);
+        return true;
     }
 
     @Override
@@ -57,22 +72,11 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
     }
 
     @Override
-    public boolean openFleetWindow() {
-        giUrlBuilder.open(PAGE_BASE_FLEET, colony);
-        if(!canSendExpedition()) {
-            return true;
-        }
-        fleet = FleetEntity.createExpeditionFleet(colony);
-        return false;
-    }
-
-    @Override
     public boolean execute() {
         return super.execute();
     }
 
     private boolean canSendExpedition() {
-//        return true;
         Long expeditionShipsCount = Instance.getInstance().calculateMinExpeditionSize();
         return colony.explorer > 0 && (
                 (expeditionShipsCount > 0 && colony.transporterLarge >= expeditionShipsCount) ||
