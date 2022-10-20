@@ -21,11 +21,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.enoch.snark.gi.command.impl.CommandType.FLEET_REQUIERED;
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class SendFleetCommand extends GICommand {
 
@@ -70,8 +72,8 @@ public class SendFleetCommand extends GICommand {
         SleepUtil.pause();
         if(!autoComplete) {
             WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
-//        coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
-//        coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
+            coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
+            coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
             coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
 //        SleepUtil.pause();
 //        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
@@ -86,6 +88,7 @@ public class SendFleetCommand extends GICommand {
             SleepUtil.sleep();
             arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
         }
+        fleet.start = LocalDateTime.now();
         fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);
         final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
         fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
@@ -105,7 +108,8 @@ public class SendFleetCommand extends GICommand {
         }
         if(Mission.SPY.equals(mission)) {
             MessageService.getInstance().put(durationTime.toSecondOfDay());
-//            setAfterCommand(new ReadMessageCommand(instance));
+            setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+3);
+            setAfterCommand(new OpenPageCommand(PAGE_BASE_FLEET, fleet.source));
         }
 
         try {
@@ -125,9 +129,11 @@ public class SendFleetCommand extends GICommand {
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
         SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
-        new GIUrlBuilder().loadFleetStatus();
-        int expeditionCount = instance.commander.getExpeditionCount();
-        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
+
+        //open after pause to wait for game to reload fleet and expedition statuses
+        new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
+//        int expeditionCount = instance.commander.getExpeditionCount();
+//        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
         return true;
     }
 

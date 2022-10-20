@@ -45,7 +45,7 @@ public class FleetEntity extends IdEntity {
 
     @Basic
     @Column(name = "start")
-    public LocalDateTime start = LocalDateTime.now();
+    public LocalDateTime start;
 
     @Basic
     @Column(name = "visited")
@@ -109,7 +109,6 @@ public class FleetEntity extends IdEntity {
 
     public FleetEntity() {
         super();
-        start = LocalDateTime.now();
     }
 
     public boolean isDone() {
@@ -158,7 +157,11 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = Instance.getInstance().findNearestSource(target);
+        fleet.spaceTarget = ColonyType.PLANET.getName();
+        if(!target.isPlanet) {
+            fleet.spaceTarget = ColonyType.MOON.getName();
+        }
+        fleet.source = Instance.getInstance().findNearestMoon(target);
         fleet.type = SPY;
         fleet.espionageProbe = count.longValue();
         return fleet;
@@ -170,7 +173,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = instance.findNearestSource(target);
+        fleet.source = instance.findNearestMoon(target);
         fleet.type = ATTACK;
         fleet.transporterSmall = target.calculateTransportByLt();
         return fleet;
@@ -208,7 +211,7 @@ public class FleetEntity extends IdEntity {
             throw new RuntimeException("missing target for fleet in FleetBuilder");
         }
         if(source == null) {
-            this.source = Instance.getInstance().findNearestSource(planet);
+            this.source = Instance.getInstance().findNearestMoon(planet);
         }
         FleetDAO.getInstance().saveOrUpdate(this);
     }

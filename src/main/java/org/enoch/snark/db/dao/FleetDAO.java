@@ -52,10 +52,7 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from FleetEntity " +
-                    "where  start is not null and " +
-                    "       start < :now and " +
-                    "       visited is null", FleetEntity.class)
-                    .setParameter("now", LocalDateTime.now())
+                    "where start is null ", FleetEntity.class)
                     .getResultList();
         }
     }

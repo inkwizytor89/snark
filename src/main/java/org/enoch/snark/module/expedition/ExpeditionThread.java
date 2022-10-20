@@ -102,6 +102,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private FleetEntity sendWhatYouCan() {
+        System.err.println("\nsendWhatYouCan expedition - why?!\n");
         ColonyEntity anotherExpeditionStartPoint = findBestExpeditionStartPoint();
         FleetEntity expedition = FleetEntity.createExpedition(anotherExpeditionStartPoint);
         if(anotherExpeditionStartPoint.explorer > 0) {

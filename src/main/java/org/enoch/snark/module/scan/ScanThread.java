@@ -1,5 +1,7 @@
 package org.enoch.snark.module.scan;
 
+import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -33,8 +35,14 @@ public class ScanThread extends AbstractThread {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        SleepUtil.secondsToSleep(10);
+    }
+
+    @Override
     protected void onStep() {
-        pause = 120;
+        pause = 300;
         if(notScanned.isEmpty()) {
             notScanned =  new LinkedList<>(TargetDAO.getInstance().findNotScanned());
         }
@@ -45,7 +53,8 @@ public class ScanThread extends AbstractThread {
         for (int i = 0; i < 10; i++) {
             if(!notScanned.isEmpty()) {
                 FleetEntity fleet = FleetEntity.createSpyFleet(notScanned.poll());
-                Instance.getInstance().push(new SendFleetCommand(fleet));
+                FleetDAO.getInstance().saveOrUpdate(fleet);
+//                Instance.getInstance().push(new SendFleetCommand(fleet));
             }
         }
     }

@@ -2,16 +2,16 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.CommandType;
+import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.WebDriverException;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Commander {
@@ -64,17 +64,24 @@ public class Commander {
 
                     startCommander();
 
-                    if (!fleetActionQueue.isEmpty() && isFleetFreeSlot()) {
-                        actualProcessedCommand = fleetActionQueue.poll();
-                        resolve(actualProcessedCommand);
-                        actualProcessedCommand = null;
-                        fleetCount++;
-                        continue;
+                    if(isFleetFreeSlot()) {
+                        if (!fleetActionQueue.isEmpty()) {
+                            resolve(Objects.requireNonNull(fleetActionQueue.poll()));
+                            fleetCount++;
+                            continue;
+                        } else {
+                            List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
+                            if (!toProcess.isEmpty()) {
+                                FleetEntity waitingFleet = toProcess.get(0);
+                                System.err.println("Find waiting fleet "+waitingFleet);
+                                resolve(new SendFleetCommand(waitingFleet));
+                                fleetCount++;
+                                continue;
+                            }
+                        }
                     } else if (!interfaceActionQueue.isEmpty()) {
-                        actualProcessedCommand = interfaceActionQueue.poll();
-                        resolve(actualProcessedCommand);
-                        actualProcessedCommand = null;
-                        continue;
+                            resolve(interfaceActionQueue.poll());
+                            continue;
                     }
 
                     SleepUtil.secondsToSleep(SLEEP_PAUSE);
@@ -117,6 +124,7 @@ public class Commander {
     }
 
     private synchronized void resolve(AbstractCommand command) {
+        actualProcessedCommand = command;
         boolean success;
         if(command.requiredGI() && !session.isLoggedIn()) {
             session.open();
@@ -152,6 +160,7 @@ public class Commander {
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
             }
         }
+        actualProcessedCommand = null;
     }
 
     private boolean isFleetFreeSlot() {

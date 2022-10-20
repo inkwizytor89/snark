@@ -56,7 +56,7 @@ public class SpaceThread extends AbstractThread {
         pause = 300;
         if(LocalDateTime.now().getHour() < 5) {
             timeToBack = 23;
-            pause = 60;
+            pause = 90;
         }
         if(!notExplored.isEmpty()) {
             LOG.info(threadName+" still galaxy to look at "+notExplored.size());

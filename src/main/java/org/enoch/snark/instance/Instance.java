@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
 
@@ -109,7 +110,9 @@ public class Instance {
 
     public void browserReset() {
         if(session != null) {
+            session.getWebDriver().close();
             session.getWebDriver().quit();
+
         }
         GI.restartInstance();
         gi = GI.getInstance();
@@ -129,13 +132,14 @@ public class Instance {
         LOG.info("SI start successful");
     }
 
-    public ColonyEntity findNearestSource(PlanetEntity planet) {
-        return this.findNearestSource(planet.toPlanet());
+    public ColonyEntity findNearestMoon(PlanetEntity planet) {
+        return this.findNearestMoon(planet.toPlanet());
     }
 
-    public ColonyEntity findNearestSource(Planet planet) {
+    public ColonyEntity findNearestMoon(Planet planet) {
 
-        List<ColonyEntity> sources = new ArrayList<>(ColonyDAO.getInstance().fetchAll());
+        List<ColonyEntity> sources = new ArrayList<>(ColonyDAO.getInstance().fetchAll()).stream()
+                .filter(col -> !col.isPlanet).collect(Collectors.toList());
 
         ColonyEntity nearestPlanet = sources.get(0);
         Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
