@@ -79,7 +79,8 @@ public class Commander {
                                 continue;
                             }
                         }
-                    } else if (!interfaceActionQueue.isEmpty()) {
+                    }
+                    if (!interfaceActionQueue.isEmpty()) {
                             resolve(interfaceActionQueue.poll());
                             continue;
                     }

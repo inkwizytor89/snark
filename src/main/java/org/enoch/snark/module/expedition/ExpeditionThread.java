@@ -1,9 +1,11 @@
 package org.enoch.snark.module.expedition;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
+import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.SI;
@@ -11,6 +13,8 @@ import org.enoch.snark.module.AbstractThread;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class ExpeditionThread extends AbstractThread {
 
@@ -66,7 +70,6 @@ public class ExpeditionThread extends AbstractThread {
             ColonyEntity colony = expeditionQueue.poll();
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {
-                System.err.println(colony+": "+expedition.source+" -> "+expedition.getDestination());
                 setExpeditionReadyToStart(expedition);
             }
             expeditionQueue.add(colony);
@@ -93,12 +96,20 @@ public class ExpeditionThread extends AbstractThread {
         }
         if(anyExpeditionStartPointHasEnoughShips(expeditionMap)) {
             return null;
+        } else {
+            loadExpeditionPoints();
         }
         return sendWhatYouCan();
     }
 
     private boolean anyExpeditionStartPointHasEnoughShips(Map<ShipEnum, Long> expeditionMap) {
         return expeditionQueue.stream().anyMatch(colony -> colony.hasEnoughShips(expeditionMap));
+    }
+
+    private void loadExpeditionPoints() {
+        expeditionQueue.forEach(col -> commander.push(new OpenPageCommand(PAGE_BASE_FLEET, col)));
+        System.err.println("reloading expedition points");
+        SleepUtil.secondsToSleep(60);
     }
 
     private FleetEntity sendWhatYouCan() {
@@ -108,8 +119,12 @@ public class ExpeditionThread extends AbstractThread {
         if(anotherExpeditionStartPoint.explorer > 0) {
             expedition.explorer = 1L;
         }
-        expedition.transporterLarge = anotherExpeditionStartPoint.transporterLarge;
-        expedition.transporterSmall = (maxTL - expedition.transporterLarge) * 5;
+        if(anotherExpeditionStartPoint.transporterLarge > maxTL) {
+            expedition.transporterLarge = maxTL;
+        } else {
+            expedition.transporterLarge = anotherExpeditionStartPoint.transporterLarge;
+            expedition.transporterSmall = (maxTL - expedition.transporterLarge) * 5;
+        }
         return expedition;
     }
 
