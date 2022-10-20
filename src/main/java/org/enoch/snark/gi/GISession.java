@@ -71,18 +71,25 @@ public class GISession {
 //        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
 //        gi.findText("Login").click();
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(instance.universe.login);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(Instance.universe.login);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
         SleepUtil.secondsToSleep(2);
 
 
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(instance.universe.pass);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.universe.pass);
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
-        SleepUtil.secondsToSleep(2);
+
+        String expectedURL="https://gameforge.com/pl-PL";
+        for(int i =0; i<20;i++) {
+            SleepUtil.secondsToSleep(1);
+            if(expectedURL.equals(webDriver.getCurrentUrl())) {
+                break;
+            }
+        }
 
         //chooseServer
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
-        gi.doubleClickText(instance.universe.name);
+        gi.doubleClickText(Instance.universe.name);
 
         isLoggedIn = true;
     }
