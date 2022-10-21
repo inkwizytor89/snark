@@ -42,12 +42,12 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        pause = 300;
+        pause = 400;
         if(notScanned.isEmpty()) {
             notScanned =  new LinkedList<>(TargetDAO.getInstance().findNotScanned());
         }
         if(notScanned.isEmpty()) {
-            pause = 1200;
+            pause = 2400;
         }
         LOG.info(threadName+" still id "+notScanned.size());
         for (int i = 0; i < 10; i++) {

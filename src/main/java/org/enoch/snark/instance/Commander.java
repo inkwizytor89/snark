@@ -55,6 +55,8 @@ public class Commander {
         Runnable task = () -> {
             while(true) {
                 try {
+                    if(!isRunning) continue;
+
                     restartIfSessionIsOver();
 
                     if (instance.isStopped()) {
@@ -116,11 +118,11 @@ public class Commander {
             }
         } catch (WebDriverException e) {
             e.printStackTrace();
-            stopCommander();
-            System.err.println("sleep 500 before restart");
-            SleepUtil.secondsToSleep(500);
-            instance.browserReset();
-            startCommander();
+//            stopCommander();
+//            System.err.println("sleep 500 before restart");
+//            SleepUtil.secondsToSleep(500);
+//            instance.browserReset();
+//            startCommander();
         }
     }
 
