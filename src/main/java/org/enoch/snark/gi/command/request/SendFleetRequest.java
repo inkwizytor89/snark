@@ -89,7 +89,7 @@ public class SendFleetRequest {
             return FleetEntity.createSpyFleet(target);
         }
         if(FleetEntity.ATTACK.equals(mission)) {
-            return FleetEntity.createFarmFleet(instance, target);
+            return FleetEntity.createFarmFleet(target);
         }
         throw new RuntimeException("Unknown mission "+ mission);
     }

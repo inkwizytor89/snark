@@ -21,4 +21,12 @@ public class FarmEntity extends IdEntity {
     @Column(name = "war_requests_code")
     public Long warRequestCode;
 
+    @Override
+    public String toString() {
+        return "FarmEntity{" +
+                "start=" + start +
+                ", spyRequestCode=" + spyRequestCode +
+                ", warRequestCode=" + warRequestCode +
+                '}';
+    }
 }

@@ -8,6 +8,7 @@ import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.command.request.SendFleetRequest;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
@@ -31,7 +32,6 @@ public class FarmThread extends AbstractThread {
     private final FleetDAO fleetDAO;
     private final TargetDAO targetDAO;
     private FarmEntity actualFarm;
-    private FarmEntity previousFarm;
     private LinkedList<TargetEntity> farms = new LinkedList<>();
 
     public FarmThread(SI si) {
@@ -54,65 +54,37 @@ public class FarmThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        if(farmDAO.getActualState() == null) {
-//            farmDAO.saveOrUpdate(createFarmEntity());
-            farmDAO.saveOrUpdate(createFarmEntity());
-        }
         actualFarm = farmDAO.getActualState();
-        previousFarm = farmDAO.getPreviousState();
-    }
-
-    private FarmEntity createFarmEntity() {
-        FarmEntity farmEntity = new FarmEntity();
-        farmEntity.start = LocalDateTime.now();
-        return farmEntity;
     }
 
     @Override
     public void onStep() {
-        pause = 1;
-        System.err.println("farm start");
+        if (!fulfillsPreconditions()) return;
 
-        if(farms.isEmpty()) {
-            findBestFarms();
-        }
-        if(farms.size() < calculateSlotsToUse() * 4) {
-            pause = 60;
-            System.err.println("farm skipping");
-            return;
-        }
-        // teraz na such request do skanowania jakiegos zbioru 4x slots
-
-        if(isTimeToNewFarmWave()) {
-            prepereNewFarmWave();
-        } else if(isTimeToSpyCheckFarms()) {
-            System.err.println("start "+ actualFarm.start);
-            List<TargetEntity> farmTargets = targetDAO.findFarms(20);
-
-            //new transaction
-            actualFarm.spyRequestCode = fleetDAO.genereteNewCode();
-            for(TargetEntity farm : farmTargets) {
-                FleetEntity spyFleet = FleetEntity.createSpyFleet(farm);
-                spyFleet.spaceTarget = ColonyType.PLANET.getName();
-                spyFleet.code = actualFarm.spyRequestCode;
-                FleetDAO.getInstance().saveOrUpdate(spyFleet);
-            }
-//            actualFarm.spyRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.SPY, farmTargets).sendAndWait();
-
+        if(isTimeToCreateWave()) {
+            actualFarm = new FarmEntity();
+            actualFarm.start = LocalDateTime.now();
             farmDAO.saveOrUpdate(actualFarm);
-            //end transaction
-            // wyciagnij poprzedni zbior celow
+        }
 
-            // wysylac sondy 50 sond do target ktore maja najwieszy porencjal a nie bylu ostatnio oblatywane
-            // spyrequest zrobic mu konsrtuktor ktory dziala na tych zbiorach lub lepiej
-        } else if (actualFarm.spyRequestCode != null) {
-            System.err.println("spyRequestCode "+ actualFarm.spyRequestCode);
+        if(isTimeToSpyFarmWave()) {
+            Long code = fleetDAO.genereteNewCode();
+            farmDAO.createNewWave(Mission.SPY, targetDAO.findFarms(10), code);
+            actualFarm.spyRequestCode = code;
+            farmDAO.saveOrUpdate(actualFarm);
+        }
+        if (isTimeToAttackFarmWave()) {
+            Long code = fleetDAO.genereteNewCode();
             int fleetNum = si.getAvailableFleetCount(this);
-            List<TargetEntity> farmTargets = targetDAO.findTopFarms(fleetNum);
-            actualFarm.warRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.ATTACK, farmTargets)
-                    .setLimit(fleetNum)
-                    .sendAndWait();
+            farmDAO.createNewWave(Mission.ATTACK, targetDAO.findTopFarms(fleetNum), code);
+            actualFarm.warRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
+
+
+//            actualFarm.warRequestCode = new SendFleetRequest(si.getInstance(), FleetEntity.ATTACK, farmTargets)
+//                    .setLimit(fleetNum)
+//                    .sendAndWait();
+//            farmDAO.saveOrUpdate(actualFarm);
             // zapytaj o 50 najnowszych skanow
             // posortuj je wg korzystnosci i bez obrony
             // wybierz fleetNum najbardziej korzystnych
@@ -124,24 +96,37 @@ public class FarmThread extends AbstractThread {
         // niech czeka ile trzeba a nie aktywuje sie co sekunde
     }
 
-    public boolean isTimeToSpyCheckFarms() {
-        return LocalDateTime.now().isAfter(actualFarm.start);
+    private boolean isTimeToCreateWave() {
+        return actualFarm == null || (actualFarm.warRequestCode != null && isFleetBack(actualFarm.warRequestCode));
     }
 
-    public void prepereNewFarmWave() {
-        System.err.println("warRequestCode "+ actualFarm.warRequestCode);
-        previousFarm = actualFarm;
-        actualFarm = createFarmEntity();
-        farmDAO.saveOrUpdate(actualFarm);
-        // x = przylot ostatniego statku
-        // stworz nowy farm entity
-        // ustaw jego start na x-5min
-        // aktualny actualFarm ustaw jako nowy
+    public boolean isTimeToSpyFarmWave() {
+        return actualFarm.spyRequestCode == null;
     }
 
-    public boolean isTimeToNewFarmWave() {
-        return actualFarm.warRequestCode != null && fleetDAO.fetchAll().stream()
-    .filter(fleet -> actualFarm.warRequestCode.equals(fleet.code))
+    public boolean isTimeToAttackFarmWave() {
+        return actualFarm.warRequestCode == null && isFleetBack(actualFarm.spyRequestCode);
+    }
+
+    public boolean fulfillsPreconditions() {
+        pause = 1;
+        System.err.println("farm start");
+
+        if(farms.isEmpty()) {
+            findBestFarms();
+        }
+        if(farms.size() < calculateSlotsToUse() * 4) {
+            pause = 60;
+            System.err.println("farm skipping");
+            return false;
+        }
+        // teraz na such request do skanowania jakiegos zbioru 4x slots
+        return true;
+    }
+
+    public boolean isFleetBack(Long code) {
+        return code != null && fleetDAO.fetchAll().stream()
+    .filter(fleet -> code.equals(fleet.code))
     .allMatch(FleetEntity::isItBack);
     }
 

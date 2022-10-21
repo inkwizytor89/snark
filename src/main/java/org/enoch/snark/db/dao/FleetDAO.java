@@ -32,7 +32,7 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
                     "select max(e.code) from FleetEntity e", Long.class)
                     .getSingleResult();
             if(singleResult == null) {
-                singleResult = 0L;
+                singleResult = 1L;
             }
             return singleResult + 1;
         }

@@ -107,8 +107,9 @@ public class SendFleetCommand extends GICommand {
             return true;
         }
         if(Mission.SPY.equals(mission)) {
-            MessageService.getInstance().put(durationTime.toSecondOfDay());
-            setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+3);
+            int secondToCheck = durationTime.toSecondOfDay()+3;
+            MessageService.getInstance().put(secondToCheck);
+            setSecoundToDelayAfterCommand(secondToCheck*2);
             setAfterCommand(new OpenPageCommand(PAGE_BASE_FLEET, fleet.source));
         }
 
@@ -120,12 +121,14 @@ public class SendFleetCommand extends GICommand {
             System.err.println("Can not send fleer to target " + target);
             instance.push(new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)));
 //            instance.removePlanet(new Planet(fleet.getCoordinate()));
+            if(fleet.code != null) fleet.code = - fleet.code;
             setAfterCommand(null);
             return true;
         }
         catch(ToStrongPlayerException e) {
             System.err.println(e);
             setAfterCommand(null);
+            if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
         SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet

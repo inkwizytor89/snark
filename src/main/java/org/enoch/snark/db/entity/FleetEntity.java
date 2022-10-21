@@ -167,13 +167,12 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createFarmFleet(@Nonnull Instance instance,
-                                             @Nonnull TargetEntity target) {
+    public static FleetEntity createFarmFleet(TargetEntity target) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = instance.findNearestMoon(target);
+        fleet.source = Instance.getInstance().findNearestMoon(target);
         fleet.type = ATTACK;
         fleet.transporterSmall = target.calculateTransportByLt();
         return fleet;
