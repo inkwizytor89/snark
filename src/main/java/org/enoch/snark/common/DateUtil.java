@@ -19,11 +19,12 @@ public class DateUtil {
         return LocalDateTime.parse(date + " " + time, formatter);
     }
 
-    // TODO: 2018-02-06 extends to days in input
+    // TODO: 2018-02-06 extends to days in input 1:05:34 h
+    // dobrze 0:10:21 h
     public static LocalTime parseDuration(String input) {
         final String[] split = input.split("\\s+");
         String time = split[0];
-        if(time.startsWith("0")) {
+        if(time.length() < 8) {
             time = "0"+time;
         }
         return LocalTime.parse(time);

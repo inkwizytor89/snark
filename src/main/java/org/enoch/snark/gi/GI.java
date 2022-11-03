@@ -153,7 +153,12 @@ public class GI {
                 if(eventHeader.get(0).isDisplayed())
                     webDriver.findElement(By.className("event_list")).click();
             }
-            webDriver.findElement(By.className("event_list")).click();
+            List<WebElement> event_list = webDriver.findElements(By.className("event_list"));
+            if(event_list.isEmpty()) {
+                return eventFleets;
+            }
+            event_list.get(0).click();
+
             SleepUtil.pause();
             List<WebElement> tableRows = new WebDriverWait(webDriver, 1)
                             .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));

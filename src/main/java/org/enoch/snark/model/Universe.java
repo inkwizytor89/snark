@@ -18,6 +18,10 @@ public class Universe {
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String MIN_DT = "min_dt";
     public static final String MAX_DT = "max_dt";
+    public static final String MASTER = "master_href";
+    public static final String FLY_POINTS = "fly_points";
+
+
     public String name;
     public String url;
 
@@ -27,9 +31,7 @@ public class Universe {
     public String mode;
     public String config;
 
-    public Collection<ColonyEntity> colonyEntities;
-
-    public static Universe loadPrperties(AppProperties appProperties) {
+    public static Universe loadProperties(AppProperties appProperties) {
         Universe universe = new Universe();
         universe.name = appProperties.server;
         universe.url = appProperties.url;

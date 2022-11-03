@@ -19,6 +19,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -37,8 +38,10 @@ public class Instance {
     public static GI gi;
     public static GISession session;
     public static Integer level = 1;
+    private final ColonyDAO colonyDAO;
 
     public List<Planet> cachedPlaned = new ArrayList<>();
+    public List<ColonyEntity> flyPoints = new ArrayList<>();
     public ColonyEntity lastVisited = null;
     //    public MessageService messageService;
 //    public List<ColonyEntity> sources;
@@ -47,6 +50,7 @@ public class Instance {
 
     private Instance() {
         LOG.info("Config file " + serverConfigPath);
+        colonyDAO = ColonyDAO.getInstance();
         loadServerProperties();
     }
 
@@ -63,7 +67,7 @@ public class Instance {
 
     public synchronized void loadServerProperties() {
         try {
-            universe = Universe.loadPrperties(new AppProperties(serverConfigPath));
+            universe = Universe.loadProperties(new AppProperties(serverConfigPath));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,8 +78,6 @@ public class Instance {
         try {
             PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
 
-            // init database with colonies to not get NPE
-            ColonyDAO colonyDAO = ColonyDAO.getInstance();
             for(ColonyEntity colony : gi.loadPlanetList()) {
                 ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
                 if (colonyEntity == null) {
@@ -103,9 +105,37 @@ public class Instance {
                 }
                 PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
+
+            typeFlyPoints();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void typeFlyPoints() {
+        flyPoints = new ArrayList<>();
+        System.err.println("\nList of fly points:");
+        List<ColonyEntity> planetList = colonyDAO.fetchAll()
+                .stream()
+                .filter(colonyEntity -> colonyEntity.isPlanet)
+                .sorted(Comparator.comparing(o -> -o.galaxy))
+                .collect(Collectors.toList());
+
+        for(ColonyEntity planet : planetList) {
+            ColonyEntity colony = planet;
+            if(!onlyPlanets() && planet.cpm != null) {
+                colony = colonyDAO.find(planet.cpm);
+            }
+            flyPoints.add(colony);
+        System.err.println(colony);
+        }
+        System.err.println();
+    }
+
+    private boolean onlyPlanets() {
+        String config = universe.getConfig(Universe.FLY_POINTS);
+        if(config == null || config.isEmpty()) return false;
+        return config.equals("planets");
     }
 
     public void browserReset() {
@@ -138,13 +168,12 @@ public class Instance {
 
     public ColonyEntity findNearestMoon(Planet planet) {
 
-        List<ColonyEntity> sources = new ArrayList<>(ColonyDAO.getInstance().fetchAll()).stream()
-                .filter(col -> !col.isPlanet).collect(Collectors.toList());
+        List<ColonyEntity> colonies = new ArrayList<>(flyPoints);
 
-        ColonyEntity nearestPlanet = sources.get(0);
-        Integer minDistance = planet.calculateDistance(sources.get(0).toPlanet());
+        ColonyEntity nearestPlanet = colonies.get(0);
+        Integer minDistance = planet.calculateDistance(colonies.get(0).toPlanet());
 
-        for(ColonyEntity source : sources) {
+        for(ColonyEntity source : colonies) {
             Integer distance = planet.calculateDistance(source.toPlanet());
             if (distance < minDistance) {
                 minDistance = distance;
@@ -167,7 +196,7 @@ public class Instance {
     }
 
     public ColonyEntity getMainColony() {
-        return ColonyDAO.getInstance().fetchAll().get(0);
+        return colonyDAO.fetchAll().get(0);
     }
 
     public Long calculateMaxExpeditionSize() {

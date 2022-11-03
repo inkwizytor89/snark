@@ -48,16 +48,26 @@ public class SendFleetCommand extends GICommand {
         fleetSelector = new FleetSelector(instance.session);
     }
 
+    public boolean prepere() {
+        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
+        if(Mission.ATTACK.equals(mission) && fleet.source.transporterSmall == 0) {
+            fleet.code = 0L;
+            fleet.start = fleet.back = LocalDateTime.now();
+            FleetDAO.getInstance().saveOrUpdate(fleet);
+            return false;
+        }
+        //todo brakuje statkow do farmienia, co wtedy ?
+        autoComplete = true;
+        return true;
+    }
+
     @Override
     public boolean execute() {
-//        fleet = FleetDAO.getInstance().fetch(fleet);
         if(fleet.visited != null || fleet.back != null) {
             System.err.println("Fleet already send "+fleet);
             return true;
         }
-        // musimy pobrac odpowiednia flote z bazy danych
-        // uzupełnić odpowiednimi danymi
-        // w przypadku odpowiednich misji odpowiednie after comandy powinny zostać zaktualizowane
+
         if(!prepere()) {
             return true;
         };
@@ -67,8 +77,8 @@ public class SendFleetCommand extends GICommand {
         for(Map.Entry<ShipEnum, Long> entry : buildShipsMap().entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
-
         fleetSelector.next();
+
         SleepUtil.pause();
         if(!autoComplete) {
             WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
@@ -137,11 +147,6 @@ public class SendFleetCommand extends GICommand {
         new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
 //        int expeditionCount = instance.commander.getExpeditionCount();
 //        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
-        return true;
-    }
-
-    public boolean prepere() {
-        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
         return true;
     }
 

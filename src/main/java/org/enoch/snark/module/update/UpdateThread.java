@@ -57,7 +57,6 @@ public class UpdateThread extends AbstractThread {
 
         events = navigator.getEventFleetList();
         if(isUnderAttack()) {
-            System.err.println("\nUnder Attack !! \n");
             writeMessageToPlayer();
         }
         putIncomingInArriveMap();

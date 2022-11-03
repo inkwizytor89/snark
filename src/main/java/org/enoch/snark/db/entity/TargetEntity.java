@@ -40,6 +40,10 @@ public class TargetEntity extends PlanetEntity {
     @Column(name = "updated")
     public LocalDateTime updated;
 
+    @Basic
+    @Column(name = "last_attacked")
+    public LocalDateTime lastAttacked;
+
     @ManyToOne
     @JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
     public PlayerEntity player;
@@ -103,6 +107,8 @@ public class TargetEntity extends PlanetEntity {
         this.shieldDomeLarge = targetEntity.shieldDomeLarge;
         this.missileInterceptor = targetEntity.missileInterceptor;
         this.missileInterplanetary = targetEntity.missileInterplanetary;
+
+        this.spyLevel = targetEntity.spyLevel;
     }
 
     @Override

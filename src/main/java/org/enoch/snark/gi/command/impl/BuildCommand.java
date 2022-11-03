@@ -7,6 +7,7 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
+import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.enoch.snark.module.building.BuildingCost;
 import org.openqa.selenium.By;
@@ -55,7 +56,7 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "metal"),
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
-            String masterHref = instance.universe.getConfig("master_href");
+            String masterHref = instance.universe.getConfig(Universe.MASTER);
             if(masterHref != null && !masterHref.isEmpty()) {
                 SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(masterHref,
                         "Master poprosze "+resources+ " na "+colony);

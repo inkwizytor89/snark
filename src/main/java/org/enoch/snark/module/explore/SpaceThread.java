@@ -1,10 +1,12 @@
 package org.enoch.snark.module.explore;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
+import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.Universe;
 import org.enoch.snark.module.AbstractThread;
 
@@ -42,12 +44,18 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        if( GalaxyDAO.getInstance().fetchAll().isEmpty()) {
-            int galaxyMax = Integer.parseInt(Instance.universe.getConfig((Universe.GALAXY_MAX)));
-            int systemMax = Integer.parseInt(Instance.universe.getConfig((Universe.SYSTEM_MAX)));
-            GalaxyDAO.getInstance().persistGalaxyMap(galaxyMax, systemMax);
+        int galaxyMax = Integer.parseInt(Instance.universe.getConfig((Universe.GALAXY_MAX)));
+        int systemMax = Integer.parseInt(Instance.universe.getConfig((Universe.SYSTEM_MAX)));
+        for(int i = 1 ; i <= galaxyMax; i++) {
+            if(isNecessaryGalaxyPersist(i))
+                GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);
         }
         notExplored.addAll(GalaxyDAO.getInstance().findNotExplored());
+    }
+
+    private boolean isNecessaryGalaxyPersist(final Integer galaxy) {
+        return ColonyDAO.getInstance().fetchAll().stream().anyMatch(colony -> colony.galaxy.equals(galaxy)) &&
+                !GalaxyDAO.getInstance().find(new SystemView(galaxy, 1)).isPresent();
     }
 
     @Override

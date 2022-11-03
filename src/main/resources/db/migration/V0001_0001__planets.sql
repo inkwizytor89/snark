@@ -102,6 +102,7 @@ create table targets
   power       integer,
   player_id bigint not null references players,
   updated    timestamp default now(),
+  last_attacked    timestamp default now(),
   is_planet boolean default true,
 
   -- fleet

@@ -81,19 +81,17 @@ public class GalaxyDAO extends AbstractDAO<GalaxyEntity> {
         }
     }
 
-    public void persistGalaxyMap(int galaxyCount, int systemCount) {
+    public void persistGalaxyMap(int galax, int systemCount) {
         synchronized (JPAUtility.dbSynchro) {
             entityManager.getTransaction().begin();
-            for (int i = 1; i <= galaxyCount; i++) {
-                for (int j = 1; j <= systemCount; j++) {
-                    GalaxyEntity galaxyEntity = new GalaxyEntity();
-                    galaxyEntity.galaxy = i;
-                    galaxyEntity.system = j;
-                    galaxyEntity.updated = null;
-                    entityManager.persist(galaxyEntity);
-                    entityManager.flush();
-                    entityManager.clear();
-                }
+            for (int j = 1; j <= systemCount; j++) {
+                GalaxyEntity galaxyEntity = new GalaxyEntity();
+                galaxyEntity.galaxy = galax;
+                galaxyEntity.system = j;
+                galaxyEntity.updated = null;
+                entityManager.persist(galaxyEntity);
+                entityManager.flush();
+                entityManager.clear();
             }
             entityManager.getTransaction().commit();
         }

@@ -185,7 +185,7 @@ public class FarmThread extends AbstractThread {
 
     public void findBestFarms() {
         List<TargetEntity> farmsInRange = targetDAO.findFarms(Integer.MAX_VALUE).stream()
-                .filter(target -> target.energy > 0)
+                .filter(target -> target.energy != null && target.energy > 0)
                 .filter(this::isNear)
                 .sorted(Comparator.comparingLong(o -> o.energy))
                 .collect(Collectors.toList());

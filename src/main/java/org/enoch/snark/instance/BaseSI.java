@@ -54,10 +54,10 @@ public class BaseSI implements SI {
     }
 
     @Override
-    public int getAvailableFleetCount(AbstractThread thred) {
+    public int getAvailableFleetCount(AbstractThread thread) {
 
-        if(thred instanceof FarmThread) {
-            return 4;//instance.commander.getFleetMax() - 2;
+        if(thread instanceof FarmThread) {
+            return instance.commander.getFleetMax() - instance.commander.getExpeditionMax() - 2;
         }
         return 0;
     }

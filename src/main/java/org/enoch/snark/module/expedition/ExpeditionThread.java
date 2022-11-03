@@ -1,7 +1,6 @@
 package org.enoch.snark.module.expedition;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
@@ -11,8 +10,9 @@ import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
@@ -21,13 +21,11 @@ public class ExpeditionThread extends AbstractThread {
     public static final String threadName = "expedition";
 
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
-    private final ColonyDAO colonyDAO;
     private Long maxTL;
 
     public ExpeditionThread(SI si) {
         super(si);
         pause = 1;
-        colonyDAO = ColonyDAO.getInstance();
     }
 
     @Override
@@ -47,21 +45,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void chooseColoniesForExpeditionsStart() {
-        System.err.println("\nlist for expeditions:");
-        List<ColonyEntity> planetList = colonyDAO.fetchAll()
-                .stream()
-                .filter(colonyEntity -> colonyEntity.isPlanet)
-                .sorted(Comparator.comparing(o -> -o.galaxy))
-                .collect(Collectors.toList());
-        for(ColonyEntity planet : planetList) {
-            ColonyEntity colony = planet;
-            if(planet.cpm != null) {
-                colony = ColonyDAO.getInstance().find(planet.cpm);
-            }
-            expeditionQueue.add(colony);
-            System.err.println(colony);
-        }
-        System.err.println();
+        expeditionQueue.addAll(instance.flyPoints);
     }
 
     @Override

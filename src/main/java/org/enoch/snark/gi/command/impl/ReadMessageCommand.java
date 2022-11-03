@@ -6,6 +6,7 @@ import org.enoch.snark.db.dao.MessageDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.SpyReportGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
@@ -30,16 +31,11 @@ public class ReadMessageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-//        SpyInfo lastSpyInfo = instance.messageService.getLastSpyInfo(planet);
-//
-//        if(lastSpyInfo == null || !lastSpyInfo.isStillAvailable(10)) {
-            new GIUrlBuilder().openMessages();
-            SleepUtil.sleep();
+        new GIUrlBuilder().openMessages();
+        SleepUtil.sleep();
 
-            List<String> spyReports = loadMessagesLinks();
-            storeSpyMessage(spyReports);
-//            instance.messageService.getLastSpyInfo(planet);
-//        }
+        List<String> spyReports = loadMessagesLinks();
+        storeSpyMessage(spyReports);
         return true;
     }
 
@@ -74,22 +70,41 @@ public class ReadMessageCommand extends AbstractCommand {
             return;
         }
         System.err.println("parsing message id "+messageId);
-        instance.session.getWebDriver().get(link);
+
+
         MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
-
         MessageDAO.getInstance().saveOrUpdate(messageEntity);
-
         if(MessageEntity.SPY.equals(messageEntity.type)) {
-            TargetEntity planet = messageEntity.getPlanet();
+
+            SpyReportGIR spyReportGIR = new SpyReportGIR();
+            TargetEntity planet = spyReportGIR.readTargetFromReport(link);
             Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(planet.galaxy, planet.system, planet.position);
             targetEntity.get().update(planet);
             TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
-            if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
-                targetEntity.get().spyLevel += 4;
-                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
-            }
+//            if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
+//                targetEntity.get().spyLevel += 4;
+//                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+//            }
         }
+
+//------------------------------------
+//        instance.session.getWebDriver().get(link);
+//        MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
+//        messageEntity.messageId = messageId;
+//
+//        MessageDAO.getInstance().saveOrUpdate(messageEntity);
+//
+//        if(MessageEntity.SPY.equals(messageEntity.type)) {
+//            TargetEntity planet = messageEntity.getPlanet();
+//            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(planet.galaxy, planet.system, planet.position);
+//            targetEntity.get().update(planet);
+//            TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+//            if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
+//                targetEntity.get().spyLevel += 4;
+//                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+//            }
+//        }
     }
 
     private String getMessageIdFromLink(String link) {

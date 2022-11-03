@@ -55,6 +55,7 @@ public class Commander {
         Runnable task = () -> {
             while(true) {
                 try {
+                    SleepUtil.sleep();
                     if(!isRunning) continue;
 
                     restartIfSessionIsOver();

@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class DateUtilTest {
 
     @Test
-    public void getDateFromTimeSreing() {
+    public void getDateFromTimeString() {
         String timeInput="21:01:19 h";
 
         final LocalTime time = DateUtil.parseDuration(timeInput);
@@ -21,7 +21,18 @@ public class DateUtilTest {
     }
 
     @Test
-    public void getShortedDateFromTimeSreing() {
+    public void getDateFromLongTimeString() {
+        String timeInput="1:05:34 h";
+
+        final LocalTime time = DateUtil.parseDuration(timeInput);
+
+        assertEquals(1,time.getHour());
+        assertEquals(5,time.getMinute());
+        assertEquals(34,time.getSecond());
+    }
+
+    @Test
+    public void getShortedDateFromTimeString() {
         String timeInput="0:00:19";
 
         final LocalTime time = DateUtil.parseDuration(timeInput);

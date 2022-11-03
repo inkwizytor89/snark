@@ -46,7 +46,9 @@ public class BuildingThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        colonyDAO.fetchAll().forEach(colony -> colonyMap.put(colony, null));
+        colonyDAO.fetchAll().stream()
+                .filter(colony -> colony.isPlanet)
+                .forEach(colony -> colonyMap.put(colony, null));
     }
 
     @Override
