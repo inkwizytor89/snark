@@ -53,16 +53,16 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
             }
         }
 
-        WebElement defenseSection = wd.findElementsByXPath("//ul[@data-type='ships']").get(0);
+        WebElement defenseSection = wd.findElementsByXPath("//ul[@data-type='defense']").get(0);
         toLowSpyLevel = defenseSection.findElements(By.className("detail_list_fail"));
         if(!toLowSpyLevel.isEmpty()) {
             increaseSpy = true;
         } else {
-            List<WebElement> fleetList = fleetSection.findElements(By.className("resource_list_el"));
-            if (fleetList.isEmpty()) {
+            List<WebElement> defenceList = defenseSection.findElements(By.className("detail_list_el"));
+            if (defenceList.isEmpty()) {
                 target.defenseSum = 0L;
             } else {
-                for (WebElement defensePosition : fleetList) {
+                for (WebElement defensePosition : defenceList) {
                     String code = defensePosition.findElement(By.tagName("img")).getAttribute("class");
                     if (code.contains("defense401")) target.rocketLauncher = toLong(defensePosition.findElement(By.className("fright")).getText());
                     else if (code.contains("defense402")) target.laserCannonLight = toLong(defensePosition.findElement(By.className("fright")).getText());
@@ -77,10 +77,40 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
                 }
             }
         }
+
+        WebElement buildingsSection = wd.findElementsByXPath("//ul[@data-type='buildings']").get(0);
+        toLowSpyLevel = buildingsSection.findElements(By.className("detail_list_fail"));
+        if(!toLowSpyLevel.isEmpty()) {
+            increaseSpy = true;
+        } else {
+            List<WebElement> buildingList = buildingsSection.findElements(By.className("detail_list_el"));
+            if (buildingList.isEmpty()) {
+                target.defenseSum = 0L;
+            } else {
+                for (WebElement position : buildingList) {
+                    String code = position.findElement(By.tagName("img")).getAttribute("class");
+                    if (code.equals("building1")) target.metalMine = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building2")) target.crystalMine = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building3")) target.deuteriumSynthesizer = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building4")) target.solarPlant = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building5")) target.fusionPlant = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building22")) target.metalStorage = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building23")) target.crystalStorage = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building24")) target.deuteriumStorage = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building14")) target.roboticsFactory = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building15")) target.naniteFactory = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building21")) target.shipyard = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building44")) target.missileSilo = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building31")) target.researchLaboratory = toLong(position.findElement(By.className("fright")).getText());
+                    else if (code.equals("building33")) target.terraformer = toLong(position.findElement(By.className("fright")).getText());
+                }
+            }
+        }
         if(increaseSpy) {
             target.spyLevel = target.spyLevel * 2;
         }
 
+        target.calculateDefenseAndShips();
         return target;
     }
 
