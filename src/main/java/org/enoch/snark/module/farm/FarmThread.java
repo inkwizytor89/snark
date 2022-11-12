@@ -7,11 +7,9 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.command.request.SendFleetRequest;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -32,7 +30,7 @@ public class FarmThread extends AbstractThread {
     private final FleetDAO fleetDAO;
     private final TargetDAO targetDAO;
     private FarmEntity actualFarm;
-    private LinkedList<TargetEntity> farms = new LinkedList<>();
+    private LinkedList<TargetEntity> baseFarms = new LinkedList<>();
 
     public FarmThread(SI si) {
         super(si);
@@ -69,7 +67,7 @@ public class FarmThread extends AbstractThread {
 
         if(isTimeToSpyFarmWave()) {
             Long code = fleetDAO.genereteNewCode();
-            farmDAO.createNewWave(Mission.SPY, targetDAO.findFarms(10), code);
+            farmDAO.createNewWave(Mission.SPY, targetDAO.findFarms(100), code);
             actualFarm.spyRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
         }
@@ -110,17 +108,15 @@ public class FarmThread extends AbstractThread {
 
     public boolean fulfillsPreconditions() {
         pause = 1;
-        System.err.println("farm start");
 
-        if(farms.isEmpty()) {
+        if(baseFarms.isEmpty()) {
             findBestFarms();
         }
-        if(farms.size() < calculateSlotsToUse() * 4) {
+        if(baseFarms.size() < calculateSlotsToUse() * 4) {
             pause = 60;
             System.err.println("farm skipping");
             return false;
         }
-        // teraz na such request do skanowania jakiegos zbioru 4x slots
         return true;
     }
 
@@ -190,7 +186,7 @@ public class FarmThread extends AbstractThread {
                 .sorted(Comparator.comparingLong(o -> o.energy))
                 .collect(Collectors.toList());
         Collections.reverse(farmsInRange); // starts witch most energy ed planets
-        this.farms = new LinkedList<>(farmsInRange);
+        this.baseFarms = new LinkedList<>(farmsInRange);
     }
 
     private boolean isNear(TargetEntity targetEntity) {

@@ -233,25 +233,40 @@ public class GI {
     }
 
     public void updateFleet(ColonyEntity colony) {
-        if (webDriver.findElements(By.id("warning")).size() > 0) {
-            return;
+        if (webDriver.findElements(By.id("warning")).size() == 0) {
+            WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
+            colony.fighterLight = getAmount(technologies,"fighterLight");
+            colony.fighterHeavy = getAmount(technologies,"fighterHeavy");
+            colony.cruiser = getAmount(technologies,"cruiser");
+            colony.battleship = getAmount(technologies,"battleship");
+            colony.interceptor = getAmount(technologies,"interceptor");
+            colony.bomber = getAmount(technologies,"bomber");
+            colony.destroyer = getAmount(technologies,"destroyer");
+            colony.deathstar = getAmount(technologies,"deathstar");
+            colony.reaper = getAmount(technologies,"reaper");
+            colony.explorer = getAmount(technologies,"explorer");
+            colony.transporterSmall = getAmount(technologies,"transporterSmall");
+            colony.transporterLarge = getAmount(technologies,"transporterLarge");
+            colony.colonyShip = getAmount(technologies,"colonyShip");
+            colony.recycler = getAmount(technologies,"recycler");
+            colony.espionageProbe = getAmount(technologies,"espionageProbe");
+        } else {
+            colony.fighterLight = 0L;
+            colony.fighterHeavy = 0L;
+            colony.cruiser = 0L;
+            colony.battleship = 0L;
+            colony.interceptor = 0L;
+            colony.bomber = 0L;
+            colony.destroyer = 0L;
+            colony.deathstar = 0L;
+            colony.reaper = 0L;
+            colony.explorer = 0L;
+            colony.transporterSmall = 0L;
+            colony.transporterLarge = 0L;
+            colony.colonyShip = 0L;
+            colony.recycler = 0L;
+            colony.espionageProbe = 0L;
         }
-        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        colony.fighterLight = getAmount(technologies,"fighterLight");
-        colony.fighterHeavy = getAmount(technologies,"fighterHeavy");
-        colony.cruiser = getAmount(technologies,"cruiser");
-        colony.battleship = getAmount(technologies,"battleship");
-        colony.interceptor = getAmount(technologies,"interceptor");
-        colony.bomber = getAmount(technologies,"bomber");
-        colony.destroyer = getAmount(technologies,"destroyer");
-        colony.deathstar = getAmount(technologies,"deathstar");
-        colony.reaper = getAmount(technologies,"reaper");
-        colony.explorer = getAmount(technologies,"explorer");
-        colony.transporterSmall = getAmount(technologies,"transporterSmall");
-        colony.transporterLarge = getAmount(technologies,"transporterLarge");
-        colony.colonyShip = getAmount(technologies,"colonyShip");
-        colony.recycler = getAmount(technologies,"recycler");
-        colony.espionageProbe = getAmount(technologies,"espionageProbe");
         colony.save();
 
     }

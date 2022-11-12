@@ -8,25 +8,24 @@ import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SpyReportGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.model.Planet;
+import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.gi.command.impl.CommandType.INTERFACE_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.NORMAL_REQUIERED;
 
 public class ReadMessageCommand extends AbstractCommand {
 
-    private Planet planet;
-
     public ReadMessageCommand() {
-        super(INTERFACE_REQUIERED);
+        super(NORMAL_REQUIERED);
     }
 
     @Override
@@ -40,14 +39,14 @@ public class ReadMessageCommand extends AbstractCommand {
     }
 
     private List<String> loadMessagesLinks() {
-        final WebDriver chromeDriver = instance.session.getWebDriver();
+        final WebDriver chromeDriver = Instance.session.getWebDriver();
         final List<WebElement> elements = chromeDriver.findElements(By.tagName("a"));
         List<String> spyReports = new ArrayList<>();
         for (WebElement element : elements) {
             final String href = element.getAttribute("href");
             if(href != null && href.contains("messageId") && href.contains("ajax=1")) {
                 spyReports.add(href);
-                System.err.println("link to messege "+href);
+//                System.err.println("link to messege "+href);
             }
         }
         return spyReports;
@@ -63,16 +62,21 @@ public class ReadMessageCommand extends AbstractCommand {
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie
     private void storeSpyMessage(String link) {
         Long messageId = Long.parseLong(getMessageIdFromLink(link));
+
+        MessageDAO.getInstance().fetchAll().stream()
+                .filter(message -> message.created.isBefore(LocalDateTime.now().minusDays(2)))
+                .forEach(message -> MessageDAO.getInstance().remove(message));
+
         boolean alreadyExists = MessageDAO.getInstance().fetchAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) {
-            System.err.println("Skipping alredy existing message id "+messageId);
+//            System.err.println("Skipping alredy existing message id "+messageId);
             return;
         }
-        System.err.println("parsing message id "+messageId);
+//        System.err.println("parsing message id "+messageId);
 
 
-        MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());
+        MessageEntity messageEntity = MessageEntity.create(Instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
         MessageDAO.getInstance().saveOrUpdate(messageEntity);
         if(MessageEntity.SPY.equals(messageEntity.type)) {

@@ -387,6 +387,7 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Override
     public String toString() {
-        return isPlanet?"p":"m"+"[" + galaxy + ", " + system + ", " + position + "]";
+        String type = isPlanet?"p":"m";
+        return type + "[" + galaxy + ", " + system + ", " + position + "]";
     }
 }

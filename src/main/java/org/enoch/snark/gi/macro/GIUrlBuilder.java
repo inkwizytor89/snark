@@ -48,7 +48,7 @@ public class GIUrlBuilder {
                 "&system=" + target.system +
                 "&position=" + target.position +
                 "&type=1&mission=" + mission.getValue();
-        instance.session.getWebDriver().get(builder);
+        Instance.session.getWebDriver().get(builder);
 
         updateColony(source);
         loadFleetStatus();
@@ -60,20 +60,19 @@ public class GIUrlBuilder {
         final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
         Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
         if(m.find()) {
-            instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+            Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
             int expeditionCount = Integer.parseInt(m.group(3));
-            instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+            Instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
         }
     }
 
     public void openMessages() {
-        String builder = instance.universe.url + "?" +
+        String builder = Instance.universe.url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
-        instance.session.getWebDriver().get(builder);
+        Instance.session.getWebDriver().get(builder);
     }
 
     public void open(String page, ColonyEntity colony) {
-        System.err.println("open " +page+ " with "+colony);
         if(colony == null) {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();

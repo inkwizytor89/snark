@@ -25,7 +25,7 @@ public class BuildCommand extends AbstractCommand {
     private GI gi;
 
     public BuildCommand(ColonyEntity colony, BuildRequirements requirements) {
-        super(Instance.getInstance(), CommandType.INTERFACE_REQUIERED);
+        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
         this.colony = colony;
         this.requirements = requirements;
         queueManger = QueueManger.getInstance();

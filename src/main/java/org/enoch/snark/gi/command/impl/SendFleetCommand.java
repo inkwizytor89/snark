@@ -26,7 +26,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.enoch.snark.gi.command.impl.CommandType.FLEET_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.PRIORITY_REQUIERED;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class SendFleetCommand extends GICommand {
@@ -39,7 +39,7 @@ public class SendFleetCommand extends GICommand {
     public FleetEntity fleet;
 
     public SendFleetCommand(FleetEntity fleet) {
-        super(FLEET_REQUIERED);
+        super(PRIORITY_REQUIERED);
         this.priority = 40;
         this.fleet = fleet;
         this.mission = Mission.convertFromString(fleet.type);
@@ -50,13 +50,16 @@ public class SendFleetCommand extends GICommand {
 
     public boolean prepere() {
         giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
-        if(Mission.ATTACK.equals(mission) && fleet.source.transporterSmall == 0) {
-            fleet.code = 0L;
+        if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
+            if(fleet.code == null) {
+                fleet.code = 0L;
+            } else {
+                fleet.code = - fleet.code;
+            }
             fleet.start = fleet.back = LocalDateTime.now();
             FleetDAO.getInstance().saveOrUpdate(fleet);
             return false;
         }
-        //todo brakuje statkow do farmienia, co wtedy ?
         autoComplete = true;
         return true;
     }

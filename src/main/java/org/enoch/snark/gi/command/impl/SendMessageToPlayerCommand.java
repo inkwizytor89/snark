@@ -2,7 +2,7 @@ package org.enoch.snark.gi.command.impl;
 
 import org.openqa.selenium.JavascriptExecutor;
 
-import static org.enoch.snark.gi.command.impl.CommandType.INTERFACE_REQUIERED;
+import static org.enoch.snark.gi.command.impl.CommandType.NORMAL_REQUIERED;
 
 public class SendMessageToPlayerCommand extends AbstractCommand {
 
@@ -10,7 +10,7 @@ public class SendMessageToPlayerCommand extends AbstractCommand {
     private final String message;
 
     public SendMessageToPlayerCommand(String herf, String message) {
-        super(INTERFACE_REQUIERED);
+        super(NORMAL_REQUIERED);
         this.herf = herf;
         this.message = message;
     }

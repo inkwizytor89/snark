@@ -60,7 +60,7 @@ public abstract class AbstractCommand implements Comparable {
     }
 
     public boolean requiredGI() {
-        return type == CommandType.FLEET_REQUIERED || type ==CommandType.INTERFACE_REQUIERED;
+        return type == CommandType.PRIORITY_REQUIERED || type ==CommandType.NORMAL_REQUIERED;
     }
 
     public void onInterrupt() {

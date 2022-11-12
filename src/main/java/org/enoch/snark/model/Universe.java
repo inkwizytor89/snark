@@ -20,6 +20,7 @@ public class Universe {
     public static final String MAX_DT = "max_dt";
     public static final String MASTER = "master_href";
     public static final String FLY_POINTS = "fly_points";
+    public static final String DEFENSE = "defense";
 
 
     public String name;

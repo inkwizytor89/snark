@@ -1,7 +1,6 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GISession;
@@ -30,8 +29,8 @@ public class Commander {
     private int expeditionCount = 0;
     private int expeditionMax = 0;
 
-    private Queue<AbstractCommand> fleetActionQueue = new LinkedList<>();
-    private Queue<AbstractCommand> interfaceActionQueue = new LinkedList<>();
+    private final Queue<AbstractCommand> priorityActionQueue = new LinkedList<>();
+    private final Queue<AbstractCommand> normalActionQueue = new LinkedList<>();
     private AbstractCommand actualProcessedCommand = null;
 
     public Commander() {
@@ -55,7 +54,6 @@ public class Commander {
         Runnable task = () -> {
             while(true) {
                 try {
-                    SleepUtil.sleep();
                     if(!isRunning) continue;
 
                     restartIfSessionIsOver();
@@ -68,26 +66,28 @@ public class Commander {
                     startCommander();
 
                     if(isFleetFreeSlot()) {
-                        if (!fleetActionQueue.isEmpty()) {
-                            resolve(Objects.requireNonNull(fleetActionQueue.poll()));
+                        if (!priorityActionQueue.isEmpty()) {
+                            resolve(Objects.requireNonNull(priorityActionQueue.poll()));
                             fleetCount++;
+                            SleepUtil.sleep();
                             continue;
-                        } else {
-                            List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
-                            if (!toProcess.isEmpty()) {
-                                FleetEntity waitingFleet = toProcess.get(0);
-                                System.err.println("Find waiting fleet "+waitingFleet);
-                                resolve(new SendFleetCommand(waitingFleet));
-                                fleetCount++;
-                                continue;
-                            }
                         }
                     }
-                    if (!interfaceActionQueue.isEmpty()) {
-                            resolve(interfaceActionQueue.poll());
+                    if (!normalActionQueue.isEmpty()) {
+                            resolve(normalActionQueue.poll());
                             continue;
                     }
-
+                    if(isFleetFreeSlot()) {
+                        List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
+                        if (!toProcess.isEmpty()) {
+                            FleetEntity waitingFleet = toProcess.get(0);
+//                                System.err.println("Find waiting fleet "+waitingFleet);
+                            resolve(new SendFleetCommand(waitingFleet));
+                            SleepUtil.sleep();
+                            fleetCount++;
+                            continue;
+                        }
+                    }
                     SleepUtil.secondsToSleep(SLEEP_PAUSE);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -157,7 +157,7 @@ public class Commander {
             }
         } else {
             command.failed++;
-            if (command.failed < 3) {
+            if (command.failed < 2) {
                 command.retry(2);
             } else {
                 command.onInterrupt();
@@ -185,10 +185,10 @@ public class Commander {
     }
 
     public synchronized void push(AbstractCommand command) {
-        if (CommandType.FLEET_REQUIERED.equals(command.getType())) {
-            fleetActionQueue.offer(command);
-        } else if (CommandType.INTERFACE_REQUIERED.equals(command.getType())) {
-            interfaceActionQueue.offer(command);
+        if (CommandType.PRIORITY_REQUIERED.equals(command.getType())) {
+            priorityActionQueue.offer(command);
+        } else if (CommandType.NORMAL_REQUIERED.equals(command.getType())) {
+            normalActionQueue.offer(command);
         } else {
             throw new RuntimeException("Invalid type of command");
         }
@@ -197,8 +197,8 @@ public class Commander {
     public synchronized List<AbstractCommand> peekQueues() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-        commandsToView.addAll(fleetActionQueue);
-        commandsToView.addAll(interfaceActionQueue);
+        commandsToView.addAll(priorityActionQueue);
+        commandsToView.addAll(normalActionQueue);
         return commandsToView;
     }
 

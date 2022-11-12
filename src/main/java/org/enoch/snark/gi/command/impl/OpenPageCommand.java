@@ -12,7 +12,7 @@ public class OpenPageCommand extends AbstractCommand {
     private boolean checkEventFleet = false;
 
     public OpenPageCommand(String page, ColonyEntity colony) {
-        super(Instance.getInstance(), CommandType.INTERFACE_REQUIERED);
+        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
         this.page = page;
         this.colony = colony;
     }
