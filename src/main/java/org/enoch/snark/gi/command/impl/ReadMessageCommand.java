@@ -54,27 +54,28 @@ public class ReadMessageCommand extends AbstractCommand {
 
     public void storeSpyMessage(List<String> links) {
         for(String link : links) {
-            storeSpyMessage(link);
+            if(!storeSpyMessage(link)) {
+                break;
+            }
         }
         new GIUrlBuilder().open(GIUrlBuilder.PAGE_OVERVIEW, null);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie
-    private void storeSpyMessage(String link) {
+    private boolean storeSpyMessage(String link) {
         Long messageId = Long.parseLong(getMessageIdFromLink(link));
-
-        MessageDAO.getInstance().fetchAll().stream()
-                .filter(message -> message.created.isBefore(LocalDateTime.now().minusDays(2)))
-                .forEach(message -> MessageDAO.getInstance().remove(message));
 
         boolean alreadyExists = MessageDAO.getInstance().fetchAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) {
 //            System.err.println("Skipping alredy existing message id "+messageId);
-            return;
+            return false;
         }
 //        System.err.println("parsing message id "+messageId);
 
+        MessageDAO.getInstance().fetchAll().stream()
+                .filter(message -> message.created.isBefore(LocalDateTime.now().minusDays(2)))
+                .forEach(message -> MessageDAO.getInstance().remove(message));
 
         MessageEntity messageEntity = MessageEntity.create(Instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
@@ -91,7 +92,7 @@ public class ReadMessageCommand extends AbstractCommand {
 //                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
 //            }
         }
-
+        return true;
 //------------------------------------
 //        instance.session.getWebDriver().get(link);
 //        MessageEntity messageEntity = MessageEntity.create(instance.session.getWebDriver().getPageSource());

@@ -162,11 +162,11 @@ public class Instance {
         LOG.info("SI start successful");
     }
 
-    public ColonyEntity findNearestMoon(PlanetEntity planet) {
-        return this.findNearestMoon(planet.toPlanet());
+    public ColonyEntity findNearestFlyPoint(PlanetEntity planet) {
+        return this.findNearestFlyPoint(planet.toPlanet());
     }
 
-    public ColonyEntity findNearestMoon(Planet planet) {
+    public ColonyEntity findNearestFlyPoint(Planet planet) {
 
         List<ColonyEntity> colonies = new ArrayList<>(flyPoints);
 
