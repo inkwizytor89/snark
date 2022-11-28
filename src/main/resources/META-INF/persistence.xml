@@ -24,7 +24,8 @@
 
         </properties>
     </persistence-unit>
-    <persistence-unit name="POSTGRES-PERSISTENCE">
+
+    <persistence-unit name="Quantum">
         <class>org.enoch.snark.db.entity.PlayerEntity</class>
         <class>org.enoch.snark.db.entity.ColonyEntity</class>
         <class>org.enoch.snark.db.entity.TargetEntity</class>
@@ -39,7 +40,51 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
             <property name="hibernate.show_sql" value = "false" />
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/snark"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/Quantum"/>
+            <property name="javax.persistence.jdbc.user" value="postgres"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="hibernate.connection.autocommit" value="false" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="Uni1">
+        <class>org.enoch.snark.db.entity.PlayerEntity</class>
+        <class>org.enoch.snark.db.entity.ColonyEntity</class>
+        <class>org.enoch.snark.db.entity.TargetEntity</class>
+        <class>org.enoch.snark.db.entity.GalaxyEntity</class>
+        <class>org.enoch.snark.db.entity.ExplorationEntity</class>
+        <class>org.enoch.snark.db.entity.MessageEntity</class>
+        <class>org.enoch.snark.db.entity.FleetEntity</class>
+        <class>org.enoch.snark.db.entity.FarmEntity</class>
+        <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
+            <property name="hibernate.show_sql" value = "false" />
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/Uni1"/>
+            <property name="javax.persistence.jdbc.user" value="postgres"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="hibernate.connection.autocommit" value="false" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="Kerberos">
+        <class>org.enoch.snark.db.entity.PlayerEntity</class>
+        <class>org.enoch.snark.db.entity.ColonyEntity</class>
+        <class>org.enoch.snark.db.entity.TargetEntity</class>
+        <class>org.enoch.snark.db.entity.GalaxyEntity</class>
+        <class>org.enoch.snark.db.entity.ExplorationEntity</class>
+        <class>org.enoch.snark.db.entity.MessageEntity</class>
+        <class>org.enoch.snark.db.entity.FleetEntity</class>
+        <class>org.enoch.snark.db.entity.FarmEntity</class>
+        <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
+            <property name="hibernate.show_sql" value = "false" />
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost/Uni1"/>
             <property name="javax.persistence.jdbc.user" value="postgres"/>
             <property name="javax.persistence.jdbc.password" value=""/>
             <property name="hibernate.connection.autocommit" value="false" />

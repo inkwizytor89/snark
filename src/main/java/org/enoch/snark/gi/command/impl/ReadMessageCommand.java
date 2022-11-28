@@ -73,10 +73,6 @@ public class ReadMessageCommand extends AbstractCommand {
         }
 //        System.err.println("parsing message id "+messageId);
 
-        MessageDAO.getInstance().fetchAll().stream()
-                .filter(message -> message.created.isBefore(LocalDateTime.now().minusDays(2)))
-                .forEach(message -> MessageDAO.getInstance().remove(message));
-
         MessageEntity messageEntity = MessageEntity.create(Instance.session.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
         MessageDAO.getInstance().saveOrUpdate(messageEntity);

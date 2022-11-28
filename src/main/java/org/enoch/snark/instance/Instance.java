@@ -38,7 +38,7 @@ public class Instance {
     public static GI gi;
     public static GISession session;
     public static Integer level = 1;
-    private final ColonyDAO colonyDAO;
+    private ColonyDAO colonyDAO;
 
     public List<Planet> cachedPlaned = new ArrayList<>();
     public List<ColonyEntity> flyPoints = new ArrayList<>();
@@ -50,7 +50,6 @@ public class Instance {
 
     private Instance() {
         LOG.info("Config file " + serverConfigPath);
-        colonyDAO = ColonyDAO.getInstance();
         loadServerProperties();
     }
 
@@ -125,9 +124,13 @@ public class Instance {
             ColonyEntity colony = planet;
             if(!onlyPlanets() && planet.cpm != null) {
                 colony = colonyDAO.find(planet.cpm);
+                flyPoints.add(colony);
+                System.err.println(colony);
             }
-            flyPoints.add(colony);
-        System.err.println(colony);
+            if(onlyPlanets()) {
+                flyPoints.add(colony);
+                System.err.println(colony);
+            }
         }
         System.err.println();
     }
@@ -151,6 +154,7 @@ public class Instance {
     }
 
     public void run() {
+        colonyDAO = ColonyDAO.getInstance();
         browserReset();
         loadGameState();
         LOG.info("loading game state successful");

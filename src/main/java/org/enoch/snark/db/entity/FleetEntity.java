@@ -174,7 +174,11 @@ public class FleetEntity extends IdEntity {
         fleet.targetPosition = target.position;
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
         fleet.type = ATTACK;
-        fleet.transporterSmall = target.calculateTransportByLt();
+        Long requiredTransporterSmall = target.calculateTransportByLt();
+        if(fleet.source.transporterSmall < requiredTransporterSmall) {
+            requiredTransporterSmall = fleet.source.transporterSmall;
+        }
+        fleet.transporterSmall = requiredTransporterSmall;
         return fleet;
     }
 

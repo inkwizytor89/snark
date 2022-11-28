@@ -105,7 +105,7 @@ public class GIUrlBuilder {
             instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         }
         if (checkEventFleet) {
-            Navigator.getInstance().informAboutEventFleets(instance.gi.readEventFleet());
+            Navigator.getInstance().informAboutEventFleets(Instance.gi.readEventFleet());
         }
     }
 

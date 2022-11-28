@@ -1,18 +1,11 @@
 package org.enoch.snark.model;
 
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.IdEntity;
-import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.AppProperties;
-
-import javax.persistence.*;
-import java.util.Collection;
-import java.util.Objects;
 
 public class Universe {
 
 
+    public static final String DATABASE = "database";
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
     public static final String EXPLORATION_AREA = "exploration_area";
@@ -45,10 +38,10 @@ public class Universe {
 
     public String getConfig(String key) {
         String[] configs = this.config.split(",");
-        for(int i = 0; i<configs.length; i++) {
-            String[] configurtion = configs[i].split("=");
-            if(key.equals(configurtion[0])) {
-                return configurtion.length>1 ? configurtion[1]: "";
+        for (String s : configs) {
+            String[] configuration = s.split("=");
+            if (key.equals(configuration[0])) {
+                return configuration.length > 1 ? configuration[1] : "";
             }
         }
         return null;

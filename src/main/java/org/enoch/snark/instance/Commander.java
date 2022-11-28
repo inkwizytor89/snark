@@ -2,16 +2,20 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.CommandType;
+import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.WebDriverException;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class Commander {
 
@@ -52,6 +56,7 @@ public class Commander {
 
     void startInterfaceQueue() {
         Runnable task = () -> {
+            checkFlyPoints();
             while(true) {
                 try {
                     if(!isRunning) continue;
@@ -96,6 +101,12 @@ public class Commander {
         };
 
         new Thread(task).start();
+    }
+
+    private void checkFlyPoints() {
+        for(ColonyEntity colony : instance.flyPoints) {
+            push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
+        }
     }
 
     private void startCommander() {

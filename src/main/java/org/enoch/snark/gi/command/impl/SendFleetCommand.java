@@ -15,6 +15,7 @@ import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.FleetCantStart;
+import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
@@ -80,7 +81,15 @@ public class SendFleetCommand extends GICommand {
         for(Map.Entry<ShipEnum, Long> entry : buildShipsMap().entrySet()) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
-        fleetSelector.next();
+        try {
+            fleetSelector.next();
+        } catch (ShipDoNotExists e) {
+            fleet.start = LocalDateTime.now();
+            fleet.code = 0L;
+            FleetDAO.getInstance().saveOrUpdate(fleet);
+            throw e;
+        }
+
 
         SleepUtil.pause();
         if(!autoComplete) {

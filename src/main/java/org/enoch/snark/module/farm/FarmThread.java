@@ -54,7 +54,19 @@ public class FarmThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        actualFarm = farmDAO.getActualState();
+        FarmEntity lastFarm = farmDAO.getActualState();
+        //if last farm have waiting spy fleet then should be closed
+        if(lastFarm != null && lastFarm.spyRequestCode != null && lastFarm.warRequestCode == null) {
+            for(FleetEntity fleet : fleetDAO.findWithCode(lastFarm.spyRequestCode)) {
+                fleet.start = LocalDateTime.now();
+                fleet.code = 0L;
+                fleetDAO.saveOrUpdate(fleet);
+            }
+        }
+
+        actualFarm = new FarmEntity();
+        actualFarm.start = LocalDateTime.now();
+        farmDAO.saveOrUpdate(actualFarm);
         findBestFarms();
     }
 
@@ -107,11 +119,6 @@ public class FarmThread extends AbstractThread {
     }
 
     private void createAttackWave(int count) {
-        if(spyWave.isEmpty()) {
-            actualFarm.spyRequestCode = null;
-            farmDAO.saveOrUpdate(actualFarm);
-            return;
-        }
         attackWave = spyWave.stream()
                 .filter(target -> target.fleetSum == 0 && target.defenseSum == 0)
                 .sorted(Comparator.comparingLong(o -> o.resources))
@@ -150,7 +157,7 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean isTimeToSpyFarmWave() {
-        return actualFarm.spyRequestCode == null;
+        return actualFarm.spyRequestCode == null && slotToUse > 0;
     }
 
     public boolean isTimeToAttackFarmWave() {

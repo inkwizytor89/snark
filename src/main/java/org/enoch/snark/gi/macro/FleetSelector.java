@@ -34,8 +34,9 @@ public class FleetSelector {
         session.getWebDriver().findElement(By.className("planet-header")).click();
 
         final WebElement continueButton = session.getWebDriver().findElement(By.id("continueToFleet2"));
-        if(continueButton.getAttribute("class").equals("continue off"))
+        if(continueButton.getAttribute("class").equals("continue off")) {
             throw new ShipDoNotExists();
+        }
 //        continueButton.click();
 
 
