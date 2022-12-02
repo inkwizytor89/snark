@@ -69,30 +69,14 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
-    public List<TargetEntity> findTopFarms(int limit) {
-        synchronized (JPAUtility.dbSynchro) {
-            return entityManager.createQuery("" +
-                    "from TargetEntity " +
-                    "where fleet_sum = 0 and " +
-                    "       defense_sum = 0 and " +
-                    "       resources is not null and " +
-                    "       resources > 0 " +
-                    "order by resources desc ", TargetEntity.class)
-                    .setMaxResults(limit)
-                    .getResultList();
-        }
-    }
-
     public List<TargetEntity> findNotScanned() {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
                     "where fleet_sum is null and " +
                     "       defense_sum is null and " +
-                    "       player.type = :type " +
-                    "order by resources desc ", TargetEntity.class)
+                    "       player.type = :type ", TargetEntity.class)
                     .setParameter("type", TargetEntity.IN_ACTIVE)
-//                    .setMaxResults(count)
                     .getResultList();
         }
     }

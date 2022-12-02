@@ -34,6 +34,10 @@ public class PlayerEntity extends IdEntity {
     @Column(name = "level")
     public Long level;
 
+    @Basic
+    @Column(name = "level")
+    public Long spyLevel = 4L;
+
 //    Research
     @Basic
     @Column(name = "energyTechnology")

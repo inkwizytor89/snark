@@ -147,12 +147,13 @@ public class FleetEntity extends IdEntity {
     }
 
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
-        Integer spyLevel = target.spyLevel == null ? 4 : target.spyLevel;
-        return createSpyFleet(target, spyLevel);
+        Long spyLevel = target.player.spyLevel;
+        Long espionageProbeCount = spyLevel == null ? 4 : spyLevel;
+        return createSpyFleet(target, espionageProbeCount);
     }
 
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target,
-                                             @Nonnull Integer count) {
+                                             @Nonnull Long count) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
@@ -163,7 +164,7 @@ public class FleetEntity extends IdEntity {
         }
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
         fleet.type = SPY;
-        fleet.espionageProbe = count.longValue();
+        fleet.espionageProbe = count;
         return fleet;
     }
 

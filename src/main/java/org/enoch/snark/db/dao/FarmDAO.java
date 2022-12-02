@@ -50,7 +50,7 @@ public class FarmDAO extends AbstractDAO<FarmEntity> {
             entityManager.getTransaction().begin();
 
             for(TargetEntity farm : farmTargets) {
-                FleetEntity fleet = null;
+                FleetEntity fleet;
                 if(Mission.SPY.equals(mission)) {
                     fleet = FleetEntity.createSpyFleet(farm);
                 } else if(Mission.ATTACK.equals(mission)) {

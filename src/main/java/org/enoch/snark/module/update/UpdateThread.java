@@ -53,7 +53,7 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(isNavigatorExpired() && noWaitingElements()) {
+        if(isNavigatorExpired() && noWaitingElementsByTag(threadName)) {
             sendCommandToUpdateEventFleets();
         }
 
@@ -69,10 +69,6 @@ public class UpdateThread extends AbstractThread {
 
     private boolean isNavigatorExpired() {
         return navigator.getLastUpdate().plusMinutes(UPDATE_TIME_IN_MINUTES).isBefore(LocalDateTime.now());
-    }
-
-    private boolean noWaitingElements() {
-        return commander.peekQueues().stream().noneMatch(command -> command.getTags().contains(threadName));
     }
 
     private boolean isUnderAttack() {

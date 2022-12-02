@@ -1,6 +1,8 @@
 package org.enoch.snark.module;
 
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.SI;
@@ -9,9 +11,11 @@ import java.util.logging.Logger;
 
 public abstract class AbstractThread extends Thread {
 
-    private static final Logger log = Logger.getLogger( AbstractThread.class.getName() );
+    private static final Logger log = Logger.getLogger(AbstractThread.class.getName());
     protected final Instance instance;
     protected final Commander commander;
+    protected final FleetDAO fleetDAO;
+    protected final TargetDAO targetDAO;
 
     protected SI si;
     protected int pause = 0;
@@ -20,6 +24,8 @@ public abstract class AbstractThread extends Thread {
         this.si = si;
         instance = si.getInstance();
         commander = Commander.getInstance();
+        fleetDAO = FleetDAO.getInstance();
+        targetDAO = TargetDAO.getInstance();
         setName(this.getClass().getName());
     }
 
@@ -57,5 +63,21 @@ public abstract class AbstractThread extends Thread {
                 wasSleeping = false;
             }
         }
+    }
+
+    protected boolean noWaitingElementsByTag(String tag) {
+        return commander.peekQueues().stream().noneMatch(command -> command.getTags().contains(tag));
+    }
+
+    protected boolean noWaitingElements() {
+        return noWaitingElementsOnQueues() && noWaitingElementsForProcess();
+    }
+
+    protected boolean noWaitingElementsOnQueues() {
+        return commander.peekQueues().isEmpty();
+    }
+
+    protected boolean noWaitingElementsForProcess() {
+        return fleetDAO.findToProcess().isEmpty();
     }
 }
