@@ -86,6 +86,7 @@ public class Instance {
                 }
                 colonyDAO.saveOrUpdate(colonyEntity);
             }
+            typeFlyPoints();
 
             // update colonies
             for(ColonyEntity colony : colonyDAO.fetchAll()) {
@@ -104,8 +105,6 @@ public class Instance {
                 }
                 PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
-
-            typeFlyPoints();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,6 +112,7 @@ public class Instance {
 
     private void typeFlyPoints() {
         flyPoints = new ArrayList<>();
+        String flyPointsConfig = universe.getConfig(Universe.FLY_POINTS);
         System.err.println("\nList of fly points:");
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
@@ -120,25 +120,25 @@ public class Instance {
                 .sorted(Comparator.comparing(o -> -o.galaxy))
                 .collect(Collectors.toList());
 
-        for(ColonyEntity planet : planetList) {
-            ColonyEntity colony = planet;
-            if(!onlyPlanets() && planet.cpm != null) {
-                colony = colonyDAO.find(planet.cpm);
+        if(flyPointsConfig == null || flyPointsConfig.isEmpty()) {
+            for (ColonyEntity planet : planetList) {
+                ColonyEntity colony = planet;
+                if (planet.cpm != null) {
+                    colony = colonyDAO.find(planet.cpm);
+                }
                 flyPoints.add(colony);
-                System.err.println(colony);
             }
-            if(onlyPlanets()) {
-                flyPoints.add(colony);
-                System.err.println(colony);
-            }
+        } else if (flyPointsConfig.contains("moon")) {
+            flyPoints = colonyDAO.fetchAll()
+                    .stream()
+                    .filter(colonyEntity -> !colonyEntity.isPlanet)
+                    .sorted(Comparator.comparing(o -> -o.galaxy))
+                    .collect(Collectors.toList());
+        } else {
+            flyPoints.addAll(planetList);
         }
+        flyPoints.forEach(System.err::println);
         System.err.println();
-    }
-
-    private boolean onlyPlanets() {
-        String config = universe.getConfig(Universe.FLY_POINTS);
-        if(config == null || config.isEmpty()) return false;
-        return config.equals("planets");
     }
 
     public void browserReset() {

@@ -56,7 +56,7 @@ public class Commander {
 
     void startInterfaceQueue() {
         Runnable task = () -> {
-            checkFlyPoints();
+//            checkFlyPoints();
             while(true) {
                 try {
                     if(!isRunning) continue;

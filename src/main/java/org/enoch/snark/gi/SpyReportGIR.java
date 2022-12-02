@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -15,6 +16,19 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
 
         String msgTitle = wd.findElement(By.className("msg_title")).getText();
         TargetEntity target = new TargetEntity(extractCoordinateFromTitle(msgTitle));// type moon-planet missing
+
+//        String playerInfo = wd.findElements(By.className("detail_txt")).get(0).getText();
+//        int indexStart = playerInfo.indexOf("(");
+//        int indexEnd = playerInfo.indexOf(")");
+//        if(indexStart == -1 || indexEnd == -1) {
+//            target.player.type = "";
+//            target.player.type = "";
+//        } else {
+//            String status = playerInfo.substring(indexStart, indexEnd+1);
+//            target.player.status = status;
+//            target.player.status = GI.setStatus(status);
+//        }
+//        PlayerDAO.getInstance().saveOrUpdate(target.player);
 
         WebElement resourceSection = wd.findElementsByXPath("//ul[@data-type='resources']").get(0);
         List<WebElement> resourceList = resourceSection.findElements(By.className("resource_list_el"));

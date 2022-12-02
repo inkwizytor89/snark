@@ -518,7 +518,7 @@ public class GI {
         galaxyDAO.update(systemView);
     }
 
-    private String setStatus(String status) {
+    public static String setStatus(String status) {
         if (status.contains("A")) {
             return TargetEntity.ADMIN;
         } else if (status.contains("u")) {

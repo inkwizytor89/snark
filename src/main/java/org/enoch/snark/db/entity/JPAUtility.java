@@ -13,7 +13,6 @@ public class JPAUtility {
     public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";
 
     static {
-//        emFactory = Persistence.createEntityManagerFactory(H2_PERSISTENCE);
         setPersistence(H2_PERSISTENCE);
     }
 

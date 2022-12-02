@@ -131,16 +131,16 @@ public class GIUrlBuilder {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
-        String builder = instance.universe.url + "?" +
+        String builder = Instance.universe.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_SPACE +
                 "&galaxy=" + systemView.galaxy +
                 "&system=" + systemView.system +
                 "&cp=" + colony.cp;
-        instance.session.getWebDriver().get(builder);
+        Instance.session.getWebDriver().get(builder);
         instance.lastVisited = colony;
         updateColony(colony);
-        instance.gi.updateGalaxy(systemView);
+        Instance.gi.updateGalaxy(systemView);
     }
 
     public GIUrlBuilder setCheckEventFleet(boolean checkEventFleet) {
