@@ -16,11 +16,11 @@ public class JPAUtility {
         setPersistence(H2_PERSISTENCE);
     }
 
-    public static void setPersistence(String persistance) {
+    public static void setPersistence(String persistence) {
         if(emFactory != null) {
             emFactory.close();
         }
-        emFactory = Persistence.createEntityManagerFactory(persistance);
+        emFactory = Persistence.createEntityManagerFactory(persistence);
         if(entityManager != null) {
             entityManager.close();
         }

@@ -30,9 +30,9 @@ public class PlayerEntity extends IdEntity {
     @Column(name = "alliance")
     public String alliance;
 
-    @Basic
-    @Column(name = "level")
-    public Long level;
+//    @Basic
+//    @Column(name = "level")
+//    public Long level;
 
     @Basic
     @Column(name = "level")

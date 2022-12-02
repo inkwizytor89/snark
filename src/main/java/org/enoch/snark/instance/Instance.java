@@ -99,9 +99,9 @@ public class Instance {
                 }
                 colonyDAO.saveOrUpdate(colony);
 
-                if(mainPlayer.level == null) {
+                if(mainPlayer.spyLevel == null) {
                     new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
-                    mainPlayer.level = 1L;
+                    mainPlayer.spyLevel = 1L;
                 }
                 PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
