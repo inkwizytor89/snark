@@ -6,11 +6,11 @@ import org.enoch.snark.instance.Instance;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCommand implements Comparable {
+public abstract class AbstractCommand {
     public AbstractCommand afterCommand;
     public Integer secondsToDelay = 0;
     protected Instance instance;
-    private CommandType type;
+    private final CommandType type;
     public int failed = 0;
     Integer priority = 100;
     private List<String> tags = new ArrayList<>();
@@ -43,7 +43,7 @@ public abstract class AbstractCommand implements Comparable {
         new WaitingThread(this, secondsToDelay).start();
     }
 
-    protected void setSecoundToDelayAfterCommand(Integer secoundToDelay) {
+    protected void setSecondToDelayAfterCommand(Integer secoundToDelay) {
         this.secondsToDelay = secoundToDelay;
     }
 
@@ -72,11 +72,5 @@ public abstract class AbstractCommand implements Comparable {
 
     public List<String> getTags() {
         return tags;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        AbstractCommand compareTo = (AbstractCommand) o;
-        return priority.compareTo(compareTo.priority);
     }
 }

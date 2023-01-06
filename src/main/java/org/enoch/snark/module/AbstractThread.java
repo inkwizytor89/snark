@@ -5,7 +5,6 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.SI;
 
 import java.util.logging.Logger;
 
@@ -13,16 +12,15 @@ public abstract class AbstractThread extends Thread {
 
     private static final Logger log = Logger.getLogger(AbstractThread.class.getName());
     protected final Instance instance;
+    private boolean isRunning = false;
     protected final Commander commander;
     protected final FleetDAO fleetDAO;
     protected final TargetDAO targetDAO;
 
-    protected SI si;
     protected int pause = 0;
 
-    public AbstractThread(SI si) {
-        this.si = si;
-        instance = si.getInstance();
+    public AbstractThread() {
+        instance = Instance.getInstance();
         commander = Commander.getInstance();
         fleetDAO = FleetDAO.getInstance();
         targetDAO = TargetDAO.getInstance();
@@ -34,7 +32,6 @@ public abstract class AbstractThread extends Thread {
     protected abstract int getPauseInSeconds();
 
     protected void onStart() {
-        log.info("Thread " + getThreadName() + " starting");
     }
 
     protected abstract void onStep();
@@ -43,26 +40,29 @@ public abstract class AbstractThread extends Thread {
     public void run() {
         super.run();
         onStart();
-        boolean wasSleeping = false;
+
         while(true) {
-            try {
-                onStep();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // sleeping logic
-            do {
-                if(!commander.isRunning()) {
-                    log.info("Thread " + getThreadName() + " stopping");
-                    wasSleeping = true;
+            SleepUtil.secondsToSleep(getPauseInSeconds());
+            boolean shouldRunning = isRunning && commander.isRunning();
+            if (shouldRunning) {
+                try {
+                    onStep();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(getPauseInSeconds());
-            }while(!commander.isRunning());
-            if(wasSleeping) {
-                log.info("Thread " + getThreadName() + " back to live");
-                wasSleeping = false;
             }
         }
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
+    public int getRequestedFleetCount() {
+        return 0;
     }
 
     protected boolean noWaitingElementsByTag(String tag) {

@@ -24,8 +24,8 @@ public class Commander {
     private static final int SLEEP_PAUSE = 1;
     private static Commander INSTANCE;
 
-    private Instance instance;
-    private GISession session;
+    private final Instance instance;
+    private final GISession session;
     private boolean isRunning = true;
 
     private int fleetCount = 0;
@@ -39,7 +39,7 @@ public class Commander {
 
     public Commander() {
         this.instance = Instance.getInstance();
-        this.session = instance.session;
+        this.session = Instance.session;
         startInterfaceQueue();
     }
 
@@ -56,7 +56,7 @@ public class Commander {
 
     void startInterfaceQueue() {
         Runnable task = () -> {
-//            checkFlyPoints();
+            checkFlyPoints();
             while(true) {
                 try {
                     if(!isRunning) continue;
@@ -161,9 +161,9 @@ public class Commander {
 
         if(success) {
             String commandMessage = command.toString();
-            log.info(command.toString());
+//            log.info(command.toString());
             if(command.isAfterCommand()) {
-                log.info("Next move in "+ command.secondsToDelay+"s is "+ command.getAfterCommand());
+//                log.info("Next move in "+ command.secondsToDelay+"s is "+ command.getAfterCommand());
                 command.doAfter();
             }
         } else {
@@ -185,7 +185,7 @@ public class Commander {
     }
 
     public void setFleetStatus(int fleetCount, int fleetMax) {
-        System.err.println("Fleet status "+fleetCount+"/"+fleetMax);
+//        System.err.println("Fleet status "+fleetCount+"/"+fleetMax);
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
     }

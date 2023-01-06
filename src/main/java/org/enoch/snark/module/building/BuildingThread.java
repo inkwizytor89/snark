@@ -4,7 +4,6 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.AbstractThread;
@@ -25,8 +24,8 @@ public class BuildingThread extends AbstractThread {
     private ColonyDAO colonyDAO;
     private BuildingCost buildingCost;
 
-    public BuildingThread(SI si) {
-        super(si);
+    public BuildingThread() {
+        super();
         buildingManager = new BuildingManager();
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();

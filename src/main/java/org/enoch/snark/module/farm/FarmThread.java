@@ -6,8 +6,9 @@ import org.enoch.snark.db.entity.FarmEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.instance.SI;
+import org.enoch.snark.instance.BaseSI;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -31,8 +32,7 @@ public class FarmThread extends AbstractThread {
     private List<TargetEntity> attackWave = new LinkedList<>();
     private int slotToUse = 4;
 
-    public FarmThread(SI si) {
-        super(si);
+    public FarmThread() {
         farmDAO = FarmDAO.getInstance();
     }
 
@@ -44,6 +44,11 @@ public class FarmThread extends AbstractThread {
     @Override
     protected int getPauseInSeconds() {
         return pause;
+    }
+
+    @Override
+    public int getRequestedFleetCount() {
+        return 0;
     }
 
     @Override
@@ -62,6 +67,7 @@ public class FarmThread extends AbstractThread {
         actualFarm = new FarmEntity();
         actualFarm.start = LocalDateTime.now();
         farmDAO.saveOrUpdate(actualFarm);
+        calculateSlotsToUse();
         findBestFarms();
     }
 
@@ -77,7 +83,7 @@ public class FarmThread extends AbstractThread {
         }
 
         if(isTimeToSpyFarmWave()) {
-            Long code = fleetDAO.genereteNewCode();
+            Long code = fleetDAO.generateNewCode();
             createSpyWave();
 //            spyWave = new LinkedList<>(targetDAO.findFarms(100));// todo remove when createSpyWave
             farmDAO.createNewWave(Mission.SPY, spyWave, code);
@@ -85,8 +91,8 @@ public class FarmThread extends AbstractThread {
             farmDAO.saveOrUpdate(actualFarm);
         }
         if (isTimeToAttackFarmWave()) {
-            Long code = fleetDAO.genereteNewCode();
-            int fleetNum = si.getAvailableFleetCount(this);
+            Long code = fleetDAO.generateNewCode();
+            int fleetNum = slotToUse;
             if(fleetNum < 1) {
                 return;
             }
@@ -155,9 +161,20 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean isFleetBack(Long code) {
-        return code != null && fleetDAO.fetchAll().stream()
-            .filter(fleet -> code.equals(fleet.code))
-            .allMatch(FleetEntity::isItBack);
+        if (code == null) return false;
+        List<FleetEntity> spyFleets = fleetDAO.fetchAll().stream()
+                .filter(fleet -> code.equals(fleet.code))
+                .collect(Collectors.toList());
+
+        if(spyFleets.stream().anyMatch(fleetEntity -> fleetEntity.start == null)) return false;
+
+        LocalDateTime lastSpy = spyFleets.stream()
+                .map(fleetEntity -> fleetEntity.visited)
+                .max(LocalDateTime::compareTo)
+                .get();
+
+        return MessageService.getInstance().getLastChecked().isAfter(lastSpy);
+//            .allMatch(FleetEntity::isItBack);
     }
 
     public boolean isFleetAlmostBack(Long code) {
@@ -167,12 +184,11 @@ public class FarmThread extends AbstractThread {
     }
 
     public void findBestFarms() {
-        List<TargetEntity> farmsInRange = targetDAO.findFarms(Integer.MAX_VALUE).stream()
-                .filter(target -> target.energy != null && target.energy > 0)
+        List<TargetEntity> farmsInRange = targetDAO.findFarms(slotToUse * 20).stream()
                 .filter(this::isNear)
-                .sorted(Comparator.comparingLong(o -> o.energy))
+//                .sorted(Comparator.comparingLong(o -> o.energy))
                 .collect(Collectors.toList());
-        Collections.reverse(farmsInRange); // starts witch most energy ed planets
+//        Collections.reverse(farmsInRange); // starts witch most energy ed planets
         this.baseFarms = new LinkedList<>(farmsInRange);
     }
 
@@ -184,6 +200,6 @@ public class FarmThread extends AbstractThread {
     }
 
     private void calculateSlotsToUse() {
-        slotToUse = si.getAvailableFleetCount(this);
+        slotToUse = BaseSI.getInstance().getAvailableFleetCount() - 2;
     }
 }

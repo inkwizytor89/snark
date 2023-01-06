@@ -5,9 +5,8 @@ import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.model.SystemView;
-import org.enoch.snark.model.Universe;
+import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -21,15 +20,9 @@ public class SpaceThread extends AbstractThread {
 
     public static final String threadName = "space";
     protected static final Logger LOG = Logger.getLogger( SpaceThread.class.getName());
-    public static final int DATA_COUNT = 50;
-    private final Instance instance;
+    public static final int DATA_COUNT = 10;
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
     private List<GalaxyEntity> galaxyToView = new ArrayList<>();
-
-    public SpaceThread(SI si) {
-        super(si);
-        instance = si.getInstance();
-    }
 
     @Override
     public String getThreadName() {
@@ -44,8 +37,8 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        int galaxyMax = Integer.parseInt(Instance.universe.getConfig((Universe.GALAXY_MAX)));
-        int systemMax = Integer.parseInt(Instance.universe.getConfig((Universe.SYSTEM_MAX)));
+        int galaxyMax = Integer.parseInt(Instance.config.getConfig((Universe.GALAXY_MAX)));
+        int systemMax = Integer.parseInt(Instance.config.getConfig((Universe.SYSTEM_MAX)));
         for(int i = 1 ; i <= galaxyMax; i++) {
             if(isNecessaryGalaxyPersist(i))
                 GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);
@@ -60,6 +53,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        if (!noWaitingElements()) return;
         int timeToBack = 95;
         pause = 300;
         if(LocalDateTime.now().getHour() < 5) {
@@ -67,7 +61,7 @@ public class SpaceThread extends AbstractThread {
             pause = 90;
         }
         if(!notExplored.isEmpty()) {
-            LOG.info(threadName+" still galaxy to look at "+notExplored.size());
+//            LOG.info(threadName+" still galaxy to look at "+notExplored.size());
             for (int i = 0; i < DATA_COUNT; i++) {
                 GalaxyEntity poll = notExplored.poll();
                 if(poll != null) {

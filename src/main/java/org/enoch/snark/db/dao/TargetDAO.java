@@ -62,6 +62,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "from TargetEntity " +
                     "where fleet_sum = 0 and " +
                     "       defense_sum = 0 and " +
+                    "       energy != null and energy > 0 and " +
                     "       player.type = 'IN_ACTIVE' " +
                     "order by power desc ", TargetEntity.class)
                     .setMaxResults(limit)

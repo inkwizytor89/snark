@@ -17,7 +17,6 @@ import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
-import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -130,8 +129,7 @@ public class SendFleetCommand extends GICommand {
         }
         if(Mission.SPY.equals(mission)) {
             int secondToCheck = durationTime.toSecondOfDay()+3;
-            MessageService.getInstance().put(secondToCheck);
-            setSecoundToDelayAfterCommand(secondToCheck*2);
+            setSecondToDelayAfterCommand(secondToCheck*2);
             setAfterCommand(new OpenPageCommand(PAGE_BASE_FLEET, fleet.source));
         }
 

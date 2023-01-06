@@ -2,7 +2,6 @@ package org.enoch.snark.module.scan;
 
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
 import java.util.LinkedList;
@@ -15,10 +14,6 @@ public class ScanThread extends AbstractThread {
     public static final String threadName = "scan";
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
-
-    public ScanThread(SI si) {
-        super(si);
-    }
 
     @Override
     public String getThreadName() {

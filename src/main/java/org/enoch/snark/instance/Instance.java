@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -12,8 +13,10 @@ import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Universe;
+import org.enoch.snark.instance.config.Universe;
+import org.enoch.snark.model.service.MessageService;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -32,8 +35,7 @@ public class Instance {
     protected static final Logger LOG = Logger.getLogger(Instance.class.getName());
 
     private static Instance INSTANCE;
-    private static String serverConfigPath = "server.properties";
-    public static Universe universe;
+    public static Config config;
     public static Commander commander;
     public static GI gi;
     public static GISession session;
@@ -47,10 +49,10 @@ public class Instance {
 //    public List<ColonyEntity> sources;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
+    private MessageService messageService;
 
     private Instance() {
-        LOG.info("Config file " + serverConfigPath);
-        loadServerProperties();
+        updateConfig();
     }
 
     public static Instance getInstance() {
@@ -60,13 +62,9 @@ public class Instance {
         return INSTANCE;
     }
 
-    public static void setServerProperties(String serverConfigPath) {
-        Instance.serverConfigPath = serverConfigPath;
-    }
-
-    public synchronized void loadServerProperties() {
+    public static synchronized void updateConfig() {
         try {
-            universe = Universe.loadProperties(new AppProperties(serverConfigPath));
+            config = Universe.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,7 +110,7 @@ public class Instance {
 
     private void typeFlyPoints() {
         flyPoints = new ArrayList<>();
-        String flyPointsConfig = universe.getConfig(Universe.FLY_POINTS);
+        String flyPointsConfig = config.getConfig(Universe.FLY_POINTS);
         System.err.println("\nList of fly points:");
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
@@ -155,15 +153,15 @@ public class Instance {
 
     public void run() {
         colonyDAO = ColonyDAO.getInstance();
+        messageService = MessageService.getInstance();
+
         browserReset();
         loadGameState();
-        LOG.info("loading game state successful");
 
         commander = Commander.getInstance();
         commander.startInterfaceQueue();
-        LOG.info("Commander start successful");
-        new BaseSI(this).run();
-        LOG.info("SI start successful");
+
+        BaseSI.getInstance().run();
     }
 
     public ColonyEntity findNearestFlyPoint(PlanetEntity planet) {
@@ -204,7 +202,7 @@ public class Instance {
     }
 
     public Long calculateMaxExpeditionSize() {
-        String maxDt = universe.getConfig((Universe.MAX_DT));
+        String maxDt = config.getConfig((Universe.MAX_DT));
         if(maxDt == null || maxDt.isEmpty()) {
             return 2500L;
         }
@@ -212,8 +210,7 @@ public class Instance {
     }
 
     public synchronized boolean isStopped() {
-        loadServerProperties();
-        return universe.mode!= null && universe.mode.contains("stop");
+        return config.mode!= null && config.mode.contains("stop");
     }
 
     public void push(AbstractCommand command) {

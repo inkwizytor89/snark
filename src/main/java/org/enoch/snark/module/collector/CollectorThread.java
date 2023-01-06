@@ -3,7 +3,6 @@ package org.enoch.snark.module.collector;
 import org.enoch.snark.db.dao.CollectionDAO;
 import org.enoch.snark.db.entity.CollectionEntity;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -12,13 +11,6 @@ import java.util.Optional;
 public class CollectorThread extends AbstractThread {
 
     public static final String threadName = "collector";
-
-    private final Instance instance;
-
-    public CollectorThread(SI si) {
-        super(si);
-        instance = si.getInstance();
-    }
 
     @Override
     public String getThreadName() {
@@ -44,7 +36,7 @@ public class CollectorThread extends AbstractThread {
                 .findAny();
 
         if(!optionalCollection.isPresent()) {
-            throw new RuntimeException("Missing entry in table Collections for universe "+instance.universe.name);
+            throw new RuntimeException("Missing entry in table Collections for universe "+Instance.config.name);
         }
         CollectionEntity collectionEntity = optionalCollection.get();
         if(LocalDateTime.now().isBefore(collectionEntity.start)) { // jeszcze flota nie przyszła

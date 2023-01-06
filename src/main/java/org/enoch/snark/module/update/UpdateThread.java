@@ -6,11 +6,10 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Universe;
+import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.AbstractThread;
@@ -27,7 +26,7 @@ import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 public class UpdateThread extends AbstractThread {
 
     public static final String threadName = "update";
-    public static final long UPDATE_TIME_IN_MINUTES = 8L;
+    public static final long UPDATE_TIME_IN_MINUTES = 6L;
 
     private final Navigator navigator;
     private List<EventFleet> events;
@@ -35,10 +34,11 @@ public class UpdateThread extends AbstractThread {
 
     private final List<LocalDateTime> aggressorsAttacks = new ArrayList<>();
 
-    public UpdateThread(SI si) {
-        super(si);
+    public UpdateThread() {
+        super();
         navigator = Navigator.getInstance();
         pause = 1;
+        setRunning(true);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UpdateThread extends AbstractThread {
         }
 
         events = navigator.getEventFleetList();
-        String config = Instance.universe.getConfig(Universe.DEFENSE);
+        String config = Instance.config.getConfig(Universe.DEFENSE);
         boolean shouldDefenceActivate = config == null || config.isEmpty() || config.equals("on");
         if(shouldDefenceActivate && isUnderAttack()) {
             writeMessageToPlayer();

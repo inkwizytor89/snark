@@ -40,7 +40,7 @@ public class GIUrlBuilder {
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
-        String builder = instance.universe.url + "?" +
+        String builder = Instance.config.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
@@ -67,7 +67,7 @@ public class GIUrlBuilder {
     }
 
     public void openMessages() {
-        String builder = Instance.universe.url + "?" +
+        String builder = Instance.config.url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
         Instance.session.getWebDriver().get(builder);
     }
@@ -77,18 +77,18 @@ public class GIUrlBuilder {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
-        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
+        StringBuilder builder = new StringBuilder( Instance.config.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         builder.append("&cp=" + colony.cp);
-        instance.session.getWebDriver().get(builder.toString());
+        Instance.session.getWebDriver().get(builder.toString());
         instance.lastVisited = colony;
 
         updateColony(colony);
         if (PAGE_RESOURCES.equals(page)) {
-            instance.gi.updateResourcesProducers(colony);
-            instance.gi.updateQueue(colony, QueueManger.BUILDING);
-            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+            Instance.gi.updateResourcesProducers(colony);
+            Instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            Instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         } else if (PAGE_FACILITIES.equals(page)) {
             instance.gi.updateFacilities(colony);
             instance.gi.updateQueue(colony, QueueManger.BUILDING);
@@ -116,7 +116,7 @@ public class GIUrlBuilder {
     }
 
     public void openWithPlayerInfo(String page, PlayerEntity player) {
-        StringBuilder builder = new StringBuilder( instance.universe.url + "?");
+        StringBuilder builder = new StringBuilder( Instance.config.url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         instance.session.getWebDriver().get(builder.toString());
@@ -131,7 +131,7 @@ public class GIUrlBuilder {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
-        String builder = Instance.universe.url + "?" +
+        String builder = Instance.config.url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_SPACE +
                 "&galaxy=" + systemView.galaxy +

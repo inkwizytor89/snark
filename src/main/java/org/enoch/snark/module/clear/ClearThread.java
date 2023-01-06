@@ -2,7 +2,6 @@ package org.enoch.snark.module.clear;
 
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.MessageDAO;
-import org.enoch.snark.instance.SI;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -12,9 +11,6 @@ public class ClearThread extends AbstractThread {
     public static final String threadName = "clear";
     public static final int UPDATE_TIME_IN_MINUTES = 500;
 
-    public ClearThread(SI si) {
-        super(si);
-    }
 
     @Override
     public String getThreadName() {

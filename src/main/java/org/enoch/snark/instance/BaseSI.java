@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
@@ -9,65 +10,79 @@ import org.enoch.snark.module.farm.FarmThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.update.UpdateThread;
 
-public class BaseSI implements SI {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final ClearThread clearThread;
-    public Instance instance;
-    private final UpdateThread updateThread;
-    private final SpaceThread spaceThread;
-    private final ScanThread scanThread;
-    private final FarmThread farmThread;
-    private final ExpeditionThread expeditionThread;
-    private final BuildingThread buildingThread;
+public class BaseSI {
+    private static BaseSI INSTANCE;
 
-    public BaseSI(Instance instance) {
-        this.instance = instance;
-        this.updateThread = new UpdateThread(this);
-        this.clearThread = new ClearThread(this);
-        this.expeditionThread = new ExpeditionThread(this);
-        this.buildingThread = new BuildingThread(this);
-        this.spaceThread = new SpaceThread(this); // explore space
-        this.scanThread = new ScanThread(this); // checking i-player on defence
-        this.farmThread = new FarmThread(this); // in progres
+    private final List<AbstractThread> operationThreads = new ArrayList<>();
+    private final List<AbstractThread> baseThreads = new ArrayList<>();
+
+    private BaseSI() {
+        baseThreads.add(new UpdateThread());
+//        baseThreads.add(new ClearThread(this));
+        operationThreads.add(new ExpeditionThread());
+        operationThreads.add(new BuildingThread());
+        operationThreads.add(new SpaceThread()); // explore space
+        operationThreads.add(new ScanThread()); // checking i-player on defence
+        operationThreads.add(new FarmThread()); // in progress
+    }
+
+    public static BaseSI getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new BaseSI();
+        }
+        return INSTANCE;
     }
 
     public void run() {
-        new Thread(updateThread).start();
-        new Thread(clearThread).start();
+        Runnable task = () -> {
+            baseThreads.forEach(Thread::start);
 
-        if(isModeOn(ExpeditionThread.threadName)) {
-            new Thread(expeditionThread).start();
-        }
-        if(isModeOn(BuildingThread.threadName)) {
-            new Thread(buildingThread).start();
-        }
-        if(isModeOn(SpaceThread.threadName)) {
-            new Thread(spaceThread).start();
-        }
-        if(isModeOn(ScanThread.threadName)) {
-            new Thread(scanThread).start();
-        }
-        if(isModeOn(FarmThread.threadName)) {
-            new Thread(farmThread).start();
-        }
+            Commander commander = Commander.getInstance();
+            while(commander.getFleetCount() <1) SleepUtil.pause();
+
+            operationThreads.stream()
+//                    .filter(this::isModeOn)
+                    .forEach(Thread::start);
+
+            while(true) {
+                Instance.updateConfig();
+                for (AbstractThread thread : operationThreads) {
+                    boolean running = thread.isRunning();
+                    if ((!running && isModeOn(thread)) || (running && !isModeOn(thread))) {
+                        System.err.println("Thread "+thread.getThreadName() + (running ? " stop":" start"));
+                        thread.setRunning(!running);
+                    }
+                }
+                SleepUtil.secondsToSleep(10);
+            }
+        };
+        new Thread(task).start();
     }
 
-    public boolean isModeOn(String threadName) {
-        String mode = Instance.universe.mode;
-        return mode == null || mode.isEmpty() || mode.contains(threadName);
+    public boolean isModeOn(AbstractThread thread) {
+        String mode = Instance.config.mode;
+        if(thread.getThreadName().contains(UpdateThread.threadName) ||
+                thread.getThreadName().contains(ClearThread.threadName))
+            return true;
+
+        return mode == null || mode.isEmpty() || mode.contains(thread.getThreadName());
     }
 
-    @Override
-    public int getAvailableFleetCount(AbstractThread thread) {
+    public int getAvailableFleetCount() {
 
-        if(thread instanceof FarmThread) {
-            return Instance.commander.getFleetMax() - Instance.commander.getExpeditionMax() - 2;
+        int fleetMax = Instance.commander.getFleetMax();
+        if(fleetMax == 0) return 0;
+
+        int fleetInUse = 0;
+        for(AbstractThread thread : operationThreads) {
+            if(thread.isRunning()) {
+                fleetInUse += thread.getRequestedFleetCount();
+            }
         }
-        return 0;
-    }
 
-    @Override
-    public Instance getInstance() {
-        return instance;
+        return fleetMax - fleetInUse;
     }
 }

@@ -404,7 +404,7 @@ public class GI {
                 }
 
                 colonyEntities.add(colonyEntity);
-                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
+//                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
             }catch (Exception e) {
                 e.printStackTrace();
             }

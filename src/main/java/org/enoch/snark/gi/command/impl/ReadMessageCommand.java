@@ -9,6 +9,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SpyReportGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -35,6 +36,7 @@ public class ReadMessageCommand extends AbstractCommand {
 
         List<String> spyReports = loadMessagesLinks();
         storeSpyMessage(spyReports);
+        MessageService.getInstance().update();
         return true;
     }
 

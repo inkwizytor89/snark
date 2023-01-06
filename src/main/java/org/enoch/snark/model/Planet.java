@@ -1,6 +1,7 @@
 package org.enoch.snark.model;
 
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.types.ColonyType;
 
 public class Planet {
@@ -38,7 +39,7 @@ public class Planet {
 
     public Integer calculateDistance(Planet planet) {
         if(!galaxy.equals(planet.galaxy)) {
-            int galaxyMax = Integer.parseInt(Instance.getInstance().universe.getConfig((Universe.GALAXY_MAX)));
+            int galaxyMax = Integer.parseInt(Instance.config.getConfig((Universe.GALAXY_MAX)));
             return roundDistance(galaxy, planet.galaxy, galaxyMax) *20000;
         }
         if(!system.equals(planet.system)) {

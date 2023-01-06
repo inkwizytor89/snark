@@ -125,11 +125,11 @@ public class TargetEntity extends PlanetEntity {
         Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
         long amount = 5000 + (250 * (hyperspaceTechnology +1));
         long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
-        System.err.println("planet = " + this.toString());
-        System.err.println("amount = " + amount);
-        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
-        System.err.println("sum = " + resources);
-        System.err.println("ships = "+ceil);
+//        System.err.println("planet = " + this.toString());
+//        System.err.println("amount = " + amount);
+//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
+//        System.err.println("sum = " + resources);
+//        System.err.println("ships = "+ceil);
         return ceil;
     }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila

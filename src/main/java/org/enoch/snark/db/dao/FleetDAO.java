@@ -26,7 +26,7 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         return FleetEntity.class;
     }
 
-    public Long genereteNewCode() {
+    public Long generateNewCode() {
         synchronized (JPAUtility.dbSynchro) {
             Long singleResult = entityManager.createQuery("" +
                     "select max(e.code) from FleetEntity e", Long.class)
@@ -53,6 +53,16 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
             return entityManager.createQuery("" +
                     "from FleetEntity " +
                     "where start is null ", FleetEntity.class)
+                    .getResultList();
+        }
+    }
+
+    public List<FleetEntity> findLastSend(LocalDateTime from) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where visited > :from or start = null", FleetEntity.class)
+                    .setParameter("from", from)
                     .getResultList();
         }
     }
