@@ -66,4 +66,14 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
                     .getResultList();
         }
     }
+
+    public void clean(LocalDateTime from) {
+        synchronized (JPAUtility.dbSynchro) {
+            entityManager.createQuery("" +
+                    "delete from FleetEntity " +
+                    "where updated < :from ", FleetEntity.class)
+                    .setParameter("from", from)
+                    .executeUpdate();
+        }
+    }
 }

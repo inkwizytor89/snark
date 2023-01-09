@@ -12,10 +12,7 @@ import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -67,7 +64,6 @@ public class FarmThread extends AbstractThread {
         actualFarm = new FarmEntity();
         actualFarm.start = LocalDateTime.now();
         farmDAO.saveOrUpdate(actualFarm);
-        calculateSlotsToUse();
         findBestFarms();
     }
 
@@ -85,7 +81,6 @@ public class FarmThread extends AbstractThread {
         if(isTimeToSpyFarmWave()) {
             Long code = fleetDAO.generateNewCode();
             createSpyWave();
-//            spyWave = new LinkedList<>(targetDAO.findFarms(100));// todo remove when createSpyWave
             farmDAO.createNewWave(Mission.SPY, spyWave, code);
             actualFarm.spyRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
@@ -101,6 +96,16 @@ public class FarmThread extends AbstractThread {
             farmDAO.createNewWave(Mission.ATTACK, attackWave, code);
             actualFarm.warRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
+            cleanResourceOnAttackedTargets(attackWave);
+        }
+    }
+
+    private void cleanResourceOnAttackedTargets(List<TargetEntity> attackWave) {
+        for(TargetEntity target : attackWave) {
+            target.metal = 0L;
+            target.crystal = 0L;
+            target.deuterium = 0L;
+            targetDAO.saveOrUpdate(target);
         }
     }
 
@@ -162,9 +167,7 @@ public class FarmThread extends AbstractThread {
 
     public boolean isFleetBack(Long code) {
         if (code == null) return false;
-        List<FleetEntity> spyFleets = fleetDAO.fetchAll().stream()
-                .filter(fleet -> code.equals(fleet.code))
-                .collect(Collectors.toList());
+        List<FleetEntity> spyFleets = new ArrayList<>(fleetDAO.findWithCode(code));
 
         if(spyFleets.stream().anyMatch(fleetEntity -> fleetEntity.start == null)) return false;
 
@@ -178,8 +181,7 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean isFleetAlmostBack(Long code) {
-        return code != null && fleetDAO.fetchAll().stream()
-                .filter(fleet -> code.equals(fleet.code))
+        return code != null && fleetDAO.findWithCode(code).stream()
                 .anyMatch(FleetEntity::isItBack);
     }
 

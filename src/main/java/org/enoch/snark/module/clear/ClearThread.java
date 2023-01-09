@@ -24,13 +24,8 @@ public class ClearThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        MessageDAO.getInstance().fetchAll().stream()
-                .filter(entity -> entity.created.isBefore(LocalDateTime.now().minusDays(2)))
-                .forEach(entity -> MessageDAO.getInstance().remove(entity));
-
-
-        FleetDAO.getInstance().fetchAll().stream()
-                .filter(entity -> entity.updated.isBefore(LocalDateTime.now().minusDays(2)))
-                .forEach(entity -> FleetDAO.getInstance().remove(entity));
+        LocalDateTime from = LocalDateTime.now().minusDays(2);
+        MessageDAO.getInstance().clean(from);
+        FleetDAO.getInstance().clean(from);
     }
 }

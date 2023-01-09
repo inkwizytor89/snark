@@ -21,7 +21,7 @@ public class BaseSI {
 
     private BaseSI() {
         baseThreads.add(new UpdateThread());
-//        baseThreads.add(new ClearThread(this));
+        baseThreads.add(new ClearThread());
         operationThreads.add(new ExpeditionThread());
         operationThreads.add(new BuildingThread());
         operationThreads.add(new SpaceThread()); // explore space
