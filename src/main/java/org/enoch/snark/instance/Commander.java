@@ -10,16 +10,15 @@ import org.enoch.snark.gi.command.impl.CommandType;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.model.exception.ShipDoNotExists;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class Commander {
-
-    private static final Logger log = Logger.getLogger(Commander.class.getName() );
 
     private static final int SLEEP_PAUSE = 1;
     private static Commander INSTANCE;
@@ -27,6 +26,7 @@ public class Commander {
     private final Instance instance;
     private final GISession session;
     private boolean isRunning = true;
+    private boolean isUnderAttack = false;
 
     private int fleetCount = 0;
     private int fleetMax = 0;
@@ -70,6 +70,12 @@ public class Commander {
 
                     startCommander();
 
+                    if(isSomethingAttacking()) {
+                        if(!isUnderAttack) resolve(new OpenPageCommand(PAGE_BASE_FLEET, null)
+                                .setCheckEventFleet(true));
+                        isUnderAttack = true;
+                    } else isUnderAttack = false;
+
                     if(isFleetFreeSlot()) {
                         if (!priorityActionQueue.isEmpty()) {
                             resolve(Objects.requireNonNull(priorityActionQueue.poll()));
@@ -101,6 +107,18 @@ public class Commander {
         };
 
         new Thread(task).start();
+    }
+
+    private boolean isSomethingAttacking() {
+        try {
+            WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
+            if(attack_alert.getAttribute("class").contains("soon")) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void checkFlyPoints() {
