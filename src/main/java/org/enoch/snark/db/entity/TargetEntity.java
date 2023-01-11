@@ -130,6 +130,9 @@ public class TargetEntity extends PlanetEntity {
 //        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
 //        System.err.println("sum = " + resources);
 //        System.err.println("ships = "+ceil);
+        if(ceil < 1) {
+            System.err.println("Error");
+        }
         return ceil;
     }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila

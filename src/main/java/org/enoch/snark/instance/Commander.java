@@ -70,11 +70,11 @@ public class Commander {
 
                     startCommander();
 
-                    if(isSomethingAttacking()) {
-                        if(!isUnderAttack) resolve(new OpenPageCommand(PAGE_BASE_FLEET, null)
-                                .setCheckEventFleet(true));
-                        isUnderAttack = true;
-                    } else isUnderAttack = false;
+//                    if(isSomethingAttacking()) {
+//                        if(!isUnderAttack) resolve(new OpenPageCommand(PAGE_BASE_FLEET, null)
+//                                .setCheckEventFleet(true));
+//                        isUnderAttack = true;
+//                    } else isUnderAttack = false;
 
                     if(isFleetFreeSlot()) {
                         if (!priorityActionQueue.isEmpty()) {

@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.CommandType.PRIORITY_REQUIERED;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
@@ -77,12 +78,24 @@ public class SendFleetCommand extends GICommand {
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
-        for(Map.Entry<ShipEnum, Long> entry : buildShipsMap().entrySet()) {
+        Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
+        for(Map.Entry<ShipEnum, Long> entry : entries) {
             fleetSelector.typeShip(entry.getKey(), entry.getValue());
         }
         try {
             fleetSelector.next();
         } catch (ShipDoNotExists e) {
+            System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
+            for(Map.Entry<ShipEnum, Long> entry : entries) {
+                System.err.println(entry.getKey().getId()+" "+entry.getKey()+"/"+fleet.source.getShipsMap().get(entry.getKey()));
+            }
+
+//            System.err.println("on planet "+fleet.source);
+//            System.err.println("transporterSmall " + fleet.source.getShipsMap().get(ShipEnum.transporterSmall));
+//            for(Map.Entry<ShipEnum, Long> entry : fleet.source.getShipsMap().entrySet()) {
+//                System.err.println(entry.getKey() + " " + entry.getValue());
+//            }
+
             fleet.start = LocalDateTime.now();
             fleet.code = 0L;
             FleetDAO.getInstance().saveOrUpdate(fleet);

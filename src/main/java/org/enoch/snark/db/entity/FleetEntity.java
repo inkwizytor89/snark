@@ -149,6 +149,7 @@ public class FleetEntity extends IdEntity {
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
         Long spyLevel = target.player.spyLevel;
         Long espionageProbeCount = spyLevel == null ? 4 : spyLevel;
+        System.err.println("player "+ target.player.name + " spy level "+ spyLevel+" but count "+espionageProbeCount);
         return createSpyFleet(target, espionageProbeCount);
     }
 
@@ -180,6 +181,9 @@ public class FleetEntity extends IdEntity {
 //            requiredTransporterSmall = fleet.source.transporterSmall;
 //        }
         fleet.transporterSmall = requiredTransporterSmall;
+        if(fleet.transporterSmall == 0) {
+            System.err.println(target+"try to send 0 lt");
+        }
         return fleet;
     }
 

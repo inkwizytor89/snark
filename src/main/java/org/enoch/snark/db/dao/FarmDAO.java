@@ -2,6 +2,7 @@ package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 
 import java.time.LocalDateTime;
@@ -48,13 +49,15 @@ public class FarmDAO extends AbstractDAO<FarmEntity> {
     public void createNewWave(Mission mission, List<TargetEntity> farmTargets, Long code) {
         synchronized (JPAUtility.dbSynchro) {
             entityManager.getTransaction().begin();
-
+            System.err.println("\n attack to send");
             for(TargetEntity farm : farmTargets) {
                 FleetEntity fleet;
                 if(Mission.SPY.equals(mission)) {
                     fleet = FleetEntity.createSpyFleet(farm);
                 } else if(Mission.ATTACK.equals(mission)) {
                     fleet = FleetEntity.createFarmFleet(farm);
+                    Planet planetEntity = new Planet(fleet.getCoordinate());
+                    System.err.println(planetEntity+" lt "+fleet.transporterSmall);
                 } else throw new RuntimeException("Unknown mission on farm wave");
 
                 fleet.spaceTarget = ColonyType.PLANET.getName();

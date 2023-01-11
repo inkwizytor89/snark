@@ -64,8 +64,8 @@ public class ExpeditionThread extends AbstractThread {
 
     private boolean noWaitingExpedition() {
         List<AbstractCommand> queues = commander.peekQueues();
-        if (queues.isEmpty())
-            System.err.println("size "+queues.size());  // to remove potential null pointer
+//        if (queues.isEmpty())
+//            System.err.println("size "+queues.size());  // to remove potential null pointer
         if(queues.isEmpty()) return true;
         return queues.stream().noneMatch(command -> command.getTags().contains(threadName));
     }

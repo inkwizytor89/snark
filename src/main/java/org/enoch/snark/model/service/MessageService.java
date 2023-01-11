@@ -20,16 +20,16 @@ public class MessageService {
     private MessageService() {
         Runnable task = () -> {
             while(true) {
-                List<FleetEntity> lastSpy = FleetDAO.getInstance().findLastSend(lastChecked).stream()
+                List<FleetEntity> notScannedSpy = FleetDAO.getInstance().findLastSend(lastChecked).stream()
                         .filter(fleet -> SPY.getName().equals(fleet.type))
                         .collect(Collectors.toList());
 
-                long waiting = lastSpy.stream()
+                long waiting = notScannedSpy.stream()
                         .filter(fleet -> fleet.visited == null ||
-                                LocalDateTime.now().plusSeconds(5).isBefore(fleet.visited))
+                                LocalDateTime.now().plusSeconds(10).isBefore(fleet.visited))
                         .count();
-                long scannedTargets = lastSpy.size() - waiting;
-                if(lastSpy.size() > 0 && (waiting == 0 || scannedTargets > 40L)) {
+                long scannedTargets = notScannedSpy.size() - waiting;
+                if(notScannedSpy.size() > 0 && (waiting == 0 || scannedTargets > 30L)) {
                     Instance.getInstance().push(new ReadMessageCommand());
                 }
                 SleepUtil.secondsToSleep(10);

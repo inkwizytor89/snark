@@ -86,18 +86,27 @@ public class FarmThread extends AbstractThread {
             farmDAO.saveOrUpdate(actualFarm);
         }
         if (isTimeToAttackFarmWave()) {
+            System.err.println("Spy wawe count "+spyWave.size());
             Long code = fleetDAO.generateNewCode();
             int fleetNum = slotToUse;
             if(fleetNum < 1) {
                 return;
             }
             createAttackWave(fleetNum);
+
+            System.err.println("attack Wave count "+attackWave.size());
+            attackWave.forEach(this::printResource);
+
 //            attackWave = new LinkedList<>(targetDAO.findTopFarms(fleetNum));
             farmDAO.createNewWave(Mission.ATTACK, attackWave, code);
             actualFarm.warRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
             cleanResourceOnAttackedTargets(attackWave);
         }
+    }
+
+    private void printResource(TargetEntity target) {
+        System.err.println(target+" "+target.metal+" "+target.crystal+" "+target.deuterium);
     }
 
     private void cleanResourceOnAttackedTargets(List<TargetEntity> attackWave) {
@@ -110,6 +119,7 @@ public class FarmThread extends AbstractThread {
     }
 
     private void createAttackWave(int count) {
+        spyWave = spyWave.stream().map(targetDAO::fetch).collect(Collectors.toList());
         attackWave = spyWave.stream()
                 .filter(target -> target.fleetSum == 0 && target.defenseSum == 0)
                 .sorted(Comparator.comparingLong(o -> o.resources))
@@ -119,11 +129,13 @@ public class FarmThread extends AbstractThread {
                 .limit(count)
                 .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(instance.findNearestFlyPoint(o).toPlanet())))
                 .collect(Collectors.toList());
+        System.err.println();
         attackWave = collect;
     }
 
     public void createSpyWave() {
         int spyWaveSize = slotToUse * 2;
+        System.err.println("slotToUse " + slotToUse);
         if(baseFarms.size() > spyWaveSize) {
             // add tops farms
             spyWave = baseFarms.subList(0, spyWaveSize);
@@ -159,7 +171,8 @@ public class FarmThread extends AbstractThread {
         pause = 1;
         if(baseFarms.size() < slotToUse * 4) {
             pause = 60;
-            System.err.println("farm step skipping");
+            System.err.println("farm step skipping baseFarms "+baseFarms.size()+" < "+(slotToUse * 4));
+            findBestFarms();
             return false;
         }
         return true;

@@ -3,6 +3,7 @@ package org.enoch.snark.gi.command.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.MessageDAO;
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -82,9 +83,12 @@ public class ReadMessageCommand extends AbstractCommand {
 
             SpyReportGIR spyReportGIR = new SpyReportGIR();
             TargetEntity planet = spyReportGIR.readTargetFromReport(link);
-            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(planet.galaxy, planet.system, planet.position);
-            targetEntity.get().update(planet);
-            TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+            Optional<TargetEntity> targetOptional = TargetDAO.getInstance().find(planet.galaxy, planet.system, planet.position);
+            TargetEntity targetEntity = targetOptional.get();
+            targetEntity.update(planet);
+            TargetDAO.getInstance().saveOrUpdate(targetEntity);
+            targetEntity.player.spyLevel = Long.parseLong(targetEntity.spyLevel.toString());
+            PlayerDAO.getInstance().saveOrUpdate(targetEntity.player);
 //            if(targetEntity.get().resources == 0L) {// jesli nie mamy informacji o resource to trzeba wysalac ponownie informacje o sondzie na wyzszy poziom bo to jest za slaby poziom informacji
 //                targetEntity.get().spyLevel += 4;
 //                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
