@@ -4,9 +4,11 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
+import org.enoch.snark.module.collector.CollectorThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.explore.SpaceThread;
 import org.enoch.snark.module.farm.FarmThread;
+import org.enoch.snark.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.update.UpdateThread;
 
@@ -27,6 +29,8 @@ public class BaseSI {
         operationThreads.add(new SpaceThread()); // explore space
         operationThreads.add(new ScanThread()); // checking i-player on defence
         operationThreads.add(new FarmThread()); // in progress
+        operationThreads.add(new FleetSaveThread()); // in progress
+        operationThreads.add(new CollectorThread()); // in progress
     }
 
     public static BaseSI getInstance() {

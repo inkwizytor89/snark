@@ -1,10 +1,10 @@
-package org.enoch.snark.module.collector;
+package org.enoch.snark.module.fleetSave;
 
 import org.enoch.snark.module.AbstractThread;
 
-public class CollectorThread extends AbstractThread {
+public class FleetSaveThread extends AbstractThread {
 
-    public static final String threadName = "Collector";
+    public static final String threadName = "FleetSave";
 
     @Override
     public String getThreadName() {
