@@ -1,5 +1,6 @@
 package org.enoch.snark.module.farm;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FarmDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FarmEntity;
@@ -7,6 +8,7 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.BaseSI;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
@@ -20,14 +22,16 @@ public class FarmThread extends AbstractThread {
 
     private static final Logger log = Logger.getLogger(FarmThread.class.getName());
     public static final String threadName = "farm";
+    public static final int FARM_INDEX_COUNT = 7;
+    public static final int FARM_SPY_SCAEL = 2;
 
     private final FarmDAO farmDAO;
     private FarmEntity actualFarm;
-    private LinkedList<TargetEntity> baseFarms = new LinkedList<>();
     private LinkedList<TargetEntity> randomFarms = new LinkedList<>();
     private List<TargetEntity> spyWave = new LinkedList<>();
     private List<TargetEntity> attackWave = new LinkedList<>();
     private int slotToUse = 4;
+    private int farmIndex = 0;
 
     public FarmThread() {
         farmDAO = FarmDAO.getInstance();
@@ -51,55 +55,38 @@ public class FarmThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
+        pause = 4;
         FarmEntity lastFarm = farmDAO.getActualState();
         //if last farm have waiting spy fleet then should be closed
         if(lastFarm != null && lastFarm.spyRequestCode != null && lastFarm.warRequestCode == null) {
             for(FleetEntity fleet : fleetDAO.findWithCode(lastFarm.spyRequestCode)) {
                 fleet.start = LocalDateTime.now();
+                fleet.back = LocalDateTime.now();
                 fleet.code = 0L;
                 fleetDAO.saveOrUpdate(fleet);
             }
         }
-
-        actualFarm = new FarmEntity();
-        actualFarm.start = LocalDateTime.now();
-        farmDAO.saveOrUpdate(actualFarm);
-        findBestFarms();
     }
 
     @Override
     public void onStep() {
-        calculateSlotsToUse();
-        if (!fulfillsPreconditions()) return;
 
         if(isTimeToCreateWave()) {
+            calculateSlotsToUse();
             actualFarm = new FarmEntity();
             actualFarm.start = LocalDateTime.now();
             farmDAO.saveOrUpdate(actualFarm);
         }
 
         if(isTimeToSpyFarmWave()) {
-            Long code = fleetDAO.generateNewCode();
+            actualFarm.spyRequestCode = fleetDAO.generateNewCode();
             createSpyWave();
-            farmDAO.createNewWave(Mission.SPY, spyWave, code);
-            actualFarm.spyRequestCode = code;
             farmDAO.saveOrUpdate(actualFarm);
         }
         if (isTimeToAttackFarmWave()) {
             System.err.println("Spy wawe count "+spyWave.size());
-            Long code = fleetDAO.generateNewCode();
-            int fleetNum = slotToUse;
-            if(fleetNum < 1) {
-                return;
-            }
-            createAttackWave(fleetNum);
-
-            System.err.println("attack Wave count "+attackWave.size());
-            attackWave.forEach(this::printResource);
-
-//            attackWave = new LinkedList<>(targetDAO.findTopFarms(fleetNum));
-            farmDAO.createNewWave(Mission.ATTACK, attackWave, code);
-            actualFarm.warRequestCode = code;
+            actualFarm.warRequestCode = fleetDAO.generateNewCode();
+            createAttackWave(slotToUse);
             farmDAO.saveOrUpdate(actualFarm);
             cleanResourceOnAttackedTargets(attackWave);
         }
@@ -120,39 +107,80 @@ public class FarmThread extends AbstractThread {
 
     private void createAttackWave(int count) {
         spyWave = spyWave.stream().map(targetDAO::fetch).collect(Collectors.toList());
-        attackWave = spyWave.stream()
+        List<TargetEntity> collect = spyWave.stream()
                 .filter(target -> target.fleetSum == 0 && target.defenseSum == 0)
                 .sorted(Comparator.comparingLong(o -> o.resources))
                 .collect(Collectors.toList());
-        Collections.reverse(attackWave);
-        List<TargetEntity> collect = attackWave.stream()
-                .limit(count)
+        Collections.reverse(collect);
+
+        attackWave = selectAvailableTargets(collect, count);
+
+//        System.err.println("attack Wave count "+attackWave.size());
+//        attackWave.forEach(this::printResource);
+
+        farmDAO.createNewWave(Mission.ATTACK, attackWave, actualFarm.warRequestCode);
+    }
+
+    private List<TargetEntity> selectAvailableTargets(List<TargetEntity> collect, int count) {
+        Map<Integer, Long> flyPointsAvailability = new HashMap<>();
+        instance.flyPoints.forEach(colony -> flyPointsAvailability.put(colony.cp, 0L));
+        List<TargetEntity> result = new ArrayList<>();
+
+        for (TargetEntity target: collect) {
+            Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
+            ColonyEntity colony = ColonyDAO.getInstance().fetch(instance.findNearestFlyPoint(target));
+            Long booked = flyPointsAvailability.get(colony.cp);
+            if(colony.transporterSmall >= requiredTransporterSmall + booked) {
+                flyPointsAvailability.put(colony.cp, booked + requiredTransporterSmall);
+                result.add(target);
+            } else {
+                System.err.println(colony+" has " + colony.transporterSmall + " transporterSmall and can not push " +
+                        requiredTransporterSmall + " already booked "+ booked);
+            }
+            if(result.size() >= count) break;
+        }
+
+        flyPointsAvailability.forEach((key, value) ->
+                System.err.println(ColonyDAO.getInstance().find(key) + " plan to send " + value + " TransporterSmall"));
+
+        return result.stream()
                 .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(instance.findNearestFlyPoint(o).toPlanet())))
                 .collect(Collectors.toList());
-        System.err.println();
-        attackWave = collect;
     }
 
     public void createSpyWave() {
-        int spyWaveSize = slotToUse * 2;
-        System.err.println("slotToUse " + slotToUse);
-        if(baseFarms.size() > spyWaveSize) {
-            // add tops farms
-            spyWave = baseFarms.subList(0, spyWaveSize);
+        int spyWaveSize = slotToUse * FARM_SPY_SCAEL;
+        farmIndex = farmIndex % FARM_INDEX_COUNT;
+        int startIndex = spyWaveSize * farmIndex;
+        int endIndex = startIndex + spyWaveSize -1;
+        System.err.println("farmIndex="+farmIndex+" startIndex="+startIndex+" endIndex="+endIndex);
 
-            // add random probe
-            if(randomFarms.size() < slotToUse) {
-                randomFarms = new LinkedList<>(baseFarms.subList(spyWaveSize, baseFarms.size()));
-            }
-            for(int i=0;i<slotToUse*2;i++) spyWave.add(randomFarms.poll());
+        List<TargetEntity> baseFarms = targetDAO.findFarms(spyWaveSize * (FARM_INDEX_COUNT+1))
+                .stream()
+                .filter(this::isNear)
+                .collect(Collectors.toList());
+        System.err.println("total="+baseFarms.size()+"before filter "+baseFarms.size());
 
-            //remove last attacked farms
-            spyWave = spyWave.stream()
-                    .filter(target -> !attackWave.contains(target))
-                    .collect(Collectors.toList());
-        } else {
-            spyWave = new LinkedList<>(baseFarms.subList(0,baseFarms.size() -1)) ;
+        int realEnd = 0;
+        if(baseFarms.size()<endIndex) {
+            realEnd = baseFarms.size()-1;
+            farmIndex = 0;
         }
+        else realEnd = endIndex;
+        spyWave = baseFarms.subList(startIndex, realEnd);
+
+        List<TargetEntity> fatFarms = targetDAO.findFatFarms(slotToUse)
+                .stream()
+                .filter(this::isNear)
+                .filter(targetEntity -> baseFarms.stream()
+                        .map(targetEntity1 -> targetEntity1.id)
+                        .noneMatch(targetEntity1 -> targetEntity1.equals(targetEntity.id)))
+                .collect(Collectors.toList());
+        fatFarms.forEach(targetEntity -> System.err.println("fat farm "+ targetEntity));
+        spyWave.addAll(fatFarms);
+
+        farmDAO.createNewWave(Mission.SPY, spyWave, actualFarm.spyRequestCode);
+        farmIndex++;
     }
 
     private boolean isTimeToCreateWave() {
@@ -167,17 +195,6 @@ public class FarmThread extends AbstractThread {
         return actualFarm.warRequestCode == null && isFleetBack(actualFarm.spyRequestCode);
     }
 
-    public boolean fulfillsPreconditions() {
-        pause = 1;
-        if(baseFarms.size() < slotToUse * 4) {
-            pause = 60;
-            System.err.println("farm step skipping baseFarms "+baseFarms.size()+" < "+(slotToUse * 4));
-            findBestFarms();
-            return false;
-        }
-        return true;
-    }
-
     public boolean isFleetBack(Long code) {
         if (code == null) return false;
         List<FleetEntity> spyFleets = new ArrayList<>(fleetDAO.findWithCode(code));
@@ -190,7 +207,6 @@ public class FarmThread extends AbstractThread {
                 .get();
 
         return MessageService.getInstance().getLastChecked().isAfter(lastSpy);
-//            .allMatch(FleetEntity::isItBack);
     }
 
     public boolean isFleetAlmostBack(Long code) {
@@ -198,23 +214,14 @@ public class FarmThread extends AbstractThread {
                 .anyMatch(FleetEntity::isItBack);
     }
 
-    public void findBestFarms() {
-        List<TargetEntity> farmsInRange = targetDAO.findFarms(slotToUse * 20).stream()
-                .filter(this::isNear)
-//                .sorted(Comparator.comparingLong(o -> o.energy))
-                .collect(Collectors.toList());
-//        Collections.reverse(farmsInRange); // starts witch most energy ed planets
-        this.baseFarms = new LinkedList<>(farmsInRange);
-    }
-
     private boolean isNear(TargetEntity targetEntity) {
         Planet targetPlanet = targetEntity.toPlanet();
         ColonyEntity nearestSource = instance.findNearestFlyPoint(targetPlanet);
         Integer distance = targetPlanet.calculateDistance(nearestSource.toPlanet());
-        return distance < 10000;
+        return distance < 13000;
     }
 
     private void calculateSlotsToUse() {
-        slotToUse = BaseSI.getInstance().getAvailableFleetCount() - 2;
+        slotToUse = BaseSI.getInstance().getAvailableFleetCount();
     }
 }

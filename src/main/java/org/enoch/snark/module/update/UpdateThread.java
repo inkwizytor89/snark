@@ -37,7 +37,7 @@ public class UpdateThread extends AbstractThread {
     public UpdateThread() {
         super();
         navigator = Navigator.getInstance();
-        pause = 1;
+        pause = 10;
         setRunning(true);
     }
 

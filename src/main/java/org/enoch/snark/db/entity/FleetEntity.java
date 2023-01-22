@@ -149,7 +149,7 @@ public class FleetEntity extends IdEntity {
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
         Long spyLevel = target.player.spyLevel;
         Long espionageProbeCount = spyLevel == null ? 4 : spyLevel;
-        System.err.println("player "+ target.player.name + " spy level "+ spyLevel+" but count "+espionageProbeCount);
+//        System.err.println("player "+ target.player.name + " spy level "+ spyLevel+" but count "+espionageProbeCount);
         return createSpyFleet(target, espionageProbeCount);
     }
 
@@ -176,7 +176,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetPosition = target.position;
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
         fleet.type = ATTACK;
-        Long requiredTransporterSmall = target.calculateTransportByLt();
+        Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
 //        if(fleet.source.transporterSmall < requiredTransporterSmall) {
 //            requiredTransporterSmall = fleet.source.transporterSmall;
 //        }

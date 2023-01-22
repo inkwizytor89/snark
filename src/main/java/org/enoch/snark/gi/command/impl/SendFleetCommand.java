@@ -87,7 +87,8 @@ public class SendFleetCommand extends GICommand {
         } catch (ShipDoNotExists e) {
             System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
             for(Map.Entry<ShipEnum, Long> entry : entries) {
-                System.err.println(entry.getKey().getId()+" "+entry.getKey()+"/"+fleet.source.getShipsMap().get(entry.getKey()));
+                System.err.print(entry.getKey().getId()+" "+entry.getValue()+"/");
+                        System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
             }
 
 //            System.err.println("on planet "+fleet.source);

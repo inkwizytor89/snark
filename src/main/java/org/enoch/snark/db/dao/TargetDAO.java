@@ -70,6 +70,20 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
+    public List<TargetEntity> findFatFarms(Integer limit) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where fleet_sum = 0 and " +
+                    "       defense_sum = 0 and " +
+                    "       energy != null and energy > 0 and " +
+                    "       player.type = 'IN_ACTIVE' " +
+                    "order by resources desc ", TargetEntity.class)
+                    .setMaxResults(limit)
+                    .getResultList();
+        }
+    }
+
     public List<TargetEntity> findNotScanned() {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +

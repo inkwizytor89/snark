@@ -31,7 +31,7 @@ public abstract class AbstractCommand {
         if(afterCommand == null) {
             return;
         }
-        System.err.println(afterCommand + " with delay " + secondsToDelay);
+//        System.err.println(afterCommand + " with delay " + secondsToDelay);
         new WaitingThread(afterCommand, secondsToDelay).start();
     }
 

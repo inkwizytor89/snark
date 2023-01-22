@@ -118,7 +118,7 @@ public class TargetEntity extends PlanetEntity {
         return Objects.hash(id, this.galaxy, this.system, this.position, this.energy, type, fleetSum, defenseSum, updated);
     }
 
-    public Long calculateTransportByLt() {
+    public Long calculateTransportByTransporterSmall() {
         if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }

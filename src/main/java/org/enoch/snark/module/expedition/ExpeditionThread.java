@@ -1,9 +1,9 @@
 package org.enoch.snark.module.expedition;
 
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.macro.ShipEnum;
@@ -12,7 +12,6 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.module.AbstractThread;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -43,6 +42,7 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
+        pause = 5;
         chooseColoniesForExpeditionsStart();
     }
 
@@ -53,21 +53,28 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStep() {
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
-            ColonyEntity colony = expeditionQueue.poll();
+            ColonyEntity colony = getNextFlyPoint();
+            if (colony == null) return;
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {
                 setExpeditionReadyToStart(expedition);
             }
-            expeditionQueue.add(colony);
+        }
+    }
+
+    private ColonyEntity getNextFlyPoint() {
+        ColonyEntity poll = expeditionQueue.poll();
+        if(poll == null) {
+            System.err.println("expeditionQueue in ExpeditionThread is empty");
+            return null;
+        } else {
+            expeditionQueue.add(poll);
+            return ColonyDAO.getInstance().fetch(poll);
         }
     }
 
     private boolean noWaitingExpedition() {
-        List<AbstractCommand> queues = commander.peekQueues();
-//        if (queues.isEmpty())
-//            System.err.println("size "+queues.size());  // to remove potential null pointer
-        if(queues.isEmpty()) return true;
-        return queues.stream().noneMatch(command -> command.getTags().contains(threadName));
+        return noWaitingElementsByTag(threadName);
     }
 
     private boolean areFreeSlotsForExpedition() {

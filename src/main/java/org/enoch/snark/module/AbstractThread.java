@@ -17,7 +17,7 @@ public abstract class AbstractThread extends Thread {
     protected final FleetDAO fleetDAO;
     protected final TargetDAO targetDAO;
 
-    protected int pause = 0;
+    protected int pause = 1;
 
     public AbstractThread() {
         instance = Instance.getInstance();
@@ -48,6 +48,7 @@ public abstract class AbstractThread extends Thread {
                 try {
                     onStep();
                 } catch (Exception e) {
+                    System.err.println(this.getThreadName()+": "+e.getMessage());
                     e.printStackTrace();
                 }
             }

@@ -159,6 +159,10 @@ public class Commander {
     private synchronized void resolve(AbstractCommand command) {
         actualProcessedCommand = command;
         boolean success;
+        if(command == null) {
+            System.err.println("Skipping resolving null command");
+            return;
+        }
         if(command.requiredGI() && !session.isLoggedIn()) {
             session.open();
         }

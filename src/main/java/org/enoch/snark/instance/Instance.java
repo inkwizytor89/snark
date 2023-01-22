@@ -75,7 +75,8 @@ public class Instance {
         try {
             PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
 
-            for(ColonyEntity colony : gi.loadPlanetList()) {
+            List<ColonyEntity> loadPlanetList = gi.loadPlanetList();
+            for(ColonyEntity colony : loadPlanetList) {
                 ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
                 if (colonyEntity == null) {
                     colonyEntity = colony;
@@ -84,6 +85,18 @@ public class Instance {
                 }
                 colonyDAO.saveOrUpdate(colonyEntity);
             }
+
+            //remove missing planets
+            colonyDAO.fetchAll().stream()
+                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .filter(colonyEntity -> loadPlanetList.stream()
+                                            .map(loaded -> loaded.cp)
+                                            .noneMatch(integer -> colonyEntity.cp.equals(integer)))
+                    .forEach(colonyEntity -> {
+                        System.err.println("Planet remove because do not exist "+ colonyEntity);
+                        colonyDAO.remove(colonyEntity);
+                    });
+
             typeFlyPoints();
 
             // update colonies

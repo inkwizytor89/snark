@@ -29,7 +29,7 @@ public class MessageService {
                                 LocalDateTime.now().plusSeconds(10).isBefore(fleet.visited))
                         .count();
                 long scannedTargets = notScannedSpy.size() - waiting;
-                if(notScannedSpy.size() > 0 && (waiting == 0 || scannedTargets > 30L)) {
+                if(notScannedSpy.size() > 0 && (waiting == 0 || scannedTargets > 35L)) {
                     Instance.getInstance().push(new ReadMessageCommand());
                 }
                 SleepUtil.secondsToSleep(10);
