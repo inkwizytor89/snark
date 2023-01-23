@@ -1,6 +1,5 @@
 package org.enoch.snark.gi;
 
-import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -16,19 +15,6 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
 
         String msgTitle = wd.findElement(By.className("msg_title")).getText();
         TargetEntity target = new TargetEntity(extractCoordinateFromTitle(msgTitle));// type moon-planet missing
-
-//        String playerInfo = wd.findElements(By.className("detail_txt")).get(0).getText();
-//        int indexStart = playerInfo.indexOf("(");
-//        int indexEnd = playerInfo.indexOf(")");
-//        if(indexStart == -1 || indexEnd == -1) {
-//            target.player.type = "";
-//            target.player.type = "";
-//        } else {
-//            String status = playerInfo.substring(indexStart, indexEnd+1);
-//            target.player.status = status;
-//            target.player.status = GI.setStatus(status);
-//        }
-//        PlayerDAO.getInstance().saveOrUpdate(target.player);
 
         WebElement resourceSection = wd.findElementsByXPath("//ul[@data-type='resources']").get(0);
         List<WebElement> resourceList = resourceSection.findElements(By.className("resource_list_el"));
@@ -64,6 +50,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
                     else if (code.contains("tech209")) target.recycler = toLong(fleetPosition.findElement(By.className("fright")).getText());
                     else if (code.contains("tech210")) target.espionageProbe = toLong(fleetPosition.findElement(By.className("fright")).getText());
                 }
+                target.calculateShips();
             }
         }
 
@@ -89,6 +76,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
                     else if (code.contains("defense502")) target.missileInterceptor = toLong(defensePosition.findElement(By.className("fright")).getText());
                     else if (code.contains("defense503")) target.missileInterplanetary = toLong(defensePosition.findElement(By.className("fright")).getText());
                 }
+                target.calculateDefense();
             }
         }
 
@@ -123,11 +111,8 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
         if(increaseSpy) {
             target.spyLevel = target.spyLevel * 2;
         }
-
-        target.calculateDefenseAndShips();
         return target;
     }
-
 
     private String extractCoordinateFromTitle(String input) {
         final String[] inputParts = input.split("\\s+");

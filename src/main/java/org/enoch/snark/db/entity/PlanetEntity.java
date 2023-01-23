@@ -385,6 +385,10 @@ public abstract class PlanetEntity extends IdEntity{
         }
     }
 
+    public String getResourceString() {
+        return "m"+metal+" c"+crystal+" d"+deuterium;
+    }
+
     @Override
     public String toString() {
         String type = isPlanet?"p":"m";

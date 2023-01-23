@@ -101,6 +101,7 @@ public class FarmThread extends AbstractThread {
             target.metal = 0L;
             target.crystal = 0L;
             target.deuterium = 0L;
+            target.resources = 0L;
             targetDAO.saveOrUpdate(target);
         }
     }

@@ -182,7 +182,7 @@ public class FleetEntity extends IdEntity {
 //        }
         fleet.transporterSmall = requiredTransporterSmall;
         if(fleet.transporterSmall == 0) {
-            System.err.println(target+"try to send 0 lt");
+            System.err.println("\nfor "+target+" try to send 0 lt ("+target.getResourceString()+")");
         }
         return fleet;
     }

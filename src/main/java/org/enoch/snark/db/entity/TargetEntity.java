@@ -77,7 +77,7 @@ public class TargetEntity extends PlanetEntity {
         this.metal = targetEntity.metal;
         this.crystal = targetEntity.crystal;
         this.deuterium = targetEntity.deuterium;
-        this.resources = 3 * metal + 2 * crystal + deuterium;
+        this.resources = metal + 2 * crystal + 3 * deuterium;
         this.energy = targetEntity.energy;
 
         this.fleetSum = targetEntity.fleetSum;
@@ -136,34 +136,32 @@ public class TargetEntity extends PlanetEntity {
         return ceil;
     }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila
-    public void calculateDefenseAndShips() {
-        if (this.rocketLauncher != null) {
-            defenseSum =
-                    (long) (this.rocketLauncher * (2000)) +
-                    (long) (this.laserCannonLight * (1500 + 750)) +
-                    (long) (this.laserCannonHeavy * (6000 + 3000)) +
-                    (long) (this.gaussCannon * (20000 + 22500 + 6000)) +
-                    (long) (this.ionCannon * (2000 + 9000)) +
-                    (long) (this.plasmaCannon * (50000 + 75000 + 90000)) +
-                    (long) (this.shieldDomeSmall * (10000 + 15000)) +
-                    (long) (this.shieldDomeLarge * (50000 + 75000));
-        }
-        if(this.fighterLight != null) {
-            fleetSum =
-                    (long) (this.fighterLight * (3000 + 1500)) +
-                    (long) (this.fighterHeavy * (6000 + 3000)) +
-                    (long) (this.cruiser * (20000 + 10500 + 6000)) +
-                    (long) (this.battleship * (45000 + 22500)) +
-                    (long) (this.interceptor * (30000 + 60000 + 45000)) +
-                    (long) (this.bomber * (50000 + 37500 + 45000)) +
-                    (long) (this.destroyer * (60000 + 75000 + 45000)) +
-                    (long) (this.deathstar * (5000000 + 6000000 + 3000000)) +
-                    (long) (this.transporterSmall * (50000 + 75000)) +
-                    (long) (this.transporterLarge * (50000 + 75000)) +
-                    (long) (this.colonyShip * (50000 + 75000)) +
-                    (long) (this.recycler * (50000 + 75000)) +
-                    (long) (this.espionageProbe * (50000 + 75000)) +
-                    (long) (this.sat * (50000 + 75000));
-        }
+    public void calculateShips() {
+        fleetSum =
+            (long) (this.fighterLight * (3000 + 1500)) +
+            (long) (this.fighterHeavy * (6000 + 3000)) +
+            (long) (this.cruiser * (20000 + 10500 + 6000)) +
+            (long) (this.battleship * (45000 + 22500)) +
+            (long) (this.interceptor * (30000 + 60000 + 45000)) +
+            (long) (this.bomber * (50000 + 37500 + 45000)) +
+            (long) (this.destroyer * (60000 + 75000 + 45000)) +
+            (long) (this.deathstar * (5000000 + 6000000 + 3000000)) +
+            (long) (this.transporterSmall * (50000 + 75000)) +
+            (long) (this.transporterLarge * (50000 + 75000)) +
+            (long) (this.colonyShip * (50000 + 75000)) +
+            (long) (this.recycler * (50000 + 75000)) +
+            (long) (this.espionageProbe * (50000 + 75000)) +
+            (long) (this.sat * (50000 + 75000));
+    }
+    public void calculateDefense() {
+        defenseSum =
+            (long) (this.rocketLauncher * (2000)) +
+            (long) (this.laserCannonLight * (1500 + 750)) +
+            (long) (this.laserCannonHeavy * (6000 + 3000)) +
+            (long) (this.gaussCannon * (20000 + 22500 + 6000)) +
+            (long) (this.ionCannon * (2000 + 9000)) +
+            (long) (this.plasmaCannon * (50000 + 75000 + 90000)) +
+            (long) (this.shieldDomeSmall * (10000 + 15000)) +
+            (long) (this.shieldDomeLarge * (50000 + 75000));
     }
 }
