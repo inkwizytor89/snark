@@ -24,7 +24,7 @@ public class ClearThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        LocalDateTime from = LocalDateTime.now().minusDays(2);
+        LocalDateTime from = LocalDateTime.now().minusDays(1);
         MessageDAO.getInstance().clean(from);
         FleetDAO.getInstance().clean(from);
     }

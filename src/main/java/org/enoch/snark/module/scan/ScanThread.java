@@ -26,6 +26,12 @@ public class ScanThread extends AbstractThread {
     }
 
     @Override
+    public int getRequestedFleetCount() {
+        return 1;
+    }
+
+
+    @Override
     protected void onStart() {
         super.onStart();
     }

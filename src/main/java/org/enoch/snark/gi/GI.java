@@ -160,9 +160,14 @@ public class GI {
             event_list.get(0).click();
 
             SleepUtil.pause();
-            List<WebElement> tableRows = new WebDriverWait(webDriver, 1)
-                            .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
-
+            List<WebElement> tableRows = null;
+            try {
+               tableRows = new WebDriverWait(webDriver, 4)
+                        .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("eventContent")), By.tagName(TR_TAG)));
+            } catch (NoSuchElementException e) {
+                System.err.println("NoSuchElementException na wczytanie przelotow");
+                return null;
+            }
             for (WebElement we : tableRows) {
 
                 EventFleet event = new EventFleet();
@@ -374,7 +379,7 @@ public class GI {
 
     public List<ColonyEntity> loadPlanetList() {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
-        List<WebElement> coloniesWebElements = new WebDriverWait(webDriver, 5)
+        List<WebElement> coloniesWebElements = new WebDriverWait(webDriver, 10)
                 .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
         for(WebElement colonyWebElement : coloniesWebElements) {
             try {

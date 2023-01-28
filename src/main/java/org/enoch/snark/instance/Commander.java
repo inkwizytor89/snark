@@ -18,7 +18,7 @@ import java.util.*;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
-public class Commander {
+public class Commander extends Thread{
 
     private static final int SLEEP_PAUSE = 1;
     private static Commander INSTANCE;
@@ -40,7 +40,7 @@ public class Commander {
     public Commander() {
         this.instance = Instance.getInstance();
         this.session = Instance.session;
-        startInterfaceQueue();
+        start();
     }
 
     public static Commander getInstance() {
@@ -54,21 +54,21 @@ public class Commander {
         return isRunning;
     }
 
-    void startInterfaceQueue() {
-        Runnable task = () -> {
-            checkFlyPoints();
-            while(true) {
-                try {
-                    if(!isRunning) continue;
+    @Override
+    public void run() {
+        checkFlyPoints();
+        while(true) {
+            try {
+                if(!isRunning) continue;
 
-                    restartIfSessionIsOver();
+                restartIfSessionIsOver();
 
-                    if (instance.isStopped()) {
-                        stopCommander();
-                        continue;
-                    }
+                if (instance.isStopped()) {
+                    stopCommander();
+                    continue;
+                }
 
-                    startCommander();
+                startCommander();
 
 //                    if(isSomethingAttacking()) {
 //                        if(!isUnderAttack) resolve(new OpenPageCommand(PAGE_BASE_FLEET, null)
@@ -76,37 +76,32 @@ public class Commander {
 //                        isUnderAttack = true;
 //                    } else isUnderAttack = false;
 
-                    if(isFleetFreeSlot()) {
-                        if (!priorityActionQueue.isEmpty()) {
-                            resolve(Objects.requireNonNull(priorityActionQueue.poll()));
-                            fleetCount++;
-                            SleepUtil.sleep();
-                            continue;
-                        }
+                if(isFleetFreeSlot()) {
+                    if (!priorityActionQueue.isEmpty()) {
+                        resolve(Objects.requireNonNull(priorityActionQueue.poll()));
+                        fleetCount++;
+                        SleepUtil.sleep();
+                        continue;
                     }
-                    if (!normalActionQueue.isEmpty()) {
-                            resolve(normalActionQueue.poll());
-                            continue;
-                    }
-                    if(isFleetFreeSlot()) {
-                        List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
-                        if (!toProcess.isEmpty()) {
-                            FleetEntity waitingFleet = toProcess.get(0);
-//                                System.err.println("Find waiting fleet "+waitingFleet);
-                            resolve(new SendFleetCommand(waitingFleet));
-                            SleepUtil.sleep();
-                            fleetCount++;
-                            continue;
-                        }
-                    }
-                    SleepUtil.secondsToSleep(SLEEP_PAUSE);
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                if (!normalActionQueue.isEmpty()) {
+                        resolve(normalActionQueue.poll());
+                        continue;
+                }
+                if(isFleetFreeSlot()) {
+                    List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
+                    if (!toProcess.isEmpty()) {
+                        resolve(new SendFleetCommand(toProcess.get(0)));
+                        SleepUtil.sleep();
+                        fleetCount++;
+                        continue;
+                    }
+                }
+                SleepUtil.secondsToSleep(SLEEP_PAUSE);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        };
-
-        new Thread(task).start();
+        }
     }
 
     private boolean isSomethingAttacking() {

@@ -23,6 +23,10 @@ public abstract class AbstractDAO<T extends IdEntity> {
     public T saveOrUpdate(@Nonnull final T entity) {
         T savedEntity = entity;
         synchronized (JPAUtility.dbSynchro) {
+
+            if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
+            JPAUtility.syncMethod = "org.enoch.snark.db.dao.AbstractDAO.saveOrUpdate "+getEntityClass().getName();
+
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
             if(entity.id == null) {
@@ -31,6 +35,8 @@ public abstract class AbstractDAO<T extends IdEntity> {
                 savedEntity = entityManager.merge(savedEntity);
             }
             transaction.commit();
+
+            JPAUtility.syncMethod=null;
         }
         return savedEntity;
     }

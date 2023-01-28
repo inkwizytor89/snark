@@ -26,7 +26,7 @@ public class SpyInfoParser {
         extractResource();
         extractFleet();
         extractDefense();
-        planet.calculateDefenseAndShips();
+//        planet.calculateDefenseAndShips();
     }
 
     private String extractCoordinateFromTitle(String input) {

@@ -12,6 +12,7 @@ public class JPAUtility {
     private static EntityManagerFactory emFactory;
     private static EntityManager entityManager;
     public static final Object dbSynchro = new Object();
+    public static String syncMethod;
 
     public static final String H2_PERSISTENCE = "H2-PERSISTENCE";
     public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";

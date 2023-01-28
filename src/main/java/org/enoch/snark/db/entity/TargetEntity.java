@@ -110,6 +110,8 @@ public class TargetEntity extends PlanetEntity {
         this.missileInterplanetary = targetEntity.missileInterplanetary;
 
         this.spyLevel = targetEntity.spyLevel;
+
+        this.updated = LocalDateTime.now();
     }
 
     @Override

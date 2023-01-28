@@ -109,12 +109,22 @@ public class FarmThread extends AbstractThread {
     private void createAttackWave(int count) {
         spyWave = spyWave.stream().map(targetDAO::fetch).collect(Collectors.toList());
         List<TargetEntity> collect = spyWave.stream()
+                .filter(target -> target.fleetSum != null && target.defenseSum != null)
                 .filter(target -> target.fleetSum == 0 && target.defenseSum == 0)
                 .sorted(Comparator.comparingLong(o -> o.resources))
                 .collect(Collectors.toList());
         Collections.reverse(collect);
 
         attackWave = selectAvailableTargets(collect, count);
+        if(!attackWave.isEmpty())
+        attackWave.stream().filter(target -> target.updated ==null ||
+                target.updated.isBefore(actualFarm.start))
+                .forEach(target -> System.err.println("Error: "+target+" has no loaded report "+
+                        target.updated+" < "+actualFarm.start));
+        else  {
+            System.err.println("Error: attackWave is empty");
+            return;
+        }
 
 //        System.err.println("attack Wave count "+attackWave.size());
 //        attackWave.forEach(this::printResource);
@@ -160,7 +170,7 @@ public class FarmThread extends AbstractThread {
                 .stream()
                 .filter(this::isNear)
                 .collect(Collectors.toList());
-        System.err.println("total="+baseFarms.size()+"before filter "+baseFarms.size());
+        System.err.println("total="+baseFarms.size()+" before filter "+baseFarms.size());
 
         int realEnd = 0;
         if(baseFarms.size()<endIndex) {
@@ -170,12 +180,14 @@ public class FarmThread extends AbstractThread {
         else realEnd = endIndex;
         spyWave = baseFarms.subList(startIndex, realEnd);
 
-        List<TargetEntity> fatFarms = targetDAO.findFatFarms(slotToUse)
+        List<TargetEntity> fatFarmsFromDatabase = targetDAO.findFatFarms(slotToUse);
+        System.err.println("fat farm count "+ fatFarmsFromDatabase.size() + "/"+slotToUse);
+        List<TargetEntity> fatFarms = fatFarmsFromDatabase
                 .stream()
                 .filter(this::isNear)
-                .filter(targetEntity -> baseFarms.stream()
-                        .map(targetEntity1 -> targetEntity1.id)
-                        .noneMatch(targetEntity1 -> targetEntity1.equals(targetEntity.id)))
+                .filter(target -> baseFarms.stream()
+                        .map(baseTarget -> baseTarget.id)
+                        .noneMatch(baseTarget -> baseTarget.equals(target.id)))
                 .collect(Collectors.toList());
         fatFarms.forEach(targetEntity -> System.err.println("fat farm "+ targetEntity));
         spyWave.addAll(fatFarms);
@@ -211,7 +223,11 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean isFleetAlmostBack(Long code) {
-        return code != null && fleetDAO.findWithCode(code).stream()
+        if(code == null){
+            return false;
+        }
+        List<FleetEntity> withCode = fleetDAO.findWithCode(code);
+        return withCode.isEmpty() || withCode.stream()
                 .anyMatch(FleetEntity::isItBack);
     }
 

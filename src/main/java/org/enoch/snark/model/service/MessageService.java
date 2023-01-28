@@ -33,7 +33,20 @@ public class MessageService {
                     Instance.getInstance().push(new ReadMessageCommand());
                 }
                 SleepUtil.secondsToSleep(10);
-            }
+
+//                List<FleetEntity> notLoadedSpyActions = FleetDAO.getInstance().findLastSend(lastChecked).stream()
+//                        .filter(fleet -> SPY.getName().equals(fleet.type))
+//                        .collect(Collectors.toList());
+//
+//                long readySpyReports = notLoadedSpyActions.stream()
+//                        .filter(fleet -> fleet.visited != null && fleet.visited.isAfter(LocalDateTime.now()))
+//                        .count();
+//
+//                long waitingSpyReports = notLoadedSpyActions.size() - readySpyReports;
+//                if(notLoadedSpyActions.size() > 0 && (waitingSpyReports == 0 || readySpyReports > 35L)) {
+//                    Instance.getInstance().push(new ReadMessageCommand());
+                }
+//            }
         };
 
         new Thread(task).start();

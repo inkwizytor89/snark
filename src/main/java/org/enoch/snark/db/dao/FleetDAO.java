@@ -69,11 +69,18 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
 
     public void clean(LocalDateTime from) {
         synchronized (JPAUtility.dbSynchro) {
-            entityManager.createQuery("" +
+
+            if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
+            JPAUtility.syncMethod = "org.enoch.snark.db.dao.FleetDAO.clean";
+
+            int update = entityManager.createQuery("" +
                     "delete from FleetEntity " +
                     "where updated < :from ", FleetEntity.class)
                     .setParameter("from", from)
                     .executeUpdate();
+
+            System.err.println("org.enoch.snark.db.dao.FleetDAO.clean "+update);
+            JPAUtility.syncMethod = null;
         }
     }
 }

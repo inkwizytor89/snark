@@ -124,7 +124,6 @@ public class Instance {
     private void typeFlyPoints() {
         flyPoints = new ArrayList<>();
         String flyPointsConfig = config.getConfig(Universe.FLY_POINTS);
-        System.err.println("\nList of fly points:");
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
                 .filter(colonyEntity -> colonyEntity.isPlanet)
@@ -148,8 +147,9 @@ public class Instance {
         } else {
             flyPoints.addAll(planetList);
         }
-        flyPoints.forEach(System.err::println);
-        System.err.println();
+
+        System.err.println("\nCount of fly points: "+flyPoints.size());
+//        flyPoints.forEach(System.err::println);
     }
 
     public void browserReset() {
@@ -172,7 +172,6 @@ public class Instance {
         loadGameState();
 
         commander = Commander.getInstance();
-        commander.startInterfaceQueue();
 
         BaseSI.getInstance().run();
     }

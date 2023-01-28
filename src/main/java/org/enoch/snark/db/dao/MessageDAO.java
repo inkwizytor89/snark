@@ -27,11 +27,18 @@ public class MessageDAO extends AbstractDAO<MessageEntity> {
 
     public void clean(LocalDateTime from) {
         synchronized (JPAUtility.dbSynchro) {
-            entityManager.createQuery("" +
+
+            if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
+            JPAUtility.syncMethod = "org.enoch.snark.db.dao.MessageDAO.clean";
+
+            int update = entityManager.createQuery("" +
                     "delete from MessageEntity " +
                     "where created < :from ", MessageEntity.class)
                     .setParameter("from", from)
                     .executeUpdate();
+
+            System.err.println("org.enoch.snark.db.dao.MessageDAO.clean "+update);
+            JPAUtility.syncMethod = null;
         }
     }
 }
