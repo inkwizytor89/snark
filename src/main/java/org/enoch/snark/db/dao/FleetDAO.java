@@ -1,8 +1,10 @@
 package org.enoch.snark.db.dao;
 
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 
+import javax.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,16 +73,41 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         synchronized (JPAUtility.dbSynchro) {
 
             if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
-            JPAUtility.syncMethod = "org.enoch.snark.db.dao.FleetDAO.clean";
+            JPAUtility.syncMethod = "org.enoch.snark.db.dao.FleetDAO.clean by date";
 
+            final EntityTransaction transaction = entityManager.getTransaction();
+            transaction.begin();
             int update = entityManager.createQuery("" +
                     "delete from FleetEntity " +
-                    "where updated < :from ", FleetEntity.class)
+                    "where updated < :from ")
                     .setParameter("from", from)
                     .executeUpdate();
 
-            System.err.println("org.enoch.snark.db.dao.FleetDAO.clean "+update);
+            System.err.println(JPAUtility.syncMethod+" "+update);
             JPAUtility.syncMethod = null;
+            entityManager.flush();
+            transaction.commit();
+        }
+    }
+
+    public void clean(ColonyEntity colony) {
+        synchronized (JPAUtility.dbSynchro) {
+
+            if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
+            JPAUtility.syncMethod = "org.enoch.snark.db.dao.FleetDAO.clean by ColonyEntity";
+
+            final EntityTransaction transaction = entityManager.getTransaction();
+            transaction.begin();
+            int update = entityManager.createQuery("" +
+                    "delete from FleetEntity " +
+                    "where source = :colony ")
+                    .setParameter("colony", colony)
+                    .executeUpdate();
+
+            System.err.println(JPAUtility.syncMethod+" "+update);
+            JPAUtility.syncMethod = null;
+            entityManager.flush();
+            transaction.commit();
         }
     }
 }

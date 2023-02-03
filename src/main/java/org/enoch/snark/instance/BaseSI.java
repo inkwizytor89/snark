@@ -12,6 +12,8 @@ import org.enoch.snark.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.update.UpdateThread;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class BaseSI {
 
     private final List<AbstractThread> operationThreads = new ArrayList<>();
     private final List<AbstractThread> baseThreads = new ArrayList<>();
+    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     private BaseSI() {
         baseThreads.add(new UpdateThread());
@@ -47,20 +50,23 @@ public class BaseSI {
             Commander commander = Commander.getInstance();
             while(commander.getFleetCount() <1) SleepUtil.pause();
 
-            operationThreads.stream()
-//                    .filter(this::isModeOn)
-                    .forEach(Thread::start);
+            operationThreads.forEach(Thread::start);
 
             while(true) {
-                Instance.updateConfig();
-                for (AbstractThread thread : operationThreads) {
-                    boolean running = thread.isRunning();
-                    if ((!running && isModeOn(thread)) || (running && !isModeOn(thread))) {
-                        System.err.println("Thread "+thread.getThreadName() + (running ? " stop":" start"));
-                        thread.setRunning(!running);
+                try {
+                    Instance.updateConfig();
+                    for (AbstractThread thread : operationThreads) {
+                        boolean running = thread.isRunning();
+                        boolean isModeOn = isModeOn(thread);
+                        if ((!running && isModeOn) || (running && !isModeOn)) {
+                            System.err.println("Thread " + thread.getThreadName() + (running ? " stop" : " start"));
+                            thread.setRunning(!running);
+                        }
                     }
+                    SleepUtil.secondsToSleep(10);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(10);
             }
         };
         new Thread(task).start();
@@ -68,11 +74,25 @@ public class BaseSI {
 
     public boolean isModeOn(AbstractThread thread) {
         String mode = Instance.config.mode;
-        if(thread.getThreadName().contains(UpdateThread.threadName) ||
-                thread.getThreadName().contains(ClearThread.threadName))
-            return true;
+        if(mode == null || mode.isEmpty())  return true;
+        String[] configTerms = mode.split(",");
+        for(String configTerm : configTerms) {
+            if(configTerm.contains(thread.getThreadName())){
+                String[] vars = configTerm.split("-");
+                if(vars.length == 3) {
+                    LocalTime start = LocalTime.parse(vars[1], dtf);
+                    LocalTime end = LocalTime.parse(vars[2], dtf);
+                    return (nowIsInMiddle(start, end) && start.isBefore(end)) ||
+                            (!nowIsInMiddle(end, start) && start.isAfter(end));
+                } else return true;
+            }
+        }
+        return false;
+    }
 
-        return mode == null || mode.isEmpty() || mode.contains(thread.getThreadName());
+    private boolean nowIsInMiddle(LocalTime start, LocalTime end) {
+        LocalTime now = LocalTime.now();
+        return now.isAfter(start) && now.isBefore(end);
     }
 
     public int getAvailableFleetCount() {

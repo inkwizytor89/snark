@@ -3,6 +3,7 @@ package org.enoch.snark.db.dao;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.MessageEntity;
 
+import javax.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 
 public class MessageDAO extends AbstractDAO<MessageEntity> {
@@ -31,14 +32,18 @@ public class MessageDAO extends AbstractDAO<MessageEntity> {
             if(JPAUtility.syncMethod != null) System.err.println("Error: synchronization collision with "+JPAUtility.syncMethod);
             JPAUtility.syncMethod = "org.enoch.snark.db.dao.MessageDAO.clean";
 
+            final EntityTransaction transaction = entityManager.getTransaction();
+            transaction.begin();
             int update = entityManager.createQuery("" +
                     "delete from MessageEntity " +
-                    "where created < :from ", MessageEntity.class)
+                    "where created < :from ")
                     .setParameter("from", from)
                     .executeUpdate();
 
             System.err.println("org.enoch.snark.db.dao.MessageDAO.clean "+update);
             JPAUtility.syncMethod = null;
+            entityManager.flush();
+            transaction.commit();
         }
     }
 }

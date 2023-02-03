@@ -1,5 +1,7 @@
 package org.enoch.snark.model.service;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -20,16 +22,8 @@ public class MessageService {
     private MessageService() {
         Runnable task = () -> {
             while(true) {
-                List<FleetEntity> notScannedSpy = FleetDAO.getInstance().findLastSend(lastChecked).stream()
-                        .filter(fleet -> SPY.getName().equals(fleet.type))
-                        .collect(Collectors.toList());
 
-                long waiting = notScannedSpy.stream()
-                        .filter(fleet -> fleet.visited == null ||
-                                LocalDateTime.now().plusSeconds(10).isBefore(fleet.visited))
-                        .count();
-                long scannedTargets = notScannedSpy.size() - waiting;
-                if(notScannedSpy.size() > 0 && (waiting == 0 || scannedTargets > 35L)) {
+                if(isTimeForReadMessages()) {
                     Instance.getInstance().push(new ReadMessageCommand());
                 }
                 SleepUtil.secondsToSleep(10);
@@ -50,6 +44,40 @@ public class MessageService {
         };
 
         new Thread(task).start();
+    }
+
+    private boolean isTimeForReadMessages() {
+        List<FleetEntity> notLoadedSpyActions = FleetDAO.getInstance().findLastSend(lastChecked).stream()
+                .filter(fleet -> SPY.getName().equals(fleet.type))
+                .collect(Collectors.toList());
+
+        Multimap<Long, FleetEntity> waitingMap = ArrayListMultimap.create();
+        Multimap<Long, FleetEntity> scannedMap = ArrayListMultimap.create();
+
+        notLoadedSpyActions.forEach(fleet -> {
+            if(fleet.visited == null || LocalDateTime.now().isBefore(fleet.visited)) {
+                waitingMap.put(fleet.code, fleet);
+            } else {
+                scannedMap.put(fleet.code, fleet);
+            }
+        });
+//
+//
+//        long waiting = notLoadedSpyActions.stream()
+//                .filter(fleet -> fleet.visited == null ||
+//                        LocalDateTime.now().plusSeconds(10).isBefore(fleet.visited))
+//                .count();
+//        long scannedTargets = notLoadedSpyActions.size() - waiting;
+
+        // some actions are ended and is no time to wait more
+        for (Long key : scannedMap.keySet()) {
+            if(waitingMap.get(key).isEmpty()) {
+                System.err.println("For "+key+" is time to read messages");
+                return true;
+            }
+        }
+
+        return notLoadedSpyActions.size() > 0 && (waitingMap.values().size() == 0 || scannedMap.values().size() > 30L);
     }
 
     public static MessageService getInstance() {

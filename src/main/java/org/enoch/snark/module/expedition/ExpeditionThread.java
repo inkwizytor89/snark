@@ -120,7 +120,9 @@ public class ExpeditionThread extends AbstractThread {
             expedition.transporterLarge = maxTL;
         } else {
             expedition.transporterLarge = anotherExpeditionStartPoint.transporterLarge;
-            expedition.transporterSmall = (maxTL - expedition.transporterLarge) * 5;
+            long missingLT = (maxTL - expedition.transporterLarge) * 5;
+            Long actualTransporterSmall = anotherExpeditionStartPoint.transporterSmall;
+            expedition.transporterSmall = missingLT>actualTransporterSmall?actualTransporterSmall:missingLT;
         }
         return expedition;
     }

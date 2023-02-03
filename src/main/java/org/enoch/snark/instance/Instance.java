@@ -1,6 +1,5 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -94,6 +93,7 @@ public class Instance {
                                             .noneMatch(integer -> colonyEntity.cp.equals(integer)))
                     .forEach(colonyEntity -> {
                         System.err.println("Planet remove because do not exist "+ colonyEntity);
+                        FleetDAO.getInstance().clean(colonyEntity);
                         colonyDAO.remove(colonyEntity);
                     });
 
@@ -123,7 +123,7 @@ public class Instance {
 
     private void typeFlyPoints() {
         flyPoints = new ArrayList<>();
-        String flyPointsConfig = config.getConfig(Universe.FLY_POINTS);
+        String flyPointsConfig = config.getConfig(Config.FLY_POINTS);
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
                 .filter(colonyEntity -> colonyEntity.isPlanet)
@@ -214,7 +214,7 @@ public class Instance {
     }
 
     public Long calculateMaxExpeditionSize() {
-        String maxDt = config.getConfig((Universe.MAX_DT));
+        String maxDt = config.getConfig((Config.MAX_DT));
         if(maxDt == null || maxDt.isEmpty()) {
             return 2500L;
         }

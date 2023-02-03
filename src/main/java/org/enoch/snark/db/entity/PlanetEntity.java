@@ -1,8 +1,10 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -383,6 +385,42 @@ public abstract class PlanetEntity extends IdEntity{
 
             default: throw new RuntimeException("Unknown Building");
         }
+    }
+
+    public Long calculateTransportByTransporterSmall() {
+        if (this.metal == null || this.crystal == null || this.deuterium == null) {
+            throw new TargetMissingResourceInfoException();
+        }
+        Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
+        long amount = 5000 + (250 * (hyperspaceTechnology +1));
+        long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
+//        System.err.println("planet = " + this.toString());
+//        System.err.println("amount = " + amount);
+//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
+//        System.err.println("sum = " + resources);
+//        System.err.println("ships = "+ceil);
+        if(ceil < 1) {
+            System.err.println("Error: amount calculation fail");
+        }
+        return ceil;
+    }
+
+    public Long calculateTransportByTransporterLarge() {
+        if (this.metal == null || this.crystal == null || this.deuterium == null) {
+            throw new TargetMissingResourceInfoException();
+        }
+        Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
+        long amount = 25000 + (250 * (hyperspaceTechnology +1));
+        long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
+//        System.err.println("planet = " + this.toString());
+//        System.err.println("amount = " + amount);
+//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
+//        System.err.println("sum = " + resources);
+//        System.err.println("ships = "+ceil);
+        if(ceil < 1) {
+            System.err.println("Error: amount calculation fail");
+        }
+        return ceil;
     }
 
     public String getResourceString() {

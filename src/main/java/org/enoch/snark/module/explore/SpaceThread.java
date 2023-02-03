@@ -5,8 +5,8 @@ import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.SystemView;
-import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -37,8 +37,8 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        int galaxyMax = Integer.parseInt(Instance.config.getConfig((Universe.GALAXY_MAX)));
-        int systemMax = Integer.parseInt(Instance.config.getConfig((Universe.SYSTEM_MAX)));
+        int galaxyMax = Integer.parseInt(Instance.config.getConfig((Config.GALAXY_MAX)));
+        int systemMax = Integer.parseInt(Instance.config.getConfig((Config.SYSTEM_MAX)));
         for(int i = 1 ; i <= galaxyMax; i++) {
             if(isNecessaryGalaxyPersist(i))
                 GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);

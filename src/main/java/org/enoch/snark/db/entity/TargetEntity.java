@@ -120,23 +120,6 @@ public class TargetEntity extends PlanetEntity {
         return Objects.hash(id, this.galaxy, this.system, this.position, this.energy, type, fleetSum, defenseSum, updated);
     }
 
-    public Long calculateTransportByTransporterSmall() {
-        if (this.metal == null || this.crystal == null || this.deuterium == null) {
-            throw new TargetMissingResourceInfoException();
-        }
-        Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
-        long amount = 5000 + (250 * (hyperspaceTechnology +1));
-        long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
-//        System.err.println("planet = " + this.toString());
-//        System.err.println("amount = " + amount);
-//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
-//        System.err.println("sum = " + resources);
-//        System.err.println("ships = "+ceil);
-        if(ceil < 1) {
-            System.err.println("Error");
-        }
-        return ceil;
-    }
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila
     public void calculateShips() {
         fleetSum =

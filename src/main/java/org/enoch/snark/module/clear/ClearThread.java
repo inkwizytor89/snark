@@ -9,8 +9,12 @@ import java.time.LocalDateTime;
 public class ClearThread extends AbstractThread {
 
     public static final String threadName = "clear";
-    public static final int UPDATE_TIME_IN_MINUTES = 500;
+    public static final int UPDATE_TIME_IN_SECONDS = 500;
 
+    public ClearThread() {
+        super();
+        setRunning(true);
+    }
 
     @Override
     public String getThreadName() {
@@ -19,7 +23,7 @@ public class ClearThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return UPDATE_TIME_IN_MINUTES;
+        return UPDATE_TIME_IN_SECONDS;
     }
 
     @Override

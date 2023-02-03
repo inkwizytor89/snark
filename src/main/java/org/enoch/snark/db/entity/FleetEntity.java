@@ -5,6 +5,7 @@ import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.model.types.MissionType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;

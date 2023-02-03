@@ -7,9 +7,9 @@ import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
+import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.AbstractThread;
@@ -58,7 +58,7 @@ public class UpdateThread extends AbstractThread {
         }
 
         events = navigator.getEventFleetList();
-        String config = Instance.config.getConfig(Universe.DEFENSE);
+        String config = Instance.config.getConfig(Config.DEFENSE);
         boolean shouldDefenceActivate = config == null || config.isEmpty() || config.equals("on");
         if(shouldDefenceActivate && isUnderAttack()) {
             writeMessageToPlayer();

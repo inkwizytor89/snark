@@ -10,7 +10,7 @@ import java.io.FilenameFilter;
 
 import static org.enoch.snark.db.entity.JPAUtility.H2_PERSISTENCE;
 import static org.enoch.snark.db.entity.JPAUtility.H2_URL;
-import static org.enoch.snark.instance.config.Universe.DATABASE;
+import static org.enoch.snark.instance.config.Config.DATABASE;
 import static org.enoch.snark.instance.config.Universe.configPath;
 
 public class Main {
@@ -22,7 +22,7 @@ public class Main {
         if(config == null || config.isEmpty() || config.equals("off")) {
             JPAUtility.buildDefaultEntityManager(H2_PERSISTENCE);
             migrateH2Database();
-        }
+        } else migratePostgresDatabase();
         new Thread(instance::run).start();
     }
 
