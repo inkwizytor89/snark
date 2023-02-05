@@ -13,6 +13,7 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ShipDoNotExists;
@@ -29,6 +30,7 @@ import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.CommandType.PRIORITY_REQUIERED;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.model.Resources.everything;
 
 public class SendFleetCommand extends GICommand {
 
@@ -38,6 +40,7 @@ public class SendFleetCommand extends GICommand {
     protected boolean autoComplete;
 
     public FleetEntity fleet;
+    private Resources resources;
 
     public SendFleetCommand(FleetEntity fleet) {
         super(PRIORITY_REQUIERED);
@@ -115,6 +118,17 @@ public class SendFleetCommand extends GICommand {
             SleepUtil.pause();
             SleepUtil.sleep();
         }
+
+        if(resources != null) {
+            if(resources.equals(everything)){
+                System.err.println("Error: everything resource not implemented");
+            } else {
+                WebElement resourcesArea = webDriver.findElement(By.id("resources"));
+                resourcesArea.findElement(By.xpath("//input[@id='metal']")).sendKeys(resources.metal.toString());
+                resourcesArea.findElement(By.xpath("//input[@id='crystal']")).sendKeys(resources.crystal.toString());
+                resourcesArea.findElement(By.xpath("//input[@id='deuterium']")).sendKeys(resources.deuterium.toString());
+            }
+        }
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         final LocalTime durationTime = DateUtil.parseDuration(duration);
@@ -183,6 +197,10 @@ public class SendFleetCommand extends GICommand {
         super.onInterrupt();
         fleet.code = -1L;
         FleetDAO.getInstance().saveOrUpdate(fleet);
+    }
+
+    public void setResources(Resources resources) {
+        this.resources = resources;
     }
 
     @Override

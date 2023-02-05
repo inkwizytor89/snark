@@ -12,14 +12,15 @@ public class Config {
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 
+    public static final String MAX_DT = "max_dt";
+    public static final String COLLECTION_DESTINATION = "coll_dest";
+    public static final String DEFENSE = "defense";
+    public static final String FLY_POINTS = "fly_points";
+    public static final String EXPLORATION_AREA = "exploration_area";
     public static final String DATABASE = "database";
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
-    public static final String EXPLORATION_AREA = "exploration_area";
-    public static final String MAX_DT = "max_dt";
     public static final String MASTER = "master_href";
-    public static final String FLY_POINTS = "fly_points";
-    public static final String DEFENSE = "defense";
 
     public String name;
     public String url;

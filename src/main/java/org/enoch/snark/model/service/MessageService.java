@@ -71,7 +71,7 @@ public class MessageService {
 
         // some actions are ended and is no time to wait more
         for (Long key : scannedMap.keySet()) {
-            if(waitingMap.get(key).isEmpty()) {
+            if(key != null && waitingMap.get(key).isEmpty()) {
                 System.err.println("For "+key+" is time to read messages");
                 return true;
             }

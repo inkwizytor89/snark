@@ -48,6 +48,7 @@ public class BaseSI {
             baseThreads.forEach(Thread::start);
 
             Commander commander = Commander.getInstance();
+            //todo zrobic inna synchronizacje bo blokuje rozruch
             while(commander.getFleetCount() <1) SleepUtil.pause();
 
             operationThreads.forEach(Thread::start);

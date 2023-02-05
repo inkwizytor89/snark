@@ -3,6 +3,7 @@ package org.enoch.snark.model;
 public class Resources {
 
     public static Resources unknown = new Resources(-1L, -1L, -1L);
+    public static Resources everything = new Resources(-100L, -100L, -100L);
 
     public Long metal = 0L;
     public Long crystal = 0L;

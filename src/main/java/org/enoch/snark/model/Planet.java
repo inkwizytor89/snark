@@ -19,6 +19,8 @@ public class Planet {
 
     public Planet(String input) {
         this(input, ColonyType.PLANET);
+
+        if('m' == input.charAt(0))  this.type = ColonyType.MOON;
     }
 
     public Planet(String input, ColonyType type) {
