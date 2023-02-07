@@ -77,13 +77,12 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
 
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
-            int update = entityManager.createQuery("" +
+            entityManager.createQuery("" +
                     "delete from FleetEntity " +
                     "where updated < :from ")
                     .setParameter("from", from)
                     .executeUpdate();
 
-            System.err.println(JPAUtility.syncMethod+" "+update);
             JPAUtility.syncMethod = null;
             entityManager.flush();
             transaction.commit();
@@ -98,13 +97,12 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
 
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
-            int update = entityManager.createQuery("" +
+            entityManager.createQuery("" +
                     "delete from FleetEntity " +
                     "where source = :colony ")
                     .setParameter("colony", colony)
                     .executeUpdate();
 
-            System.err.println(JPAUtility.syncMethod+" "+update);
             JPAUtility.syncMethod = null;
             entityManager.flush();
             transaction.commit();

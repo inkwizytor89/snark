@@ -34,13 +34,12 @@ public class MessageDAO extends AbstractDAO<MessageEntity> {
 
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
-            int update = entityManager.createQuery("" +
+            entityManager.createQuery("" +
                     "delete from MessageEntity " +
                     "where created < :from ")
                     .setParameter("from", from)
                     .executeUpdate();
 
-            System.err.println("org.enoch.snark.db.dao.MessageDAO.clean "+update);
             JPAUtility.syncMethod = null;
             entityManager.flush();
             transaction.commit();

@@ -213,14 +213,6 @@ public class Instance {
         return colonyDAO.fetchAll().get(0);
     }
 
-    public Long calculateMaxExpeditionSize() {
-        String maxDt = config.getConfig((Config.MAX_DT));
-        if(maxDt == null || maxDt.isEmpty()) {
-            return 2500L;
-        }
-        return Long.parseLong(maxDt);
-    }
-
     public synchronized boolean isStopped() {
         return config.mode!= null && config.mode.contains("stop");
     }

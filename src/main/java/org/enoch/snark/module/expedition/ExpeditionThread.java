@@ -20,6 +20,8 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadName = "expedition";
+    public static final String BATTLE_EXTENSION = "battle_extension";
+    public static final String MAX_DT = "max_dt";
 
     private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
     private Long maxTL;
@@ -82,7 +84,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private FleetEntity buildExpeditionFleet(ColonyEntity colony) {
-        maxTL = instance.calculateMaxExpeditionSize();
+        maxTL = calculateMaxExpeditionSize();
         FleetEntity expeditionToSend = FleetEntity.createExpedition(colony);
 
         Map<ShipEnum, Long> expeditionMap = ShipEnum.createExpeditionMap(maxTL, 0L, 1L);
@@ -140,8 +142,17 @@ public class ExpeditionThread extends AbstractThread {
         return bestColony;
     }
 
+    public Long calculateMaxExpeditionSize() {
+        String maxDt = Instance.config.get(threadName, MAX_DT);
+        if(maxDt == null || maxDt.isEmpty()) {
+            return 2500L;
+        }
+        return Long.parseLong(maxDt);
+    }
+
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition);
+        boolean battleExtension = Instance.config.contains(threadName, BATTLE_EXTENSION);
+        ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
         expeditionFleetCommand.addTag(threadName);
         instance.push(expeditionFleetCommand);
     }

@@ -94,12 +94,6 @@ public class SendFleetCommand extends GICommand {
                         System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
             }
 
-//            System.err.println("on planet "+fleet.source);
-//            System.err.println("transporterSmall " + fleet.source.getShipsMap().get(ShipEnum.transporterSmall));
-//            for(Map.Entry<ShipEnum, Long> entry : fleet.source.getShipsMap().entrySet()) {
-//                System.err.println(entry.getKey() + " " + entry.getValue());
-//            }
-
             fleet.start = LocalDateTime.now();
             fleet.code = 0L;
             FleetDAO.getInstance().saveOrUpdate(fleet);
@@ -113,8 +107,6 @@ public class SendFleetCommand extends GICommand {
             coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
             coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
             coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
-//        SleepUtil.pause();
-//        webDriver.findElement(By.id("target")).findElement(By.id("pbutton")).click();
             SleepUtil.pause();
             SleepUtil.sleep();
         }

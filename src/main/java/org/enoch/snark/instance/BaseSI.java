@@ -6,7 +6,7 @@ import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
 import org.enoch.snark.module.collector.CollectorThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
-import org.enoch.snark.module.explore.SpaceThread;
+import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.farm.FarmThread;
 import org.enoch.snark.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.module.scan.ScanThread;

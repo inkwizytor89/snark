@@ -1,4 +1,4 @@
-package org.enoch.snark.module.explore;
+package org.enoch.snark.module.space;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.GalaxyDAO;
