@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.commander;
 
+import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.model.EventFleet;
+import org.enoch.snark.model.types.MissionType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +40,19 @@ public class Navigator {
 
     public List<EventFleet> getEventFleetList() {
         return this.eventFleetList;
+    }
+
+    public boolean noneMission(MissionType missionType) {
+        return this.eventFleetList.stream()
+                .noneMatch(fleet -> missionType.equals(fleet.missionType));
+    }
+
+    public boolean isSimilarFleet(FleetEntity fleetEntity) {
+        return this.eventFleetList.stream()
+                .anyMatch(fleet ->
+                        fleetEntity.source.toPlanet().equals(fleet.getFrom()) &&
+                        fleetEntity.getTarget().equals(fleet.getTo()) &&
+                                fleetEntity.type.equals(fleet.missionType.getName()));
     }
 
     @Override

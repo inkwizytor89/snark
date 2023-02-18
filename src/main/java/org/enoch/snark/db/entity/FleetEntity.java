@@ -57,6 +57,26 @@ public class FleetEntity extends IdEntity {
     public LocalDateTime back;
 
     @Basic
+    @Column(name = "speed")
+    public Long speed;
+
+    @Basic
+    @Column(name = "metal")
+    public Long metal;
+
+    @Basic
+    @Column(name = "crystal")
+    public Long crystal;
+
+    @Basic
+    @Column(name = "deuterium")
+    public Long deuterium;
+
+    @Basic
+    @Column(name = "acs_code")
+    public String acsCode;
+
+    @Basic
     @Column(name = "code")
     public Long code;
 
@@ -228,5 +248,16 @@ public class FleetEntity extends IdEntity {
     @Override
     public String toString() {
         return "[" + id + ": " + type + " " + source + " -> " + targetSystem.toString() + "]";
+    }
+
+    public void setTarget(Planet planet) {
+        targetGalaxy = planet.galaxy;
+        targetSystem = planet.system;
+        targetPosition = planet.position;
+        spaceTarget = planet.type.getName();
+    }
+
+    public Planet getTarget() {
+        return new Planet(targetGalaxy, targetSystem, targetPosition, ColonyType.valueOf(spaceTarget));
     }
 }

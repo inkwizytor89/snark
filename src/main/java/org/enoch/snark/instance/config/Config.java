@@ -23,7 +23,6 @@ public class Config {
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 
-    public static final String COLLECTION_DESTINATION = "coll_dest";
     public static final String DEFENSE = "defense";
     public static final String FLY_POINTS = "fly_points";
     public static final String EXPLORATION_AREA = "exploration_area";
@@ -91,6 +90,7 @@ public class Config {
 
     public String get(String threadName, String key) {
         String threadConfig = extract(threadName);
+        if (threadConfig == null) return "";
         String[] configs = threadConfig.split(",");
         for (String s : configs) {
             String[] configuration = s.split("=");

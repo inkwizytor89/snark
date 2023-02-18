@@ -49,4 +49,14 @@ public class EventFleet {
         }
         return new Planet(coordsOrigin, originFleet);
     }
+
+    public Planet getFrom() {
+        return new Planet(coordsOrigin, originFleet);
+    }
+
+    public Planet getTo() {
+        return new Planet(destCoords, destFleet);
+    }
+
+
 }

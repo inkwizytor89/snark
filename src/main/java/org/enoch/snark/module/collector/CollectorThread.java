@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 
 public class CollectorThread extends AbstractThread {
 
-    public static final String threadName = "Collector";
+    public static final String threadName = "collector";
+    public static final String COLLECTION_DESTINATION = "coll_dest";
 
     @Override
     public String getThreadName() {
@@ -38,13 +39,15 @@ public class CollectorThread extends AbstractThread {
     protected void onStep() {
         if(noCollectingOngoing()) {
             ColonyEntity destination = getCollectionDestinationFromConfig();
+            System.err.println("dest choose "+destination);
             FleetEntity fleet = buildCollectingFleetEntity(destination);
 
-            long deuterium = fleet.source.deuterium < 1000000L? 0: fleet.source.deuterium-1000000L ;
-            Resources resources = new Resources(fleet.source.metal, fleet.source.crystal, deuterium);
+            fleet.metal = fleet.source.metal;
+            fleet.crystal = fleet.source.crystal;
+            long deuterium = fleet.source.deuterium < 4000000L? 0: fleet.source.deuterium-1000000L ;
+            fleet.deuterium = deuterium;
 
             SendFleetCommand collecting = new SendFleetCommand(fleet);
-            collecting.setResources(resources);
             collecting.addTag(threadName);
             commander.push(collecting);
         }
@@ -86,7 +89,8 @@ public class CollectorThread extends AbstractThread {
     }
 
     private ColonyEntity getCollectionDestinationFromConfig() {
-        String config = Instance.config.getConfig(Config.COLLECTION_DESTINATION);
+        String config = Instance.config.get(threadName, COLLECTION_DESTINATION);
+        System.err.println("coll_dest="+config);
         if(config == null || config.isEmpty()) {
             long oneBeforeLast = Long.parseLong(Instance.config.getConfig(Config.GALAXY_MAX))-1;
             return Instance.getInstance().findNearestFlyPoint(new Planet("["+oneBeforeLast+":325:8]"));
@@ -105,7 +109,6 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean noCollectingByNavigator() {
-        return Navigator.getInstance().getEventFleetList().stream()
-                .noneMatch(fleet -> MissionType.TRANSPORT.equals(fleet.missionType));
+        return Navigator.getInstance().noneMission(MissionType.TRANSPORT);
     }
 }

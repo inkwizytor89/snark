@@ -66,7 +66,10 @@ public class Planet {
         if(!(obj instanceof Planet)) return false;
 
         Planet anotherPlanet = (Planet) obj;
-        return this.galaxy.equals(anotherPlanet.galaxy) && this.system.equals(anotherPlanet.system) && this.position.equals(anotherPlanet.position);
+        return this.galaxy.equals(anotherPlanet.galaxy) &&
+                this.system.equals(anotherPlanet.system) &&
+                this.position.equals(anotherPlanet.position) &&
+                this.type.equals(anotherPlanet.type);
     }
 
     public static String getCordinate(Planet planet) {

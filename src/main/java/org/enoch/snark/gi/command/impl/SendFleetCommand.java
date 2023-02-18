@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,7 +41,6 @@ public class SendFleetCommand extends GICommand {
     protected boolean autoComplete;
 
     public FleetEntity fleet;
-    private Resources resources;
 
     public SendFleetCommand(FleetEntity fleet) {
         super(PRIORITY_REQUIERED);
@@ -111,15 +111,27 @@ public class SendFleetCommand extends GICommand {
             SleepUtil.sleep();
         }
 
-        if(resources != null) {
-            if(resources.equals(everything)){
-                System.err.println("Error: everything resource not implemented");
-            } else {
-                WebElement resourcesArea = webDriver.findElement(By.id("resources"));
-                resourcesArea.findElement(By.xpath("//input[@id='metal']")).sendKeys(resources.metal.toString());
-                resourcesArea.findElement(By.xpath("//input[@id='crystal']")).sendKeys(resources.crystal.toString());
-                resourcesArea.findElement(By.xpath("//input[@id='deuterium']")).sendKeys(resources.deuterium.toString());
+        if(fleet.metal != null || fleet.crystal != null || fleet.deuterium != null) {
+            WebElement resourcesArea = webDriver.findElement(By.id("resources"));
+            WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
+            WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
+            WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
+            for(int i=0; i<3; i++) {
+                SleepUtil.pause();
+                deuteriumAmount.sendKeys(fleet.deuterium.toString());
+                crystalAmount.sendKeys(fleet.crystal.toString());
+                metalAmount.sendKeys(fleet.metal.toString());
+                if(Long.parseLong(metalAmount.getText())>0 ||
+                        Long.parseLong(crystalAmount.getText())>0 ||
+                        Long.parseLong(deuteriumAmount.getText())>0) break;
             }
+        }
+
+        if(fleet.speed != null) {
+            WebElement element = webDriver.findElement(By.className("steps"));
+            List<WebElement> steps = element.findElements(By.className("step"));
+            WebElement speedElement = steps.get(Integer.parseInt(fleet.speed.toString()) / 10 - 1);
+            speedElement.click();
         }
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
@@ -189,10 +201,6 @@ public class SendFleetCommand extends GICommand {
         super.onInterrupt();
         fleet.code = -1L;
         FleetDAO.getInstance().saveOrUpdate(fleet);
-    }
-
-    public void setResources(Resources resources) {
-        this.resources = resources;
     }
 
     @Override

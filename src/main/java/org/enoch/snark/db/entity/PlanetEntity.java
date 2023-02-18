@@ -325,7 +325,7 @@ public abstract class PlanetEntity extends IdEntity{
     }
 
     public Planet toPlanet() {
-        return new Planet(this.getCordinate());
+        return new Planet(this.toString());
     }
 
     public Map<ShipEnum, Long> getShipsMap() {
@@ -400,7 +400,7 @@ public abstract class PlanetEntity extends IdEntity{
 //        System.err.println("sum = " + resources);
 //        System.err.println("ships = "+ceil);
         if(ceil < 1) {
-            System.err.println("Error: amount calculation fail");
+            System.err.println("Error: amount calculation fail for TransporterSmall");
         }
         return ceil;
     }
@@ -418,7 +418,7 @@ public abstract class PlanetEntity extends IdEntity{
 //        System.err.println("sum = " + resources);
 //        System.err.println("ships = "+ceil);
         if(ceil < 1) {
-            System.err.println("Error: amount calculation fail");
+            System.err.println("Error: amount calculation fail for TransporterLarge");
         }
         return ceil;
     }

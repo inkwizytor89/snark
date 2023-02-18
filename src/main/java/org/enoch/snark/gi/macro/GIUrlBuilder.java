@@ -8,6 +8,7 @@ import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.SystemView;
+import org.enoch.snark.model.types.ColonyType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -47,12 +48,21 @@ public class GIUrlBuilder {
                 "&galaxy=" + target.galaxy +
                 "&system=" + target.system +
                 "&position=" + target.position +
-                "&type=1&mission=" + mission.getValue();
+                "&type=" +  generateTargetType(target.type) +
+                "&mission=" + mission.getValue();
         Instance.session.getWebDriver().get(builder);
 
         updateColony(source);
         loadFleetStatus();
         Instance.getInstance().gi.updateFleet(source);
+    }
+
+    private String generateTargetType(ColonyType type) {
+        switch (type) {
+            case MOON: return "3";
+            case DEBRIS: return "2";
+            default: return "1";
+        }
     }
 
     public void loadFleetStatus() {
