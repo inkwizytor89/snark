@@ -8,12 +8,11 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.macro.FleetSelector;
+import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ShipDoNotExists;
@@ -21,35 +20,33 @@ import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.CommandType.PRIORITY_REQUIERED;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
-import static org.enoch.snark.model.Resources.everything;
 
 public class SendFleetCommand extends GICommand {
 
-    protected final FleetSelector fleetSelector;
     public Mission mission;
     protected GIUrlBuilder giUrlBuilder;
     protected boolean autoComplete;
 
     public FleetEntity fleet;
+    private final SendFleetGIR gir;
 
     public SendFleetCommand(FleetEntity fleet) {
         super(PRIORITY_REQUIERED);
         this.priority = 40;
         this.fleet = fleet;
         this.mission = Mission.convertFromString(fleet.type);
-
+        gir = new SendFleetGIR();
         giUrlBuilder = new GIUrlBuilder();
-        fleetSelector = new FleetSelector(instance.session);
     }
 
     public boolean prepere() {
@@ -83,10 +80,10 @@ public class SendFleetCommand extends GICommand {
 
         Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
         for(Map.Entry<ShipEnum, Long> entry : entries) {
-            fleetSelector.typeShip(entry.getKey(), entry.getValue());
+            typeShip(entry.getKey(), entry.getValue());
         }
         try {
-            fleetSelector.next();
+            next();
         } catch (ShipDoNotExists e) {
             System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
             for(Map.Entry<ShipEnum, Long> entry : entries) {
@@ -111,28 +108,9 @@ public class SendFleetCommand extends GICommand {
             SleepUtil.sleep();
         }
 
-        if(fleet.metal != null || fleet.crystal != null || fleet.deuterium != null) {
-            WebElement resourcesArea = webDriver.findElement(By.id("resources"));
-            WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
-            WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
-            WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
-            for(int i=0; i<3; i++) {
-                SleepUtil.pause();
-                deuteriumAmount.sendKeys(fleet.deuterium.toString());
-                crystalAmount.sendKeys(fleet.crystal.toString());
-                metalAmount.sendKeys(fleet.metal.toString());
-                if(Long.parseLong(metalAmount.getText())>0 ||
-                        Long.parseLong(crystalAmount.getText())>0 ||
-                        Long.parseLong(deuteriumAmount.getText())>0) break;
-            }
-        }
+        gir.setResources(fleet);
+        gir.setSpeed(fleet);
 
-        if(fleet.speed != null) {
-            WebElement element = webDriver.findElement(By.className("steps"));
-            List<WebElement> steps = element.findElements(By.className("step"));
-            WebElement speedElement = steps.get(Integer.parseInt(fleet.speed.toString()) / 10 - 1);
-            speedElement.click();
-        }
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         final LocalTime durationTime = DateUtil.parseDuration(duration);
@@ -166,7 +144,7 @@ public class SendFleetCommand extends GICommand {
         }
 
         try {
-            fleetSelector.start();
+            start();
         } catch(FleetCantStart e) {
             e.printStackTrace();
             Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -189,6 +167,50 @@ public class SendFleetCommand extends GICommand {
         new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
 //        int expeditionCount = instance.commander.getExpeditionCount();
 //        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
+        return true;
+    }
+
+    public void typeShip(ShipEnum shipEnum, Long count) {
+        WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
+        if(!element.isEnabled()) {
+            throw new ShipDoNotExists("Missings ships " + shipEnum.getId());
+        }
+        element.sendKeys(count.toString());
+    }
+
+    public void next() {
+        SleepUtil.pause();
+        // to button continue to recalculate
+        session.getWebDriver().findElement(By.className("planet-header")).click();
+
+        final WebElement continueButton = session.getWebDriver().findElement(By.id("continueToFleet2"));
+        if(continueButton.getAttribute("class").equals("continue off")) {
+            throw new ShipDoNotExists();
+        }
+//        continueButton.click();
+
+
+        Actions actions = new Actions(session.getWebDriver());
+
+        actions.moveToElement(continueButton).click().perform();
+    }
+
+    public boolean start() {
+//        SleepUtil.sleep();
+        SleepUtil.secondsToSleep(1);
+        final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
+        if(startInput.getAttribute("class").contains("off")) {
+            throw new FleetCantStart();
+        }
+        startInput.click();
+//        SleepUtil.pause();
+        final WebElement errorBox = webDriver.findElement(By.id("errorBoxDecision"));
+        if(errorBox.isDisplayed() && Mission.COLONIZATION.name().equals(fleet.type)) {
+            webDriver.findElement(By.id("errorBoxDecisionYes")).click();
+        }
+        if(errorBox.isDisplayed()) {
+            throw new ToStrongPlayerException();
+        }
         return true;
     }
 
