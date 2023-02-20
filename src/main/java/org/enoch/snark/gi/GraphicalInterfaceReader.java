@@ -1,15 +1,20 @@
 package org.enoch.snark.gi;
 
-import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.exception.GIException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import java.util.List;
-
 abstract class GraphicalInterfaceReader {
+
+    public static final String A_TAG = "a";
+    public static final String DIV_TAG = "div";
+    public static final String TR_TAG = "tr";
+    public static final String SPAN_TAG = "span";
+
+    public static final String HREF_ATTRIBUTE = "href";
+    public static final String TITLE_ATTRIBUTE = "title";
+    public static final String ID_ATTRIBUTE = "id";
+    public static final String CLASS_ATTRIBUTE = "class";
 
     protected final ChromeDriver wd;
 

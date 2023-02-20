@@ -3,6 +3,7 @@ package org.enoch.snark.gi.macro;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.gi.GeneralGIR;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.commander.QueueManger;
@@ -115,7 +116,7 @@ public class GIUrlBuilder {
             instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         }
         if (checkEventFleet) {
-            Navigator.getInstance().informAboutEventFleets(Instance.gi.readEventFleet());
+            Navigator.getInstance().informAboutEventFleets(new GeneralGIR().readEventFleet());
         }
     }
 

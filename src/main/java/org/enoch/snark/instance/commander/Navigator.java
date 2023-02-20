@@ -31,7 +31,6 @@ public class Navigator {
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
         if(eventFleetList == null) {
-            System.err.println("Navigator loaded null data - skipping");
             return;
         }
         this.eventFleetList = eventFleetList;
