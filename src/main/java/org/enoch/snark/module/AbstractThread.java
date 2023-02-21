@@ -42,7 +42,6 @@ public abstract class AbstractThread extends Thread {
         onStart();
 
         while(true) {
-            SleepUtil.secondsToSleep(getPauseInSeconds());
             boolean shouldRunning = isRunning && commander.isRunning();
             if (shouldRunning) {
                 try {
@@ -52,6 +51,7 @@ public abstract class AbstractThread extends Thread {
                     e.printStackTrace();
                 }
             }
+            SleepUtil.secondsToSleep(getPauseInSeconds());
         }
     }
 

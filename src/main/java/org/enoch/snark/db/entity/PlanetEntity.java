@@ -330,6 +330,7 @@ public abstract class PlanetEntity extends IdEntity{
 
     public Map<ShipEnum, Long> getShipsMap() {
         Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        shipsMap.put(ShipEnum.fighterLight, fighterLight);
         shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
         shipsMap.put(ShipEnum.cruiser, cruiser);
         shipsMap.put(ShipEnum.battleship, battleship);

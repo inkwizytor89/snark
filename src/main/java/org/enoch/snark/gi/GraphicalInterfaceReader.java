@@ -1,8 +1,11 @@
 package org.enoch.snark.gi;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 abstract class GraphicalInterfaceReader {
 
@@ -17,9 +20,11 @@ abstract class GraphicalInterfaceReader {
     public static final String CLASS_ATTRIBUTE = "class";
 
     protected final ChromeDriver wd;
+    protected final WebDriverWait wait;
 
     GraphicalInterfaceReader() {
         wd =(ChromeDriver) GI.getInstance().webDriver;
+        wait = new WebDriverWait(wd, 1);
     }
 
     protected String getText(ChromeDriver wd) {
@@ -46,5 +51,18 @@ abstract class GraphicalInterfaceReader {
      */
     protected Long toLong(String string) {
         return Long.parseLong(string.replaceAll("\\.",""));
+    }
+
+    public WebElement getIfPresentById(String id) {
+        return getIfPresentById(id, 1L);
+    }
+
+    public WebElement getIfPresentById(String id, long timeOutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(wd, timeOutInSeconds);
+        WebElement webElement = null;
+        try {
+            webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
+        } catch (TimeoutException ignored) {}
+        return webElement;
     }
 }

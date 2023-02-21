@@ -144,7 +144,7 @@ public class SendFleetCommand extends GICommand {
         }
 
         try {
-            start();
+            gir.sendFleet(fleet);
         } catch(FleetCantStart e) {
             e.printStackTrace();
             Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -161,7 +161,7 @@ public class SendFleetCommand extends GICommand {
             if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
-        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
+//        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
 
         //open after pause to wait for game to reload fleet and expedition statuses
         new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
@@ -193,25 +193,6 @@ public class SendFleetCommand extends GICommand {
         Actions actions = new Actions(session.getWebDriver());
 
         actions.moveToElement(continueButton).click().perform();
-    }
-
-    public boolean start() {
-//        SleepUtil.sleep();
-        SleepUtil.secondsToSleep(1);
-        final WebElement startInput = session.getWebDriver().findElement(By.id("sendFleet"));
-        if(startInput.getAttribute("class").contains("off")) {
-            throw new FleetCantStart();
-        }
-        startInput.click();
-//        SleepUtil.pause();
-        final WebElement errorBox = webDriver.findElement(By.id("errorBoxDecision"));
-        if(errorBox.isDisplayed() && Mission.COLONIZATION.name().equals(fleet.type)) {
-            webDriver.findElement(By.id("errorBoxDecisionYes")).click();
-        }
-        if(errorBox.isDisplayed()) {
-            throw new ToStrongPlayerException();
-        }
-        return true;
     }
 
     public Map<ShipEnum, Long> buildShipsMap() {

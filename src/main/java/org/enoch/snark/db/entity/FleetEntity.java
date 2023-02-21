@@ -16,6 +16,8 @@ import java.util.Map;
 @Table(name = "fleet", schema = "public", catalog = "snark")
 public class FleetEntity extends IdEntity {
 
+    public static final Long FLEET_SAVE_CODE = 1L;
+
     public static final String SPY = "SPY";
     public static final String ATTACK = "ATTACK";
     public static final String EXPEDITION = "EXPEDITION";

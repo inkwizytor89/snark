@@ -58,6 +58,7 @@ public class UpdateThread extends AbstractThread {
         }
 
         events = navigator.getEventFleetList();
+        if (events == null) return;
         String config = Instance.config.getConfig(Config.DEFENSE);
         boolean shouldDefenceActivate = config == null || config.isEmpty() || config.equals("on");
         if(shouldDefenceActivate && isUnderAttack()) {

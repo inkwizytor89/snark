@@ -1,6 +1,7 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
@@ -46,10 +47,7 @@ public class BaseSI {
     public void run() {
         Runnable task = () -> {
             baseThreads.forEach(Thread::start);
-
-            Commander commander = Commander.getInstance();
-            //todo zrobic inna synchronizacje bo blokuje rozruch
-            while(commander.getFleetCount() <1) SleepUtil.pause();
+            while(Navigator.getInstance().getEventFleetList() == null) SleepUtil.pause();
 
             operationThreads.forEach(Thread::start);
 

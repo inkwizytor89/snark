@@ -2,13 +2,36 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.model.exception.FleetCantStart;
+import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
+
+    public void sendFleet(FleetEntity fleet) {
+        final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
+        Boolean isExpectedState = new WebDriverWait(wd, 2)
+                .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
+        if(!isExpectedState) {
+            throw new FleetCantStart();
+        }
+        sendFleet.click();
+
+        WebElement errorBox = getIfPresentById("errorBoxDecision");
+        if(errorBox != null && Mission.COLONIZATION.name().equals(fleet.type)) {
+            wd.findElement(By.id("errorBoxDecisionYes")).click();
+        } else if(errorBox != null) {
+            //todo change old code
+            System.err.println("silny gracz ");
+            throw new ToStrongPlayerException();
+        }
+    }
 
     public void setResources(FleetEntity fleet) {
         if(fleet.metal != null || fleet.crystal != null || fleet.deuterium != null) {

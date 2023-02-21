@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
+
 public class FleetSaveThread extends AbstractThread {
 
     public static final String threadName = "fleetSave";
@@ -46,11 +48,8 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-//        if(true) return;
-
         for(FleetEntity fleet : loadFleetToSave()) {
-            //skipping
-            if(isFleetRequested(fleet)) continue;
+            if(!isColonyShipOnColony(fleet)) continue;
 
             if(isColonyStillBlocked(fleet.source)) continue;
 
@@ -67,6 +66,10 @@ public class FleetSaveThread extends AbstractThread {
                 .anyMatch(fleet -> source.toPlanet().equals(fleet.getEndingPlanet()));
     }
 
+    private boolean isColonyShipOnColony(FleetEntity fleet) {
+        ColonyEntity source = ColonyDAO.getInstance().fetch(fleet.source);
+        return source.colonyShip > 0;
+    }
     private boolean isFleetRequested(FleetEntity fleet) {
         return Navigator.getInstance().isSimilarFleet(fleet) ||
                 isActiveFleetSaveInDB(fleet);
@@ -91,6 +94,7 @@ public class FleetSaveThread extends AbstractThread {
             fleetEntity.setTarget(new Planet(configValues[DESTINATION_INDEX]));
             fleetEntity.type = Mission.COLONIZATION.name();
             fleetEntity.setShips(fleetEntity.source.getShipsMap());
+            fleetEntity.code = FLEET_SAVE_CODE;
 
             fleetEntity.metal = Long.MAX_VALUE;
             fleetEntity.crystal = Long.MAX_VALUE;

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class Navigator {
 
     private static Navigator INSTANCE;
-    private List<EventFleet> eventFleetList = new ArrayList<>();
+    private List<EventFleet> eventFleetList;
     private LocalDateTime lastUpdate = LocalDateTime.now().minusDays(1L);
 
     private Navigator() {
