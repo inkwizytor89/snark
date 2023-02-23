@@ -15,12 +15,14 @@ import java.util.List;
 public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void sendFleet(FleetEntity fleet) {
+        SleepUtil.pause();
         final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
         Boolean isExpectedState = new WebDriverWait(wd, 2)
                 .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
         if(!isExpectedState) {
             throw new FleetCantStart();
         }
+        SleepUtil.pause();
         sendFleet.click();
 
         WebElement errorBox = getIfPresentById("errorBoxDecision");

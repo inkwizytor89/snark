@@ -161,7 +161,7 @@ public class SendFleetCommand extends GICommand {
             if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
-//        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
+        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
 
         //open after pause to wait for game to reload fleet and expedition statuses
         new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
