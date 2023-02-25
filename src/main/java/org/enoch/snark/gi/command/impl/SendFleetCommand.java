@@ -2,6 +2,7 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -75,6 +76,7 @@ public class SendFleetCommand extends GICommand {
         if(!prepere()) {
             return true;
         };
+        fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 

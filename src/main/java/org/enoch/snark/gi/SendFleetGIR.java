@@ -41,9 +41,11 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
+
+            Long deuterium = rememberToLeaveSomeDeuterium(fleet);
             for(int i=0; i<3; i++) {
                 SleepUtil.pause();
-                deuteriumAmount.sendKeys(fleet.deuterium.toString());
+                deuteriumAmount.sendKeys(deuterium.toString());
                 crystalAmount.sendKeys(fleet.crystal.toString());
                 metalAmount.sendKeys(fleet.metal.toString());
 
@@ -54,6 +56,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
                     break;
             }
         }
+    }
+
+    public Long rememberToLeaveSomeDeuterium(FleetEntity fleet) {
+        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+        long consumption = toLong(consumptionInput.split("\\s")[0]);
+
+        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 1000000L;
     }
 
     public void setSpeed(FleetEntity fleet) {

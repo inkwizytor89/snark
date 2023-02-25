@@ -44,7 +44,7 @@ public class CollectorThread extends AbstractThread {
 
             fleet.metal = fleet.source.metal;
             fleet.crystal = fleet.source.crystal;
-            long deuterium = fleet.source.deuterium < 4000000L? 0: fleet.source.deuterium-1000000L ;
+            long deuterium = fleet.source.deuterium < 4000000L? 0: fleet.source.deuterium;
             fleet.deuterium = deuterium;
 
             SendFleetCommand collecting = new SendFleetCommand(fleet);

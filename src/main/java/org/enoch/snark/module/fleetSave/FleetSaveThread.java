@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
@@ -50,11 +51,19 @@ public class FleetSaveThread extends AbstractThread {
     protected void onStep() {
         for(FleetEntity fleet : loadFleetToSave()) {
             if(!isColonyShipOnColony(fleet)) continue;
-
             if(isColonyStillBlocked(fleet.source)) continue;
 
-            FleetDAO.getInstance().saveOrUpdate(fleet);
+            String colonizationCode = getColonizationCode(fleet);
+            if(noWaitingElementsByTag(colonizationCode)) {
+                SendFleetCommand command = new SendFleetCommand(fleet);
+                command.addTag(colonizationCode);
+                commander.push(command);
+            }
         }
+    }
+
+    private String getColonizationCode(FleetEntity fleet) {
+        return threadName+fleet.getDestination();
     }
 
     private boolean isColonyStillBlocked(ColonyEntity source) {
@@ -83,6 +92,11 @@ public class FleetSaveThread extends AbstractThread {
                         fleetEntity.type.equals(fleet.type));
     }
 
+    /**
+     * fs=m[1:1:8]-30-p[1:1:1];m[2:2:8]-30-p[2:2:1]
+     *
+     * @return
+     */
     private List<FleetEntity> loadFleetToSave() {
         String[] allFleetToSaveConfig = Instance.config.get(threadName, "fs").split(";");
         List<FleetEntity> fleetToSave = new ArrayList<>();
