@@ -8,6 +8,8 @@ public enum MissionType {
     STATION("STATION"),
     TRANSPORT("TRANSPORT"),
     ATTACK("ATTACK"),
+    GROUP_ATTACK("GROUP_ATTACK"),
+    DESTROY("DESTROY"),
     UNKNOWN("UNKNOWN");
 
     private String name;
@@ -37,6 +39,10 @@ public enum MissionType {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isAggressive() {
+        return this.equals(SPY) || this.equals(ATTACK) || this.equals(DESTROY) || this.equals(GROUP_ATTACK);
     }
 
     @Override
