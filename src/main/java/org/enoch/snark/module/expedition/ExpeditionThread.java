@@ -23,7 +23,7 @@ public class ExpeditionThread extends AbstractThread {
     public static final String BATTLE_EXTENSION = "battle_extension";
     public static final String MAX_DT = "max_dt";
 
-    private final Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
+    private Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
     private Long maxTL;
 
     @Override
@@ -45,10 +45,10 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         pause = 5;
-        chooseColoniesForExpeditionsStart();
     }
 
     private void chooseColoniesForExpeditionsStart() {
+        expeditionQueue = new LinkedList<>();
         expeditionQueue.addAll(instance.flyPoints);
     }
 
@@ -65,6 +65,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private ColonyEntity getNextFlyPoint() {
+        if(expeditionQueue.isEmpty()) chooseColoniesForExpeditionsStart();
         ColonyEntity poll = expeditionQueue.poll();
         if(poll == null) {
             System.err.println("expeditionQueue in ExpeditionThread is empty");

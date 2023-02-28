@@ -106,16 +106,6 @@ public class Instance {
                         }
                     });
 
-//            for(ColonyEntity colony : loadColonyList) {
-//                ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
-//                if (colonyEntity == null) {
-//                    colonyEntity = colony;
-//                } else if (colony.cpm != null && colonyEntity.cpm == null) {
-//                    colonyEntity.cpm = colony.cpm;
-//                }
-//                colonyDAO.saveOrUpdate(colonyEntity);
-//            }
-
             //remove missing colony
             stillExistMap.forEach((colonyEntity, stillExist) -> {
                     if(!stillExist) {
