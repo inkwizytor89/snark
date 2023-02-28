@@ -9,6 +9,7 @@ import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.CommandType;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
@@ -26,7 +27,6 @@ public class Commander extends Thread{
     private final Instance instance;
     private final GISession session;
     private boolean isRunning = true;
-    private boolean isUnderAttack = false;
 
     private int fleetCount = 0;
     private int fleetMax = 0;
@@ -70,11 +70,9 @@ public class Commander extends Thread{
 
                 startCommander();
 
-//                    if(isSomethingAttacking()) {
-//                        if(!isUnderAttack) resolve(new OpenPageCommand(PAGE_BASE_FLEET, null)
-//                                .setCheckEventFleet(true));
-//                        isUnderAttack = true;
-//                    } else isUnderAttack = false;
+                if(isSomethingAttacking() && Navigator.getInstance().isExpiredForMinutes(2)) {
+                    resolve(new OpenPageCommand(PAGE_BASE_FLEET, null).setCheckEventFleet(true));
+                }
 
                 if(isFleetFreeSlot()) {
                     if (!priorityActionQueue.isEmpty()) {

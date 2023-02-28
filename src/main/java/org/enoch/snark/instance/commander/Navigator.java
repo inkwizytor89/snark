@@ -29,6 +29,10 @@ public class Navigator {
         return lastUpdate;
     }
 
+    public boolean isExpiredForMinutes(int minutes) {
+        return lastUpdate.plusMinutes(minutes).isBefore(LocalDateTime.now());
+    }
+
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
         if(eventFleetList == null) {
             return;

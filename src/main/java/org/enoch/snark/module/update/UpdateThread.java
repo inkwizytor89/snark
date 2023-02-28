@@ -26,7 +26,7 @@ import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 public class UpdateThread extends AbstractThread {
 
     public static final String threadName = "update";
-    public static final long UPDATE_TIME_IN_MINUTES = 6L;
+    public static final int UPDATE_TIME_IN_MINUTES = 6;
 
     private final Navigator navigator;
     private List<EventFleet> events;
@@ -69,7 +69,7 @@ public class UpdateThread extends AbstractThread {
     }
 
     private boolean isNavigatorExpired() {
-        return navigator.getLastUpdate().plusMinutes(UPDATE_TIME_IN_MINUTES).isBefore(LocalDateTime.now());
+        return navigator.isExpiredForMinutes(UPDATE_TIME_IN_MINUTES);
     }
 
     private boolean isUnderAttack() {
