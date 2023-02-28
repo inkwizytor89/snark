@@ -20,10 +20,7 @@ import org.enoch.snark.model.service.MessageService;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -74,27 +71,58 @@ public class Instance {
         try {
             PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
 
-            List<ColonyEntity> loadPlanetList = gi.loadPlanetList();
-            for(ColonyEntity colony : loadPlanetList) {
-                ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
-                if (colonyEntity == null) {
-                    colonyEntity = colony;
-                } else if (colony.cpm != null && colonyEntity.cpm == null) {
-                    colonyEntity.cpm = colony.cpm;
-                }
-                colonyDAO.saveOrUpdate(colonyEntity);
-            }
+            Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
+            colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
 
-            //remove missing planets
-            colonyDAO.fetchAll().stream()
-                    .filter(colonyEntity -> colonyEntity.isPlanet)
-                    .filter(colonyEntity -> loadPlanetList.stream()
-                                            .map(loaded -> loaded.cp)
-                                            .noneMatch(integer -> colonyEntity.cp.equals(integer)))
-                    .forEach(colonyEntity -> {
-                        System.err.println("Planet remove because do not exist "+ colonyEntity);
+            List<ColonyEntity> loadColonyList = gi.loadPlanetList();
+
+            loadColonyList.stream().filter(loadedColony -> loadedColony.isPlanet)
+                    .forEach(loadedColony -> {
+                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
+
+                        if(colonyEntity == null) {
+                            // new planet
+                            colonyDAO.saveOrUpdate(loadedColony);
+                        } else {
+                            // old planet
+                            stillExistMap.put(colonyEntity, true);
+                        }
+                    });
+
+            loadColonyList.stream().filter(loadedColony -> !loadedColony.isPlanet)
+                    .forEach(loadedColony -> {
+                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
+
+                        if(colonyEntity == null) {
+                            // new moon
+                            colonyDAO.saveOrUpdate(loadedColony);
+                            //update planet cpm
+                            ColonyEntity planet = colonyDAO.find(loadedColony.cpm);
+                            planet.cpm = loadedColony.cp;
+                            colonyDAO.saveOrUpdate(planet);
+                        } else {
+                            // old moon
+                            stillExistMap.put(colonyEntity, true);
+                        }
+                    });
+
+//            for(ColonyEntity colony : loadColonyList) {
+//                ColonyEntity colonyEntity = colonyDAO.find(colony.cp);
+//                if (colonyEntity == null) {
+//                    colonyEntity = colony;
+//                } else if (colony.cpm != null && colonyEntity.cpm == null) {
+//                    colonyEntity.cpm = colony.cpm;
+//                }
+//                colonyDAO.saveOrUpdate(colonyEntity);
+//            }
+
+            //remove missing colony
+            stillExistMap.forEach((colonyEntity, stillExist) -> {
+                    if(!stillExist) {
+                        System.err.println("Colony remove because do not exist " + colonyEntity);
                         FleetDAO.getInstance().clean(colonyEntity);
                         colonyDAO.remove(colonyEntity);
+                    }
                     });
 
             typeFlyPoints();

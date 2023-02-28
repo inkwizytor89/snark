@@ -6,6 +6,7 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -17,9 +18,10 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     public void sendFleet(FleetEntity fleet) {
         SleepUtil.pause();
         final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
-        Boolean isExpectedState = new WebDriverWait(wd, 2)
-                .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
-        if(!isExpectedState) {
+        try {
+            new WebDriverWait(wd, 2)
+                    .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
+        } catch (TimeoutException e) {
             throw new FleetCantStart();
         }
         SleepUtil.pause();
