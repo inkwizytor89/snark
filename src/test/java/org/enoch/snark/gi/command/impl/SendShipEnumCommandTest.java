@@ -1,9 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.gi.AbstractSeleniumTest;
-import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.model.Fleet;
 import org.junit.Test;
 
 public class SendShipEnumCommandTest extends AbstractSeleniumTest {
