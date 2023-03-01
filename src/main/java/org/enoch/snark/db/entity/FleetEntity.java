@@ -5,7 +5,6 @@ import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
-import org.enoch.snark.model.types.MissionType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -44,7 +43,8 @@ public class FleetEntity extends IdEntity {
 
     @Basic
     @Column(name = "space_target")
-    public String spaceTarget; // planet, moon, debris
+    @Enumerated(EnumType.STRING)
+    public ColonyType spaceTarget;
 
     @Basic
     @Column(name = "start")
@@ -182,9 +182,9 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.spaceTarget = ColonyType.PLANET.getName();
+        fleet.spaceTarget = ColonyType.PLANET;
         if(!target.isPlanet) {
-            fleet.spaceTarget = ColonyType.MOON.getName();
+            fleet.spaceTarget = ColonyType.MOON;
         }
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
         fleet.type = SPY;
@@ -215,7 +215,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = colony.galaxy;
         fleet.targetSystem = colony.system;
         fleet.targetPosition = 16;
-        fleet.spaceTarget = ColonyType.PLANET.getName();
+        fleet.spaceTarget = ColonyType.PLANET;
         fleet.source = colony;
         fleet.type = EXPEDITION;
         return fleet;
@@ -234,7 +234,7 @@ public class FleetEntity extends IdEntity {
     }
 
     public Planet getDestination() {
-        return new Planet(this.targetGalaxy, this.targetSystem, this.targetPosition, ColonyType.parse(spaceTarget));
+        return new Planet(this.targetGalaxy, this.targetSystem, this.targetPosition, spaceTarget);
     }
 
     public void send() {
@@ -256,10 +256,10 @@ public class FleetEntity extends IdEntity {
         targetGalaxy = planet.galaxy;
         targetSystem = planet.system;
         targetPosition = planet.position;
-        spaceTarget = planet.type.getName();
+        spaceTarget = planet.type;
     }
 
     public Planet getTarget() {
-        return new Planet(targetGalaxy, targetSystem, targetPosition, ColonyType.valueOf(spaceTarget));
+        return new Planet(targetGalaxy, targetSystem, targetPosition, spaceTarget);
     }
 }

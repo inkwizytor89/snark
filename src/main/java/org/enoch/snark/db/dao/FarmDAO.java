@@ -59,7 +59,7 @@ public class FarmDAO extends AbstractDAO<FarmEntity> {
 //                    System.err.println(planetEntity+" lt "+fleet.transporterSmall);
                 } else throw new RuntimeException("Unknown mission on farm wave");
 
-                fleet.spaceTarget = ColonyType.PLANET.getName();
+                fleet.spaceTarget = ColonyType.PLANET;
                 fleet.code = code;
                 entityManager.persist(fleet);
                 entityManager.flush();

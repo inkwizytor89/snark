@@ -82,7 +82,7 @@ public class Planet {
 
     @Override
     public String toString() {
-        return type.getName()+" "+getCordinate(galaxy, system, position);
+        return type+" "+getCordinate(galaxy, system, position);
     }
     public String toFileName() {
         return toString().replace(":","_");

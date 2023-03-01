@@ -60,7 +60,7 @@ public class CollectorThread extends AbstractThread {
         fleet.targetGalaxy = destination.galaxy;
         fleet.targetSystem = destination.system;
         fleet.targetPosition = destination.position;
-        fleet.spaceTarget = destination.isPlanet ? ColonyType.PLANET.getName(): ColonyType.MOON.getName();
+        fleet.spaceTarget = destination.isPlanet ? ColonyType.PLANET: ColonyType.MOON;
         fleet.transporterLarge = fleet.source.calculateTransportByTransporterLarge();
         return fleet;
     }
