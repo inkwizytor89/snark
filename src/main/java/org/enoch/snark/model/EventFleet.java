@@ -1,15 +1,15 @@
 package org.enoch.snark.model;
 
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.model.types.FleetDirectionType;
-import org.enoch.snark.model.types.MissionType;
 
 import java.time.LocalDateTime;
 
 public class EventFleet {
     public String countDown;
     public LocalDateTime arrivalTime;
-    public MissionType missionType;
+    public Mission mission;
     public ColonyType originFleet;
     public String coordsOrigin;
     public String detailsFleet;
@@ -26,7 +26,7 @@ public class EventFleet {
                 " " + isHostile +
                 ", '" + countDown + '\'' +
                 ", '" + arrivalTime + '\'' +
-                ", '" + missionType + '\'' +
+                ", '" + mission + '\'' +
                 ", '" + originFleet + '\'' +
                 ", '" + coordsOrigin + '\'' +
                 ", '" + detailsFleet + '\'' +
@@ -40,12 +40,12 @@ public class EventFleet {
 
     public boolean isFleetImpactOnColony() {
         // TODO: 26.02.2023 shouldn't life form expedition have inpact on colony
-        return FleetDirectionType.BACK == iconMovement || MissionType.STATION.equals(missionType) || MissionType.TRANSPORT.equals(missionType);
+        return FleetDirectionType.BACK == iconMovement || Mission.STATIONED.equals(mission) || Mission.TRANSPORT.equals(mission);
     }
 
     public Planet getEndingPlanet() {
         if(FleetDirectionType.THERE.equals(iconMovement) &&
-                (MissionType.STATION.equals(missionType) || (MissionType.TRANSPORT.equals(missionType)))) {
+                (Mission.STATIONED.equals(mission) || (Mission.TRANSPORT.equals(mission)))) {
             return new Planet(destCoords, destFleet);
         }
         return new Planet(coordsOrigin, originFleet);

@@ -218,9 +218,9 @@ public class Instance {
     public void removePlanet(Planet target) {
         Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(target.galaxy, target.system, target.position);
         if(targetEntity.isPresent()) {
-            FleetDAO.getInstance().fetchAll().stream()
-                    .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))
-                    .forEach(fleetEntity -> FleetDAO.getInstance().remove(fleetEntity));
+//            FleetDAO.getInstance().fetchAll().stream()
+//                    .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))
+//                    .forEach(fleetEntity -> FleetDAO.getInstance().remove(fleetEntity));
             TargetDAO.getInstance().remove(targetEntity.get());
             LOG.info("Removed "+target);
             //TODO: remove messegas and others

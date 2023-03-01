@@ -1,7 +1,6 @@
 package org.enoch.snark.module.fleetSave;
 
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
@@ -9,7 +8,6 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -68,10 +66,10 @@ public class FleetSaveThread extends AbstractThread {
 
     private boolean isColonyStillBlocked(ColonyEntity source) {
         return Navigator.getInstance().getEventFleetList().stream()
-                .filter(fleet -> MissionType.TRANSPORT.equals(fleet.missionType) ||
-                         MissionType.ATTACK.equals(fleet.missionType) ||
-                         MissionType.STATION.equals(fleet.missionType) ||
-                         MissionType.EXPEDITION.equals(fleet.missionType))
+                .filter(fleet -> Mission.TRANSPORT.equals(fleet.mission) ||
+                         Mission.ATTACK.equals(fleet.mission) ||
+                         Mission.STATIONED.equals(fleet.mission) ||
+                         Mission.EXPEDITION.equals(fleet.mission))
                 .anyMatch(fleet -> source.toPlanet().equals(fleet.getEndingPlanet()));
     }
 
@@ -89,7 +87,7 @@ public class FleetSaveThread extends AbstractThread {
                 .anyMatch(fleet ->
                         fleetEntity.source.toPlanet().equals(fleet.source.toPlanet()) &&
                         fleetEntity.getTarget().equals(fleet.getTarget()) &&
-                        fleetEntity.type.equals(fleet.type));
+                        fleetEntity.mission.equals(fleet.mission));
     }
 
     /**
@@ -106,7 +104,7 @@ public class FleetSaveThread extends AbstractThread {
             fleetEntity.source = colonyDAO.get(configValues[SOURCE_INDEX]);
             fleetEntity.speed = Long.parseLong(configValues[SPEED_INDEX]);
             fleetEntity.setTarget(new Planet(configValues[DESTINATION_INDEX]));
-            fleetEntity.type = Mission.COLONIZATION.name();
+            fleetEntity.mission = Mission.COLONIZATION;
             fleetEntity.setShips(fleetEntity.source.getShipsMap());
             fleetEntity.code = FLEET_SAVE_CODE;
 

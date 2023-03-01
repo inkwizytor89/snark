@@ -4,13 +4,12 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.types.ColonyType;
-import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -55,7 +54,7 @@ public class CollectorThread extends AbstractThread {
 
     private FleetEntity buildCollectingFleetEntity(ColonyEntity destination) {
         FleetEntity fleet = new FleetEntity();
-        fleet.type = MissionType.TRANSPORT.getName();
+        fleet.mission = Mission.TRANSPORT;
         fleet.source = getColonyToCollect(destination);
         fleet.targetGalaxy = destination.galaxy;
         fleet.targetSystem = destination.system;
@@ -83,7 +82,7 @@ public class CollectorThread extends AbstractThread {
 
     private boolean noActiveCollectingInDB() {
         return fleetDAO.findLastSend(LocalDateTime.now().minusHours(8)).stream()
-                .filter(fleet -> MissionType.TRANSPORT.getName().equals(fleet.type))
+                .filter(fleet -> Mission.TRANSPORT.equals(fleet.mission))
                 .noneMatch(fleetEntity -> fleetEntity.start == null ||
                         LocalDateTime.now().isBefore(fleetEntity.back));
     }
@@ -109,6 +108,6 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean noCollectingByNavigator() {
-        return Navigator.getInstance().noneMission(MissionType.TRANSPORT);
+        return Navigator.getInstance().noneMission(Mission.TRANSPORT);
     }
 }

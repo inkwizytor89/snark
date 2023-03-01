@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.model.types.MissionType.SPY;
+import static org.enoch.snark.gi.macro.Mission.SPY;
 
 public class MessageService {
     private static MessageService INSTANCE;
@@ -48,7 +48,7 @@ public class MessageService {
 
     private boolean isTimeForReadMessages() {
         List<FleetEntity> notLoadedSpyActions = FleetDAO.getInstance().findLastSend(lastChecked).stream()
-                .filter(fleet -> SPY.getName().equals(fleet.type))
+                .filter(fleet -> SPY.equals(fleet.mission))
                 .collect(Collectors.toList());
 
         Multimap<Long, FleetEntity> waitingMap = ArrayListMultimap.create();

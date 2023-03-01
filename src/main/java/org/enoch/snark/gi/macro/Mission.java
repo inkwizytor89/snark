@@ -3,7 +3,6 @@ package org.enoch.snark.gi.macro;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TreeMap;
 
 public enum Mission {
     EXPEDITION("id=missionButton15", 15),
@@ -15,7 +14,9 @@ public enum Mission {
     STOP("id=missionButton5", 5),
     ATTACK("id=missionButton1", 1),
     GROUP_ATTACK("id=missionButton2", 2),
-    DESTROY("id=missionButton9", 9);
+    DESTROY("id=missionButton9", 9),
+    LIFE_FORM("LIFE_FORM", 0),
+    UNKNOWN("UNKNOWN",0);
 
     private String id;
     private int value;
@@ -40,6 +41,31 @@ public enum Mission {
             }
         }
         throw new RuntimeException("Unknown mission " + name);
+    }
+
+    public static Mission convert(String input) {
+        String string = input.toLowerCase();
+        if(string.contains(EXPEDITION.name().toLowerCase()) || string.contains("ekspedycja")) {
+            return EXPEDITION;
+        } else if(string.contains(STATIONED.name().toLowerCase()) || string.contains("stacjonuj")) {
+            return STATIONED;
+        } else if(string.contains(TRANSPORT.name().toLowerCase()) || string.contains("transportuj")) {
+            return TRANSPORT;
+        } else if(string.contains(COLONIZATION.name().toLowerCase()) || string.contains("oloniz")) {
+            return COLONIZATION;
+        } else if(string.contains(RECYCLE.name().toLowerCase()) || string.contains("recykluj")) {
+            return RECYCLE;
+        }  else if(string.contains(ATTACK.name().toLowerCase()) || string.contains("atakuj")) {
+            return ATTACK;
+        } else if(string.contains(SPY.name().toLowerCase()) || string.contains("szpieguj")) {
+            return SPY;
+        } else if(string.contains(LIFE_FORM.name().toLowerCase()) || string.contains("form")) {
+            return LIFE_FORM;
+        } else return UNKNOWN;
+    }
+
+    public boolean isAggressive() {
+        return this.equals(SPY) || this.equals(ATTACK) || this.equals(DESTROY) || this.equals(GROUP_ATTACK);
     }
 
     static List<Mission> allMissions() {

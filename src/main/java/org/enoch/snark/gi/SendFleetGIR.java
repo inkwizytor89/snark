@@ -28,7 +28,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         sendFleet.click();
 
         WebElement errorBox = getIfPresentById("errorBoxDecision");
-        if(errorBox != null && Mission.COLONIZATION.name().equals(fleet.type)) {
+        if(errorBox != null && Mission.COLONIZATION.name().equals(fleet.mission)) {
             wd.findElement(By.id("errorBoxDecisionYes")).click();
         } else if(errorBox != null) {
             //todo change old code

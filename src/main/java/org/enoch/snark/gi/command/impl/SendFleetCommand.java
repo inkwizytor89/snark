@@ -45,7 +45,7 @@ public class SendFleetCommand extends GICommand {
         super(PRIORITY_REQUIERED);
         this.priority = 40;
         this.fleet = fleet;
-        this.mission = Mission.convertFromString(fleet.type);
+        this.mission = fleet.mission;
         gir = new SendFleetGIR();
         giUrlBuilder = new GIUrlBuilder();
     }

@@ -2,13 +2,11 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.model.types.FleetDirectionType;
-import org.enoch.snark.model.types.MissionType;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -47,7 +45,7 @@ public class GeneralGIR extends GraphicalInterfaceReader {
                 event.countDown =  countDown.getText();
                 event.arrivalTime =  DateUtil.parseStringTimeToDateTime(we.findElement(By.className("arrivalTime")).getText());
                 String missionText = we.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute(TITLE_ATTRIBUTE);
-                event.missionType = MissionType.convert(missionText);
+                event.mission = Mission.convert(missionText);
                 WebElement figure = we.findElement(By.className("originFleet")).findElement(By.tagName("figure"));
                 event.originFleet = figure.getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
                 event.coordsOrigin =  we.findElement(By.className("coordsOrigin")).getText();

@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
@@ -17,10 +18,6 @@ public class FleetEntity extends IdEntity {
 
     public static final Long FLEET_SAVE_CODE = 1L;
 
-    public static final String SPY = "SPY";
-    public static final String ATTACK = "ATTACK";
-    public static final String EXPEDITION = "EXPEDITION";
-
     @Basic
     @Column(name = "target_galaxy")
     public Integer targetGalaxy;
@@ -35,7 +32,8 @@ public class FleetEntity extends IdEntity {
 
     @Basic
     @Column(name = "type")
-    public String type;
+    @Enumerated(EnumType.STRING)
+    public Mission mission;
 
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
@@ -134,12 +132,6 @@ public class FleetEntity extends IdEntity {
         super();
     }
 
-    public boolean isDone() {
-        LocalDateTime now = LocalDateTime.now();
-        return (SPY.equals(type) && visited != null && now.isAfter(visited)) ||
-                (ATTACK.equals(type) && back != null && now.isAfter(back));
-    }
-
     public boolean isItBack() {
         return back != null && LocalDateTime.now().isAfter(back);
     }
@@ -187,7 +179,7 @@ public class FleetEntity extends IdEntity {
             fleet.spaceTarget = ColonyType.MOON;
         }
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
-        fleet.type = SPY;
+        fleet.mission = Mission.SPY;
         fleet.espionageProbe = count;
         return fleet;
     }
@@ -198,7 +190,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
         fleet.source = Instance.getInstance().findNearestFlyPoint(target);
-        fleet.type = ATTACK;
+        fleet.mission = Mission.ATTACK;
         Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
 //        if(fleet.source.transporterSmall < requiredTransporterSmall) {
 //            requiredTransporterSmall = fleet.source.transporterSmall;
@@ -217,7 +209,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetPosition = 16;
         fleet.spaceTarget = ColonyType.PLANET;
         fleet.source = colony;
-        fleet.type = EXPEDITION;
+        fleet.mission = Mission.EXPEDITION;
         return fleet;
     }
 
@@ -249,7 +241,7 @@ public class FleetEntity extends IdEntity {
 
     @Override
     public String toString() {
-        return "[" + id + ": " + type + " " + source + " -> " + targetSystem.toString() + "]";
+        return "[" + id + ": " + mission + " " + source + " -> " + targetSystem.toString() + "]";
     }
 
     public void setTarget(Planet planet) {

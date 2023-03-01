@@ -1,12 +1,12 @@
 package org.enoch.snark.module.defense;
 
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.EventFleet;
-import org.enoch.snark.model.types.MissionType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -69,7 +69,7 @@ public class DefenseThread extends AbstractThread {
 
     private void loadAggressiveFleet() {
         events = Navigator.getInstance().getEventFleetList().stream()
-        .filter(event -> event.isHostile && event.missionType.isAggressive())
+        .filter(event -> event.isHostile && event.mission.isAggressive())
         .collect(Collectors.toList());
     }
 
@@ -91,7 +91,7 @@ public class DefenseThread extends AbstractThread {
 
     private void writeMessageToPlayer(List<EventFleet> events) {
         events.stream()
-                .filter(event -> event.isHostile && MissionType.ATTACK.equals(event.missionType))
+                .filter(event -> event.isHostile && Mission.ATTACK.equals(event.mission))
                 .filter(event -> !aggressorsAttacks.contains(event.sendMail))
                 .forEach(event -> {
                     commander.push(new SendMessageToPlayerCommand(event.sendMail, Msg.get(BAZINGA_PL)));
@@ -118,7 +118,7 @@ public class DefenseThread extends AbstractThread {
 
     private boolean isUnderAttack() {
         //isAttack() || isAgressiveSpy() || isDestroyMoonFleet();
-        return events.stream().anyMatch(event -> event.isHostile && MissionType.ATTACK.equals(event.missionType));
+        return events.stream().anyMatch(event -> event.isHostile && Mission.ATTACK.equals(event.mission));
     }
 
     private boolean isDefenseActivate() {
