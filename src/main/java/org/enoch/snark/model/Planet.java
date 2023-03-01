@@ -39,19 +39,21 @@ public class Planet {
         this.type = type;
     }
 
-    public Integer calculateDistance(Planet planet) {
+    public Long calculateDistance(Planet planet) {
         if(!galaxy.equals(planet.galaxy)) {
             int galaxyMax = Integer.parseInt(Instance.config.getConfig((Config.GALAXY_MAX)));
             return roundDistance(galaxy, planet.galaxy, galaxyMax) *20000;
-        }
-        if(!system.equals(planet.system)) {
+        } else if(!system.equals(planet.system)) {
             return roundDistance(system, planet.system, 499) *95 +2700;
-        }
-        return roundDistance(position, planet.position, 15)*5+1000;
+        } else if(!position.equals(planet.position)) {
+            return roundDistance(position, planet.position, 15)*5+1000;
+        } else if(!type.equals(planet.type)) {
+            return 5L;
+        } else return 0L;
     }
 
-    private int roundDistance(Integer x1, Integer x2, Integer max) {
-        return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
+    private Long roundDistance(Integer x1, Integer x2, Integer max) {
+        return (long) Math.min(Math.abs(x1 - x2), max - Math.abs(x1 - x2));
     }
 
     protected void loadPlanetCoordinate(String coordinateString) {

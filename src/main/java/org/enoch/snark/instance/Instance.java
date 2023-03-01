@@ -203,10 +203,10 @@ public class Instance {
         List<ColonyEntity> colonies = new ArrayList<>(flyPoints);
 
         ColonyEntity nearestPlanet = colonies.get(0);
-        Integer minDistance = planet.calculateDistance(colonies.get(0).toPlanet());
+        Long minDistance = planet.calculateDistance(colonies.get(0).toPlanet());
 
         for(ColonyEntity source : colonies) {
-            Integer distance = planet.calculateDistance(source.toPlanet());
+            Long distance = planet.calculateDistance(source.toPlanet());
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestPlanet = source;
