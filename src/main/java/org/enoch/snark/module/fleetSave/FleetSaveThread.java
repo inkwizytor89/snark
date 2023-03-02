@@ -100,18 +100,12 @@ public class FleetSaveThread extends AbstractThread {
         List<FleetEntity> fleetToSave = new ArrayList<>();
         for(String fleetToSaveConfig : allFleetToSaveConfig){
             String[] configValues = fleetToSaveConfig.split("-");
-            FleetEntity fleetEntity = new FleetEntity();
-            fleetEntity.source = colonyDAO.get(configValues[SOURCE_INDEX]);
+            ColonyEntity source = colonyDAO.get(configValues[SOURCE_INDEX]);
+            Planet target = new Planet(configValues[DESTINATION_INDEX]);
+
+            FleetEntity fleetEntity = FleetEntity.createQuickColonization(source, target);
             fleetEntity.speed = Long.parseLong(configValues[SPEED_INDEX]);
-            fleetEntity.setTarget(new Planet(configValues[DESTINATION_INDEX]));
-            fleetEntity.mission = Mission.COLONIZATION;
-            fleetEntity.setShips(fleetEntity.source.getShipsMap());
             fleetEntity.code = FLEET_SAVE_CODE;
-
-            fleetEntity.metal = Long.MAX_VALUE;
-            fleetEntity.crystal = Long.MAX_VALUE;
-            fleetEntity.deuterium = Long.MAX_VALUE;
-
             fleetToSave.add(fleetEntity);
         }
         return fleetToSave;

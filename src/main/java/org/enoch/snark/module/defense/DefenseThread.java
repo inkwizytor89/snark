@@ -1,5 +1,6 @@
 package org.enoch.snark.module.defense;
 
+import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.text.Msg;
@@ -55,13 +56,16 @@ public class DefenseThread extends AbstractThread {
             return;
         }
         playMusic();
+        long aggressiveActionCount = Navigator.getInstance().getEventFleetList().stream()
+                .filter(event -> event.isHostile).count();
 
-        List<EventFleet> moreThan4min = moreThan4min();
-        if(!moreThan4min.isEmpty()) writeMessageToPlayer(moreThan4min);
+        List<EventFleet> nearAction = nearAction(aggressiveActionCount);
+        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
 
-        List<EventFleet> lessThan4min = lessThan4min();
-        if(!lessThan4min.isEmpty()) {
+        List<EventFleet> incomingAction = incomingAction(aggressiveActionCount);
+        if(!incomingAction.isEmpty()) {
             System.err.println("Send fleet to escape");
+//            FleetEntity.createQuickColonization()
             return; //escape fleet
         }
 
@@ -73,15 +77,15 @@ public class DefenseThread extends AbstractThread {
         .collect(Collectors.toList());
     }
 
-    private List<EventFleet> lessThan4min() {
+    private List<EventFleet> incomingAction(long aggressiveActionCount) {
         return events.stream()
-                .filter(event -> LocalDateTime.now().plusMinutes(4).isAfter(event.arrivalTime))
+                .filter(event -> LocalDateTime.now().plusMinutes(2+aggressiveActionCount).isAfter(event.arrivalTime))
                 .collect(Collectors.toList());
     }
 
-    private List<EventFleet> moreThan4min() {
+    private List<EventFleet> nearAction(long aggressiveActionCount) {
         return events.stream()
-                .filter(event -> LocalDateTime.now().plusMinutes(4).isBefore(event.arrivalTime))
+                .filter(event -> LocalDateTime.now().plusMinutes(2+aggressiveActionCount).isBefore(event.arrivalTime))
                 .collect(Collectors.toList());
     }
 

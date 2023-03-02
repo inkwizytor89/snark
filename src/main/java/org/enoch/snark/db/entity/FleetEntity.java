@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
@@ -17,7 +18,8 @@ import java.util.Map;
 @Table(name = "fleet", schema = "public", catalog = "snark")
 public class FleetEntity extends IdEntity {
 
-    public static final Long FLEET_SAVE_CODE = 1L;
+    public static final Long DEFENCE_CODE = 1L;
+    public static final Long FLEET_SAVE_CODE = 2L;
 
     @Basic
     @Column(name = "target_galaxy")
@@ -212,6 +214,20 @@ public class FleetEntity extends IdEntity {
         fleet.source = colony;
         fleet.mission = Mission.EXPEDITION;
         return fleet;
+    }
+
+    public static FleetEntity createQuickColonization(@Nonnull ColonyEntity colony, Planet target) {
+        FleetEntity fleetEntity = new FleetEntity();
+        ColonyEntity source = ColonyDAO.getInstance().fetch(colony);
+        fleetEntity.source = source;
+        fleetEntity.setTarget(target);
+        fleetEntity.mission = Mission.COLONIZATION;
+        fleetEntity.setShips(source.getShipsMap());
+
+        fleetEntity.metal = Long.MAX_VALUE;
+        fleetEntity.crystal = Long.MAX_VALUE;
+        fleetEntity.deuterium = Long.MAX_VALUE;
+        return fleetEntity;
     }
 
     public FleetEntity to(PlanetEntity planet) {
