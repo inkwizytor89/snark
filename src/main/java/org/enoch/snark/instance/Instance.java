@@ -194,26 +194,22 @@ public class Instance {
         BaseSI.getInstance().run();
     }
 
-    public ColonyEntity findNearestFlyPoint(PlanetEntity planet) {
-        return this.findNearestFlyPoint(planet.toPlanet());
-    }
-
-    public ColonyEntity findNearestFlyPoint(Planet planet) {
-
-        List<ColonyEntity> colonies = new ArrayList<>(flyPoints);
-
-        ColonyEntity nearestPlanet = colonies.get(0);
-        Long minDistance = planet.calculateDistance(colonies.get(0).toPlanet());
-
-        for(ColonyEntity source : colonies) {
-            Long distance = planet.calculateDistance(source.toPlanet());
-            if (distance < minDistance) {
-                minDistance = distance;
-                nearestPlanet = source;
-            }
-        }
-        return nearestPlanet;
-    }
+//    public ColonyEntity findNearestFlyPoint(Planet planet) {
+//
+//        List<ColonyEntity> colonies = new ArrayList<>(flyPoints);
+//
+//        ColonyEntity nearestPlanet = colonies.get(0);
+//        Long minDistance = planet.calculateDistance(colonies.get(0).toPlanet());
+//
+//        for(ColonyEntity source : colonies) {
+//            Long distance = planet.calculateDistance(source.toPlanet());
+//            if (distance < minDistance) {
+//                minDistance = distance;
+//                nearestPlanet = source;
+//            }
+//        }
+//        return nearestPlanet;
+//    }
 
     public void removePlanet(Planet target) {
         Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(target.galaxy, target.system, target.position);

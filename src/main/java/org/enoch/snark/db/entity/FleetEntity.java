@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 
@@ -178,7 +179,7 @@ public class FleetEntity extends IdEntity {
         if(!target.isPlanet) {
             fleet.spaceTarget = ColonyType.MOON;
         }
-        fleet.source = Instance.getInstance().findNearestFlyPoint(target);
+        fleet.source = new ColonyPlaner(target).getNearestColony();
         fleet.mission = Mission.SPY;
         fleet.espionageProbe = count;
         return fleet;
@@ -189,7 +190,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = Instance.getInstance().findNearestFlyPoint(target);
+        fleet.source = new ColonyPlaner(target).getNearestColony();
         fleet.mission = Mission.ATTACK;
         Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
 //        if(fleet.source.transporterSmall < requiredTransporterSmall) {
@@ -234,7 +235,7 @@ public class FleetEntity extends IdEntity {
             throw new RuntimeException("missing target for fleet in FleetBuilder");
         }
         if(source == null) {
-            this.source = Instance.getInstance().findNearestFlyPoint(planet);
+            this.source = new ColonyPlaner(planet).getNearestColony();
         }
         FleetDAO.getInstance().saveOrUpdate(this);
     }

@@ -8,6 +8,7 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.config.Config;
+import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
@@ -92,9 +93,9 @@ public class CollectorThread extends AbstractThread {
         System.err.println("coll_dest="+config);
         if(config == null || config.isEmpty()) {
             long oneBeforeLast = Long.parseLong(Instance.config.getConfig(Config.GALAXY_MAX))-1;
-            return Instance.getInstance().findNearestFlyPoint(new Planet("["+oneBeforeLast+":325:8]"));
+            return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).getNearestColony();
         } else {
-            return Instance.getInstance().findNearestFlyPoint(new Planet(config));
+            return new ColonyPlaner(new Planet(config)).getNearestColony();
         }
     }
 

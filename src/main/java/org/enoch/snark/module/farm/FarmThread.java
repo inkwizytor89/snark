@@ -9,6 +9,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.BaseSI;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
@@ -139,7 +140,7 @@ public class FarmThread extends AbstractThread {
 
         for (TargetEntity target: collect) {
             Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
-            ColonyEntity colony = ColonyDAO.getInstance().fetch(instance.findNearestFlyPoint(target));
+            ColonyEntity colony = ColonyDAO.getInstance().fetch(new ColonyPlaner(target).getNearestColony());
             Long booked = flyPointsAvailability.get(colony.cp);
             if(colony.transporterSmall >= requiredTransporterSmall + booked) {
                 flyPointsAvailability.put(colony.cp, booked + requiredTransporterSmall);
@@ -155,7 +156,7 @@ public class FarmThread extends AbstractThread {
                 System.err.println(ColonyDAO.getInstance().find(key) + " plan to send " + value + " TransporterSmall"));
 
         return result.stream()
-                .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(instance.findNearestFlyPoint(o).toPlanet())))
+                .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(new ColonyPlaner(o).getNearestColony().toPlanet())))
                 .collect(Collectors.toList());
     }
 
@@ -233,8 +234,8 @@ public class FarmThread extends AbstractThread {
 
     private boolean isNear(TargetEntity targetEntity) {
         Planet targetPlanet = targetEntity.toPlanet();
-        ColonyEntity nearestSource = instance.findNearestFlyPoint(targetPlanet);
-        Integer distance = targetPlanet.calculateDistance(nearestSource.toPlanet());
+        ColonyEntity nearestSource = new ColonyPlaner(targetPlanet).getNearestColony();
+        Long distance = targetPlanet.calculateDistance(nearestSource.toPlanet());
         return distance < 13000;
     }
 
