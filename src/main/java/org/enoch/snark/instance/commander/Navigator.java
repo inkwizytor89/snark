@@ -1,8 +1,12 @@
 package org.enoch.snark.instance.commander;
 
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.model.EventFleet;
+import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.types.ColonyType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +59,19 @@ public class Navigator {
                         fleetEntity.source.toPlanet().equals(fleet.getFrom()) &&
                         fleetEntity.getTarget().equals(fleet.getTo()) &&
                                 fleetEntity.mission.equals(fleet.mission));
+    }
+
+    public List<ColonyEntity> getSafeColonies(ColonyType type) {
+        List<Planet> attackedPlanets = eventFleetList.stream()
+                .filter(event -> event.isHostile)
+                .map(eventFleet -> eventFleet.getTo())
+                .collect(Collectors.toList());
+
+        return ColonyDAO.getInstance().fetchAll().stream()
+                .filter(colonyEntity -> colonyEntity.isPlanet && ColonyType.PLANET.equals(type))
+                .filter(colonyEntity -> !attackedPlanets.contains(colonyEntity.toPlanet()))
+                .collect(Collectors.toList());
+
     }
 
     @Override
