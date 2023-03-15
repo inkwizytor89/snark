@@ -6,6 +6,7 @@ import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
 import org.enoch.snark.module.collector.CollectorThread;
+import org.enoch.snark.module.defense.DefenseThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.farm.FarmThread;
@@ -28,6 +29,7 @@ public class BaseSI {
     private BaseSI() {
         baseThreads.add(new UpdateThread());
         baseThreads.add(new ClearThread());
+        operationThreads.add(new DefenseThread());
         operationThreads.add(new ExpeditionThread());
         operationThreads.add(new BuildingThread());
         operationThreads.add(new SpaceThread()); // explore space

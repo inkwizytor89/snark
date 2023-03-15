@@ -1,6 +1,5 @@
 package org.enoch.snark.module.defense;
 
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.text.Msg;
@@ -19,6 +18,7 @@ import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 
 public class DefenseThread extends AbstractThread {
 
+    public static final String ALARM = "alarm";
     public static final String threadName = "defense";
     public static final int UPDATE_TIME_IN_SECONDS = 10;
 
@@ -47,8 +47,6 @@ public class DefenseThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(!isDefenseActivate()) return;
-
         loadAggressiveFleet();
 
         if(!isUnderAttack()) {
@@ -90,7 +88,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void playMusic() {
-
+        AlarmSoundPlayer.start();
     }
 
     private void writeMessageToPlayer(List<EventFleet> events) {
@@ -105,6 +103,7 @@ public class DefenseThread extends AbstractThread {
 
     private void clearCache() {
         aggressorsAttacks = new ArrayList<>();
+        AlarmSoundPlayer.stop();
         return ;
     }
 
@@ -123,10 +122,5 @@ public class DefenseThread extends AbstractThread {
     private boolean isUnderAttack() {
         //isAttack() || isAgressiveSpy() || isDestroyMoonFleet();
         return events.stream().anyMatch(event -> event.isHostile && Mission.ATTACK.equals(event.mission));
-    }
-
-    private boolean isDefenseActivate() {
-        String config = Instance.config.getConfig(Config.DEFENSE);
-        return config == null || config.isEmpty() || config.equals("on");
     }
 }

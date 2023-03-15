@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.clear.ClearThread;
 import org.enoch.snark.module.collector.CollectorThread;
+import org.enoch.snark.module.defense.DefenseThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.farm.FarmThread;
 import org.enoch.snark.module.fleetSave.FleetSaveThread;
@@ -23,7 +24,6 @@ public class Config {
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 
-    public static final String DEFENSE = "defense";
     public static final String FLY_POINTS = "fly_points";
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String DATABASE = "database";
@@ -38,6 +38,7 @@ public class Config {
     public String mode;
     public String config;
 
+    public String defense;
     public String expedition;
     public String farm;
     public String collector;
@@ -61,6 +62,7 @@ public class Config {
         mode = properties.getProperty(MODE);
         config = properties.getProperty(CONFIG);
 
+        defense = properties.getProperty(DefenseThread.threadName);
         expedition = properties.getProperty(ExpeditionThread.threadName);
         farm = properties.getProperty(FarmThread.threadName);
         collector = properties.getProperty(CollectorThread.threadName);
@@ -107,6 +109,7 @@ public class Config {
 
     private String extract(String threadName) {
         switch (threadName) {
+            case DefenseThread.threadName: return defense;
             case ExpeditionThread.threadName: return expedition;
             case FarmThread.threadName: return farm;
             case CollectorThread.threadName: return collector;
