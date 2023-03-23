@@ -3,9 +3,8 @@ package org.enoch.snark.module.defense;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.Instance;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -44,13 +43,17 @@ public class AlarmSoundPlayer implements LineListener {
         }
     }
 
+    public static void main(String[] args) {
+        AlarmSoundPlayer alarmSoundPlayer = new AlarmSoundPlayer();
+        shouldPlayAlarm = true;
+        alarmSoundPlayer.play();
+    }
+
     private void play() {
         Runnable task = () -> {
             try {
-                String audioFilePath = getAlarmAudioFilePath();
-                InputStream inputStream = getClass().getClassLoader()
-                    .getResourceAsStream(audioFilePath);
-                AudioInputStream audioStream = AudioSystem.getAudioInputStream(inputStream);
+                File soundFile = new File(getAlarmAudioFilePath());
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
 
                 AudioFormat format = audioStream.getFormat();
                 DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -72,6 +75,7 @@ public class AlarmSoundPlayer implements LineListener {
 
             } catch (UnsupportedAudioFileException | LineUnavailableException | IOException ex) {
                 System.out.println("Error occurred during playback process: "+ ex.getMessage());
+                ex.printStackTrace();
             }
         };
         new Thread(task).start();

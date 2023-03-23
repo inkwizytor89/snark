@@ -49,8 +49,17 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
     }
 
     private boolean canSendExpedition() {
-        return fleet.source.transporterLarge >= fleet.transporterLarge &&
-                fleet.source.transporterSmall >= fleet.transporterSmall &&
-                fleet.source.explorer >= fleet.explorer;
+        if(fleet.source.transporterLarge == null) fleet.source.transporterLarge = 0L;
+        if(fleet.source.transporterSmall == null) fleet.source.transporterSmall = 0L;
+        if(fleet.source.explorer == null) fleet.source.explorer = 0L;
+
+        return zeroForNull(fleet.source.transporterLarge) >= zeroForNull(fleet.transporterLarge) &&
+                zeroForNull(fleet.source.transporterSmall) >= zeroForNull(fleet.transporterSmall) &&
+                        zeroForNull(fleet.source.explorer) >= zeroForNull(fleet.explorer);
+    }
+
+    private Long zeroForNull(Long value) {
+        if(value == null) return 0L;
+        return value;
     }
 }

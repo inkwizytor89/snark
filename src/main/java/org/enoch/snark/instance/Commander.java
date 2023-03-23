@@ -11,7 +11,6 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.exception.ShipDoNotExists;
-import org.enoch.snark.module.defense.DefenseThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -19,7 +18,6 @@ import org.openqa.selenium.WebElement;
 import java.util.*;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
-import static org.enoch.snark.module.defense.DefenseThread.ALARM;
 
 public class Commander extends Thread {
 
@@ -72,7 +70,7 @@ public class Commander extends Thread {
 
                 startCommander();
 
-                if(isSomethingAttacking() && Navigator.getInstance().isExpiredForMinutes(2)) {
+                if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
                     resolve(new OpenPageCommand(PAGE_BASE_FLEET, null).setCheckEventFleet(true));
                 }
 
@@ -111,7 +109,7 @@ public class Commander extends Thread {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return false;
     }

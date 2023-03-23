@@ -49,7 +49,7 @@ public class ExpeditionThread extends AbstractThread {
 
     private void chooseColoniesForExpeditionsStart() {
         expeditionQueue = new LinkedList<>();
-        expeditionQueue.addAll(instance.flyPoints);
+        expeditionQueue.addAll(instance.getFlyPoints());
     }
 
     @Override
@@ -69,6 +69,7 @@ public class ExpeditionThread extends AbstractThread {
         ColonyEntity poll = expeditionQueue.poll();
         if(poll == null) {
             System.err.println("expeditionQueue in ExpeditionThread is empty");
+            chooseColoniesForExpeditionsStart();
             return null;
         } else {
             expeditionQueue.add(poll);
@@ -109,7 +110,7 @@ public class ExpeditionThread extends AbstractThread {
     private void loadExpeditionPoints() {
         expeditionQueue.forEach(col -> commander.push(new OpenPageCommand(PAGE_BASE_FLEET, col)));
         System.err.println("reloading expedition points");
-        SleepUtil.secondsToSleep(60);
+        SleepUtil.secondsToSleep(expeditionQueue.size() * 5);
     }
 
     private FleetEntity sendWhatYouCan() {

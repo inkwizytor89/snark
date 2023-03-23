@@ -135,11 +135,12 @@ public class Instance {
                 PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
         } catch (Exception e) {
+            typeFlyPoints();
             e.printStackTrace();
         }
     }
 
-    private void typeFlyPoints() {
+    private synchronized void typeFlyPoints() {
         flyPoints = new ArrayList<>();
         String flyPointsConfig = config.getConfig(Config.FLY_POINTS);
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
@@ -168,6 +169,11 @@ public class Instance {
 
         System.err.println("\nCount of fly points: "+flyPoints.size());
 //        flyPoints.forEach(System.err::println);
+    }
+
+    public List<ColonyEntity> getFlyPoints() {
+        if(flyPoints.isEmpty()) typeFlyPoints();
+        return flyPoints;
     }
 
     public void browserReset() {

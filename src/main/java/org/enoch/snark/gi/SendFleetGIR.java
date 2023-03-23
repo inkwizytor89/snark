@@ -24,11 +24,11 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         } catch (TimeoutException e) {
             throw new FleetCantStart();
         }
-        SleepUtil.pause();
+        SleepUtil.sleep();
         sendFleet.click();
 
         WebElement errorBox = getIfPresentById("errorBoxDecision");
-        if(errorBox != null && Mission.COLONIZATION.name().equals(fleet.mission)) {
+        if(errorBox != null && Mission.COLONIZATION.equals(fleet.mission)) {
             wd.findElement(By.id("errorBoxDecisionYes")).click();
         } else if(errorBox != null) {
             //todo change old code
@@ -51,6 +51,8 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
                 crystalAmount.sendKeys(fleet.crystal.toString());
                 metalAmount.sendKeys(fleet.metal.toString());
 
+                System.err.println("setResources m"+fleet.metal.toString()+" k"+fleet.crystal.toString()+" d"+deuterium.toString());
+
                 long remainingresources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
                 long maxresources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
 
@@ -69,6 +71,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void setSpeed(FleetEntity fleet) {
         if(fleet.speed != null) {
+            SleepUtil.sleep();
             WebElement element = wd.findElement(By.className("steps"));
             List<WebElement> steps = element.findElements(By.className("step"));
             WebElement speedElement = steps.get(Integer.parseInt(fleet.speed.toString()) / 10 - 1);

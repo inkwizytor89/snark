@@ -32,7 +32,7 @@ public class Navigator {
         return lastUpdate;
     }
 
-    public boolean isExpiredForMinutes(int minutes) {
+    public boolean isExpiredAfterMinutes(int minutes) {
         return lastUpdate.plusMinutes(minutes).isBefore(LocalDateTime.now());
     }
 

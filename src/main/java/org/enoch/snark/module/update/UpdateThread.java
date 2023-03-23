@@ -55,7 +55,7 @@ public class UpdateThread extends AbstractThread {
     }
 
     private boolean isNavigatorExpired() {
-        return navigator.isExpiredForMinutes(UPDATE_TIME_IN_MINUTES);
+        return navigator.isExpiredAfterMinutes(UPDATE_TIME_IN_MINUTES);
     }
 
     private void sendCommandToUpdateEventFleets() {

@@ -53,12 +53,13 @@ public class DefenseThread extends AbstractThread {
             clearCache();
             return;
         }
+        System.err.println("Should playMusic");
         playMusic();
         long aggressiveActionCount = Navigator.getInstance().getEventFleetList().stream()
                 .filter(event -> event.isHostile).count();
 
         List<EventFleet> nearAction = nearAction(aggressiveActionCount);
-        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
+//        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
 
         List<EventFleet> incomingAction = incomingAction(aggressiveActionCount);
         if(!incomingAction.isEmpty()) {

@@ -110,8 +110,8 @@ public class SendFleetCommand extends GICommand {
             SleepUtil.sleep();
         }
 
-        gir.setResources(fleet);
         gir.setSpeed(fleet);
+        gir.setResources(fleet);
 
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
