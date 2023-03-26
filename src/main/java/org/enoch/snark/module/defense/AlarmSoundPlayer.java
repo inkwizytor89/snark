@@ -36,10 +36,8 @@ public class AlarmSoundPlayer implements LineListener {
     @Override
     public void update(LineEvent event) {
         if (LineEvent.Type.START == event.getType()) {
-            System.out.println("Playback started.");
         } else if (LineEvent.Type.STOP == event.getType()) {
             shouldPlayAlarm = false;
-            System.out.println("Playback completed.");
         }
     }
 
@@ -91,6 +89,7 @@ public class AlarmSoundPlayer implements LineListener {
 
     public static void start() {
         if(!shouldPlayAlarm) {
+            System.err.println("Alarm activate");
             shouldPlayAlarm = true;
             getInstance().play();
         }

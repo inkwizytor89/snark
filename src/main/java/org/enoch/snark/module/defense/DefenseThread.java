@@ -3,9 +3,7 @@ package org.enoch.snark.module.defense;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.text.Msg;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
-import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.module.AbstractThread;
 
@@ -14,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.gi.macro.Mission.STATIONED;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 
 public class DefenseThread extends AbstractThread {
@@ -23,7 +22,7 @@ public class DefenseThread extends AbstractThread {
     public static final int UPDATE_TIME_IN_SECONDS = 10;
 
     private List<String> aggressorsAttacks = new ArrayList<>();
-    private List<EventFleet> events = new ArrayList<>();
+    private List<EventFleet> aggressorsEvents = new ArrayList<>();
 
     public DefenseThread() {
         super();
@@ -49,19 +48,19 @@ public class DefenseThread extends AbstractThread {
     protected void onStep() {
         loadAggressiveFleet();
 
-        if(!isUnderAttack()) {
+        if(aggressorsEvents.isEmpty()) {
             clearCache();
             return;
         }
-        System.err.println("Should playMusic");
         playMusic();
-        long aggressiveActionCount = Navigator.getInstance().getEventFleetList().stream()
-                .filter(event -> event.isHostile).count();
+        long aggressiveActionCount = aggressorsEvents.size();
 
         List<EventFleet> nearAction = nearAction(aggressiveActionCount);
+        System.err.println("nearAction "+nearAction.size());
 //        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
 
         List<EventFleet> incomingAction = incomingAction(aggressiveActionCount);
+        System.err.println("incomingAction "+ incomingAction.size());
         if(!incomingAction.isEmpty()) {
             System.err.println("Send fleet to escape");
 //            FleetEntity.createQuickColonization()
@@ -71,19 +70,20 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void loadAggressiveFleet() {
-        events = Navigator.getInstance().getEventFleetList().stream()
-        .filter(event -> event.isHostile && event.mission.isAggressive())
+        aggressorsEvents = Navigator.getInstance().getEventFleetList().stream()
+        .filter(event -> (event.isHostile && event.mission.isAggressive()) ||
+                STATIONED.equals(event.mission))
         .collect(Collectors.toList());
     }
 
     private List<EventFleet> incomingAction(long aggressiveActionCount) {
-        return events.stream()
+        return aggressorsEvents.stream()
                 .filter(event -> LocalDateTime.now().plusMinutes(2+aggressiveActionCount).isAfter(event.arrivalTime))
                 .collect(Collectors.toList());
     }
 
     private List<EventFleet> nearAction(long aggressiveActionCount) {
-        return events.stream()
+        return aggressorsEvents.stream()
                 .filter(event -> LocalDateTime.now().plusMinutes(2+aggressiveActionCount).isBefore(event.arrivalTime))
                 .collect(Collectors.toList());
     }
@@ -104,6 +104,7 @@ public class DefenseThread extends AbstractThread {
 
     private void clearCache() {
         aggressorsAttacks = new ArrayList<>();
+        aggressorsEvents = new ArrayList<>();
         AlarmSoundPlayer.stop();
         return ;
     }
@@ -122,6 +123,6 @@ public class DefenseThread extends AbstractThread {
 
     private boolean isUnderAttack() {
         //isAttack() || isAgressiveSpy() || isDestroyMoonFleet();
-        return events.stream().anyMatch(event -> event.isHostile && Mission.ATTACK.equals(event.mission));
+        return aggressorsEvents.stream().anyMatch(event -> event.isHostile && Mission.ATTACK.equals(event.mission));
     }
 }
