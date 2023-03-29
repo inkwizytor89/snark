@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.enoch.snark.instance.config.Config.URL;
+
 public class GIUrlBuilder {
 
     public static final String COMPONENT_TERM = "component=";
@@ -34,15 +36,17 @@ public class GIUrlBuilder {
     public static final String PAGE_SPACE = "galaxy";
 
     private Instance instance;
+    private String url;
 
     private boolean checkEventFleet = false;
 
     public GIUrlBuilder() {
         instance = Instance.getInstance();
+        url = Instance.config.getConfig(URL);
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
-        String builder = Instance.config.url + "?" +
+        String builder = url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_BASE_FLEET +
                 "&cp=" + source.cp +
@@ -78,7 +82,7 @@ public class GIUrlBuilder {
     }
 
     public void openMessages() {
-        String builder = Instance.config.url + "?" +
+        String builder = url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
         Instance.session.getWebDriver().get(builder);
     }
@@ -88,7 +92,7 @@ public class GIUrlBuilder {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
-        StringBuilder builder = new StringBuilder( Instance.config.url + "?");
+        StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         builder.append("&cp=" + colony.cp);
@@ -127,7 +131,7 @@ public class GIUrlBuilder {
     }
 
     public void openWithPlayerInfo(String page, PlayerEntity player) {
-        StringBuilder builder = new StringBuilder( Instance.config.url + "?");
+        StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + page);
         instance.session.getWebDriver().get(builder.toString());
@@ -142,7 +146,7 @@ public class GIUrlBuilder {
             colony = instance.lastVisited;
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
-        String builder = Instance.config.url + "?" +
+        String builder = url + "?" +
                 PAGE_TERM + PAGE_INGAME + "&" +
                 COMPONENT_TERM + PAGE_SPACE +
                 "&galaxy=" + systemView.galaxy +

@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.config.Config;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,7 +40,7 @@ public class JPAUtility {
         EntityManagerFactory managerFactory = null;
         Map<String, String> persistenceMap = new HashMap<String, String>();
 
-        persistenceMap.put("javax.persistence.jdbc.url", "jdbc:postgresql://localhost/"+ Instance.config.name);
+        persistenceMap.put("javax.persistence.jdbc.url", "jdbc:postgresql://localhost/"+ Instance.config.getConfig(Config.SERVER));
 
         managerFactory = Persistence.createEntityManagerFactory("default", persistenceMap);
         return  managerFactory.createEntityManager();

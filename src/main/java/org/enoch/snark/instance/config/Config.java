@@ -16,6 +16,8 @@ import java.util.Properties;
 
 public class Config {
 
+    public static final String MAIN = "main";
+
     public static final String SERVER = "server";
     public static final String URL = "url";
     public static final String LOGIN = "login";
@@ -30,20 +32,12 @@ public class Config {
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
     public static final String MASTER = "master_href";
-
-    public String name;
-    public String url;
-    public String login;
-    public String pass;
-    public String mode;
+    private final Properties properties;
     public String config;
 
-    public String defense;
-    public String expedition;
     public String farm;
     public String collector;
     public String building;
-    public String fleetSave;
     public String space;
     public String scan;
 
@@ -54,20 +48,12 @@ public class Config {
 
     public Config(Properties properties) {
 
-        url = properties.getProperty(URL);
-        name = properties.getProperty(SERVER);
-        login = properties.getProperty(LOGIN);
-        pass = properties.getProperty(PASSWORD);
-
-        mode = properties.getProperty(MODE);
+        this.properties = properties;
         config = properties.getProperty(CONFIG);
 
-        defense = properties.getProperty(DefenseThread.threadName);
-        expedition = properties.getProperty(ExpeditionThread.threadName);
         farm = properties.getProperty(FarmThread.threadName);
         collector = properties.getProperty(CollectorThread.threadName);
         building = properties.getProperty(BuildingThread.threadName);
-        fleetSave = properties.getProperty(FleetSaveThread.threadName);
         space = properties.getProperty(SpaceThread.threadName);
         scan = properties.getProperty(ScanThread.threadName);
 
@@ -80,46 +66,51 @@ public class Config {
     }
 
     public String getConfig(String key) {
-        String[] configs = this.config.split(",");
-        for (String s : configs) {
-            String[] configuration = s.split("=");
-            if (key.equals(configuration[0])) {
-                return configuration.length > 1 ? configuration[1] : "";
-            }
-        }
-        return null;
+        return getConfig(MAIN, key, "missing_value");
     }
 
-    public String get(String threadName, String key) {
-        String threadConfig = extract(threadName);
-        if (threadConfig == null) return "";
-        String[] configs = threadConfig.split(",");
-        for (String s : configs) {
-            String[] configuration = s.split("=");
-            if (key.equals(configuration[0])) {
-                return configuration.length > 1 ? configuration[1] : StringUtils.EMPTY;
-            }
+    public String getConfig(String area, String key, String defaultValue) {
+        String propertiesKey = createPropertiesKey(area, key);
+        if(!properties.containsKey(propertiesKey)) {
+            System.err.println("Missing "+propertiesKey+" in properties file, set defaultValue "+defaultValue);
+            return defaultValue;
         }
-        return StringUtils.EMPTY;
+        String propertyValue = properties.getProperty(propertiesKey);
+        if(propertyValue == null || StringUtils.EMPTY.equals(propertyValue)) {
+            return defaultValue;
+        }
+        return propertyValue;
     }
 
-    public boolean contains(String threadName, String key) {
-        return extract(threadName).contains(key);
+    public String createPropertiesKey(String area, String key) {
+        return area + "." + key;
     }
 
-    private String extract(String threadName) {
-        switch (threadName) {
-            case DefenseThread.threadName: return defense;
-            case ExpeditionThread.threadName: return expedition;
-            case FarmThread.threadName: return farm;
-            case CollectorThread.threadName: return collector;
-            case BuildingThread.threadName: return building;
-            case FleetSaveThread.threadName: return fleetSave;
-            case SpaceThread.threadName: return space;
-            case ScanThread.threadName: return scan;
-            case UpdateThread.threadName: return update;
-            case ClearThread.threadName: return clear;
-            default: return config;
+    public Integer getConfigInteger(String area, String key, Integer defaultValue) {
+        try {
+            return Integer.parseInt(getConfig(area, key, defaultValue.toString()));
+        } catch (NumberFormatException e) {
+            System.err.println("For "+createPropertiesKey(area, key)+" get default value " + defaultValue +
+                    " because "+e.getMessage());
+            return defaultValue;
         }
+    }
+
+    public Long getConfigLong(String area, String key, Long defaultValue) {
+        try {
+            return Long.parseLong(getConfig(area, key, defaultValue.toString()));
+        } catch (NumberFormatException e) {
+            System.err.println("For "+createPropertiesKey(area, key)+" get default value " + defaultValue +
+                    " because "+e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    public Boolean getConfigBoolean(String area, String key, Boolean defaultValue) {
+        return Boolean.parseBoolean(getConfig(area, key, defaultValue.toString()));
+    }
+
+    public String[] getConfigArray(String area, String key) {
+        return getConfig(area, key, "").split(";");
     }
 }

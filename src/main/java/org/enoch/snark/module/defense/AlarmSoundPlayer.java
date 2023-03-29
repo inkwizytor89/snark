@@ -20,6 +20,7 @@ import static org.enoch.snark.module.defense.DefenseThread.ALARM;
 
 public class AlarmSoundPlayer implements LineListener {
 
+    public static final String MISSING_WAV = "missing.wav";
     private static AlarmSoundPlayer INSTANCE;
     static boolean shouldPlayAlarm = false;
 
@@ -80,8 +81,8 @@ public class AlarmSoundPlayer implements LineListener {
     }
 
     private String getAlarmAudioFilePath() {
-        String alarmPath = Instance.config.get(DefenseThread.threadName, ALARM);
-        if(!alarmPath.equals(StringUtils.EMPTY)) return alarmPath;
+        String alarmPath = Instance.config.getConfig(DefenseThread.threadName, ALARM, MISSING_WAV);
+        if(!alarmPath.equals(MISSING_WAV)) return alarmPath;
         File[] files = new File("").listFiles((dir, name) -> name.toLowerCase().endsWith(".wav"));
         if(files== null || files.length == 0) return null;
         return files[0].getAbsolutePath();

@@ -1,5 +1,6 @@
 package org.enoch.snark.module.collector;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -14,6 +15,8 @@ import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
+
+import static org.enoch.snark.instance.config.Config.MAIN;
 
 public class CollectorThread extends AbstractThread {
 
@@ -89,10 +92,10 @@ public class CollectorThread extends AbstractThread {
     }
 
     private ColonyEntity getCollectionDestinationFromConfig() {
-        String config = Instance.config.get(threadName, COLLECTION_DESTINATION);
+        String config = Instance.config.getConfig(threadName, COLLECTION_DESTINATION, StringUtils.EMPTY);
         System.err.println("coll_dest="+config);
         if(config == null || config.isEmpty()) {
-            long oneBeforeLast = Long.parseLong(Instance.config.getConfig(Config.GALAXY_MAX))-1;
+            long oneBeforeLast = Instance.config.getConfigLong(MAIN, Config.GALAXY_MAX, 6L)-1;
             return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).getNearestColony();
         } else {
             return new ColonyPlaner(new Planet(config)).getNearestColony();

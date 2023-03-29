@@ -145,15 +145,11 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     public Long calculateMaxExpeditionSize() {
-        String maxDt = Instance.config.get(threadName, MAX_DT);
-        if(maxDt == null || maxDt.isEmpty()) {
-            return 2500L;
-        }
-        return Long.parseLong(maxDt);
+        return Instance.config.getConfigLong(threadName, MAX_DT, 2500L);
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        boolean battleExtension = Instance.config.contains(threadName, BATTLE_EXTENSION);
+        boolean battleExtension = Instance.config.getConfigBoolean(threadName, BATTLE_EXTENSION, true);
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
         expeditionFleetCommand.addTag(threadName);
         instance.push(expeditionFleetCommand);

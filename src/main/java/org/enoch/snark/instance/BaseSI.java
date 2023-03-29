@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.instance.config.Config.*;
+
 public class BaseSI {
     private static BaseSI INSTANCE;
 
@@ -30,12 +32,12 @@ public class BaseSI {
         baseThreads.add(new UpdateThread());
         baseThreads.add(new ClearThread());
         operationThreads.add(new DefenseThread());
+        operationThreads.add(new FleetSaveThread()); // in progress
         operationThreads.add(new ExpeditionThread());
         operationThreads.add(new BuildingThread());
         operationThreads.add(new SpaceThread()); // explore space
         operationThreads.add(new ScanThread()); // checking i-player on defence
         operationThreads.add(new FarmThread()); // in progress
-        operationThreads.add(new FleetSaveThread()); // in progress
         operationThreads.add(new CollectorThread()); // in progress
     }
 
@@ -74,10 +76,10 @@ public class BaseSI {
     }
 
     public boolean isModeOn(AbstractThread thread) {
-        String mode = Instance.config.mode;
-        if(mode == null || mode.isEmpty())  return true;
-        String[] configTerms = mode.split(",");
-        for(String configTerm : configTerms) {
+        String[] configArray = Instance.config.getConfigArray(MAIN, MODE);
+        if(configArray == null || configArray.length == 0)  return true;
+
+        for(String configTerm : configArray) {
             if(configTerm.contains(thread.getThreadName())){
                 String[] vars = configTerm.split("-");
                 if(vars.length == 3) {

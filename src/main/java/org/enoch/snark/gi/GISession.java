@@ -12,18 +12,17 @@ import org.openqa.selenium.WebDriver;
 import java.util.ArrayList;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
+import static org.enoch.snark.instance.config.Config.*;
 
 public class GISession {
 
     private final WebDriver webDriver;
-    private final Instance instance;
     public GI gi;
 
     private boolean isLoggedIn = false;
 
     public GISession(Instance instance) {
-        this.instance = instance;
-        gi = instance.gi;
+        gi = Instance.gi;
         webDriver = gi.webDriver;
 
         webDriver.manage().window().maximize();
@@ -71,12 +70,12 @@ public class GISession {
 //        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
 //        gi.findText("Login").click();
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(Instance.config.login);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(Instance.config.getConfig(LOGIN));
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
         SleepUtil.secondsToSleep(2);
 
 
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.config.pass);
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.config.getConfig(PASSWORD));
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
 
         String expectedURL="https://gameforge.com/pl-PL";
@@ -89,7 +88,7 @@ public class GISession {
 
         //chooseServer
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
-        gi.doubleClickText(Instance.config.name);
+        gi.doubleClickText(Instance.config.getConfig(SERVER));
 
         isLoggedIn = true;
     }

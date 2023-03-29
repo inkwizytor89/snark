@@ -16,6 +16,8 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.logging.Logger;
 
+import static org.enoch.snark.instance.config.Config.*;
+
 public class SpaceThread extends AbstractThread {
 
     public static final String threadName = "space";
@@ -37,8 +39,8 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        int galaxyMax = Integer.parseInt(Instance.config.getConfig((Config.GALAXY_MAX)));
-        int systemMax = Integer.parseInt(Instance.config.getConfig((Config.SYSTEM_MAX)));
+        int galaxyMax = Instance.config.getConfigInteger(MAIN, GALAXY_MAX, 6);
+        int systemMax = Instance.config.getConfigInteger(MAIN, SYSTEM_MAX, 499);
         for(int i = 1 ; i <= galaxyMax; i++) {
             if(isNecessaryGalaxyPersist(i))
                 GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);

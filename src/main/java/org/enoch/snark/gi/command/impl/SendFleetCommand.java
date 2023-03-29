@@ -51,7 +51,7 @@ public class SendFleetCommand extends GICommand {
     }
 
     public boolean prepere() {
-        giUrlBuilder.openFleetView(fleet.source, new Planet(fleet.getCoordinate()), mission);
+        giUrlBuilder.openFleetView(fleet.source, fleet.getDestination(), mission);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;
@@ -86,6 +86,7 @@ public class SendFleetCommand extends GICommand {
         }
         try {
             next();
+            SleepUtil.sleep();
         } catch (ShipDoNotExists e) {
             System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
             for(Map.Entry<ShipEnum, Long> entry : entries) {
@@ -100,7 +101,6 @@ public class SendFleetCommand extends GICommand {
         }
 
 
-        SleepUtil.pause();
         if(!autoComplete) {
             WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
             coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
@@ -210,6 +210,6 @@ public class SendFleetCommand extends GICommand {
 
     @Override
     public String toString() {
-        return mission.name()+" "+fleet.getCoordinate()+" form "+fleet.source;
+        return mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
     }
 }

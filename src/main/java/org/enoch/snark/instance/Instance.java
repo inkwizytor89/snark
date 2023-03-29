@@ -1,11 +1,11 @@
 package org.enoch.snark.instance;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
+import static org.enoch.snark.instance.config.Config.*;
 
 public class Instance {
 
@@ -142,14 +143,14 @@ public class Instance {
 
     private synchronized void typeFlyPoints() {
         flyPoints = new ArrayList<>();
-        String flyPointsConfig = config.getConfig(Config.FLY_POINTS);
+        String flyPointsConfig = config.getConfig(MAIN, FLY_POINTS, StringUtils.EMPTY);
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
                 .filter(colonyEntity -> colonyEntity.isPlanet)
                 .sorted(Comparator.comparing(o -> -o.galaxy))
                 .collect(Collectors.toList());
 
-        if(flyPointsConfig == null || flyPointsConfig.isEmpty()) {
+        if(flyPointsConfig.isEmpty()) {
             for (ColonyEntity planet : planetList) {
                 ColonyEntity colony = planet;
                 if (planet.cpm != null) {
@@ -234,7 +235,7 @@ public class Instance {
     }
 
     public synchronized boolean isStopped() {
-        return config.mode!= null && config.mode.contains("stop");
+        return config.getConfig(MODE)!= null && config.getConfig(MODE).contains("stop");
     }
 
     public void push(AbstractCommand command) {

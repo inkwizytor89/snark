@@ -1,5 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
@@ -16,6 +17,8 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 
 import static org.enoch.snark.gi.GI.*;
+import static org.enoch.snark.instance.config.Config.MAIN;
+import static org.enoch.snark.instance.config.Config.MASTER;
 
 public class BuildCommand extends AbstractCommand {
 
@@ -56,7 +59,7 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "metal"),
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
-            String masterHref = Instance.config.getConfig(Config.MASTER);
+            String masterHref = Instance.config.getConfig(MAIN, MASTER, StringUtils.EMPTY);
             if(masterHref != null && !masterHref.isEmpty()) {
                 SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(masterHref,
                         "Master poprosze "+resources+ " na "+colony);

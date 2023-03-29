@@ -22,6 +22,7 @@ public class FleetSaveThread extends AbstractThread {
     public static final int SOURCE_INDEX = 0;
     public static final int SPEED_INDEX = 1;
     public static final int DESTINATION_INDEX = 2;
+    public static final String FS_KEY = "fs";
     private ColonyDAO colonyDAO;
 
     @Override
@@ -96,7 +97,7 @@ public class FleetSaveThread extends AbstractThread {
      * @return
      */
     private List<FleetEntity> loadFleetToSave() {
-        String[] allFleetToSaveConfig = Instance.config.get(threadName, "fs").split(";");
+        String[] allFleetToSaveConfig = Instance.config.getConfigArray(threadName, FS_KEY);
         List<FleetEntity> fleetToSave = new ArrayList<>();
         for(String fleetToSaveConfig : allFleetToSaveConfig){
             String[] configValues = fleetToSaveConfig.split("-");

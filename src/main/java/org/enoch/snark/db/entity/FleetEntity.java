@@ -139,10 +139,6 @@ public class FleetEntity extends IdEntity {
         return back != null && LocalDateTime.now().isAfter(back);
     }
 
-    public String getCoordinate() {
-        return "[" + targetGalaxy + ", " + targetSystem + ", " + targetPosition + "]";
-    }
-
     public void setShips(Map<ShipEnum, Long> toApply) {
         for(Map.Entry<ShipEnum, Long> entry : toApply.entrySet()) {
             if(entry.getKey() == ShipEnum.fighterLight) fighterLight = entry.getValue();

@@ -4,6 +4,9 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.types.ColonyType;
 
+import static org.enoch.snark.instance.config.Config.GALAXY_MAX;
+import static org.enoch.snark.instance.config.Config.MAIN;
+
 public class Planet {
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -18,9 +21,7 @@ public class Planet {
     }
 
     public Planet(String input) {
-        this(input, ColonyType.PLANET);
-
-        if('m' == input.charAt(0))  this.type = ColonyType.MOON;
+        this(input, 'm' == input.charAt(0) ? ColonyType.MOON : ColonyType.PLANET);
     }
 
     public Planet(String input, ColonyType type) {
@@ -41,7 +42,7 @@ public class Planet {
 
     public Long calculateDistance(Planet planet) {
         if(!galaxy.equals(planet.galaxy)) {
-            int galaxyMax = Integer.parseInt(Instance.config.getConfig((Config.GALAXY_MAX)));
+            int galaxyMax = Instance.config.getConfigInteger(MAIN, GALAXY_MAX, 6);
             return roundDistance(galaxy, planet.galaxy, galaxyMax) *20000;
         } else if(!system.equals(planet.system)) {
             return roundDistance(system, planet.system, 499) *95 +2700;
