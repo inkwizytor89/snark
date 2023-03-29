@@ -1,6 +1,7 @@
 package org.enoch.snark.gi.macro;
 
 import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.GeneralGIR;
@@ -133,11 +134,13 @@ public class GIUrlBuilder {
     public void openWithPlayerInfo(String page, PlayerEntity player) {
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
-        builder.append(COMPONENT_TERM + page);
-        instance.session.getWebDriver().get(builder.toString());
+        builder.append(COMPONENT_TERM).append(page);
+        Instance.session.getWebDriver().get(builder.toString());
         if(PAGE_RESEARCH.equals(page) && player != null) {
-            instance.gi.updateResearch(player);
-            instance.gi.updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
+            Instance.gi.updateResearch(player);
+            Instance.gi.updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
+            player.updated = LocalDateTime.now();
+            PlayerDAO.getInstance().saveOrUpdate(player);
         }
     }
 

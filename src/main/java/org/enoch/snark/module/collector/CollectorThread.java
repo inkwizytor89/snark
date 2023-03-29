@@ -42,7 +42,6 @@ public class CollectorThread extends AbstractThread {
     protected void onStep() {
         if(noCollectingOngoing()) {
             ColonyEntity destination = getCollectionDestinationFromConfig();
-            System.err.println("dest choose "+destination);
             FleetEntity fleet = buildCollectingFleetEntity(destination);
 
             fleet.metal = fleet.source.metal;
@@ -93,7 +92,6 @@ public class CollectorThread extends AbstractThread {
 
     private ColonyEntity getCollectionDestinationFromConfig() {
         String config = Instance.config.getConfig(threadName, COLLECTION_DESTINATION, StringUtils.EMPTY);
-        System.err.println("coll_dest="+config);
         if(config == null || config.isEmpty()) {
             long oneBeforeLast = Instance.config.getConfigLong(MAIN, Config.GALAXY_MAX, 6L)-1;
             return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).getNearestColony();

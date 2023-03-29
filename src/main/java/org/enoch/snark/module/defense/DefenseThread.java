@@ -115,8 +115,9 @@ public class DefenseThread extends AbstractThread {
         Long limit = Instance.config.getConfigLong(threadName, LIMIT, 3000L);
 
         aggressorsEvents = Navigator.getInstance().getEventFleetList().stream()
-        .filter(event -> (event.isHostile && event.mission.isAggressive()) ||
-                STATIONED.equals(event.mission))
+        .filter(event -> (event.isHostile && event.mission.isAggressive())
+//                || STATIONED.equals(event.mission)
+        )
         .filter(eventFleet -> Long.parseLong(eventFleet.detailsFleet) > limit || DESTROY.equals(eventFleet.mission))
         .collect(Collectors.toList());
     }

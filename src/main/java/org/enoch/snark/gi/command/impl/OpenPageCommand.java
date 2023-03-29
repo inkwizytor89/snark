@@ -1,13 +1,17 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
+
 public class OpenPageCommand extends AbstractCommand {
 
-    private final String page;
-    private final ColonyEntity colony;
+    private String page;
+    private PlayerEntity player;
+    private ColonyEntity colony;
 
     private boolean checkEventFleet = false;
 
@@ -17,6 +21,17 @@ public class OpenPageCommand extends AbstractCommand {
         this.colony = colony;
     }
 
+    public OpenPageCommand(String page, PlayerEntity player) {
+        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
+        this.page = page;
+        this.player = player;
+    }
+
+    public OpenPageCommand(String page) {
+        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
+        this.page = page;
+    }
+
     public OpenPageCommand setCheckEventFleet(boolean checkEventFleet) {
         this.checkEventFleet = checkEventFleet;
         return this;
@@ -24,9 +39,18 @@ public class OpenPageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        new GIUrlBuilder()
-                .setCheckEventFleet(checkEventFleet)
-                .open(page, colony);
+        if(colony != null) {
+            new GIUrlBuilder()
+                    .setCheckEventFleet(checkEventFleet)
+                    .open(page, colony);
+        } else if(player != null) {
+            new GIUrlBuilder()
+                    .openWithPlayerInfo(PAGE_RESEARCH, player);
+        } else {
+            new GIUrlBuilder()
+                    .setCheckEventFleet(checkEventFleet)
+                    .open(page, null);
+        }
         return true;
     }
 

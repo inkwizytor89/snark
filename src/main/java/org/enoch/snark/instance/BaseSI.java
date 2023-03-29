@@ -4,7 +4,7 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
-import org.enoch.snark.module.clear.ClearThread;
+import org.enoch.snark.module.regular.RegularThread;
 import org.enoch.snark.module.collector.CollectorThread;
 import org.enoch.snark.module.defense.DefenseThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
@@ -30,7 +30,7 @@ public class BaseSI {
 
     private BaseSI() {
         baseThreads.add(new UpdateThread());
-        baseThreads.add(new ClearThread());
+        baseThreads.add(new RegularThread());
         operationThreads.add(new DefenseThread());
         operationThreads.add(new FleetSaveThread()); // in progress
         operationThreads.add(new ExpeditionThread());

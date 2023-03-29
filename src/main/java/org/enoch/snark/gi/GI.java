@@ -299,6 +299,8 @@ public class GI {
     private Long getLevel(WebElement element, String name) {
         try {
             return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("level")).getText());
+        } catch (NumberFormatException e) {
+            return Long.parseLong(element.findElement(By.className(name)).findElement(By.className("level")).getAttribute("data-value"));
         } catch (Exception e) {
             e.printStackTrace();
             return 0L;

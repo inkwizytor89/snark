@@ -71,7 +71,7 @@ public class Commander extends Thread {
                 startCommander();
 
                 if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
-                    resolve(new OpenPageCommand(PAGE_BASE_FLEET, null).setCheckEventFleet(true));
+                    resolve(new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true));
                 }
 
                 if(isFleetFreeSlot()) {

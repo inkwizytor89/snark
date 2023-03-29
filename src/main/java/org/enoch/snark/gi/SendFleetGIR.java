@@ -51,8 +51,6 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
                 crystalAmount.sendKeys(fleet.crystal.toString());
                 metalAmount.sendKeys(fleet.metal.toString());
 
-                System.err.println("setResources m"+fleet.metal.toString()+" k"+fleet.crystal.toString()+" d"+deuterium.toString());
-
                 long remainingresources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
                 long maxresources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
 

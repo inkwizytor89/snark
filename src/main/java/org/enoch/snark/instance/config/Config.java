@@ -2,12 +2,9 @@ package org.enoch.snark.instance.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.module.building.BuildingThread;
-import org.enoch.snark.module.clear.ClearThread;
+import org.enoch.snark.module.regular.RegularThread;
 import org.enoch.snark.module.collector.CollectorThread;
-import org.enoch.snark.module.defense.DefenseThread;
-import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.farm.FarmThread;
-import org.enoch.snark.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.update.UpdateThread;
@@ -58,7 +55,7 @@ public class Config {
         scan = properties.getProperty(ScanThread.threadName);
 
         update = properties.getProperty(UpdateThread.threadName);
-        clear = properties.getProperty(ClearThread.threadName);
+        clear = properties.getProperty(RegularThread.threadName);
 
         pathToChromeWebdriver = properties.getProperty(WEBDRIVER_CHROME_DRIVER);
         System.setProperty(WEBDRIVER_CHROME_DRIVER, pathToChromeWebdriver);

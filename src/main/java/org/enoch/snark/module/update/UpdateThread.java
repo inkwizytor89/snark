@@ -59,7 +59,7 @@ public class UpdateThread extends AbstractThread {
     }
 
     private void sendCommandToUpdateEventFleets() {
-        OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, null).setCheckEventFleet(true);
+        OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true);
         command.addTag(threadName);
         commander.push(command);
     }

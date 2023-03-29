@@ -70,7 +70,6 @@ public class Instance {
     @Transactional
     public void loadGameState() {
         try {
-            PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
 
             Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
             colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
@@ -129,11 +128,11 @@ public class Instance {
                 }
                 colonyDAO.saveOrUpdate(colony);
 
+                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
                 if(mainPlayer.spyLevel == null) {
                     new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
                     mainPlayer.spyLevel = 1L;
                 }
-                PlayerDAO.getInstance().saveOrUpdate(mainPlayer);
             }
         } catch (Exception e) {
             typeFlyPoints();
