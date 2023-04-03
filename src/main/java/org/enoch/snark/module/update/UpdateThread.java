@@ -3,6 +3,7 @@ package org.enoch.snark.module.update;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
@@ -19,7 +20,7 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 public class UpdateThread extends AbstractThread {
 
     public static final String threadName = "update";
-    public static final int UPDATE_TIME_IN_MINUTES = 6;
+    public int updateTimeInMinutes = 12;
 
     private final Navigator navigator;
     private List<EventFleet> events;
@@ -44,6 +45,7 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        updateTimeInMinutes = Instance.config.getConfigInteger(threadName, "refresh", 12);
         if(isNavigatorExpired() && noWaitingElementsByTag(threadName)) {
             sendCommandToUpdateEventFleets();
         }
@@ -55,7 +57,7 @@ public class UpdateThread extends AbstractThread {
     }
 
     private boolean isNavigatorExpired() {
-        return navigator.isExpiredAfterMinutes(UPDATE_TIME_IN_MINUTES);
+        return navigator.isExpiredAfterMinutes(updateTimeInMinutes);
     }
 
     private void sendCommandToUpdateEventFleets() {
@@ -67,7 +69,7 @@ public class UpdateThread extends AbstractThread {
     private void putIncomingInArriveMap() {
         events.stream()
                 .filter(event -> LocalDateTime.now().isBefore(event.arrivalTime)) // remove not updated events
-                .filter(event -> LocalDateTime.now().plusMinutes(UPDATE_TIME_IN_MINUTES).isAfter(event.arrivalTime))
+                .filter(event -> LocalDateTime.now().plusMinutes(updateTimeInMinutes).isAfter(event.arrivalTime))
                 .filter(EventFleet::isFleetImpactOnColony) //is ending fly
                 .filter(event -> !arrivedMap.containsKey(event.arrivalTime)) // only not registered yet
                 .forEach(event -> arrivedMap.put(event.arrivalTime, event.getEndingPlanet()));

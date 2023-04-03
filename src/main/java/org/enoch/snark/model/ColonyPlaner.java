@@ -10,6 +10,7 @@ public class ColonyPlaner {
 
     private final HashMap<ColonyEntity, Long> distanceMap;
     private ColonyEntity nearestColony;
+    private boolean skipPlanet = true;
 
     public ColonyPlaner(TargetEntity target) {
         this(target.toPlanet());
@@ -24,12 +25,17 @@ public class ColonyPlaner {
         range.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet())));
 
         nearestColony = distanceMap.entrySet().stream()
-                .filter(colony -> !colony.getKey().toPlanet().equals(planet))
+                .filter(colony -> !skipPlanet || !colony.getKey().toPlanet().equals(planet))
                 .min(Comparator.comparingLong(Map.Entry::getValue)).get().getKey();
     }
 
     public ColonyEntity getNearestColony() {
         return nearestColony;
+    }
+
+    public ColonyPlaner doNotSkipPlanet() {
+        skipPlanet = false;
+        return this;
     }
 
 }

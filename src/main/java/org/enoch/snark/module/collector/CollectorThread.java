@@ -94,9 +94,9 @@ public class CollectorThread extends AbstractThread {
         String config = Instance.config.getConfig(threadName, COLLECTION_DESTINATION, StringUtils.EMPTY);
         if(config == null || config.isEmpty()) {
             long oneBeforeLast = Instance.config.getConfigLong(MAIN, Config.GALAXY_MAX, 6L)-1;
-            return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).getNearestColony();
+            return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).doNotSkipPlanet().getNearestColony();
         } else {
-            return new ColonyPlaner(new Planet(config)).getNearestColony();
+            return new ColonyPlaner(new Planet(config)).doNotSkipPlanet().getNearestColony();
         }
     }
 

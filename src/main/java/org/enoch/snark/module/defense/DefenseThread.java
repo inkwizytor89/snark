@@ -51,7 +51,6 @@ public class DefenseThread extends AbstractThread {
     @Override
     protected void onStep() {
         loadAggressiveFleet();
-        if(true) return ;
         if(aggressorsEvents.isEmpty()) {
             clearCache();
             return;
