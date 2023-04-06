@@ -69,8 +69,8 @@ public class FleetSaveThread extends AbstractThread {
         return Navigator.getInstance().getEventFleetList().stream()
                 .filter(fleet -> Mission.TRANSPORT.equals(fleet.mission) ||
                          Mission.ATTACK.equals(fleet.mission) ||
-                         Mission.STATIONED.equals(fleet.mission) //||
-                //         Mission.EXPEDITION.equals(fleet.mission)
+                         Mission.STATIONED.equals(fleet.mission) ||
+                         Mission.EXPEDITION.equals(fleet.mission)
                 )
                 .anyMatch(fleet -> source.toPlanet().equals(fleet.getEndingPlanet()));
     }
