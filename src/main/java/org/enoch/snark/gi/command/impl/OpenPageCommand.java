@@ -45,6 +45,7 @@ public class OpenPageCommand extends AbstractCommand {
                     .open(page, colony);
         } else if(player != null) {
             new GIUrlBuilder()
+                    .setCheckEventFleet(checkEventFleet)
                     .openWithPlayerInfo(PAGE_RESEARCH, player);
         } else {
             new GIUrlBuilder()

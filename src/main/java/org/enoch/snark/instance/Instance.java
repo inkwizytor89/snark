@@ -1,6 +1,7 @@
 package org.enoch.snark.instance;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -11,6 +12,9 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
+import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
+import org.enoch.snark.gi.command.impl.OpenPageCommand;
+import org.enoch.snark.gi.command.impl.RefreshColoniesStateCommand;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.Planet;
@@ -24,6 +28,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
 import static org.enoch.snark.instance.config.Config.*;
 
@@ -66,113 +71,116 @@ public class Instance {
             e.printStackTrace();
         }
     }
-
-    @Transactional
-    public void loadGameState() {
-        try {
-
-            Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
-            colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
-
-            List<ColonyEntity> loadColonyList = gi.loadPlanetList();
-
-            loadColonyList.stream().filter(loadedColony -> loadedColony.isPlanet)
-                    .forEach(loadedColony -> {
-                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
-
-                        if(colonyEntity == null) {
-                            // new planet
-                            colonyDAO.saveOrUpdate(loadedColony);
-                        } else {
-                            // old planet
-                            stillExistMap.put(colonyEntity, true);
-                        }
-                    });
-
-            loadColonyList.stream().filter(loadedColony -> !loadedColony.isPlanet)
-                    .forEach(loadedColony -> {
-                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
-
-                        if(colonyEntity == null) {
-                            // new moon
-                            colonyDAO.saveOrUpdate(loadedColony);
-                            //update planet cpm
-                            ColonyEntity planet = colonyDAO.find(loadedColony.cpm);
-                            planet.cpm = loadedColony.cp;
-                            colonyDAO.saveOrUpdate(planet);
-                        } else {
-                            // old moon
-                            stillExistMap.put(colonyEntity, true);
-                        }
-                    });
-
-            //remove missing colony
-            stillExistMap.forEach((colonyEntity, stillExist) -> {
-                    if(!stillExist) {
-                        System.err.println("Colony remove because do not exist " + colonyEntity);
-                        FleetDAO.getInstance().clean(colonyEntity);
-                        colonyDAO.remove(colonyEntity);
-                    }
-                    });
-
-            typeFlyPoints();
-
-            // update colonies
-            for(ColonyEntity colony : colonyDAO.fetchAll()) {
-                if(colony.isPlanet) {
-                    cachedPlaned.add(colony.toPlanet());
-                }
-                if(colony.level == null) {
-                    gi.updateColony(colony);
-                    colony.level = 1L;
-                }
-                colonyDAO.saveOrUpdate(colony);
-
-                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-                if(mainPlayer.spyLevel == null) {
-                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
-                    mainPlayer.spyLevel = 1L;
-                }
-            }
-        } catch (Exception e) {
-            typeFlyPoints();
-            e.printStackTrace();
-        }
-    }
-
-    private synchronized void typeFlyPoints() {
-        flyPoints = new ArrayList<>();
-        String flyPointsConfig = config.getConfig(MAIN, FLY_POINTS, StringUtils.EMPTY);
-        List<ColonyEntity> planetList = colonyDAO.fetchAll()
-                .stream()
-                .filter(colonyEntity -> colonyEntity.isPlanet)
-                .sorted(Comparator.comparing(o -> -o.galaxy))
-                .collect(Collectors.toList());
-
-        if(flyPointsConfig.isEmpty()) {
-            for (ColonyEntity planet : planetList) {
-                ColonyEntity colony = planet;
-                if (planet.cpm != null) {
-                    colony = colonyDAO.find(planet.cpm);
-                }
-                flyPoints.add(colony);
-            }
-        } else if (flyPointsConfig.contains("moon")) {
-            flyPoints = colonyDAO.fetchAll()
-                    .stream()
-                    .filter(colonyEntity -> !colonyEntity.isPlanet)
-                    .sorted(Comparator.comparing(o -> -o.galaxy))
-                    .collect(Collectors.toList());
-        } else {
-            flyPoints.addAll(planetList);
-        }
-
-        System.err.println("\nCount of fly points: "+flyPoints.size());
-//        flyPoints.forEach(System.err::println);
-    }
+//
+//    @Transactional
+//    public void loadGameState() {
+//        try {
+//
+//            Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
+//            colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
+//
+//            List<ColonyEntity> loadColonyList = gi.loadPlanetList();
+//
+//            loadColonyList.stream().filter(loadedColony -> loadedColony.isPlanet)
+//                    .forEach(loadedColony -> {
+//                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
+//
+//                        if(colonyEntity == null) {
+//                            // new planet
+//                            colonyDAO.saveOrUpdate(loadedColony);
+//                        } else {
+//                            // old planet
+//                            stillExistMap.put(colonyEntity, true);
+//                        }
+//                    });
+//
+//            loadColonyList.stream().filter(loadedColony -> !loadedColony.isPlanet)
+//                    .forEach(loadedColony -> {
+//                        ColonyEntity colonyEntity = colonyDAO.find(loadedColony.cp);
+//
+//                        if(colonyEntity == null) {
+//                            // new moon
+//                            colonyDAO.saveOrUpdate(loadedColony);
+//                            //update planet cpm
+//                            ColonyEntity planet = colonyDAO.find(loadedColony.cpm);
+//                            planet.cpm = loadedColony.cp;
+//                            colonyDAO.saveOrUpdate(planet);
+//                        } else {
+//                            // old moon
+//                            stillExistMap.put(colonyEntity, true);
+//                        }
+//                    });
+//
+//            //remove missing colony
+//            stillExistMap.forEach((colonyEntity, stillExist) -> {
+//                    if(!stillExist) {
+//                        System.err.println("Colony remove because do not exist " + colonyEntity);
+//                        FleetDAO.getInstance().clean(colonyEntity);
+//                        colonyDAO.remove(colonyEntity);
+//                    }
+//                    });
+//
+//            typeFlyPoints();
+//
+//            // update colonies
+//            for(ColonyEntity colony : colonyDAO.fetchAll()) {
+//                if(colony.isPlanet) {
+//                    cachedPlaned.add(colony.toPlanet());
+//                }
+//                if(colony.level == null) {
+//                    gi.updateColony(colony);
+//                    colony.level = 1L;
+//                }
+//                colonyDAO.saveOrUpdate(colony);
+//
+//                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
+//                if(mainPlayer.spyLevel == null) {
+//                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
+//                    mainPlayer.spyLevel = 1L;
+//                }
+//            }
+//        } catch (Exception e) {
+//            typeFlyPoints();
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private synchronized void typeFlyPoints() {
+//        flyPoints = new ArrayList<>();
+//        String flyPointsConfig = config.getConfig(MAIN, FLY_POINTS, StringUtils.EMPTY);
+//        List<ColonyEntity> planetList = colonyDAO.fetchAll()
+//                .stream()
+//                .filter(colonyEntity -> colonyEntity.isPlanet)
+//                .sorted(Comparator.comparing(o -> -o.galaxy))
+//                .collect(Collectors.toList());
+//
+//        if(flyPointsConfig.isEmpty()) {
+//            for (ColonyEntity planet : planetList) {
+//                ColonyEntity colony = planet;
+//                if (planet.cpm != null) {
+//                    colony = colonyDAO.find(planet.cpm);
+//                }
+//                flyPoints.add(colony);
+//            }
+//        } else if (flyPointsConfig.contains("moon")) {
+//            flyPoints = colonyDAO.fetchAll()
+//                    .stream()
+//                    .filter(colonyEntity -> !colonyEntity.isPlanet)
+//                    .sorted(Comparator.comparing(o -> -o.galaxy))
+//                    .collect(Collectors.toList());
+//        } else {
+//            flyPoints.addAll(planetList);
+//        }
+//
+//        System.err.println("\nCount of fly points: "+flyPoints.size());
+////        flyPoints.forEach(System.err::println);
+//    }
 
     public List<ColonyEntity> getFlyPoints() {
-        if(flyPoints.isEmpty()) typeFlyPoints();
+        while(flyPoints.isEmpty()) {
+            System.err.println("Waiting for FlyPoints");
+            SleepUtil.sleep();
+        }
         return flyPoints;
     }
 
@@ -193,9 +201,13 @@ public class Instance {
         messageService = MessageService.getInstance();
 
         browserReset();
-        loadGameState();
+//        loadGameState();
 
         commander = Commander.getInstance();
+        commander.push(new LoadColoniesCommand());
+        PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
+        commander.push(new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true));
+        commander.push(new RefreshColoniesStateCommand());
 
         BaseSI.getInstance().run();
     }

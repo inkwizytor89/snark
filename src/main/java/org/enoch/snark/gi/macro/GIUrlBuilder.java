@@ -142,6 +142,10 @@ public class GIUrlBuilder {
             player.updated = LocalDateTime.now();
             PlayerDAO.getInstance().saveOrUpdate(player);
         }
+
+        if (checkEventFleet) {
+            Navigator.getInstance().informAboutEventFleets(new GeneralGIR().readEventFleet());
+        }
     }
 
     public void openGalaxy(SystemView systemView, ColonyEntity colony) {

@@ -56,7 +56,7 @@ public class Commander extends Thread {
 
     @Override
     public void run() {
-        checkFlyPoints();
+//        checkFlyPoints();
         while(true) {
             try {
                 if(!isRunning) continue;

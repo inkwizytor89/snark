@@ -33,13 +33,13 @@ public class RegularThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        LocalDateTime from = LocalDateTime.now().minusDays(1);
-        MessageDAO.getInstance().clean(from);
-        FleetDAO.getInstance().clean(from);
-
-        PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-        if(LocalDateTime.now().minusDays(7L).isAfter(mainPlayer.updated)) {
-            commander.push(new OpenPageCommand(PAGE_RESEARCH, mainPlayer));
-        }
+//        LocalDateTime from = LocalDateTime.now().minusDays(1);
+//        MessageDAO.getInstance().clean(from);
+//        FleetDAO.getInstance().clean(from);
+//
+//        PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
+//        if(LocalDateTime.now().minusDays(7L).isAfter(mainPlayer.updated)) {
+//            commander.push(new OpenPageCommand(PAGE_RESEARCH, mainPlayer));
+//        }
     }
 }

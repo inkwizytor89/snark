@@ -141,15 +141,15 @@ public class GI {
         return Long.parseLong(root.findElement(id).getAttribute("data-raw"));
     }
 
-    public void updateColony(ColonyEntity colony) {
-        new GIUrlBuilder().open(PAGE_RESOURCES, colony);
-        new GIUrlBuilder().open(PAGE_FACILITIES, colony);
-        if(isLifeformAvailable() && colony.isPlanet) {
-            new GIUrlBuilder().open(PAGE_LIFEFORM, colony);
-        }
-        new GIUrlBuilder().open(PAGE_BASE_FLEET, colony);
-        new GIUrlBuilder().open(PAGE_DEFENSES, colony);
-    }
+//    public void updateColony(ColonyEntity colony) {
+//        new GIUrlBuilder().open(PAGE_RESOURCES, colony);
+//        new GIUrlBuilder().open(PAGE_FACILITIES, colony);
+//        if(isLifeformAvailable() && colony.isPlanet) {
+//            new GIUrlBuilder().open(PAGE_LIFEFORM, colony);
+//        }
+//        new GIUrlBuilder().open(PAGE_BASE_FLEET, colony);
+//        new GIUrlBuilder().open(PAGE_DEFENSES, colony);
+//    }
 
     public void updateResources(ColonyEntity colony) {
         WebElement resources = webDriver.findElement(By.id("resources"));
@@ -238,9 +238,9 @@ public class GI {
         }
     }
 
-    public boolean isLifeformAvailable() {
-        return !webDriver.findElements(By.id("lifeform")).isEmpty();
-    }
+//    public boolean isLifeformAvailable() {
+//        return !webDriver.findElements(By.id("lifeform")).isEmpty();
+//    }
 
     public void updateFacilities(ColonyEntity colony) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
@@ -317,45 +317,45 @@ public class GI {
         return Long.parseLong(resultString);
     }
 
-    public List<ColonyEntity> loadPlanetList() {
-        ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
-        List<WebElement> coloniesWebElements = new WebDriverWait(webDriver, 10)
-                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
-        for(WebElement colonyWebElement : coloniesWebElements) {
-            try {
-                ColonyEntity colonyEntity = new ColonyEntity();
-
-                colonyEntity.cp = Integer.parseInt(colonyWebElement.getAttribute(ID_ATTRIBUTE).split("-")[1]);
-                Planet planet = new Planet(colonyWebElement.findElement(By.className("planet-koords ")).getText());
-                colonyEntity.galaxy = planet.galaxy;
-                colonyEntity.system = planet.system;
-                colonyEntity.position = planet.position;
-                colonyEntity.isPlanet = true;
-
-                List<WebElement> moons = colonyWebElement.findElements(By.className("moonlink"));
-                if(!moons.isEmpty()) {
-                    String link = moons.get(0).getAttribute(HREF_ATTRIBUTE);
-                    int i = link.indexOf("cp=");
-                    colonyEntity.cpm = Integer.parseInt(link.substring(i+3));
-
-                    ColonyEntity moonColonyEntity = new ColonyEntity();
-                    moonColonyEntity.galaxy = planet.galaxy;
-                    moonColonyEntity.system = planet.system;
-                    moonColonyEntity.position = planet.position;
-                    moonColonyEntity.isPlanet = false;
-                    moonColonyEntity.cp = colonyEntity.cpm;
-                    moonColonyEntity.cpm = colonyEntity.cp;
-                    colonyEntities.add(moonColonyEntity);
-                }
-
-                colonyEntities.add(colonyEntity);
-//                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return colonyEntities;
-    }
+//    public List<ColonyEntity> loadPlanetList() {
+//        ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
+//        List<WebElement> coloniesWebElements = new WebDriverWait(webDriver, 10)
+//                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(webDriver.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
+//        for(WebElement colonyWebElement : coloniesWebElements) {
+//            try {
+//                ColonyEntity colonyEntity = new ColonyEntity();
+//
+//                colonyEntity.cp = Integer.parseInt(colonyWebElement.getAttribute(ID_ATTRIBUTE).split("-")[1]);
+//                Planet planet = new Planet(colonyWebElement.findElement(By.className("planet-koords ")).getText());
+//                colonyEntity.galaxy = planet.galaxy;
+//                colonyEntity.system = planet.system;
+//                colonyEntity.position = planet.position;
+//                colonyEntity.isPlanet = true;
+//
+//                List<WebElement> moons = colonyWebElement.findElements(By.className("moonlink"));
+//                if(!moons.isEmpty()) {
+//                    String link = moons.get(0).getAttribute(HREF_ATTRIBUTE);
+//                    int i = link.indexOf("cp=");
+//                    colonyEntity.cpm = Integer.parseInt(link.substring(i+3));
+//
+//                    ColonyEntity moonColonyEntity = new ColonyEntity();
+//                    moonColonyEntity.galaxy = planet.galaxy;
+//                    moonColonyEntity.system = planet.system;
+//                    moonColonyEntity.position = planet.position;
+//                    moonColonyEntity.isPlanet = false;
+//                    moonColonyEntity.cp = colonyEntity.cpm;
+//                    moonColonyEntity.cpm = colonyEntity.cp;
+//                    colonyEntities.add(moonColonyEntity);
+//                }
+//
+//                colonyEntities.add(colonyEntity);
+////                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
+//            }catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return colonyEntities;
+//    }
 
     public boolean upgrade(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));

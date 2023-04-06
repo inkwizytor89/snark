@@ -39,7 +39,7 @@ public class EventFleet {
     }
 
     public boolean isFleetImpactOnColony() {
-        // TODO: 26.02.2023 shouldn't life form expedition have inpact on colony
+        if(Mission.LIFE_FORM.equals(mission)) return false;
         return FleetDirectionType.BACK == iconMovement || Mission.STATIONED.equals(mission) || Mission.TRANSPORT.equals(mission);
     }
 
