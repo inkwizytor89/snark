@@ -50,9 +50,8 @@ public class BaseSI {
 
     public void run() {
         Runnable task = () -> {
-            baseThreads.forEach(Thread::start);
             while(Navigator.getInstance().getEventFleetList() == null) SleepUtil.pause();
-
+            baseThreads.forEach(Thread::start);
             operationThreads.forEach(Thread::start);
 
             while(true) {
