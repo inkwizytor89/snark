@@ -22,15 +22,16 @@ public class UpdateThread extends AbstractThread {
     public static final String threadName = "update";
     public int updateTimeInMinutes = 12;
 
-    private final Navigator navigator;
+    private Navigator navigator;
     private List<EventFleet> events;
     private final HashMap<LocalDateTime, Planet> arrivedMap = new HashMap<>();
 
-    public UpdateThread() {
-        super();
+    @Override
+    protected void onStart() {
+        super.onStart();
         navigator = Navigator.getInstance();
         pause = 10;
-        setRunning(true);
+        setAutoRunning(true);
     }
 
     @Override

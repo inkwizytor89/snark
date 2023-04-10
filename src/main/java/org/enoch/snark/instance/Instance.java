@@ -90,9 +90,25 @@ public class Instance {
         colonyDAO = ColonyDAO.getInstance();
         messageService = MessageService.getInstance();
 
+        startRefreshingConfig();
         browserReset();
         initialActionOnStart();
-        BaseSI.getInstance().run();
+        BaseSI.getInstance();
+    }
+
+    public void startRefreshingConfig() {
+        Runnable task = () -> {
+
+            while(true) {
+                try {
+                    Instance.updateConfig();
+                    SleepUtil.secondsToSleep(10);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(task).start();
     }
 
     public void initialActionOnStart() {

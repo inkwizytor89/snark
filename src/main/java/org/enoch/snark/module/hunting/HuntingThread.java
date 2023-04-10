@@ -23,11 +23,6 @@ public class HuntingThread extends AbstractThread {
 
     private List<PlayerEntity> targets = new ArrayList<>();
 
-    public HuntingThread() {
-        super();
-        setRunning(true);
-    }
-
     @Override
     public String getThreadName() {
         return threadName;
