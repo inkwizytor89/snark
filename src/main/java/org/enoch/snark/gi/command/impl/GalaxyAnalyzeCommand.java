@@ -17,12 +17,12 @@ public class GalaxyAnalyzeCommand extends GICommand {
     private GIUrlBuilder giUrlBuilder;
 
     public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
-        super(CommandType.NORMAL_REQUIERED);
+        super();
         init(galaxyEntity);
     }
 
     public GalaxyAnalyzeCommand(SystemView systemView) {
-        super(CommandType.NORMAL_REQUIERED);
+        super();
         Optional<GalaxyEntity> galaxyOptional = GalaxyDAO.getInstance().find(systemView);
         galaxyOptional.ifPresent(this::init);
         galaxyOptional.orElseThrow(() -> new RuntimeException("All galaxy should be present"));

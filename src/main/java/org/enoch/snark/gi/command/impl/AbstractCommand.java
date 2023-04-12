@@ -10,19 +10,13 @@ public abstract class AbstractCommand {
     public AbstractCommand afterCommand;
     public Integer secondsToDelay = 0;
     protected Instance instance;
-    private final CommandType type;
     public int failed = 0;
     Integer priority = 100;
     private List<String> tags = new ArrayList<>();
 
-    protected AbstractCommand(Instance instance, CommandType type) {
-        this.instance = instance;
-        this.type = type;
-    }
 
-    protected AbstractCommand(CommandType type) {
+    protected AbstractCommand() {
         this.instance = Instance.getInstance();
-        this.type = type;
     }
 
     public abstract boolean execute();
@@ -53,14 +47,6 @@ public abstract class AbstractCommand {
 
     public void setAfterCommand(AbstractCommand afterCommand) {
         this.afterCommand = afterCommand;
-    }
-
-    public CommandType getType() {
-        return type;
-    }
-
-    public boolean requiredGI() {
-        return type == CommandType.PRIORITY_REQUIERED || type ==CommandType.NORMAL_REQUIERED;
     }
 
     public void onInterrupt() {

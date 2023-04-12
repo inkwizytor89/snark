@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.enoch.snark.gi.command.impl.CommandType.PRIORITY_REQUIERED;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class SendFleetCommand extends GICommand {
@@ -42,7 +41,7 @@ public class SendFleetCommand extends GICommand {
     private final SendFleetGIR gir;
 
     public SendFleetCommand(FleetEntity fleet) {
-        super(PRIORITY_REQUIERED);
+        super();
         this.priority = 40;
         this.fleet = fleet;
         this.mission = fleet.mission;

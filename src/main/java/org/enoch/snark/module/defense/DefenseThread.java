@@ -93,7 +93,7 @@ public class DefenseThread extends AbstractThread {
 
         SendFleetCommand command = new SendFleetCommand(fleetEntity);
         command.addTag(threadName);
-        commander.push(command);
+        commander.pushWithPriority(command);
     }
 
     private ColonyEntity chooseDestination(Planet source) {

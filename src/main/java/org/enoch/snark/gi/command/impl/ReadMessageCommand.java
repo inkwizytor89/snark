@@ -15,19 +15,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.gi.command.impl.CommandType.NORMAL_REQUIERED;
-
 public class ReadMessageCommand extends AbstractCommand {
 
     public ReadMessageCommand() {
-        super(NORMAL_REQUIERED);
+        super();
     }
 
     @Override

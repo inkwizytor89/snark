@@ -7,7 +7,6 @@ import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
-import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.enoch.snark.module.building.BuildingCost;
@@ -16,7 +15,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import static org.enoch.snark.gi.GI.*;
+import static org.enoch.snark.gi.GI.TECHNOLOGIES;
 import static org.enoch.snark.instance.config.Config.MAIN;
 import static org.enoch.snark.instance.config.Config.MASTER;
 
@@ -28,7 +27,7 @@ public class BuildCommand extends AbstractCommand {
     private GI gi;
 
     public BuildCommand(ColonyEntity colony, BuildRequirements requirements) {
-        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
+        super();
         this.colony = colony;
         this.requirements = requirements;
         queueManger = QueueManger.getInstance();

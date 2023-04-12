@@ -24,7 +24,7 @@ public class LoadColoniesCommand extends AbstractCommand {
     private final BaseGameInfoGIR baseGameInfoGIR;
 
     public LoadColoniesCommand() {
-        super(Instance.getInstance(), CommandType.NORMAL_REQUIERED);
+        super();
         colonyDAO = ColonyDAO.getInstance();
         baseGameInfoGIR = new BaseGameInfoGIR();
     }

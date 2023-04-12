@@ -2,11 +2,9 @@ package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
-import org.enoch.snark.gi.command.impl.CommandType;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
@@ -113,12 +111,6 @@ public class Commander extends Thread {
         return false;
     }
 
-    private void checkFlyPoints() {
-        for(ColonyEntity colony : instance.flyPoints) {
-            push(new OpenPageCommand(PAGE_BASE_FLEET, colony));
-        }
-    }
-
     private void startCommander() {
         this.isRunning = true;
     }
@@ -155,7 +147,7 @@ public class Commander extends Thread {
             System.err.println("Skipping resolving null command");
             return;
         }
-        if(command.requiredGI() && !session.isLoggedIn()) {
+        if(!session.isLoggedIn()) {
             session.open();
         }
         // każdy wyjątek powinien miec czy powtórzyć procedure
@@ -209,13 +201,19 @@ public class Commander extends Thread {
         this.expeditionMax = expeditionMax;
     }
 
+    public synchronized void pushWithPriority(AbstractCommand command) {
+        push(command, true);
+    }
+
     public synchronized void push(AbstractCommand command) {
-        if (CommandType.PRIORITY_REQUIERED.equals(command.getType())) {
+        push(command, false);
+    }
+
+    private synchronized void push(AbstractCommand command, boolean withPriority) {
+        if (withPriority) {
             priorityActionQueue.offer(command);
-        } else if (CommandType.NORMAL_REQUIERED.equals(command.getType())) {
-            normalActionQueue.offer(command);
         } else {
-            throw new RuntimeException("Invalid type of command");
+            normalActionQueue.offer(command);
         }
     }
 

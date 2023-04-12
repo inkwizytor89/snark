@@ -2,15 +2,13 @@ package org.enoch.snark.gi.command.impl;
 
 import org.openqa.selenium.JavascriptExecutor;
 
-import static org.enoch.snark.gi.command.impl.CommandType.NORMAL_REQUIERED;
-
 public class SendMessageToPlayerCommand extends AbstractCommand {
 
     private final String herf;
     private final String message;
 
     public SendMessageToPlayerCommand(String herf, String message) {
-        super(NORMAL_REQUIERED);
+        super();
         this.herf = herf;
         this.message = message;
     }
