@@ -27,12 +27,12 @@ public class Commander extends Thread {
     private boolean isRunning = true;
 
     private int fleetCount = 0;
-    private int fleetMax = 0;
+    private int fleetMax = 1;
     private int expeditionCount = 0;
     private int expeditionMax = 0;
 
-    private final Queue<AbstractCommand> priorityActionQueue = new LinkedList<>();
-    private final Queue<AbstractCommand> normalActionQueue = new LinkedList<>();
+    private final Deque<AbstractCommand> fleetActionQueue = new LinkedList<>();
+    private final Deque<AbstractCommand> interfaceActionQueue = new LinkedList<>();
     private AbstractCommand actualProcessedCommand = null;
 
     public Commander() {
@@ -71,16 +71,20 @@ public class Commander extends Thread {
                     resolve(new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true));
                 }
 
+                // check if fleet slot is free because is something fleet to send
+                if(!isFleetFreeSlot() && !fleetActionQueue.isEmpty()) {
+                    resolve(new OpenPageCommand(PAGE_BASE_FLEET));
+                }
+                // method for put top in fleet queue
                 if(isFleetFreeSlot()) {
-                    if (!priorityActionQueue.isEmpty()) {
-                        resolve(Objects.requireNonNull(priorityActionQueue.poll()));
-                        fleetCount++;
+                    if (!fleetActionQueue.isEmpty()) {
+                        resolve(Objects.requireNonNull(fleetActionQueue.poll()));
                         SleepUtil.sleep();
                         continue;
                     }
                 }
-                if (!normalActionQueue.isEmpty()) {
-                        resolve(normalActionQueue.poll());
+                if (!interfaceActionQueue.isEmpty()) {
+                        resolve(interfaceActionQueue.poll());
                         continue;
                 }
                 if(isFleetFreeSlot()) {
@@ -185,13 +189,10 @@ public class Commander extends Thread {
     }
 
     private boolean isFleetFreeSlot() {
-        if(!session.isLoggedIn()) return false;
-        if(getFleetFreeSlots() > 0)   return true;
-        return false;
+        return getFleetFreeSlots() > 0;
     }
 
     public void setFleetStatus(int fleetCount, int fleetMax) {
-//        System.err.println("Fleet status "+fleetCount+"/"+fleetMax);
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
     }
@@ -201,27 +202,27 @@ public class Commander extends Thread {
         this.expeditionMax = expeditionMax;
     }
 
-    public synchronized void pushWithPriority(AbstractCommand command) {
-        push(command, true);
+    public synchronized void pushFleet(AbstractCommand command) {
+        pushFleet(command, false);
+    }
+
+    public synchronized void pushFleet(AbstractCommand command, boolean withPriority) {
+        if (withPriority) {
+            fleetActionQueue.addFirst(command);
+        } else {
+            fleetActionQueue.offer(command);
+        }
     }
 
     public synchronized void push(AbstractCommand command) {
-        push(command, false);
-    }
-
-    private synchronized void push(AbstractCommand command, boolean withPriority) {
-        if (withPriority) {
-            priorityActionQueue.offer(command);
-        } else {
-            normalActionQueue.offer(command);
-        }
+        interfaceActionQueue.offer(command);
     }
 
     public synchronized List<AbstractCommand> peekQueues() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-        commandsToView.addAll(priorityActionQueue);
-        commandsToView.addAll(normalActionQueue);
+        commandsToView.addAll(fleetActionQueue);
+        commandsToView.addAll(interfaceActionQueue);
         return commandsToView;
     }
 

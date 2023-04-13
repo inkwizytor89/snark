@@ -113,10 +113,10 @@ public class Instance {
 
     public void initialActionOnStart() {
         commander = Commander.getInstance();
-        commander.push(new LoadColoniesCommand());
+        commander.pushFleet(new LoadColoniesCommand());
         PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-        commander.push(new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true));
-        commander.pushWithPriority(new RefreshColoniesStateCommand());
+        commander.pushFleet(new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true));
+        commander.pushFleet(new RefreshColoniesStateCommand());
     }
 
     public void removePlanet(Planet target) {
