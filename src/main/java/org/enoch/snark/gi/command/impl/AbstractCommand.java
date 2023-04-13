@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractCommand {
-    public AbstractCommand afterCommand;
+    private AbstractCommand afterCommand;
+    private boolean shouldUseFleetActionQueue;
     public Integer secondsToDelay = 0;
     protected Instance instance;
     public int failed = 0;
     Integer priority = 100;
-    private List<String> tags = new ArrayList<>();
+    private final List<String> tags = new ArrayList<>();
 
 
     protected AbstractCommand() {
@@ -25,8 +26,7 @@ public abstract class AbstractCommand {
         if(afterCommand == null) {
             return;
         }
-//        System.err.println(afterCommand + " with delay " + secondsToDelay);
-        new WaitingThread(afterCommand, secondsToDelay).start();
+        new WaitingThread(afterCommand, shouldUseFleetActionQueue, secondsToDelay).start();
     }
 
     public boolean isAfterCommand() {
@@ -34,19 +34,19 @@ public abstract class AbstractCommand {
     }
 
     public void retry(Integer secondsToDelay) {
-        new WaitingThread(this, secondsToDelay).start();
+        new WaitingThread(this, shouldUseFleetActionQueue, secondsToDelay).start();
     }
 
-    protected void setSecondToDelayAfterCommand(Integer secoundToDelay) {
-        this.secondsToDelay = secoundToDelay;
-    }
-
-    public AbstractCommand getAfterCommand() {
-        return afterCommand;
+    protected void setSecondToDelayAfterCommand(Integer secondToDelay) {
+        this.secondsToDelay = secondToDelay;
     }
 
     public void setAfterCommand(AbstractCommand afterCommand) {
+        setAfterCommand(afterCommand, false);
+    }
+    public void setAfterCommand(AbstractCommand afterCommand, boolean shouldUseFleetActionQueue) {
         this.afterCommand = afterCommand;
+        this.shouldUseFleetActionQueue = shouldUseFleetActionQueue;
     }
 
     public void onInterrupt() {

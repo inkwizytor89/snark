@@ -10,7 +10,6 @@ import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.module.AbstractThread;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,23 +78,9 @@ public class FleetSaveThread extends AbstractThread {
         ColonyEntity source = ColonyDAO.getInstance().fetch(fleet.source);
         return source.colonyShip > 0;
     }
-    private boolean isFleetRequested(FleetEntity fleet) {
-        return Navigator.getInstance().isSimilarFleet(fleet) ||
-                isActiveFleetSaveInDB(fleet);
-    }
-
-    private boolean isActiveFleetSaveInDB(FleetEntity fleetEntity) {
-        return fleetDAO.findLastSend(LocalDateTime.now().minusHours(8)).stream()
-                .anyMatch(fleet ->
-                        fleetEntity.source.toPlanet().equals(fleet.source.toPlanet()) &&
-                        fleetEntity.getTarget().equals(fleet.getTarget()) &&
-                        fleetEntity.mission.equals(fleet.mission));
-    }
 
     /**
      * fs=m[1:1:8]-30-p[1:1:1];m[2:2:8]-30-p[2:2:1]
-     *
-     * @return
      */
     private List<FleetEntity> loadFleetToSave() {
         String[] allFleetToSaveConfig = Instance.config.getConfigArray(threadName, FS_KEY);

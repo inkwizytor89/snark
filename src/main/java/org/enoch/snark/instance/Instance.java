@@ -45,7 +45,6 @@ public class Instance {
     public ColonyEntity lastVisited = null;
 
     public LocalDateTime instanceStart = LocalDateTime.now();
-    private MessageService messageService;
 
     private Instance() {
         updateConfig();
@@ -88,7 +87,7 @@ public class Instance {
 
     public void run() {
         colonyDAO = ColonyDAO.getInstance();
-        messageService = MessageService.getInstance();
+        MessageService.getInstance();
 
         startRefreshingConfig();
         browserReset();
@@ -140,6 +139,14 @@ public class Instance {
     }
 
     public void push(AbstractCommand command) {
-        commander.push(command);
+        push(command, false);
+    }
+
+    public void push(AbstractCommand command, boolean shouldUseFleetActionQueue) {
+        if(shouldUseFleetActionQueue) {
+            commander.pushFleet(command);
+        } else {
+            commander.push(command);
+        }
     }
 }
