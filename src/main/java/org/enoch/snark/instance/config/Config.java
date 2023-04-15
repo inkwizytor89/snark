@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.module.building.BuildingThread;
 import org.enoch.snark.module.regular.RegularThread;
 import org.enoch.snark.module.collector.CollectorThread;
@@ -9,6 +10,8 @@ import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.update.UpdateThread;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class Config {
@@ -22,6 +25,12 @@ public class Config {
     public static final String MODE = "mode";
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
+
+    public static final String TIME = "time";
+    public static final String ON = "on";
+    public static final String OFF = "off";
+    public static final String STOP = "stop";
+    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String FLY_POINTS = "fly_points";
     public static final String EXPLORATION_AREA = "exploration_area";
@@ -109,5 +118,29 @@ public class Config {
 
     public String[] getConfigArray(String area, String key) {
         return getConfig(area, key, "").split(";");
+    }
+
+    public boolean isOn(String area) {
+        String[] configArray = Instance.config.getConfigArray(area, TIME);
+        if(configArray == null || configArray.length == 0)  return true;
+        if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return true;
+        if(configArray.length == 1 && configArray[0].equals(ON))  return true;
+        if(configArray.length == 1 && configArray[0].equals(OFF))  return false;
+
+        for(String configTerm : configArray) {
+            String[] vars = configTerm.split("-");
+            if (vars.length == 2) {
+                LocalTime start = LocalTime.parse(vars[0], dtf);
+                LocalTime end = LocalTime.parse(vars[1], dtf);
+                return (nowIsInMiddle(start, end) && start.isBefore(end)) ||
+                        (!nowIsInMiddle(end, start) && start.isAfter(end));
+            } else return false;
+        }
+        return false;
+    }
+
+    private boolean nowIsInMiddle(LocalTime start, LocalTime end) {
+        LocalTime now = LocalTime.now();
+        return now.isAfter(start) && now.isBefore(end);
     }
 }

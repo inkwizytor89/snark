@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -8,6 +9,7 @@ import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
+import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
@@ -16,6 +18,8 @@ import org.openqa.selenium.WebElement;
 import java.util.*;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.instance.config.Config.MODE;
+import static org.enoch.snark.instance.config.Config.STOP;
 
 public class Commander extends Thread {
 
@@ -55,8 +59,12 @@ public class Commander extends Thread {
     @Override
     public void run() {
         while(true) {
+            Instance.updateConfig();
             try {
-                if(!isRunning) continue;
+                RunningStatus runningStatus = createRunningStatus();
+                isRunning = createRunningStatus().shouldRunning();
+                runningStatus.log(Commander.class.getName());
+                if(!runningStatus.shouldRunning()) continue;
 
                 restartIfSessionIsOver();
 
@@ -101,6 +109,12 @@ public class Commander extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    public RunningStatus createRunningStatus() {
+        boolean stopRunning = Instance.config.getConfig(MODE).toLowerCase().contains(STOP);
+        boolean runningStatus = !stopRunning && Instance.config.isOn(Config.MAIN);
+        return new RunningStatus(isRunning, runningStatus);
     }
 
     private boolean isSomethingAttacking() {

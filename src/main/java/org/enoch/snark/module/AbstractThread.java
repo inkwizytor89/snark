@@ -1,6 +1,7 @@
 package org.enoch.snark.module;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -19,10 +20,6 @@ import static org.enoch.snark.instance.config.Config.MODE;
 public abstract class AbstractThread extends Thread {
 
     private static final Logger log = Logger.getLogger(AbstractThread.class.getName());
-    public static final String TIME = "time";
-    public static final String ON = "on";
-    public static final String OFF = "off";
-    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
     protected final Instance instance;
     private boolean isRunning = false;
     private boolean isAutoRunning = false;
@@ -55,21 +52,25 @@ public abstract class AbstractThread extends Thread {
         onStart();
 
         while(true) {
+            RunningStatus runningStatus = new RunningStatus(isRunning, shouldRunning());
+            runningStatus.log("Thread " + getThreadName());
+//            if(!commander.isRunning()) continue;
+//            if (!isAutoRunning) {
+//                boolean isModeOn = Instance.config.isOn(getThreadName());
+//                if ((!isRunning && isModeOn) || (isRunning && !isModeOn)) {
+//                    System.err.println("Thread " + getThreadName() + (isRunning ? " stop" : " start"));
+//                    isRunning = !isRunning;
+//                }
+//            }
 
-            if(!isAutoRunning) {
-                boolean isModeOn = isModeOn();
-                if ((!isRunning && isModeOn) || (isRunning && !isModeOn)) {
-                    System.err.println("Thread " + getThreadName() + (isRunning ? " stop" : " start"));
-                    isRunning = !isRunning;
-                }
-            }
 
-            boolean shouldRunning = (isAutoRunning || isRunning) && commander.isRunning();
-            if (shouldRunning) {
+//            boolean shouldRunning = isAutoRunning || isRunning;
+            isRunning = runningStatus.shouldRunning();
+            if (isRunning) {
                 try {
                     onStep();
                 } catch (Exception e) {
-                    System.err.println(getThreadName()+": "+e.getMessage());
+                    System.err.println(getThreadName() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -77,28 +78,10 @@ public abstract class AbstractThread extends Thread {
         }
     }
 
-    private boolean isModeOn() {
-        String[] configArray = Instance.config.getConfigArray(getThreadName(), TIME);
-        if(configArray == null || configArray.length == 0)  return true;
-        if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return true;
-        if(configArray.length == 1 && configArray[0].equals(ON))  return true;
-        if(configArray.length == 1 && configArray[0].equals(OFF))  return false;
-
-        for(String configTerm : configArray) {
-            String[] vars = configTerm.split("-");
-            if (vars.length == 2) {
-                LocalTime start = LocalTime.parse(vars[0], dtf);
-                LocalTime end = LocalTime.parse(vars[1], dtf);
-                return (nowIsInMiddle(start, end) && start.isBefore(end)) ||
-                        (!nowIsInMiddle(end, start) && start.isAfter(end));
-            } else return false;
-        }
-        return false;
-    }
-
-    private boolean nowIsInMiddle(LocalTime start, LocalTime end) {
-        LocalTime now = LocalTime.now();
-        return now.isAfter(start) && now.isBefore(end);
+    private boolean shouldRunning() {
+        if(!commander.isRunning()) return false;
+        if(isAutoRunning) return true;
+        return Instance.config.isOn(getThreadName());
     }
 
     public boolean isRunning() {
@@ -107,6 +90,7 @@ public abstract class AbstractThread extends Thread {
 
     public void setAutoRunning(boolean running) {
         isAutoRunning = running;
+        isRunning = true;
     }
     public int getRequestedFleetCount() {
         return 0;
