@@ -1,28 +1,19 @@
 package org.enoch.snark.module;
 
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.module.expedition.ExpeditionThread;
-import org.enoch.snark.module.space.SpaceThread;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
-
-import static org.enoch.snark.instance.config.Config.MAIN;
-import static org.enoch.snark.instance.config.Config.MODE;
 
 public abstract class AbstractThread extends Thread {
 
     private static final Logger log = Logger.getLogger(AbstractThread.class.getName());
     protected final Instance instance;
     private boolean isRunning = false;
-    private boolean isAutoRunning = false;
     protected final Commander commander;
     protected final FleetDAO fleetDAO;
     protected final TargetDAO targetDAO;
@@ -54,17 +45,6 @@ public abstract class AbstractThread extends Thread {
         while(true) {
             RunningStatus runningStatus = new RunningStatus(isRunning, shouldRunning());
             runningStatus.log("Thread " + getThreadName());
-//            if(!commander.isRunning()) continue;
-//            if (!isAutoRunning) {
-//                boolean isModeOn = Instance.config.isOn(getThreadName());
-//                if ((!isRunning && isModeOn) || (isRunning && !isModeOn)) {
-//                    System.err.println("Thread " + getThreadName() + (isRunning ? " stop" : " start"));
-//                    isRunning = !isRunning;
-//                }
-//            }
-
-
-//            boolean shouldRunning = isAutoRunning || isRunning;
             isRunning = runningStatus.shouldRunning();
             if (isRunning) {
                 try {
@@ -80,7 +60,6 @@ public abstract class AbstractThread extends Thread {
 
     private boolean shouldRunning() {
         if(!commander.isRunning()) return false;
-        if(isAutoRunning) return true;
         return Instance.config.isOn(getThreadName());
     }
 
@@ -88,10 +67,6 @@ public abstract class AbstractThread extends Thread {
         return isRunning;
     }
 
-    public void setAutoRunning(boolean running) {
-        isAutoRunning = running;
-        isRunning = true;
-    }
     public int getRequestedFleetCount() {
         return 0;
     }

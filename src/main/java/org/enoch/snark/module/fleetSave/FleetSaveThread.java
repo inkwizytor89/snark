@@ -36,7 +36,7 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return 1;
+        return instance.getFlyPoints().size();
     }
 
     @Override

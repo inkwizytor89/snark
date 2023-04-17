@@ -9,7 +9,6 @@ import org.enoch.snark.module.defense.DefenseThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
 import org.enoch.snark.module.farm.FarmThread;
 import org.enoch.snark.module.fleetSave.FleetSaveThread;
-import org.enoch.snark.module.regular.RegularThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.update.UpdateThread;
@@ -21,13 +20,11 @@ public class BaseSI {
     private static BaseSI INSTANCE;
 
     private final List<AbstractThread> operationThreads = new ArrayList<>();
-    private final List<AbstractThread> baseThreads = new ArrayList<>();
 
     private BaseSI() {
-        baseThreads.add(new UpdateThread());
-        baseThreads.add(new RegularThread());
+        operationThreads.add(new UpdateThread());
         operationThreads.add(new DefenseThread());
-        operationThreads.add(new FleetSaveThread()); // in progress
+        operationThreads.add(new FleetSaveThread());
         operationThreads.add(new ExpeditionThread());
         operationThreads.add(new BuildingThread());
         operationThreads.add(new SpaceThread()); // explore space
@@ -36,7 +33,6 @@ public class BaseSI {
         operationThreads.add(new CollectorThread()); // in progress
 
         while(Navigator.getInstance().getEventFleetList() == null) SleepUtil.pause();
-        baseThreads.forEach(Thread::start);
         operationThreads.forEach(Thread::start);
     }
 

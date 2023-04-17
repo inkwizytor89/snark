@@ -2,13 +2,6 @@ package org.enoch.snark.instance.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.module.building.BuildingThread;
-import org.enoch.snark.module.regular.RegularThread;
-import org.enoch.snark.module.collector.CollectorThread;
-import org.enoch.snark.module.farm.FarmThread;
-import org.enoch.snark.module.scan.ScanThread;
-import org.enoch.snark.module.space.SpaceThread;
-import org.enoch.snark.module.update.UpdateThread;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -39,36 +32,13 @@ public class Config {
     public static final String SYSTEM_MAX = "system_max";
     public static final String MASTER = "master_href";
     private final Properties properties;
-    public String config;
-
-    public String farm;
-    public String collector;
-    public String building;
-    public String space;
-    public String scan;
-
-    public String update;
-    public String clear;
 
     public String pathToChromeWebdriver;
 
     public Config(Properties properties) {
-
         this.properties = properties;
-        config = properties.getProperty(CONFIG);
-
-        farm = properties.getProperty(FarmThread.threadName);
-        collector = properties.getProperty(CollectorThread.threadName);
-        building = properties.getProperty(BuildingThread.threadName);
-        space = properties.getProperty(SpaceThread.threadName);
-        scan = properties.getProperty(ScanThread.threadName);
-
-        update = properties.getProperty(UpdateThread.threadName);
-        clear = properties.getProperty(RegularThread.threadName);
-
         pathToChromeWebdriver = properties.getProperty(WEBDRIVER_CHROME_DRIVER);
         System.setProperty(WEBDRIVER_CHROME_DRIVER, pathToChromeWebdriver);
-
     }
 
     public String getConfig(String key) {
@@ -78,7 +48,7 @@ public class Config {
     public String getConfig(String area, String key, String defaultValue) {
         String propertiesKey = createPropertiesKey(area, key);
         if(!properties.containsKey(propertiesKey)) {
-            System.err.println("Missing "+propertiesKey+" in properties file, set defaultValue "+defaultValue);
+            System.err.println("Missing "+propertiesKey+" in properties file, set defaultValue '"+defaultValue+"'");
             return defaultValue;
         }
         String propertyValue = properties.getProperty(propertiesKey);

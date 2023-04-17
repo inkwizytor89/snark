@@ -13,6 +13,7 @@ import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.RefreshColoniesStateCommand;
+import org.enoch.snark.instance.commander.Cleaner;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.Planet;
@@ -92,6 +93,7 @@ public class Instance {
         browserReset();
         initialActionOnStart();
         BaseSI.getInstance();
+        Cleaner.getInstance();
     }
 
     public void initialActionOnStart() {

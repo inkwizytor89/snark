@@ -31,7 +31,6 @@ public class UpdateThread extends AbstractThread {
         super.onStart();
         navigator = Navigator.getInstance();
         pause = 10;
-        setAutoRunning(true);
     }
 
     @Override
