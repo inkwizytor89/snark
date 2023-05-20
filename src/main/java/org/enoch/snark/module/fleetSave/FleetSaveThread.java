@@ -1,8 +1,10 @@
 package org.enoch.snark.module.fleetSave;
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
+import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 
 public class FleetSaveThread extends AbstractThread {
 
@@ -31,7 +34,7 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 6;
+        return 600;
     }
 
     @Override
@@ -47,17 +50,33 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        System.err.println("\nFs lap:");
         for(FleetEntity fleet : loadFleetToSave()) {
-            if(!isColonyShipOnColony(fleet)) continue;
-            if(isColonyStillBlocked(fleet.source)) continue;
+            if(!isColonyShipOnColony(fleet)) {
+                System.err.println(fleet.source + " missing colonyShip - fs waiting");
+                continue;
+            }
+            if(isColonyStillBlocked(fleet.source)) {
+                System.err.println(fleet.source + " waiting for fleet - fs waiting");
+                continue;
+            }
 
             String colonizationCode = getColonizationCode(fleet);
             if(noWaitingElementsByTag(colonizationCode)) {
                 SendFleetCommand command = new SendFleetCommand(fleet);
+                command.setAllShips(true);
+                command.setAllResources(true);
                 command.addTag(colonizationCode);
                 commander.push(command);
+                System.err.println(fleet.source+" push to send with code "+colonizationCode);
             }
         }
+    }
+
+    private void loadFlyPoints() {
+        instance.getFlyPoints().forEach(col -> commander.push(new OpenPageCommand(PAGE_BASE_FLEET, col)));
+        System.err.println("reloading fleets points");
+        SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10);
     }
 
     private String getColonizationCode(FleetEntity fleet) {
@@ -66,10 +85,11 @@ public class FleetSaveThread extends AbstractThread {
 
     private boolean isColonyStillBlocked(ColonyEntity source) {
         return Navigator.getInstance().getEventFleetList().stream()
-                .filter(fleet -> Mission.TRANSPORT.equals(fleet.mission) ||
-                         Mission.ATTACK.equals(fleet.mission) ||
-                         Mission.STATIONED.equals(fleet.mission) ||
-                         Mission.EXPEDITION.equals(fleet.mission)
+                .filter(fleet ->
+                        Mission.TRANSPORT.equals(fleet.mission) ||
+                        Mission.ATTACK.equals(fleet.mission) ||
+//                        Mission.STATIONED.equals(fleet.mission) ||
+                        Mission.EXPEDITION.equals(fleet.mission)
                 )
                 .anyMatch(fleet -> source.toPlanet().equals(fleet.getEndingPlanet()));
     }

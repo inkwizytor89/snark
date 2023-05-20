@@ -93,6 +93,8 @@ public class DefenseThread extends AbstractThread {
 
         SendFleetCommand command = new SendFleetCommand(fleetEntity);
         command.addTag(threadName);
+        command.setAllResources(true);
+        command.setAllShips(true);
         commander.pushFleet(command, true);
     }
 

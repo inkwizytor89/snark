@@ -5,14 +5,28 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "targets", schema = "public", catalog = "snark")
-public class TargetEntity extends PlanetEntity {
+@Table(name = "historic_targets", schema = "public", catalog = "snark")
+public class HistoricTargetEntity extends IdEntity {
 
-    public final static String ADMIN = "ADMIN";
-    public final static String NORMAL = "NORMAL";
-    public final static String ABSENCE = "ABSENCE";
-    public final static String WEAK = "WEAK";
-    public final static String IN_ACTIVE = "IN_ACTIVE";
+    @ManyToOne
+    @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
+    public TargetEntity target;
+
+    @Basic
+    @Column(name = "metal")
+    public Long metal;
+
+    @Basic
+    @Column(name = "crystal")
+    public Long crystal;
+
+    @Basic
+    @Column(name = "deuterium")
+    public Long deuterium;
+
+    @Basic
+    @Column(name = "tags")
+    public String tags;
 
     @Basic
     @Column(name = "resources")
@@ -27,47 +41,114 @@ public class TargetEntity extends PlanetEntity {
     public Long defenseSum;
 
     @Basic
-    @Column(name = "spy_level")
-    public Integer spyLevel = 4;
+    @Column(name = "fighterLight")
+    public Long fighterLight = 0L;
 
     @Basic
-    @Column(name = "last_attacked")
-    public LocalDateTime lastAttacked;
+    @Column(name = "fighterHeavy")
+    public Long fighterHeavy = 0L;
 
-    @ManyToOne
-    @JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
-    public PlayerEntity player;
+    @Basic
+    @Column(name = "cruiser")
+    public Long cruiser = 0L;
 
-    public TargetEntity() {
-        super();
-    }
+    @Basic
+    @Column(name = "battleship")
+    public Long battleship = 0L;
 
-    public TargetEntity(String input) {
-        super(input);
-    }
+    @Basic
+    @Column(name = "interceptor")
+    public Long interceptor = 0L;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TargetEntity entity = (TargetEntity) o;
-        return Objects.equals(id, entity.id) &&
-                Objects.equals(galaxy, entity.galaxy) &&
-                Objects.equals(system, entity.system) &&
-                Objects.equals(position, entity.position) &&
-                Objects.equals(energy, entity.energy) &&
-                Objects.equals(type, entity.type) &&
-                Objects.equals(fleetSum, entity.fleetSum) &&
-                Objects.equals(defenseSum, entity.defenseSum) &&
-                Objects.equals(updated, entity.updated);
-    }
+    @Basic
+    @Column(name = "bomber")
+    public Long bomber = 0L;
 
-    public void update(TargetEntity targetEntity) {
+    @Basic
+    @Column(name = "destroyer")
+    public Long destroyer = 0L;
+
+    @Basic
+    @Column(name = "deathstar")
+    public Long deathstar = 0L;
+
+    @Basic
+    @Column(name = "transporterSmall")
+    public Long transporterSmall = 0L;
+
+    @Basic
+    @Column(name = "transporterLarge")
+    public Long transporterLarge = 0L;
+
+    @Basic
+    @Column(name = "colonyShip")
+    public Long colonyShip = 0L;
+
+    @Basic
+    @Column(name = "recycler")
+    public Long recycler = 0L;
+
+    @Basic
+    @Column(name = "espionageProbe")
+    public Long espionageProbe = 0L;
+
+    @Basic
+    @Column(name = "sat")
+    public Long sat = 0L;
+
+    @Basic
+    @Column(name = "explorer")
+    public Long explorer = 0L;
+
+    @Basic
+    @Column(name = "reaper")
+    public Long reaper = 0L;
+
+    @Basic
+    @Column(name = "rocketLauncher")
+    public Long rocketLauncher = 0L;
+
+    @Basic
+    @Column(name = "laserCannonLight")
+    public Long laserCannonLight = 0L;
+
+    @Basic
+    @Column(name = "laserCannonHeavy")
+    public Long laserCannonHeavy = 0L;
+
+    @Basic
+    @Column(name = "gaussCannon")
+    public Long gaussCannon = 0L;
+
+    @Basic
+    @Column(name = "ionCannon")
+    public Long ionCannon = 0L;
+
+    @Basic
+    @Column(name = "plasmaCannon")
+    public Long plasmaCannon = 0L;
+
+    @Basic
+    @Column(name = "shieldDomeSmall")
+    public Long shieldDomeSmall = 0L;
+
+    @Basic
+    @Column(name = "shieldDomeLarge")
+    public Long shieldDomeLarge = 0L;
+
+    @Basic
+    @Column(name = "missileInterceptor")
+    public Long missileInterceptor = 0L;
+
+    @Basic
+    @Column(name = "missileInterplanetary")
+    public Long missileInterplanetary = 0L;
+
+    public void update(HistoricTargetEntity targetEntity) {
         this.metal = targetEntity.metal;
         this.crystal = targetEntity.crystal;
         this.deuterium = targetEntity.deuterium;
         this.resources = metal + 2 * crystal + 3 * deuterium;
-        this.energy = targetEntity.energy;
 
         this.fleetSum = targetEntity.fleetSum;
         this.defenseSum = targetEntity.defenseSum;
@@ -98,15 +179,7 @@ public class TargetEntity extends PlanetEntity {
         this.missileInterceptor = targetEntity.missileInterceptor;
         this.missileInterplanetary = targetEntity.missileInterplanetary;
 
-        this.spyLevel = targetEntity.spyLevel;
-
         this.updated = LocalDateTime.now();
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id, this.galaxy, this.system, this.position, this.energy, type, fleetSum, defenseSum, updated);
     }
 
 // todo zrobic zeby zmienna przy przemnazaniu sie nie przekrecila

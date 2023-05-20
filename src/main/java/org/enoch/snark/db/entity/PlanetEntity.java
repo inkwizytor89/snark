@@ -31,6 +31,10 @@ public abstract class PlanetEntity extends IdEntity{
     public Integer position;
 
     @Basic
+    @Column(name = "type")
+    public String type;
+
+    @Basic
     @Column(name = "metal")
     public Long metal;
 
@@ -43,12 +47,28 @@ public abstract class PlanetEntity extends IdEntity{
     public Long deuterium;
 
     @Basic
+    @Column(name = "tags")
+    public String tags;
+
+    @Basic
     @Column(name = "is_planet")
     public boolean isPlanet = true;
 
     @Basic
     @Column(name = "power")
     public Long energy;
+
+    @Basic
+    @Column(name = "debris_metal")
+    public Long debrisMetal;
+
+    @Basic
+    @Column(name = "debris_crystal")
+    public Long debrisCrystal;
+
+    @Basic
+    @Column(name = "debris_deuterium")
+    public Long debrisDeuterium;
 
     @Basic
     @Column(name = "fighterLight")

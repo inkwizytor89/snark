@@ -44,7 +44,7 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        pause = 5;
+        pause = 8;
     }
 
     private void chooseColoniesForExpeditionsStart() {

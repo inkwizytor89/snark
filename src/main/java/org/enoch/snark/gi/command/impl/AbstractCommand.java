@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class AbstractCommand {
     private AbstractCommand afterCommand;
     private boolean shouldUseFleetActionQueue;
-    public Integer secondsToDelay = 0;
+    public int secondsToDelay = 0;
     protected Instance instance;
     public int failed = 0;
     Integer priority = 100;
@@ -26,7 +26,9 @@ public abstract class AbstractCommand {
         if(afterCommand == null) {
             return;
         }
-        new WaitingThread(afterCommand, shouldUseFleetActionQueue, secondsToDelay).start();
+
+        WaitingThread waitingThread = new WaitingThread(afterCommand, shouldUseFleetActionQueue, secondsToDelay);
+        waitingThread.start();
     }
 
     public boolean isAfterCommand() {

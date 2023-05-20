@@ -53,8 +53,9 @@ public abstract class AbstractThread extends Thread {
                     System.err.println(getThreadName() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
+                SleepUtil.secondsToSleep(getPauseInSeconds());
             }
-            SleepUtil.secondsToSleep(getPauseInSeconds());
+            else SleepUtil.secondsToSleep(60);
         }
     }
 

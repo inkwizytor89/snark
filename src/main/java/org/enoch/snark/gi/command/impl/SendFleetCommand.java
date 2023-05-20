@@ -36,6 +36,8 @@ public class SendFleetCommand extends GICommand {
     public Mission mission;
     protected GIUrlBuilder giUrlBuilder;
     protected boolean autoComplete;
+    protected boolean allResources;
+    protected boolean allShips;
 
     public FleetEntity fleet;
     private final SendFleetGIR gir;
@@ -79,20 +81,28 @@ public class SendFleetCommand extends GICommand {
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
+
         Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
-        for(Map.Entry<ShipEnum, Long> entry : entries) {
-            typeShip(entry.getKey(), entry.getValue());
+        if(allShips) {
+            gir.selectAllShips();
+        } else {
+            for (Map.Entry<ShipEnum, Long> entry : entries) {
+                typeShip(entry.getKey(), entry.getValue());
+            }
         }
         try {
             next();
             SleepUtil.sleep();
         } catch (ShipDoNotExists e) {
             System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
-            for(Map.Entry<ShipEnum, Long> entry : entries) {
-                System.err.print(entry.getKey().getId()+" "+entry.getValue()+"/");
-                        System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
+            if(allShips) {
+                System.err.println("allShips selected");
+            } else {
+                for (Map.Entry<ShipEnum, Long> entry : entries) {
+                    System.err.print(entry.getKey().getId() + " " + entry.getValue() + "/");
+                    System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
+                }
             }
-
             fleet.start = LocalDateTime.now();
             fleet.code = 0L;
             FleetDAO.getInstance().saveOrUpdate(fleet);
@@ -110,7 +120,9 @@ public class SendFleetCommand extends GICommand {
         }
 
         gir.setSpeed(fleet);
-        gir.setResources(fleet);
+
+        if(allResources) gir.selectAllResources();
+        else gir.setResources(fleet);
 
         final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
@@ -205,6 +217,14 @@ public class SendFleetCommand extends GICommand {
         super.onInterrupt();
         fleet.code = -1L;
         FleetDAO.getInstance().saveOrUpdate(fleet);
+    }
+
+    public void setAllResources(boolean allResources) {
+        this.allResources = allResources;
+    }
+
+    public void setAllShips(boolean allShips) {
+        this.allShips = allShips;
     }
 
     @Override

@@ -4,7 +4,6 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "players", schema = "public", catalog = "snark")
@@ -30,12 +29,36 @@ public class PlayerEntity extends IdEntity {
     @Column(name = "alliance")
     public String alliance;
 
-//    @Basic
-//    @Column(name = "level")
-//    public Long level;
+    @Basic
+    @Column(name = "all_points")
+    public Long allPoints;
 
     @Basic
-    @Column(name = "level")
+    @Column(name = "economy_points")
+    public Long economyPoints;
+
+    @Basic
+    @Column(name = "research_points")
+    public Long researchPoints;
+
+    @Basic
+    @Column(name = "fleet_points")
+    public Long fleetPoints;
+
+    @Basic
+    @Column(name = "ships_count")
+    public Long shipsCount;
+
+    @Basic
+    @Column(name = "lifeform_points")
+    public Long lifeformPoints;
+
+    @Basic
+    @Column(name = "tags")
+    public String tags;
+
+    @Basic
+    @Column(name = "spy_level")
     public Long spyLevel = 4L;
 
 //    Research

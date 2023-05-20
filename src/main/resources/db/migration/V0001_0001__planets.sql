@@ -13,8 +13,14 @@ create table colonies
   level       integer,
   updated    timestamp default now(),
 
+  debris_metal       bigint,
+  debris_crystal     bigint,
+  debris_deuterium   bigint,
+
   cp          integer   not null,
   cpm          integer,
+  type          text default 'PLANET',
+  tags              text,
   is_planet boolean default true,
   collecting_order    integer,
 
@@ -103,7 +109,13 @@ create table targets
   player_id bigint not null references players,
   updated    timestamp default now(),
   last_attacked    timestamp default now(),
+  type        varchar(15) not null default 'PLANET',
+  tags              text,
   is_planet boolean default true,
+
+  debris_metal       bigint,
+  debris_crystal     bigint,
+  debris_deuterium   bigint,
 
   -- fleet
   fighterLight    integer default 0,
@@ -175,8 +187,65 @@ create table targets
   lifeformTech14112 integer,
 
   resources   integer,
-  type        varchar(15) not null,
   fleet_sum   bigint default 0,
   defense_sum bigint default 0,
   spy_level integer default 4
+);
+
+create table historic_targets
+(
+  id          bigserial   not null
+    constraint historic_targets_pkey
+    primary key,
+  target_id bigint not null references targets,
+  metal       bigint,
+  crystal     bigint,
+  deuterium   bigint,
+  updated    timestamp default now(),
+  tags              text,
+
+  resources   integer,
+  fleet_sum   bigint default 0,
+  defense_sum bigint default 0,
+
+  -- fleet
+  fighterLight    integer default 0,
+  fighterHeavy    integer default 0,
+  cruiser    integer default 0,
+  battleship    integer default 0,
+  interceptor   integer default 0,
+  bomber   integer default 0,
+  destroyer    integer default 0,
+  deathstar    integer default 0,
+  recycler    integer default 0,
+  explorer    integer default 0,
+  transporterSmall    integer default 0,
+  transporterLarge    integer default 0,
+  colonyShip   integer default 0,
+  reaper   integer default 0,
+  espionageProbe   integer default 0,
+  sat   integer default 0,
+
+  --defence
+  rocketLauncher    integer default 0,
+  laserCannonLight   integer default 0,
+  laserCannonHeavy   integer default 0,
+  gaussCannon    integer default 0,
+  ionCannon    integer default 0,
+  plasmaCannon    integer default 0,
+  shieldDomeSmall   integer default 0,
+  shieldDomeLarge   integer default 0,
+  missileInterceptor    integer default 0,
+  missileInterplanetary    integer default 0
+);
+
+create table targets_activity
+(
+  id          bigserial   not null
+    constraint targets_activities_pkey
+    primary key,
+  target_id bigint not null references targets,
+  counter       integer,
+  tags              text,
+  updated    timestamp default now()
 );

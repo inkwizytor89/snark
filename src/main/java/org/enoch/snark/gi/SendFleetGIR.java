@@ -64,7 +64,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
         long consumption = toLong(consumptionInput.split("\\s")[0]);
 
-        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 1000000L;
+        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 300000L;
     }
 
     public void setSpeed(FleetEntity fleet) {
@@ -75,5 +75,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement speedElement = steps.get(Integer.parseInt(fleet.speed.toString()) / 10 - 1);
             speedElement.click();
         }
+    }
+
+    public void selectAllShips() {
+        wd.findElement(By.id("sendall")).click();
+    }
+
+    public void selectAllResources() {
+        wd.findElement(By.id("allresources")).findElement(By.tagName("img")).click();
     }
 }
