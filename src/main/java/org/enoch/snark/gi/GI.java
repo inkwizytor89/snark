@@ -13,6 +13,7 @@ import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.SystemView;
+import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -387,6 +388,7 @@ public class GI {
                 entity.galaxy = systemView.galaxy;
                 entity.system = systemView.system;
                 entity.position = position;
+                entity.type = ColonyType.PLANET;
             }
             PlayerEntity playerEntity = playerDAO.find(playerCode);
             playerEntity.name = playerName;
@@ -395,7 +397,6 @@ public class GI {
             playerEntity.type = setStatus(status);
             PlayerEntity savedPlayer = playerDAO.saveOrUpdate(playerEntity);
 
-            entity.type = status;
             entity.player = savedPlayer;
             targetDAO.saveOrUpdate(entity);
         }

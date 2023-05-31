@@ -20,6 +20,7 @@ public class GeneralGIR extends GraphicalInterfaceReader {
     public List<EventFleet> readEventFleet() {
         List<EventFleet> eventFleets = new ArrayList<>();
         try {
+            SleepUtil.pause(3);
             List<WebElement> eventHeader = wd.findElements(By.id("eventHeader"));
             if(!eventHeader.isEmpty()) {
                 if(eventHeader.get(0).isDisplayed())
@@ -27,10 +28,11 @@ public class GeneralGIR extends GraphicalInterfaceReader {
             }
             List<WebElement> event_list = wd.findElements(By.className("event_list"));
             if(event_list.isEmpty()) {
+                System.err.println("brak flot i wysylam puste");
                 return eventFleets;
             }
             event_list.get(0).click();
-
+            System.err.println("klik");
             SleepUtil.sleep();
             List<WebElement> tableRows = null;
             WebDriverWait wait = new WebDriverWait(wd, 15);

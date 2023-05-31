@@ -57,11 +57,6 @@ public class ColonyEntity extends PlanetEntity {
         return true;
     }
 
-    public ColonyEntity refresh() {
-        JPAUtility.getEntityManager().refresh(this);
-        return this;
-    }
-
     public ColonyEntity save() {
         ColonyDAO.getInstance().saveOrUpdate(this);
         return this;

@@ -9,8 +9,10 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.BaseGameInfoGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.types.ColonyType;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,6 @@ public class LoadColoniesCommand extends AbstractCommand {
     @Transactional
     public boolean execute() {
         try {
-
             Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
             colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
 
@@ -45,6 +46,7 @@ public class LoadColoniesCommand extends AbstractCommand {
 
                         if(colonyEntity == null) {
                             // new planet
+                            loadedColony.type = ColonyType.PLANET;
                             colonyDAO.saveOrUpdate(loadedColony);
                         } else {
                             // old planet
@@ -58,6 +60,7 @@ public class LoadColoniesCommand extends AbstractCommand {
 
                         if(colonyEntity == null) {
                             // new moon
+                            loadedColony.type = ColonyType.MOON;
                             colonyDAO.saveOrUpdate(loadedColony);
                             //update planet cpm
                             ColonyEntity planet = colonyDAO.find(loadedColony.cpm);
@@ -97,7 +100,6 @@ public class LoadColoniesCommand extends AbstractCommand {
                     mainPlayer.spyLevel = 1L;
                 }
             }
-
         } catch (Exception e) {
             typeFlyPoints();
             e.printStackTrace();
@@ -132,7 +134,7 @@ public class LoadColoniesCommand extends AbstractCommand {
             flyPoints.addAll(planetList);
         }
 
-        System.err.println("\nCount of fly points: "+flyPoints.size());
+//        System.err.println("\nCount of fly points: "+flyPoints.size());
 //        flyPoints.forEach(System.err::println);
         Instance.getInstance().flyPoints = flyPoints;
     }

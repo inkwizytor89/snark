@@ -1,12 +1,8 @@
 package org.enoch.snark.instance.commander;
 
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.instance.Commander;
 import org.enoch.snark.model.EventFleet;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.types.ColonyType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,19 +24,19 @@ public class Navigator {
         return INSTANCE;
     }
 
-    public LocalDateTime getLastUpdate() {
-        return lastUpdate;
-    }
-
     public boolean isExpiredAfterMinutes(int minutes) {
         return lastUpdate.plusMinutes(minutes).isBefore(LocalDateTime.now());
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
-        if(eventFleetList == null) {
+        int fleetCount = Commander.getInstance().getFleetCount();
+        if(eventFleetList == null || eventFleetList.size() < fleetCount) {
+            System.err.println("informAboutEventFleets null");
             return;
         }
         this.eventFleetList = eventFleetList;
+        System.err.println("informAboutEventFleets size "+this.eventFleetList.size());
+
         this.lastUpdate = LocalDateTime.now();
     }
 
@@ -51,27 +47,6 @@ public class Navigator {
     public boolean noneMission(Mission mission) {
         return this.eventFleetList.stream()
                 .noneMatch(fleet -> mission.equals(fleet.mission));
-    }
-
-    public boolean isSimilarFleet(FleetEntity fleetEntity) {
-        return this.eventFleetList.stream()
-                .anyMatch(fleet ->
-                        fleetEntity.source.toPlanet().equals(fleet.getFrom()) &&
-                        fleetEntity.getTarget().equals(fleet.getTo()) &&
-                                fleetEntity.mission.equals(fleet.mission));
-    }
-
-    public List<ColonyEntity> getSafeColonies(ColonyType type) {
-        List<Planet> attackedPlanets = eventFleetList.stream()
-                .filter(event -> event.isHostile)
-                .map(eventFleet -> eventFleet.getTo())
-                .collect(Collectors.toList());
-
-        return ColonyDAO.getInstance().fetchAll().stream()
-                .filter(colonyEntity -> colonyEntity.isPlanet && ColonyType.PLANET.equals(type))
-                .filter(colonyEntity -> !attackedPlanets.contains(colonyEntity.toPlanet()))
-                .collect(Collectors.toList());
-
     }
 
     @Override

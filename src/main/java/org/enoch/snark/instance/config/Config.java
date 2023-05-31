@@ -30,6 +30,7 @@ public class Config {
     public static final String DATABASE = "database";
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
+    public static final String HIDING_ACTIVITY = "hiding_activity";
     public static final String MASTER = "master_href";
     private final Properties properties;
 
@@ -93,9 +94,9 @@ public class Config {
     public boolean isOn(String area) {
         String[] configArray = Instance.config.getConfigArray(area, TIME);
         if(configArray == null || configArray.length == 0)  return true;
+        if(configArray.length == 1 && configArray[0].contains(ON))  return true;
+        if(configArray.length == 1 && configArray[0].contains(OFF))  return false;
         if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return true;
-        if(configArray.length == 1 && configArray[0].equals(ON))  return true;
-        if(configArray.length == 1 && configArray[0].equals(OFF))  return false;
 
         for(String configTerm : configArray) {
             String[] vars = configTerm.split("-");

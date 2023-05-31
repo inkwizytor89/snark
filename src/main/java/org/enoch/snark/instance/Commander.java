@@ -191,13 +191,13 @@ public class Commander extends Thread {
                 command.doAfter();
             }
         } else {
-            command.failed++;
-            if (command.failed < 2) {
-                command.retry(2);
-            } else {
-                command.onInterrupt();
+//            command.failed++;
+//            if (command.failed < 2) {
+//                command.retry(2);
+//            } else {
+//                command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
-            }
+//            }
         }
         actualProcessedCommand = null;
     }

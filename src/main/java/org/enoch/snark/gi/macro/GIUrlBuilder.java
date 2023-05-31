@@ -5,6 +5,7 @@ import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.GeneralGIR;
+import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.commander.QueueManger;
@@ -15,10 +16,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.instance.config.Config.URL;
+import static org.enoch.snark.instance.config.Config.*;
 
 public class GIUrlBuilder {
 
@@ -72,13 +75,18 @@ public class GIUrlBuilder {
     }
 
     public void loadFleetStatus() {
-        Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
-        final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
-        Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
-        if(m.find()) {
-            Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
-            int expeditionCount = Integer.parseInt(m.group(3));
-            Instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+        try {
+            Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
+            final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
+            Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
+            if (m.find()) {
+                Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+                int expeditionCount = Integer.parseInt(m.group(3));
+                Instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+            }
+        } catch (Exception e) {
+            System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");
+            new LoadColoniesCommand().execute();
         }
     }
 
@@ -90,8 +98,8 @@ public class GIUrlBuilder {
 
     public void open(String page, ColonyEntity colony) {
         if(colony == null) {
-            colony = instance.lastVisited;
-            if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
+            colony = selectColony();
+            System.err.println(LocalDateTime.now().toString()+" colony to refresh "+colony);
         }
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
@@ -123,6 +131,24 @@ public class GIUrlBuilder {
         if (checkEventFleet) {
             Navigator.getInstance().informAboutEventFleets(new GeneralGIR().readEventFleet());
         }
+    }
+
+    private ColonyEntity selectColony() {
+        Boolean isHidingActivity = Instance.config.getConfigBoolean(MAIN, HIDING_ACTIVITY, false);
+        if(isHidingActivity) {
+            Optional<ColonyEntity> temporaryPlanet = ColonyDAO.getInstance().fetchAll().stream()
+                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .filter(colonyEntity -> colonyEntity.cpm == null)
+                    .max(Comparator.comparing(o -> o.created));
+
+            if (temporaryPlanet.isPresent()) {
+                return temporaryPlanet.get();
+            }
+        }
+        ColonyEntity colony = instance.lastVisited;
+        if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
+        ColonyDAO.getInstance().fetchAll();
+        return colony;
     }
 
     public void updateColony(ColonyEntity colony) {

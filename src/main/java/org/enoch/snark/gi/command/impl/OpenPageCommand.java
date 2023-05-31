@@ -38,6 +38,10 @@ public class OpenPageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
+//        if(checkEventFleet) {
+//            new LoadColoniesCommand().execute();
+//        }
+
         if(colony != null) {
             new GIUrlBuilder()
                     .setCheckEventFleet(checkEventFleet)

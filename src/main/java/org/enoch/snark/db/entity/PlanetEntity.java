@@ -5,10 +5,10 @@ import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
+import org.enoch.snark.model.types.ColonyType;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +32,8 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Basic
     @Column(name = "type")
-    public String type;
+    @Enumerated(EnumType.STRING)
+    public ColonyType type = ColonyType.PLANET;
 
     @Basic
     @Column(name = "metal")
@@ -57,6 +58,10 @@ public abstract class PlanetEntity extends IdEntity{
     @Basic
     @Column(name = "power")
     public Long energy;
+
+    @Basic
+    @Column(name = "created")
+    public LocalDateTime created = LocalDateTime.now();
 
     @Basic
     @Column(name = "debris_metal")

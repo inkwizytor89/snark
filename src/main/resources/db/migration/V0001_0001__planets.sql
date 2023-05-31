@@ -12,6 +12,7 @@ create table colonies
   power       integer,
   level       integer,
   updated    timestamp default now(),
+  created       timestamp default now(),
 
   debris_metal       bigint,
   debris_crystal     bigint,
@@ -108,6 +109,7 @@ create table targets
   power       integer,
   player_id bigint not null references players,
   updated    timestamp default now(),
+  created       timestamp default now(),
   last_attacked    timestamp default now(),
   type        varchar(15) not null default 'PLANET',
   tags              text,
