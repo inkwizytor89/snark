@@ -2,6 +2,7 @@ package org.enoch.snark.module;
 
 import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.instance.Commander;
@@ -15,6 +16,7 @@ public abstract class AbstractThread extends Thread {
     protected final Instance instance;
     private boolean isRunning = false;
     protected final Commander commander;
+    protected final CacheEntryDAO cacheEntryDAO;
     protected final FleetDAO fleetDAO;
     protected final TargetDAO targetDAO;
 
@@ -25,6 +27,7 @@ public abstract class AbstractThread extends Thread {
         commander = Commander.getInstance();
         fleetDAO = FleetDAO.getInstance();
         targetDAO = TargetDAO.getInstance();
+        cacheEntryDAO = CacheEntryDAO.getInstance();
         setName(this.getClass().getName());
     }
 

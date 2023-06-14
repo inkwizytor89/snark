@@ -1,11 +1,19 @@
 package org.enoch.snark.module.hunting;
 
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.gi.command.impl.UpdateHighScoreCommand;
 import org.enoch.snark.module.AbstractThread;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
 
 public class HuntingThread extends AbstractThread {
 
@@ -31,20 +39,13 @@ public class HuntingThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(targets.isEmpty()) generateTargetsList();
+        updateHighScore();
     }
 
-    private void generateTargetsList() {
-        List<PlayerEntity> result = fetchPlayersFromDatabse();
-        targets = result.stream().filter(playerEntity -> notSkippingPlayer(playerEntity)).collect(Collectors.toList());
-    }
-
-    private List<PlayerEntity> fetchPlayersFromDatabse() {
-        return null;
-    }
-
-    private boolean notSkippingPlayer(PlayerEntity playerEntity) {
-        return false;
+    private void updateHighScore() {
+        if(DateUtil.isExpired(HIGH_SCORE, 23, ChronoUnit.HOURS) && noWaitingElementsByTag(HIGH_SCORE)) {
+            commander.push(new UpdateHighScoreCommand());
+        }
     }
 
 }

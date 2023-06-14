@@ -40,6 +40,8 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
             fleet.interceptor = 1L;
         } else if (source.battleship > 0) {
             fleet.battleship = 1L;
+        } else if (source.cruiser > 0) {
+            fleet.cruiser = 1L;
         }
     }
 

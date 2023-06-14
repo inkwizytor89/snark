@@ -67,8 +67,9 @@ public class DefenseThread extends AbstractThread {
 
 
         if(!incomingAction.isEmpty() && noWaitingElementsByTag(threadName)) {
+            incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
             Set<Planet> attackedPlanets = incomingAction.stream()
-                    .map(EventFleet::getEndingPlanet)
+                    .map(EventFleet::getTo)
                     .collect(Collectors.toSet());
             attackedPlanets.forEach(this::sendFleetEscape);
             System.err.println("Send fleet to escape");
@@ -76,7 +77,9 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
+        System.err.println("Escape from planet "+sourcePlanet);
         ColonyEntity sourceEntity = ColonyDAO.getInstance().get(sourcePlanet);
+        System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
         Map<ShipEnum, Long> shipsMap = sourceEntity.getShipsMap();
         if(shipsMap.isEmpty())  return;
 

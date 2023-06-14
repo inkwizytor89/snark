@@ -10,15 +10,17 @@ import java.time.LocalDateTime;
 @Table(name = "cache_entries", schema = "public", catalog = "snark")
 public class CacheEntryEntity extends IdEntity {
 
+    public static final String HIGH_SCORE = "HIGH_SCORE";
+
     @Basic
     @Column(name = "created")
     public LocalDateTime created = LocalDateTime.now();
 
     @Basic
     @Column(name = "key")
-    public Long key;
+    public String key;
 
     @Basic
     @Column(name = "value")
-    public Long value;
+    public String value;
 }
