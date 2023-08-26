@@ -13,6 +13,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
@@ -35,6 +36,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
@@ -57,6 +59,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
@@ -79,6 +82,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
@@ -101,6 +105,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
@@ -123,6 +128,7 @@
         <class>org.enoch.snark.db.entity.FleetEntity</class>
         <class>org.enoch.snark.db.entity.FarmEntity</class>
         <class>org.enoch.snark.db.entity.FleetRequestEntity</class>
+        <class>org.enoch.snark.db.entity.CacheEntryEntity</class>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>

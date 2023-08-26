@@ -55,16 +55,14 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
         return colonyEntities;
     }
 
-
-
     public void updateColony(ColonyEntity colony) {
-        new GIUrlBuilder().open(PAGE_RESOURCES, colony);
-        new GIUrlBuilder().open(PAGE_FACILITIES, colony);
+        new GIUrlBuilder().openComponent(PAGE_RESOURCES, colony);
+        new GIUrlBuilder().openComponent(PAGE_FACILITIES, colony);
         if(isLifeformAvailable() && colony.isPlanet) {
-            new GIUrlBuilder().open(PAGE_LIFEFORM, colony);
+            new GIUrlBuilder().openComponent(PAGE_LIFEFORM, colony);
         }
-        new GIUrlBuilder().open(PAGE_BASE_FLEET, colony);
-        new GIUrlBuilder().open(PAGE_DEFENSES, colony);
+        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, colony);
+        new GIUrlBuilder().openComponent(PAGE_DEFENSES, colony);
     }
 
     public boolean isLifeformAvailable() {

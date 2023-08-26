@@ -45,7 +45,7 @@ public class OpenPageCommand extends AbstractCommand {
         if(colony != null) {
             new GIUrlBuilder()
                     .setCheckEventFleet(checkEventFleet)
-                    .open(page, colony);
+                    .openComponent(page, colony);
         } else if(player != null) {
             new GIUrlBuilder()
                     .setCheckEventFleet(checkEventFleet)
@@ -53,7 +53,7 @@ public class OpenPageCommand extends AbstractCommand {
         } else {
             new GIUrlBuilder()
                     .setCheckEventFleet(checkEventFleet)
-                    .open(page, null);
+                    .openComponent(page, null);
         }
         return true;
     }

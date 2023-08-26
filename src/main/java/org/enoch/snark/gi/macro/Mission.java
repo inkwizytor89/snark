@@ -61,6 +61,8 @@ public enum Mission {
             return SPY;
         } else if(string.contains(LIFE_FORM.name().toLowerCase()) || string.contains("form")) {
             return LIFE_FORM;
+        } else if(string.contains(GROUP_ATTACK.name().toLowerCase()) || string.contains("atak") || string.contains("group")) {
+            return GROUP_ATTACK;
         } else return UNKNOWN;
     }
 

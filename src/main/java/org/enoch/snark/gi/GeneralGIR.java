@@ -32,7 +32,6 @@ public class GeneralGIR extends GraphicalInterfaceReader {
                 return eventFleets;
             }
             event_list.get(0).click();
-            System.err.println("klik");
             SleepUtil.sleep();
             List<WebElement> tableRows = null;
             WebDriverWait wait = new WebDriverWait(wd, 15);
@@ -46,17 +45,28 @@ public class GeneralGIR extends GraphicalInterfaceReader {
                 event.isHostile = !countDown.findElements(By.className("hostile")).isEmpty();
                 event.countDown =  countDown.getText();
                 event.arrivalTime =  DateUtil.parseStringTimeToDateTime(we.findElement(By.className("arrivalTime")).getText());
-                String missionText = we.findElement(By.className("missionFleet")).findElement(By.className("tooltipHTML")).getAttribute(TITLE_ATTRIBUTE);
+                String missionText = "UNKNOWN";
+                List<WebElement> missionTypeWE = we.findElement(By.className("missionFleet")).findElements(By.className("tooltipHTML"));
+                if(!missionTypeWE.isEmpty()) {
+                    missionText = missionTypeWE.get(0).getAttribute(TITLE_ATTRIBUTE);
+                } else {
+                    missionText = we.findElement(By.className("missionFleet")).findElement(By.className("tooltip")).getAttribute(TITLE_ATTRIBUTE);
+                }
                 event.mission = Mission.convert(missionText);
-                WebElement figure = we.findElement(By.className("originFleet")).findElement(By.tagName("figure"));
-                event.originFleet = figure.getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                List<WebElement> figure = we.findElement(By.className("originFleet")).findElements(By.tagName("figure"));
+                if(!figure.isEmpty())
+                    event.originFleet = figure.get(0).getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                else event.originFleet = ColonyType.UNKNOWN;
                 event.coordsOrigin =  we.findElement(By.className("coordsOrigin")).getText();
                 event.detailsFleet =  we.findElement(By.className("detailsFleet")).getText();
                 event.iconMovement =  missionText.contains("(R)") ? FleetDirectionType.BACK : FleetDirectionType.THERE;
-                WebElement destFigure = we.findElement(By.className("destFleet")).findElement(By.tagName("figure"));
-                event.destFleet =  destFigure.getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                List<WebElement> destFigure = we.findElement(By.className("destFleet")).findElements(By.tagName("figure"));
+                if(!destFigure.isEmpty())
+                    event.destFleet =  destFigure.get(0).getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;
+                else event.destFleet = ColonyType.UNKNOWN;
                 event.destCoords =  we.findElement(By.className("destCoords")).getText();
-                event.sendProbe =  we.findElement(By.className("sendProbe")).getText();
+                List<WebElement> sendProbe = we.findElements(By.className("sendProbe"));
+                if(!sendProbe.isEmpty()) event.sendProbe =  sendProbe.get(0).getText();
                 List<WebElement> player = we.findElements(By.className("sendMail"));
                 if(player.size() > 1) {
                     event.sendMail =  player.get(1).getAttribute(HREF_ATTRIBUTE);

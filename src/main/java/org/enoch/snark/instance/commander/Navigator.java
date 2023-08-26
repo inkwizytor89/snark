@@ -31,12 +31,9 @@ public class Navigator {
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
         int fleetCount = Commander.getInstance().getFleetCount();
         if(eventFleetList == null || eventFleetList.size() < fleetCount) {
-            System.err.println("informAboutEventFleets null");
             return;
         }
         this.eventFleetList = eventFleetList;
-        System.err.println("informAboutEventFleets size "+this.eventFleetList.size());
-
         this.lastUpdate = LocalDateTime.now();
     }
 

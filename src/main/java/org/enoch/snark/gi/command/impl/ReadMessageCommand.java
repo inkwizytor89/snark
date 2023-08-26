@@ -58,7 +58,7 @@ public class ReadMessageCommand extends AbstractCommand {
                 break;
             }
         }
-        new GIUrlBuilder().open(GIUrlBuilder.PAGE_OVERVIEW, null);
+        new GIUrlBuilder().openComponent(GIUrlBuilder.PAGE_OVERVIEW, null);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie

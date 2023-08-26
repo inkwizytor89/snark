@@ -36,11 +36,11 @@ public class BuildCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
+        new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
         boolean upgraded = gi.upgrade(requirements);
         if(upgraded) {
             // resource in database refresh
-            new GIUrlBuilder().open(requirements.request.building.getPage(), colony);
+            new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
 
             Integer seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
             if(seconds == null) {

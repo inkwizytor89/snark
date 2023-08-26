@@ -27,20 +27,41 @@ public class CacheEntryDAO extends AbstractDAO<CacheEntryEntity> {
         return CacheEntryEntity.class;
     }
 
-    public String getValue(String key) {
+
+    public CacheEntryEntity getCacheEntry(String key) {
         synchronized (JPAUtility.dbSynchro) {
-            CacheEntryEntity cacheEntryEntity = entityManager.createQuery("" +
+            List<CacheEntryEntity> cacheEntryEntities = entityManager.createQuery("" +
                     "from CacheEntryEntity where key = :key", CacheEntryEntity.class)
                     .setParameter("key", key)
-                    .getSingleResult();
-            if(cacheEntryEntity == null) return null;
-            return cacheEntryEntity.value;
+                    .getResultList();
+            if(cacheEntryEntities.isEmpty()) return null;
+            return cacheEntryEntities.get(0);
         }
+    }
+
+    public String getValue(String key) {
+        CacheEntryEntity cacheEntry = getCacheEntry(key);
+        if(cacheEntry == null) return null;
+        return cacheEntry.value;
     }
 
     public LocalDateTime getDate(String key) {
         String value = getValue(key);
         if(value == null) return null;
         else return LocalDateTime.parse(value);
+    }
+
+    public void setValue(String key, String value) {
+        synchronized (JPAUtility.dbSynchro) {
+            CacheEntryEntity cacheEntry = getCacheEntry(key);
+            if(cacheEntry == null) {
+              cacheEntry = new CacheEntryEntity();
+              cacheEntry.key = key;
+              cacheEntry.created = LocalDateTime.now();
+            }
+            cacheEntry.value = value;
+            cacheEntry.updated = LocalDateTime.now();
+            saveOrUpdate(cacheEntry);
+        }
     }
 }

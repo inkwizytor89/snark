@@ -356,17 +356,15 @@ public class GI {
             if(targetElement.isEmpty()) {
                 continue;
             }
-            final WebElement playerElement =targetElement.get(0);
+            final WebElement playerElement = targetElement.get(0);
             final String playerName = playerElement.getText().trim();
-            final String playerCode = playerElement.getAttribute("rel");
+            final String playerCode = playerElement.getAttribute("rel").substring(6);
             List<WebElement> isStatus = cellPlayerName.findElements(By.tagName("pre"));
             String status = "";
             if(!isStatus.isEmpty()) {
                 status = isStatus.get(0).getText();
             }
             final String alliance = row.findElement(By.className("cellAlliance")).getText();
-
-
 
             if(StringUtils.isEmpty(playerName) && targetFromDb.isPresent()) {
                 instance.removePlanet(targetFromDb.get().toPlanet());

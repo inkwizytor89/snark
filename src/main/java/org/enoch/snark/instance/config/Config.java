@@ -31,6 +31,7 @@ public class Config {
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
     public static final String HIDING_ACTIVITY = "hiding_activity";
+    public static final String HIGH_SCORE_PAGES = "high_score_pages";
     public static final String MASTER = "master_href";
     private final Properties properties;
 

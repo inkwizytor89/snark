@@ -212,12 +212,16 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createQuickColonization(@Nonnull ColonyEntity colony, Planet target) {
+    public static FleetEntity createQuickFleetSave(@Nonnull ColonyEntity colony, Planet target) {
         FleetEntity fleetEntity = new FleetEntity();
         ColonyEntity source = ColonyDAO.getInstance().fetch(colony);
         fleetEntity.source = source;
         fleetEntity.setTarget(target);
-        fleetEntity.mission = Mission.COLONIZATION;
+        if(ColonyType.MOON.equals(target.type)) {
+            fleetEntity.mission = Mission.STATIONED;
+        } else {
+            fleetEntity.mission = Mission.COLONIZATION;
+        }
         fleetEntity.setShips(source.getShipsMap());
 
         fleetEntity.metal = Long.MAX_VALUE;

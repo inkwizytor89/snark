@@ -71,9 +71,8 @@ public class FarmThread extends AbstractThread {
 
     @Override
     public void onStep() {
-
+        calculateSlotsToUse();
         if(isTimeToCreateWave()) {
-            calculateSlotsToUse();
             actualFarm = new FarmEntity();
             actualFarm.start = LocalDateTime.now();
             farmDAO.saveOrUpdate(actualFarm);

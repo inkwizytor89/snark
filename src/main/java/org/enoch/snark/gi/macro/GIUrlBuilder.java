@@ -27,6 +27,7 @@ public class GIUrlBuilder {
 
     public static final String COMPONENT_TERM = "component=";
     public static final String PAGE_TERM = "page=";
+    private static final String SITE_TERM = "site=";
 
     public static final String PAGE_INGAME = "ingame";
     public static final String PAGE_OVERVIEW = "overview";
@@ -38,6 +39,7 @@ public class GIUrlBuilder {
     public static final String PAGE_DEFENSES = "defenses";
     public static final String PAGE_MESSAGES = "messages";
     public static final String PAGE_SPACE = "galaxy";
+    public static final String PAGE_HIGH_SCORE = "highscore";
 
     private Instance instance;
     private String url;
@@ -96,35 +98,42 @@ public class GIUrlBuilder {
         Instance.session.getWebDriver().get(builder);
     }
 
-    public void open(String page, ColonyEntity colony) {
+    public void openHighScore(String site) {
+        String builder = url + "?" +
+                PAGE_TERM + PAGE_HIGH_SCORE + "&" +
+                SITE_TERM +site;
+        Instance.session.getWebDriver().get(builder.toString());
+    }
+
+    public void openComponent(String component, ColonyEntity colony) {
         if(colony == null) {
             colony = selectColony();
             System.err.println(LocalDateTime.now().toString()+" colony to refresh "+colony);
         }
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
-        builder.append(COMPONENT_TERM + page);
+        builder.append(COMPONENT_TERM + component);
         builder.append("&cp=" + colony.cp);
         Instance.session.getWebDriver().get(builder.toString());
         instance.lastVisited = colony;
 
         updateColony(colony);
-        if (PAGE_RESOURCES.equals(page)) {
+        if (PAGE_RESOURCES.equals(component)) {
             Instance.gi.updateResourcesProducers(colony);
             Instance.gi.updateQueue(colony, QueueManger.BUILDING);
             Instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
-        } else if (PAGE_FACILITIES.equals(page)) {
+        } else if (PAGE_FACILITIES.equals(component)) {
             instance.gi.updateFacilities(colony);
             instance.gi.updateQueue(colony, QueueManger.BUILDING);
-        } else if (PAGE_LIFEFORM.equals(page) && colony.isPlanet) {
+        } else if (PAGE_LIFEFORM.equals(component) && colony.isPlanet) {
             instance.gi.updateLifeform(colony);
             instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
-        } else if (PAGE_BASE_FLEET.equals(page)) {
+        } else if (PAGE_BASE_FLEET.equals(component)) {
             if (instance.commander != null) {
                 loadFleetStatus();
             }
             Instance.getInstance().gi.updateFleet(colony);
-        } else if (PAGE_DEFENSES.equals(page)) {
+        } else if (PAGE_DEFENSES.equals(component)) {
             Instance.getInstance().gi.updateDefence(colony);
             instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
         }

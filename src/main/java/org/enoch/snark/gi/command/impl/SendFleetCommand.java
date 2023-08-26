@@ -177,7 +177,7 @@ public class SendFleetCommand extends GICommand {
         SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
 
         //open after pause to wait for game to reload fleet and expedition statuses
-        new GIUrlBuilder().open(PAGE_BASE_FLEET, fleet.source);
+        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, fleet.source);
 //        int expeditionCount = instance.commander.getExpeditionCount();
 //        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
         return true;

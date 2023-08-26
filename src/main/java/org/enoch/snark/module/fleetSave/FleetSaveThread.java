@@ -110,7 +110,7 @@ public class FleetSaveThread extends AbstractThread {
             ColonyEntity source = colonyDAO.get(configValues[SOURCE_INDEX]);
             Planet target = new Planet(configValues[DESTINATION_INDEX]);
 
-            FleetEntity fleetEntity = FleetEntity.createQuickColonization(source, target);
+            FleetEntity fleetEntity = FleetEntity.createQuickFleetSave(source, target);
             fleetEntity.speed = Long.parseLong(configValues[SPEED_INDEX]);
             fleetEntity.code = FLEET_SAVE_CODE;
             fleetToSave.add(fleetEntity);

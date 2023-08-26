@@ -1,9 +1,14 @@
 package org.enoch.snark.db.entity;
 
+import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.db.dao.PlayerDAO;
+import org.enoch.snark.model.HighScorePosition;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "players", schema = "public", catalog = "snark")
@@ -132,5 +137,27 @@ public class PlayerEntity extends IdEntity {
         player.name = "";
         player.code = "";
         return player;
+    }
+
+    public void update(HighScorePosition highScorePosition) {
+        if(!StringUtils.isEmpty(highScorePosition.name)) this.name = highScorePosition.name;
+        if(highScorePosition.points != null) this.allPoints = highScorePosition.points;
+        if(highScorePosition.economy != null) {
+            if(highScorePosition.economy < this.economyPoints) System.err.println("\neconomy-decrease for "+highScorePosition.code+" "+
+                    highScorePosition.name+" "+this.economyPoints+ "->"+highScorePosition.economy);
+            this.economyPoints = highScorePosition.economy;
+        }
+        if(highScorePosition.fleet != null) {
+            if(highScorePosition.fleet < this.fleetPoints) System.err.println("\nfleet-decrease for "+highScorePosition.code+" "+
+                    highScorePosition.name+" "+this.fleetPoints+ "->"+highScorePosition.fleet);
+            this.fleetPoints = highScorePosition.fleet;
+        }
+        if(highScorePosition.ships != null) {
+            if(highScorePosition.ships < this.shipsCount) System.err.println("\nships-decrease for "+highScorePosition.code+" "+
+                    highScorePosition.name+" "+this.shipsCount+ "->"+highScorePosition.ships);
+            this.shipsCount = highScorePosition.ships;
+        }
+        this.updated = LocalDateTime.now();
+        PlayerDAO.getInstance().saveOrUpdate(this);
     }
 }

@@ -3,7 +3,8 @@ package org.enoch.snark.model.types;
 public enum ColonyType {
     PLANET,
     MOON,
-    DEBRIS;
+    DEBRIS,
+    UNKNOWN;
 
     public static ColonyType parse(String spaceTarget) {
         if(MOON.name().equals(spaceTarget)) {
