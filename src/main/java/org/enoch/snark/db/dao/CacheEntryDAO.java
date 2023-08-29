@@ -27,7 +27,6 @@ public class CacheEntryDAO extends AbstractDAO<CacheEntryEntity> {
         return CacheEntryEntity.class;
     }
 
-
     public CacheEntryEntity getCacheEntry(String key) {
         synchronized (JPAUtility.dbSynchro) {
             List<CacheEntryEntity> cacheEntryEntities = entityManager.createQuery("" +
@@ -37,6 +36,18 @@ public class CacheEntryDAO extends AbstractDAO<CacheEntryEntity> {
             if(cacheEntryEntities.isEmpty()) return null;
             return cacheEntryEntities.get(0);
         }
+    }
+
+    public CacheEntryEntity getCacheEntryNotNull(String key) {
+        CacheEntryEntity cacheEntry = getCacheEntry(key);
+        if(cacheEntry == null) {
+            cacheEntry = new CacheEntryEntity();
+            cacheEntry.key = key;
+            cacheEntry.created = LocalDateTime.now();
+            cacheEntry.updated = LocalDateTime.now();
+            saveOrUpdate(cacheEntry);
+        }
+        return cacheEntry;
     }
 
     public String getValue(String key) {

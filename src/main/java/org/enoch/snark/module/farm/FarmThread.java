@@ -2,13 +2,9 @@ package org.enoch.snark.module.farm;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FarmDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FarmEntity;
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.BaseSI;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
@@ -28,11 +24,12 @@ public class FarmThread extends AbstractThread {
 
     private final FarmDAO farmDAO;
     private FarmEntity actualFarm;
-    private LinkedList<TargetEntity> randomFarms = new LinkedList<>();
     private List<TargetEntity> spyWave = new LinkedList<>();
     private List<TargetEntity> attackWave = new LinkedList<>();
     private int slotToUse = 4;
     private int farmIndex = 0;
+    private CacheEntryEntity spyCacheEntry;
+    private CacheEntryEntity warCacheEntry;
 
     public FarmThread() {
         farmDAO = FarmDAO.getInstance();
@@ -72,23 +69,28 @@ public class FarmThread extends AbstractThread {
     @Override
     public void onStep() {
         calculateSlotsToUse();
-        if(isTimeToCreateWave()) {
-            actualFarm = new FarmEntity();
-            actualFarm.start = LocalDateTime.now();
-            farmDAO.saveOrUpdate(actualFarm);
-        }
+        if(slotToUse <= 0) return;
+
+        spyCacheEntry = cacheEntryDAO.getCacheEntryNotNull("farm.spy_requests_code");
+        warCacheEntry = cacheEntryDAO.getCacheEntryNotNull("farm.war_requests_code");
 
         if(isTimeToSpyFarmWave()) {
-            actualFarm.spyRequestCode = fleetDAO.generateNewCode();
+            warCacheEntry.value = null;
+            spyCacheEntry.setLong(fleetDAO.generateNewCode());
             createSpyWave();
-            farmDAO.saveOrUpdate(actualFarm);
+            cacheEntryDAO.saveOrUpdate(warCacheEntry);
+            cacheEntryDAO.saveOrUpdate(spyCacheEntry);
+
         }
         if (isTimeToAttackFarmWave()) {
+            spyCacheEntry.value = null;
             System.err.println("Spy wawe count "+spyWave.size());
-            actualFarm.warRequestCode = fleetDAO.generateNewCode();
+            warCacheEntry.setLong(fleetDAO.generateNewCode());
             createAttackWave(slotToUse);
-            farmDAO.saveOrUpdate(actualFarm);
             cleanResourceOnAttackedTargets(attackWave);
+
+            cacheEntryDAO.saveOrUpdate(warCacheEntry);
+            cacheEntryDAO.saveOrUpdate(spyCacheEntry);
         }
     }
 
@@ -117,10 +119,10 @@ public class FarmThread extends AbstractThread {
 
         attackWave = selectAvailableTargets(collect, count);
         if(!attackWave.isEmpty())
-        attackWave.stream().filter(target -> target.updated ==null ||
-                target.updated.isBefore(actualFarm.start))
+        attackWave.stream().filter(target -> target.updated == null ||
+                target.updated.isBefore(spyCacheEntry.updated))
                 .forEach(target -> System.err.println("Error: "+target+" has no loaded report "+
-                        target.updated+" < "+actualFarm.start));
+                        target.updated+" < "+spyCacheEntry.updated));
         else  {
             System.err.println("Error: attackWave is empty");
             return;
@@ -129,7 +131,7 @@ public class FarmThread extends AbstractThread {
 //        System.err.println("attack Wave count "+attackWave.size());
 //        attackWave.forEach(this::printResource);
 
-        farmDAO.createNewWave(Mission.ATTACK, attackWave, actualFarm.warRequestCode);
+        farmDAO.createNewWave(Mission.ATTACK, attackWave, warCacheEntry.getLong());
     }
 
     private List<TargetEntity> selectAvailableTargets(List<TargetEntity> collect, int count) {
@@ -192,24 +194,20 @@ public class FarmThread extends AbstractThread {
         fatFarms.forEach(targetEntity -> System.err.println("fat farm "+ targetEntity));
         spyWave.addAll(fatFarms);
 
-        farmDAO.createNewWave(Mission.SPY, spyWave, actualFarm.spyRequestCode);
+        farmDAO.createNewWave(Mission.SPY, spyWave, spyCacheEntry.getLong());
         farmIndex++;
     }
 
-    private boolean isTimeToCreateWave() {
-        return actualFarm == null || (actualFarm.warRequestCode != null && isFleetAlmostBack(actualFarm.warRequestCode));
-    }
-
-    public boolean isTimeToSpyFarmWave() {
-        return actualFarm.spyRequestCode == null && slotToUse > 0;
+    private boolean isTimeToSpyFarmWave() {
+        return spyCacheEntry.getLong() == null && isFleetAlmostBack(warCacheEntry.getLong());
     }
 
     public boolean isTimeToAttackFarmWave() {
-        return actualFarm.warRequestCode == null && isFleetBack(actualFarm.spyRequestCode);
+        return warCacheEntry.getLong() == null && isFleetBack(spyCacheEntry.getLong());
     }
 
     public boolean isFleetBack(Long code) {
-        if (code == null) return false;
+        if (code == null) return true;
         List<FleetEntity> spyFleets = new ArrayList<>(fleetDAO.findWithCode(code));
 
         if(spyFleets.stream().anyMatch(fleetEntity -> fleetEntity.start == null)) return false;
@@ -223,9 +221,7 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean isFleetAlmostBack(Long code) {
-        if(code == null){
-            return false;
-        }
+        if(code == null) return true;
         List<FleetEntity> withCode = fleetDAO.findWithCode(code);
         return withCode.isEmpty() || withCode.stream()
                 .anyMatch(FleetEntity::isItBack);

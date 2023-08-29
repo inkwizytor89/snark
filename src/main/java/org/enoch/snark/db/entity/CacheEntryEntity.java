@@ -23,4 +23,14 @@ public class CacheEntryEntity extends IdEntity {
     @Basic
     @Column(name = "value")
     public String value;
+
+    public Long getLong() {
+        if(value == null) return null;
+        return Long.parseLong(value);
+    }
+
+    public void setLong(Long value) {
+        if(value == null) this.value = null;
+        else this.value = value.toString();
+    }
 }

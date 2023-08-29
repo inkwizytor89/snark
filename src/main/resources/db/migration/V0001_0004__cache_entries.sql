@@ -3,5 +3,5 @@ create table cache_entries (
     created timestamp not null default now(),
     updated timestamp not null default now(),
     key text not null,
-    value text not null
+    value text 
 );
