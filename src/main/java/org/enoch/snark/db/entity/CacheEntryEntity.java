@@ -29,6 +29,11 @@ public class CacheEntryEntity extends IdEntity {
         return Long.parseLong(value);
     }
 
+    public Integer getInt() {
+        if(value == null) return null;
+        return Integer.parseInt(value);
+    }
+
     public void setLong(Long value) {
         if(value == null) this.value = null;
         else this.value = value.toString();

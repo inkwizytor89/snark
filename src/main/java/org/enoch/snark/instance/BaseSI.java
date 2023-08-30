@@ -45,18 +45,16 @@ public class BaseSI {
         return INSTANCE;
     }
 
-    public int getAvailableFleetCount() {
-
+    public int getAvailableFleetCount(String withOutThreadName) {
         int fleetMax = Instance.commander.getFleetMax();
         if(fleetMax == 0) return 0;
 
         int fleetInUse = 0;
         for(AbstractThread thread : operationThreads) {
-            if(thread.isRunning()) {
+            if(thread.isRunning() && !thread.getThreadName().equals(withOutThreadName)) {
                 fleetInUse += thread.getRequestedFleetCount();
             }
         }
-
         return fleetMax - fleetInUse;
     }
 }

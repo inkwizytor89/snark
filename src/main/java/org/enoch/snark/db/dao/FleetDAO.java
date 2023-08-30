@@ -3,6 +3,9 @@ package org.enoch.snark.db.dao;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;
+import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.model.types.ColonyType;
 
 import javax.persistence.EntityTransaction;
 import java.time.LocalDateTime;
@@ -106,6 +109,28 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
             JPAUtility.syncMethod = null;
             entityManager.flush();
             transaction.commit();
+        }
+    }
+
+    public void createNewWave(Mission mission, List<TargetEntity> farmTargets, Long code) {
+        synchronized (JPAUtility.dbSynchro) {
+            entityManager.getTransaction().begin();
+            for(TargetEntity farm : farmTargets) {
+                FleetEntity fleet;
+                if(Mission.SPY.equals(mission)) {
+                    fleet = FleetEntity.createSpyFleet(farm);
+                } else if(Mission.ATTACK.equals(mission)) {
+                    fleet = FleetEntity.createFarmFleet(farm);
+                } else throw new RuntimeException("Unknown mission on farm wave");
+
+                fleet.spaceTarget = ColonyType.PLANET;
+                fleet.code = code;
+                entityManager.persist(fleet);
+                entityManager.flush();
+                entityManager.clear();
+            }
+
+            entityManager.getTransaction().commit();
         }
     }
 }

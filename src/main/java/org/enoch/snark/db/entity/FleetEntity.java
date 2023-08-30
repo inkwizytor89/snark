@@ -160,6 +160,12 @@ public class FleetEntity extends IdEntity {
         }
     }
 
+    public void closeFlyPlan() {
+        start = LocalDateTime.now();
+        back = LocalDateTime.now();
+        code = 0L;
+    }
+
     public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
         Long spyLevel = target.player.spyLevel;
         Long espionageProbeCount = spyLevel == null ? 4 : spyLevel;

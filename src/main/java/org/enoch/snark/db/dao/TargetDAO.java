@@ -70,7 +70,7 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
-    public List<TargetEntity> findFatFarms(Integer limit) {
+    public List<TargetEntity> findRichFarms(Integer limit) {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
                     "from TargetEntity " +
