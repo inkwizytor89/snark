@@ -7,7 +7,6 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.BaseSI;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.ColonyPlaner;
-import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
 
@@ -16,11 +15,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.instance.config.Config.MAIN;
+
 public class FarmThread extends AbstractThread {
 
     public static final String threadName = "farm";
     public static final String INDEX_COUNT_CONFIG = "index_count";
     public static final String SLOT_CONFIG = "slot";
+    public static final String EXPLORATION_AREA_CONFIG = "exploration_area";
     public static final String SPY_CACHE_CODE = "farm.spy_requests_code";
     public static final String WAR_CACHE_CODE = "farm.war_requests_code";
     public static final String FARM_INDEX_CACHE = "farm.index";
@@ -33,6 +35,8 @@ public class FarmThread extends AbstractThread {
     private List<TargetEntity> spyWave = new LinkedList<>();
     private List<TargetEntity> attackWave = new LinkedList<>();
     private int slotToUse;
+    private Integer explorationArea;
+    private ColonyPlaner planer;
 
     @Override
     public String getThreadName() {
@@ -74,6 +78,8 @@ public class FarmThread extends AbstractThread {
         warCacheEntry = cacheEntryDAO.getCacheEntryNotNull(WAR_CACHE_CODE);
 
         if(isTimeToSpyFarmWave()) {
+            explorationArea = typeExplorationArea();
+            planer = new ColonyPlaner(typeReadyColony());
             if(!createSpyWave()) {
                 System.out.println("Farm thread has empty spy wave than waiting 5 min and try again");
                 pause = LONG_PAUSE;
@@ -137,7 +143,7 @@ public class FarmThread extends AbstractThread {
 
         for (TargetEntity target: collect) {
             Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
-            ColonyEntity colony = ColonyDAO.getInstance().fetch(new ColonyPlaner(target).getNearestColony());
+            ColonyEntity colony = ColonyDAO.getInstance().fetch(new ColonyPlaner().getNearestColony(target));
             Long booked = flyPointsAvailability.get(colony.cp);
             if(colony.transporterSmall >= requiredTransporterSmall + booked) {
                 flyPointsAvailability.put(colony.cp, booked + requiredTransporterSmall);
@@ -152,7 +158,7 @@ public class FarmThread extends AbstractThread {
         System.out.print("farm wave "); flyPointsAvailability.forEach((key, value) -> System.out.print(ColonyDAO.getInstance().find(key) + " " + value + "ts, ")); System.out.println();
 
         return result.stream()
-                .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(new ColonyPlaner(o).getNearestColony().toPlanet())))
+                .sorted(Comparator.comparingLong(o -> -o.toPlanet().calculateDistance(new ColonyPlaner().getNearestColony(o).toPlanet())))
                 .collect(Collectors.toList());
     }
 
@@ -174,7 +180,7 @@ public class FarmThread extends AbstractThread {
     private List<TargetEntity> removeFarmsForWhichMissingShips() {
         return spyWave.stream()
                 .filter(target -> {
-                    ColonyEntity colony = ColonyDAO.getInstance().fetch(new ColonyPlaner(target).getNearestColony());
+                    ColonyEntity colony = ColonyDAO.getInstance().fetch(new ColonyPlaner().getNearestColony(target));
                     return colony.espionageProbe > 0 && colony.transporterSmall > 0;
                 })
                 .collect(Collectors.toList());
@@ -185,17 +191,38 @@ public class FarmThread extends AbstractThread {
         int startIndex = count * farmIndex;
         int endIndex = startIndex + count -1;
         Integer indexCount = Instance.config.getConfigInteger(threadName, INDEX_COUNT_CONFIG, 8);
-        List<TargetEntity> farms = targetDAO.findFarms(count * (indexCount+1))
-                .stream()
-                .filter(this::isNear)
-                .collect(Collectors.toList());
+        List<TargetEntity> farms = findNearedFarms();
         if(farms.size()-1 < endIndex) {
-            endIndex = farms.size()-1;
+            endIndex = farms.size() - 1;
             farmIndex = indexCount - 1;
             System.err.println("Error: "+threadName+"."+INDEX_COUNT_CONFIG+" is too high i result "+FARM_INDEX_CACHE+" is set to 0");
         }
         cacheEntryDAO.setValue(FARM_INDEX_CACHE, Integer.toString((farmIndex + 1) % indexCount));
         return farms.subList(startIndex, Math.min(farms.size()-1, endIndex));
+    }
+
+    private List<TargetEntity> findNearedFarms() {
+        return targetDAO.findFarms()
+                .stream()
+                .filter(target -> planer.isNear(target, ColonyPlaner.mapSystemToDistance(explorationArea)))
+                .collect(Collectors.toList());
+    }
+
+    private Integer typeExplorationArea() {
+        Integer explorationArea = Instance.config.getConfigInteger(threadName, EXPLORATION_AREA_CONFIG, -1);
+        if(explorationArea>=0) return explorationArea;
+        return Instance.config.getConfigInteger(MAIN, EXPLORATION_AREA_CONFIG, -1);
+    }
+
+    private List<ColonyEntity> typeReadyColony() {
+        List<ColonyEntity> readyColony = new ArrayList<>();
+        Instance.getInstance().getFlyPoints().forEach(colonyEntity -> {
+            ColonyEntity fetch = ColonyDAO.getInstance().fetch(colonyEntity);
+            if(fetch.transporterSmall > 0 && fetch.espionageProbe > 0) {
+                readyColony.add(fetch);
+            }
+        });
+        return readyColony;
     }
 
     private Integer loadFarmIndex() {
@@ -206,12 +233,20 @@ public class FarmThread extends AbstractThread {
     }
 
     private List<TargetEntity> findRichFarm(Integer count) {
-        return targetDAO.findRichFarms(count)
+        return findNearedRichFarms()
                 .stream()
-                .filter(this::isNear)
+                .filter(target -> new ColonyPlaner().isNear(target, ColonyPlaner.mapSystemToDistance(explorationArea)))
                 .filter(target -> spyWave.stream()
                         .map(baseTarget -> baseTarget.id)
                         .noneMatch(baseTarget -> baseTarget.equals(target.id)))
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    private List<TargetEntity> findNearedRichFarms() {
+        return targetDAO.findRichFarms()
+                .stream()
+                .filter(target -> planer.isNear(target, ColonyPlaner.mapSystemToDistance(explorationArea)))
                 .collect(Collectors.toList());
     }
 
@@ -242,13 +277,6 @@ public class FarmThread extends AbstractThread {
         List<FleetEntity> withCode = fleetDAO.findWithCode(code);
         return withCode.isEmpty() || withCode.stream()
                 .anyMatch(FleetEntity::isItBack);
-    }
-
-    private boolean isNear(TargetEntity targetEntity) {
-        Planet targetPlanet = targetEntity.toPlanet();
-        ColonyEntity nearestSource = new ColonyPlaner(targetPlanet).getNearestColony();
-        Long distance = targetPlanet.calculateDistance(nearestSource.toPlanet());
-        return distance < 13000;
     }
 
     private boolean isSlotsToUseValid() {

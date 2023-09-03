@@ -42,12 +42,15 @@ public class CollectorThread extends AbstractThread {
     protected void onStep() {
         if(noCollectingOngoing()) {
             ColonyEntity destination = getCollectionDestinationFromConfig();
+            if(destination == null) {
+                System.err.println("Error: CollectorThread can not find destination colony");
+                return;
+            }
             FleetEntity fleet = buildCollectingFleetEntity(destination);
 
             fleet.metal = fleet.source.metal;
             fleet.crystal = fleet.source.crystal;
-            long deuterium = fleet.source.deuterium < 4000000L? 0: fleet.source.deuterium;
-            fleet.deuterium = deuterium;
+            fleet.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
 
             SendFleetCommand collecting = new SendFleetCommand(fleet);
             collecting.addTag(threadName);
@@ -94,9 +97,9 @@ public class CollectorThread extends AbstractThread {
         String config = Instance.config.getConfig(threadName, COLLECTION_DESTINATION, StringUtils.EMPTY);
         if(config == null || config.isEmpty()) {
             long oneBeforeLast = Instance.config.getConfigLong(MAIN, Config.GALAXY_MAX, 6L)-1;
-            return new ColonyPlaner(new Planet("["+oneBeforeLast+":325:8]")).doNotSkipPlanet().getNearestColony();
+            return new ColonyPlaner(ColonyDAO.getInstance().fetchAll()).getNearestColony(new Planet("["+oneBeforeLast+":325:8]"));
         } else {
-            return new ColonyPlaner(new Planet(config)).doNotSkipPlanet().getNearestColony();
+            return ColonyDAO.getInstance().get(config);
         }
     }
 

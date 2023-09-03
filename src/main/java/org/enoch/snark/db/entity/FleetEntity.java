@@ -183,7 +183,7 @@ public class FleetEntity extends IdEntity {
         if(!target.isPlanet) {
             fleet.spaceTarget = ColonyType.MOON;
         }
-        fleet.source = new ColonyPlaner(target).getNearestColony();
+        fleet.source = new ColonyPlaner().getNearestColony(target);
         fleet.mission = Mission.SPY;
         fleet.espionageProbe = count;
         return fleet;
@@ -194,7 +194,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
-        fleet.source = new ColonyPlaner(target).getNearestColony();
+        fleet.source = new ColonyPlaner().getNearestColony(target);
         fleet.mission = Mission.ATTACK;
         Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
 //        if(fleet.source.transporterSmall < requiredTransporterSmall) {
@@ -257,7 +257,7 @@ public class FleetEntity extends IdEntity {
             throw new RuntimeException("missing target for fleet in FleetBuilder");
         }
         if(source == null) {
-            this.source = new ColonyPlaner(planet).getNearestColony();
+            this.source = new ColonyPlaner().getNearestColony(planet);
         }
         FleetDAO.getInstance().saveOrUpdate(this);
     }

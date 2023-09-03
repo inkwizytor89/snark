@@ -112,7 +112,7 @@ public class DefenseThread extends AbstractThread {
         destinationList = destinationList.stream()
                 .filter(colony -> !colony.toPlanet().equals(source)).collect(Collectors.toList());
 
-        return new ColonyPlaner(source, destinationList).getNearestColony();
+        return new ColonyPlaner(destinationList).getNearestColony(source);
     }
 
     private void loadAggressiveFleet() {

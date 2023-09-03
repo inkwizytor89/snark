@@ -64,7 +64,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
         long consumption = toLong(consumptionInput.split("\\s")[0]);
 
-        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 300000L;
+        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 1000000L;
     }
 
     public void setSpeed(FleetEntity fleet) {

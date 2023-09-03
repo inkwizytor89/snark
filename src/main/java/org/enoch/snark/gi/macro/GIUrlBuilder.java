@@ -108,7 +108,6 @@ public class GIUrlBuilder {
     public void openComponent(String component, ColonyEntity colony) {
         if(colony == null) {
             colony = selectColony();
-            System.err.println(LocalDateTime.now().toString()+" colony to refresh "+colony);
         }
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");

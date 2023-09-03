@@ -70,6 +70,19 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         }
     }
 
+    public List<TargetEntity> findFarms() {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where fleet_sum = 0 and " +
+                    "       defense_sum = 0 and " +
+                    "       energy != null and energy > 0 and " +
+                    "       player.type = 'IN_ACTIVE' " +
+                    "order by power desc ", TargetEntity.class)
+                    .getResultList();
+        }
+    }
+
     public List<TargetEntity> findRichFarms(Integer limit) {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +
@@ -80,6 +93,19 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "       player.type = 'IN_ACTIVE' " +
                     "order by resources desc ", TargetEntity.class)
                     .setMaxResults(limit)
+                    .getResultList();
+        }
+    }
+
+    public List<TargetEntity> findRichFarms() {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from TargetEntity " +
+                    "where fleet_sum = 0 and " +
+                    "       defense_sum = 0 and " +
+                    "       energy != null and energy > 0 and " +
+                    "       player.type = 'IN_ACTIVE' " +
+                    "order by resources desc ", TargetEntity.class)
                     .getResultList();
         }
     }
