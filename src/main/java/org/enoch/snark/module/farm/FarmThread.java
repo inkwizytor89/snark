@@ -34,7 +34,8 @@ public class FarmThread extends AbstractThread {
     private CacheEntryEntity warCacheEntry;
     private List<TargetEntity> spyWave = new LinkedList<>();
     private List<TargetEntity> attackWave = new LinkedList<>();
-    private int slotToUse;
+    private Integer slotToUse;
+    private Integer propertiesSlotToUse;
     private Integer explorationArea;
     private ColonyPlaner planer;
 
@@ -78,6 +79,7 @@ public class FarmThread extends AbstractThread {
         warCacheEntry = cacheEntryDAO.getCacheEntryNotNull(WAR_CACHE_CODE);
 
         if(isTimeToSpyFarmWave()) {
+            slotToUse = propertiesSlotToUse;
             explorationArea = typeExplorationArea();
             planer = new ColonyPlaner(typeReadyColony());
             if(!createSpyWave()) {
@@ -104,6 +106,7 @@ public class FarmThread extends AbstractThread {
     }
 
     private void createAttackWave() {
+        slotToUse = slotToUse == null ? propertiesSlotToUse : slotToUse;
         reloadSpyTargets();
         attackWave = selectAvailableTargets(selectTargetsWithoutDefense(), slotToUse);
         if(attackWave.isEmpty()) {
@@ -280,8 +283,8 @@ public class FarmThread extends AbstractThread {
     }
 
     private boolean isSlotsToUseValid() {
-        slotToUse = Instance.config.getConfigInteger(threadName, SLOT_CONFIG, -1);
-        if(slotToUse == -1) slotToUse = BaseSI.getInstance().getAvailableFleetCount(threadName);
-        return slotToUse > 0;
+        propertiesSlotToUse = Instance.config.getConfigInteger(threadName, SLOT_CONFIG, -1);
+        if(propertiesSlotToUse == -1) propertiesSlotToUse = BaseSI.getInstance().getAvailableFleetCount(threadName);
+        return propertiesSlotToUse > 0;
     }
 }

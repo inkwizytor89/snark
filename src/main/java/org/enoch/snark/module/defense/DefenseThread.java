@@ -45,7 +45,7 @@ public class DefenseThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return 1;
+        return 2;
     }
 
     @Override

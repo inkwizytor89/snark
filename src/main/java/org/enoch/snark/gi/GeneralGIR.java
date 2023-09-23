@@ -44,6 +44,7 @@ public class GeneralGIR extends GraphicalInterfaceReader {
                 WebElement countDown = we.findElement(By.className("countDown"));
                 event.isHostile = !countDown.findElements(By.className("hostile")).isEmpty();
                 event.countDown =  countDown.getText();
+                if(event.countDown.isEmpty()) continue;
                 event.arrivalTime =  DateUtil.parseStringTimeToDateTime(we.findElement(By.className("arrivalTime")).getText());
                 String missionText = "UNKNOWN";
                 List<WebElement> missionTypeWE = we.findElement(By.className("missionFleet")).findElements(By.className("tooltipHTML"));
