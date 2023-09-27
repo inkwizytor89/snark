@@ -298,7 +298,7 @@ public class GI {
         return Long.parseLong(resultString);
     }
 
-    public boolean upgrade(BuildRequirements requirements) {
+    public boolean upgradeBuilding(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.getName()));
         Long buildingLevel = getLevel(technologies, requirements.request.building.getName());

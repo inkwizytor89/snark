@@ -7,8 +7,11 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.config.Config;
 
 import java.util.logging.Logger;
+
+import static org.enoch.snark.instance.config.Config.PAUSE;
 
 public abstract class AbstractThread extends Thread {
 
@@ -56,10 +59,14 @@ public abstract class AbstractThread extends Thread {
                     System.err.println(getThreadName() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(getPauseInSeconds());
+                SleepUtil.secondsToSleep(getPause());
             }
             else SleepUtil.secondsToSleep(60);
         }
+    }
+
+    private int getPause() {
+        return Instance.config.getConfigInteger(getThreadName(), PAUSE, getPauseInSeconds());
     }
 
     private boolean shouldRunning() {

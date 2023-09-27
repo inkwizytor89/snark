@@ -24,6 +24,7 @@ import static org.enoch.snark.instance.config.Config.STOP;
 public class Commander extends Thread {
 
     private static final int SLEEP_PAUSE = 1;
+    public static final String LOBBY_URL = "https://lobby.ogame.gameforge.com/";
     private static Commander INSTANCE;
 
     private final Instance instance;
@@ -58,6 +59,7 @@ public class Commander extends Thread {
 
     @Override
     public void run() {
+        waitingToOpenServerTab();
         while(true) {
             Instance.updateConfig();
             try {
@@ -108,6 +110,12 @@ public class Commander extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void waitingToOpenServerTab() {
+        while (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
+            SleepUtil.pause();
         }
     }
 

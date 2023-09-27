@@ -28,7 +28,6 @@ public class GeneralGIR extends GraphicalInterfaceReader {
             }
             List<WebElement> event_list = wd.findElements(By.className("event_list"));
             if(event_list.isEmpty()) {
-                System.err.println("brak flot i wysylam puste");
                 return eventFleets;
             }
             event_list.get(0).click();
