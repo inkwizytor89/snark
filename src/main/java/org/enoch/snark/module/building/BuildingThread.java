@@ -15,6 +15,7 @@ public class BuildingThread extends AbstractThread {
 
     public static final String threadName = "building";
     public static final int SHORT_PAUSE = 20;
+    public static final String LEVEL = "level";
     private final Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
     private int pause = SHORT_PAUSE;
     private final QueueManger queueManger;
@@ -52,7 +53,7 @@ public class BuildingThread extends AbstractThread {
     protected void onStep() {
 //        System.err.println(queueManger);
         for(ColonyEntity colony : colonyMap.keySet()) {
-            if(colony.level > buildingManager.getColonyLastLevelToProcess()) {
+            if(colony.level > getColonyLastLevelToProcess()) {
                 continue;
             }
             if(isColonyNotYetLoaded(colony) || isQueueBusy(colony)) {
@@ -74,6 +75,9 @@ public class BuildingThread extends AbstractThread {
             }
         }
 //        System.err.println("Building end step, sleep in "+pause);
+    }
+    public static Integer getColonyLastLevelToProcess() {
+        return Instance.config.getConfigInteger(threadName, LEVEL, 2);
     }
 
     private boolean isColonyNotYetLoaded(ColonyEntity colony) {

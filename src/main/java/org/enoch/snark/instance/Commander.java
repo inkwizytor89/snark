@@ -149,7 +149,7 @@ public class Commander extends Thread {
 
     private void restartIfSessionIsOver() {
         try {
-            if (instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
+            if (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
                 stopCommander();
                 System.err.println("sleep 300 before restart");
                 SleepUtil.secondsToSleep(300);
