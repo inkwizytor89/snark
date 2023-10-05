@@ -91,6 +91,7 @@ public class LoadColoniesCommand extends AbstractCommand {
                 if(colony.level == null) {
                     baseGameInfoGIR.updateColony(colony);
                     colony.level = 1L;
+                    colony.formsLevel = 1L;
                 }
                 colonyDAO.saveOrUpdate(colony);
 

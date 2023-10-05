@@ -124,7 +124,7 @@ public class GIUrlBuilder {
         } else if (PAGE_FACILITIES.equals(component)) {
             instance.gi.updateFacilities(colony);
             instance.gi.updateQueue(colony, QueueManger.BUILDING);
-        } else if (PAGE_LIFEFORM.equals(component) && colony.isPlanet) {
+        } else if (PAGE_LIFEFORM.equals(component)) {
             instance.gi.updateLifeform(colony);
             instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
         } else if (PAGE_BASE_FLEET.equals(component)) {

@@ -204,8 +204,7 @@ public class GI {
             return;
         }
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        List<WebElement> kaelsLifeFormChoosen = webDriver.findElements(By.id("lifeformTech14101"));
-        if(!kaelsLifeFormChoosen.isEmpty()) {
+        if(!webDriver.findElements(By.className("lifeformTech14101")).isEmpty()) {
             colony.lifeformTech14101 = getLevel(technologies, "lifeformTech14101");
             colony.lifeformTech14102 = getLevel(technologies, "lifeformTech14102");
             colony.lifeformTech14103 = getLevel(technologies, "lifeformTech14103");
@@ -218,6 +217,48 @@ public class GI {
             colony.lifeformTech14110 = getLevel(technologies, "lifeformTech14110");
             colony.lifeformTech14111 = getLevel(technologies, "lifeformTech14111");
             colony.lifeformTech14112 = getLevel(technologies, "lifeformTech14112");
+            colony.save();
+        } else if(!webDriver.findElements(By.className("lifeformTech13101")).isEmpty()) {
+            colony.lifeformTech13101 = getLevel(technologies, "lifeformTech13101");
+            colony.lifeformTech13102 = getLevel(technologies, "lifeformTech13102");
+            colony.lifeformTech13103 = getLevel(technologies, "lifeformTech13103");
+            colony.lifeformTech13104 = getLevel(technologies, "lifeformTech13104");
+            colony.lifeformTech13105 = getLevel(technologies, "lifeformTech13105");
+            colony.lifeformTech13106 = getLevel(technologies, "lifeformTech13106");
+            colony.lifeformTech13107 = getLevel(technologies, "lifeformTech13107");
+            colony.lifeformTech13108 = getLevel(technologies, "lifeformTech13108");
+            colony.lifeformTech13109 = getLevel(technologies, "lifeformTech13109");
+            colony.lifeformTech13110 = getLevel(technologies, "lifeformTech13110");
+            colony.lifeformTech13111 = getLevel(technologies, "lifeformTech13111");
+            colony.lifeformTech13112 = getLevel(technologies, "lifeformTech13112");
+            colony.save();
+        } else if(!webDriver.findElements(By.className("lifeformTech12101")).isEmpty()) {
+            colony.lifeformTech12101 = getLevel(technologies, "lifeformTech12101");
+            colony.lifeformTech12102 = getLevel(technologies, "lifeformTech12102");
+            colony.lifeformTech12103 = getLevel(technologies, "lifeformTech12103");
+            colony.lifeformTech12104 = getLevel(technologies, "lifeformTech12104");
+            colony.lifeformTech12105 = getLevel(technologies, "lifeformTech12105");
+            colony.lifeformTech12106 = getLevel(technologies, "lifeformTech12106");
+            colony.lifeformTech12107 = getLevel(technologies, "lifeformTech12107");
+            colony.lifeformTech12108 = getLevel(technologies, "lifeformTech12108");
+            colony.lifeformTech12109 = getLevel(technologies, "lifeformTech12109");
+            colony.lifeformTech12110 = getLevel(technologies, "lifeformTech12110");
+            colony.lifeformTech12111 = getLevel(technologies, "lifeformTech12111");
+            colony.lifeformTech12112 = getLevel(technologies, "lifeformTech12112");
+            colony.save();
+        } else if(!webDriver.findElements(By.className("lifeformTech11101")).isEmpty()) {
+            colony.lifeformTech11101 = getLevel(technologies, "lifeformTech11101");
+            colony.lifeformTech11102 = getLevel(technologies, "lifeformTech11102");
+            colony.lifeformTech11103 = getLevel(technologies, "lifeformTech11103");
+            colony.lifeformTech11104 = getLevel(technologies, "lifeformTech11104");
+            colony.lifeformTech11105 = getLevel(technologies, "lifeformTech11105");
+            colony.lifeformTech11106 = getLevel(technologies, "lifeformTech11106");
+            colony.lifeformTech11107 = getLevel(technologies, "lifeformTech11107");
+            colony.lifeformTech11108 = getLevel(technologies, "lifeformTech11108");
+            colony.lifeformTech11109 = getLevel(technologies, "lifeformTech11109");
+            colony.lifeformTech11110 = getLevel(technologies, "lifeformTech11110");
+            colony.lifeformTech11111 = getLevel(technologies, "lifeformTech11111");
+            colony.lifeformTech11112 = getLevel(technologies, "lifeformTech11112");
             colony.save();
         }
     }
@@ -298,11 +339,12 @@ public class GI {
         return Long.parseLong(resultString);
     }
 
-    public boolean upgradeBuilding(BuildRequirements requirements) {
+    public boolean      upgradeBuilding(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.getName()));
         Long buildingLevel = getLevel(technologies, requirements.request.building.getName());
         if(buildingLevel >= requirements.request.level) {
+            System.err.println(requirements + " already achieved");
             return true;
         }
         List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
@@ -310,6 +352,7 @@ public class GI {
             return false;
         }
         upgrades.get(0).click();
+        System.err.println(requirements + " upgrade");
         return true;
     }
 

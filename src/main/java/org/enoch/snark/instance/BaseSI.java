@@ -4,6 +4,7 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.building.BuildingThread;
+import org.enoch.snark.module.building.FormsThread;
 import org.enoch.snark.module.collector.CollectorThread;
 import org.enoch.snark.module.defense.DefenseThread;
 import org.enoch.snark.module.expedition.ExpeditionThread;
@@ -28,6 +29,7 @@ public class BaseSI {
         operationThreads.add(new FleetSaveThread());
         operationThreads.add(new ExpeditionThread());
         operationThreads.add(new BuildingThread());
+        operationThreads.add(new FormsThread());
         operationThreads.add(new SpaceThread()); // explore space
         operationThreads.add(new ScanThread()); // checking i-player on defence
         operationThreads.add(new FarmThread()); // in progress
