@@ -278,8 +278,12 @@ public class FarmThread extends AbstractThread {
     public boolean isFleetAlmostBack(Long code) {
         if(code == null) return true;
         List<FleetEntity> withCode = fleetDAO.findWithCode(code);
-        return withCode.isEmpty() || withCode.stream()
-                .anyMatch(FleetEntity::isItBack);
+        List<LocalDateTime> backTimes = withCode.stream()
+                .map(fleetEntity -> fleetEntity.back)
+                .sorted()
+                .collect(Collectors.toList());
+        LocalDateTime whenHalfIsBack = backTimes.get(backTimes.size() / 2);
+        return withCode.isEmpty() ||  LocalDateTime.now().isAfter(whenHalfIsBack);
     }
 
     private boolean isSlotsToUseValid() {

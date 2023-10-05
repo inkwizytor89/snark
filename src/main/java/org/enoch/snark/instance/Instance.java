@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
@@ -75,15 +76,25 @@ public class Instance {
     }
 
     public void browserReset() {
-        if(session != null) {
-            session.getWebDriver().close();
-            session.getWebDriver().quit();
+        boolean isException;
+        do {
+            try {
+                if (session != null) {
+                    session.getWebDriver().close();
+                    session.getWebDriver().quit();
 
-        }
-        GI.restartInstance();
-        gi = GI.getInstance();
-        session = new GISession(this);
-        instanceStart = LocalDateTime.now();
+                }
+                GI.restartInstance();
+                gi = GI.getInstance();
+                session = new GISession(this);
+
+                isException = false;
+            } catch (Throwable e) {
+                e.printStackTrace();
+                isException = true;
+                SleepUtil.sleep(TimeUnit.MINUTES, 1);
+            }
+        }while(isException);
     }
 
     public void run() {

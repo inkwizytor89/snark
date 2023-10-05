@@ -1,6 +1,7 @@
 package org.enoch.snark.module.collector;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -15,6 +16,8 @@ import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.instance.config.Config.MAIN;
 
@@ -39,23 +42,40 @@ public class CollectorThread extends AbstractThread {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        SleepUtil.sleep(TimeUnit.MINUTES, 10);
+    }
+
+    @Override
     protected void onStep() {
-        if(noCollectingOngoing()) {
-            ColonyEntity destination = getCollectionDestinationFromConfig();
-            if(destination == null) {
-                System.err.println("Error: CollectorThread can not find destination colony");
-                return;
-            }
-            FleetEntity fleet = buildCollectingFleetEntity(destination);
+        if(notEnoughReadyPlanets()) { System.out.println(threadName+": not enough ready planets - sleep");SleepUtil.secondsToSleep(600); return;}
+        if(isCollectingOngoing()) return;
 
-            fleet.metal = fleet.source.metal;
-            fleet.crystal = fleet.source.crystal;
-            fleet.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
-
-            SendFleetCommand collecting = new SendFleetCommand(fleet);
-            collecting.addTag(threadName);
-            commander.push(collecting);
+        ColonyEntity destination = getCollectionDestinationFromConfig();
+        if(destination == null) {
+            System.err.println("Error: CollectorThread can not find destination colony");
+            return;
         }
+        FleetEntity fleet = buildCollectingFleetEntity(destination);
+
+        fleet.metal = fleet.source.metal;
+        fleet.crystal = fleet.source.crystal;
+        fleet.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
+
+        SendFleetCommand collecting = new SendFleetCommand(fleet);
+        collecting.addTag(threadName);
+        commander.push(collecting);
+    }
+
+    private boolean notEnoughReadyPlanets() {
+        List<ColonyEntity> flyPoints = instance.getFlyPoints();
+        int minFlyPoints = flyPoints.size()/2;
+        long readyPlanetCount = flyPoints.stream()
+                .map(colony -> ColonyDAO.getInstance().fetch(colony))
+                .filter(colony -> colony.transporterLarge > 0)
+                .count();
+        return readyPlanetCount < minFlyPoints;
     }
 
     private FleetEntity buildCollectingFleetEntity(ColonyEntity destination) {
@@ -82,8 +102,8 @@ public class CollectorThread extends AbstractThread {
         return source;
     }
 
-    private boolean noCollectingOngoing() {
-        return noCollectingByNavigator() && noWaitingElementsByTag(threadName) && noActiveCollectingInDB();
+    private boolean isCollectingOngoing() {
+        return !(noCollectingByNavigator() && noWaitingElementsByTag(threadName) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {

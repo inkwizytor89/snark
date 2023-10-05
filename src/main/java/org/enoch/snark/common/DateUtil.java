@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalUnit;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,13 @@ public class DateUtil {
         if(time.length() < 8) {
             time = "0"+time;
         }
-        return LocalTime.parse(time);
+        LocalTime parse = LocalTime.now().plusHours(12L);
+        try{
+            parse = LocalTime.parse(time);
+        } catch (DateTimeParseException e) {
+            e.printStackTrace();
+        }
+        return parse;
     }
 
     public static LocalTime parseStringToTime(String input) {
