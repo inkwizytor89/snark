@@ -1,5 +1,6 @@
 package org.enoch.snark.module.building;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.macro.BuildingEnum;
@@ -8,18 +9,18 @@ import java.util.*;
 
 public class BuildingManager {
 
-    private final Map<Long, List<BuildingRequest>> levelUpMap;
+//    private final Map<Long, List<BuildingRequest>> levelUpMap;
 
     public BuildingRequest getBuildRequest(ColonyEntity colony) {
+        final Map<Long, List<BuildingRequest>> levelUpMap = generateLevelUpMap(colony);
         if(colony.level > levelUpMap.size()) {
             System.err.println(colony+" reach max level " + colony.level);
             return null;
         }
-        List<BuildingRequest> levelUpList = levelUpMap.get(colony.level);
-        if (levelUpList == null) {
+        if (!levelUpMap.containsKey(colony.level)) {
             return null;
         }
-        for(BuildingRequest request : levelUpList) {
+        for(BuildingRequest request : levelUpMap.get(colony.level)) {
             Long buildingLevel = colony.getBuildingLevel(request.building);
             if(request.level > buildingLevel) {
 //                System.err.println("Maybe build "+request + " on "+colony);
@@ -30,13 +31,84 @@ public class BuildingManager {
         return getBuildRequest(colony);
     }
 
-    public Long getColonyLastLevelToProcess() {
-        return new Integer(levelUpMap.size()).longValue();
+    private Map<Long, List<BuildingRequest>> generateLevelUpMap(ColonyEntity colony) {
+        final Map<Long, List<BuildingRequest>> map = new HashMap<>();
+        final int colonyCount = ColonyDAO.getInstance().fetchAll().size();
+        final Integer maxLevel = BuildingThread.getColonyLastLevelToProcess();
+        if (colonyCount < 5) addSimpleBuildings(map, maxLevel);
+        else addFastGrowBuildings(map, maxLevel);
+        addMines(map, colony, maxLevel);
+        return map;
     }
 
-    public BuildingManager() {
-        levelUpMap = new HashMap<>();
-        levelUpMap.put(1L, Arrays.asList(
+    private void addMines(Map<Long, List<BuildingRequest>> map, ColonyEntity colony, Integer maxLevel) {
+        if(colony.position >= 13) {
+            for(long i=3; i<=maxLevel; i++) {
+                ArrayList<BuildingRequest> list = new ArrayList<>();
+                list.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i));
+                list.add(new BuildingRequest(BuildingEnum.crystalMine, i-1));
+                list.add(new BuildingRequest(BuildingEnum.metalMine, i-2));
+                map.put(i, list);
+            }
+        } else {
+            for(long i=3; i<=maxLevel; i++) {
+                ArrayList<BuildingRequest> list = new ArrayList<>();
+                list.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i-1));
+                list.add(new BuildingRequest(BuildingEnum.crystalMine, i-2));
+                list.add(new BuildingRequest(BuildingEnum.metalMine, i));
+                map.put(i, list);
+            }
+        }
+    }
+
+    private void addFastGrowBuildings(Map<Long, List<BuildingRequest>> map, Integer maxLevel) {
+        if(maxLevel >= 1L)
+          map.put(1L, Arrays.asList(
+                new BuildingRequest(BuildingEnum.roboticsFactory, 10),
+                new BuildingRequest(BuildingEnum.deuteriumStorage, 7),
+                new BuildingRequest(BuildingEnum.crystalStorage, 8),
+                new BuildingRequest(BuildingEnum.metalStorage, 9),
+                new BuildingRequest(BuildingEnum.shipyard, 8)
+          ));
+
+        if(maxLevel >= 2L)
+            map.put(2L, Arrays.asList(
+            new BuildingRequest(BuildingEnum.solarPlant, 1),
+            new BuildingRequest(BuildingEnum.metalMine, 2),
+            new BuildingRequest(BuildingEnum.solarPlant, 2),
+            new BuildingRequest(BuildingEnum.metalMine, 3),
+            new BuildingRequest(BuildingEnum.crystalMine, 1),
+            new BuildingRequest(BuildingEnum.solarPlant, 3),
+            new BuildingRequest(BuildingEnum.metalMine, 4),
+            new BuildingRequest(BuildingEnum.crystalMine, 2),
+            new BuildingRequest(BuildingEnum.solarPlant, 4),
+            new BuildingRequest(BuildingEnum.metalMine, 5),
+            new BuildingRequest(BuildingEnum.crystalMine, 3),
+            new BuildingRequest(BuildingEnum.solarPlant, 5),
+            new BuildingRequest(BuildingEnum.metalMine, 6),
+            new BuildingRequest(BuildingEnum.crystalMine, 4),
+            new BuildingRequest(BuildingEnum.solarPlant, 6),
+            new BuildingRequest(BuildingEnum.metalMine, 7),
+            new BuildingRequest(BuildingEnum.crystalMine, 5),
+            new BuildingRequest(BuildingEnum.solarPlant, 7),
+            new BuildingRequest(BuildingEnum.metalMine, 8),
+            new BuildingRequest(BuildingEnum.crystalMine, 6),
+            new BuildingRequest(BuildingEnum.solarPlant, 8),
+            new BuildingRequest(BuildingEnum.metalMine, 9),
+            new BuildingRequest(BuildingEnum.crystalMine, 7),
+            new BuildingRequest(BuildingEnum.solarPlant, 9),
+            new BuildingRequest(BuildingEnum.metalMine, 10),
+            new BuildingRequest(BuildingEnum.crystalMine, 8),
+            new BuildingRequest(BuildingEnum.solarPlant, 10),
+            new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
+            new BuildingRequest(BuildingEnum.solarPlant, 11),
+            new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 7)
+        ));
+    }
+
+    private void addSimpleBuildings(Map<Long, List<BuildingRequest>> map, Integer maxLevel) {
+        if(maxLevel >= 1L)
+            map.put(1L, Arrays.asList(
                 new BuildingRequest(BuildingEnum.solarPlant, 1),
                 new BuildingRequest(BuildingEnum.metalMine, 2),
                 new BuildingRequest(BuildingEnum.solarPlant, 2),
@@ -68,11 +140,11 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.solarPlant, 11),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 7),
                 new BuildingRequest(BuildingEnum.roboticsFactory, 2),
-                new BuildingRequest(BuildingEnum.shipyard, 2)//,
-//                new BuildingRequest(BuildingEnum.researchLaboratory, 1)
-        ));
+                new BuildingRequest(BuildingEnum.shipyard, 2)
+            ));
 
-        levelUpMap.put(2L, Arrays.asList(
+        if(maxLevel >= 2L)
+            map.put(2L, Arrays.asList(
                 new BuildingRequest(BuildingEnum.metalStorage, 2),
                 new BuildingRequest(BuildingEnum.crystalStorage, 1),
                 new BuildingRequest(BuildingEnum.solarPlant, 12),
@@ -80,12 +152,78 @@ public class BuildingManager {
                 new BuildingRequest(BuildingEnum.solarPlant, 13),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 8),
                 new BuildingRequest(BuildingEnum.crystalMine, 11),
+                new BuildingRequest(BuildingEnum.deuteriumStorage, 1),
+                new BuildingRequest(BuildingEnum.crystalStorage, 2),
+                new BuildingRequest(BuildingEnum.metalStorage, 3),
                 new BuildingRequest(BuildingEnum.solarPlant, 14),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 10),
                 new BuildingRequest(BuildingEnum.crystalMine, 12),
+                new BuildingRequest(BuildingEnum.deuteriumStorage, 2),
+                new BuildingRequest(BuildingEnum.crystalStorage, 3),
+                new BuildingRequest(BuildingEnum.metalStorage, 4),
                 new BuildingRequest(BuildingEnum.solarPlant, 15),
                 new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 12),
-                new BuildingRequest(BuildingEnum.crystalMine, 13)));//,
+                new BuildingRequest(BuildingEnum.crystalMine, 13),
+                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
+                new BuildingRequest(BuildingEnum.shipyard, 4),
+                new BuildingRequest(BuildingEnum.deuteriumStorage, 2),
+                new BuildingRequest(BuildingEnum.crystalStorage, 3),
+                new BuildingRequest(BuildingEnum.metalStorage, 4)
+                ));
+    }
+
+    public BuildingManager() {
+//        levelUpMap = new HashMap<>();
+//        levelUpMap.put(1L, Arrays.asList(
+//                new BuildingRequest(BuildingEnum.solarPlant, 1),
+//                new BuildingRequest(BuildingEnum.metalMine, 2),
+//                new BuildingRequest(BuildingEnum.solarPlant, 2),
+//                new BuildingRequest(BuildingEnum.metalMine, 3),
+//                new BuildingRequest(BuildingEnum.crystalMine, 1),
+//                new BuildingRequest(BuildingEnum.solarPlant, 3),
+//                new BuildingRequest(BuildingEnum.metalMine, 4),
+//                new BuildingRequest(BuildingEnum.crystalMine, 2),
+//                new BuildingRequest(BuildingEnum.solarPlant, 4),
+//                new BuildingRequest(BuildingEnum.metalMine, 5),
+//                new BuildingRequest(BuildingEnum.crystalMine, 3),
+//                new BuildingRequest(BuildingEnum.solarPlant, 5),
+//                new BuildingRequest(BuildingEnum.metalMine, 6),
+//                new BuildingRequest(BuildingEnum.crystalMine, 4),
+//                new BuildingRequest(BuildingEnum.solarPlant, 6),
+//                new BuildingRequest(BuildingEnum.metalMine, 7),
+//                new BuildingRequest(BuildingEnum.crystalMine, 5),
+//                new BuildingRequest(BuildingEnum.solarPlant, 7),
+//                new BuildingRequest(BuildingEnum.metalMine, 8),
+//                new BuildingRequest(BuildingEnum.crystalMine, 6),
+//                new BuildingRequest(BuildingEnum.solarPlant, 8),
+//                new BuildingRequest(BuildingEnum.metalMine, 9),
+//                new BuildingRequest(BuildingEnum.crystalMine, 7),
+//                new BuildingRequest(BuildingEnum.solarPlant, 9),
+//                new BuildingRequest(BuildingEnum.metalMine, 10),
+//                new BuildingRequest(BuildingEnum.crystalMine, 8),
+//                new BuildingRequest(BuildingEnum.solarPlant, 10),
+//                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
+//                new BuildingRequest(BuildingEnum.solarPlant, 11),
+//                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 7),
+//                new BuildingRequest(BuildingEnum.roboticsFactory, 2),
+//                new BuildingRequest(BuildingEnum.shipyard, 2)//,
+////                new BuildingRequest(BuildingEnum.researchLaboratory, 1)
+//        ));
+//
+//        levelUpMap.put(2L, Arrays.asList(
+//                new BuildingRequest(BuildingEnum.metalStorage, 2),
+//                new BuildingRequest(BuildingEnum.crystalStorage, 1),
+//                new BuildingRequest(BuildingEnum.solarPlant, 12),
+//                new BuildingRequest(BuildingEnum.crystalMine, 10),
+//                new BuildingRequest(BuildingEnum.solarPlant, 13),
+//                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 8),
+//                new BuildingRequest(BuildingEnum.crystalMine, 11),
+//                new BuildingRequest(BuildingEnum.solarPlant, 14),
+//                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 10),
+//                new BuildingRequest(BuildingEnum.crystalMine, 12),
+//                new BuildingRequest(BuildingEnum.solarPlant, 15),
+//                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 12),
+//                new BuildingRequest(BuildingEnum.crystalMine, 13)));//,
 // po co wiecej ??
 //                // na odwal sie
 //                new BuildingRequest(BuildingEnum.roboticsFactory, 4),

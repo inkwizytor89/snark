@@ -24,6 +24,7 @@ import static org.enoch.snark.instance.config.Config.STOP;
 public class Commander extends Thread {
 
     private static final int SLEEP_PAUSE = 1;
+    public static final String LOBBY_URL = "https://lobby.ogame.gameforge.com/";
     private static Commander INSTANCE;
 
     private final Instance instance;
@@ -58,6 +59,7 @@ public class Commander extends Thread {
 
     @Override
     public void run() {
+        waitingToOpenServerTab();
         while(true) {
             Instance.updateConfig();
             try {
@@ -111,6 +113,12 @@ public class Commander extends Thread {
         }
     }
 
+    private void waitingToOpenServerTab() {
+        while (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
+            SleepUtil.pause();
+        }
+    }
+
     public RunningStatus createRunningStatus() {
         boolean stopRunning = Instance.config.getConfig(MODE).toLowerCase().contains(STOP);
         boolean runningStatus = !stopRunning && Instance.config.isOn(Config.MAIN);
@@ -141,7 +149,7 @@ public class Commander extends Thread {
 
     private void restartIfSessionIsOver() {
         try {
-            if (instance.gi.webDriver.getCurrentUrl().contains("https://lobby.ogame.gameforge.com/")) {
+            if (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
                 stopCommander();
                 System.err.println("sleep 300 before restart");
                 SleepUtil.secondsToSleep(300);

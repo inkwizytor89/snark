@@ -260,8 +260,155 @@ public abstract class PlanetEntity extends IdEntity{
     @Column(name = "jumpGate")
     public Long jumpGate;
 
-
 //    Lifeform
+
+// Humans
+    @Basic
+    @Column(name = "lifeformTech11101")
+    public Long lifeformTech11101;
+
+    @Basic
+    @Column(name = "lifeformTech11102")
+    public Long lifeformTech11102;
+
+    @Basic
+    @Column(name = "lifeformTech11103")
+    public Long lifeformTech11103;
+
+    @Basic
+    @Column(name = "lifeformTech11104")
+    public Long lifeformTech11104;
+
+    @Basic
+    @Column(name = "lifeformTech11105")
+    public Long lifeformTech11105;
+
+    @Basic
+    @Column(name = "lifeformTech11106")
+    public Long lifeformTech11106;
+
+    @Basic
+    @Column(name = "lifeformTech11107")
+    public Long lifeformTech11107;
+
+    @Basic
+    @Column(name = "lifeformTech11108")
+    public Long lifeformTech11108;
+
+    @Basic
+    @Column(name = "lifeformTech11109")
+    public Long lifeformTech11109;
+
+    @Basic
+    @Column(name = "lifeformTech11110")
+    public Long lifeformTech11110;
+
+    @Basic
+    @Column(name = "lifeformTech11111")
+    public Long lifeformTech11111;
+
+    @Basic
+    @Column(name = "lifeformTech11112")
+    public Long lifeformTech11112;
+    // Rock´tal
+    @Basic
+    @Column(name = "lifeformTech12101")
+    public Long lifeformTech12101;
+
+    @Basic
+    @Column(name = "lifeformTech12102")
+    public Long lifeformTech12102;
+
+    @Basic
+    @Column(name = "lifeformTech12103")
+    public Long lifeformTech12103;
+
+    @Basic
+    @Column(name = "lifeformTech12104")
+    public Long lifeformTech12104;
+
+    @Basic
+    @Column(name = "lifeformTech12105")
+    public Long lifeformTech12105;
+
+    @Basic
+    @Column(name = "lifeformTech12106")
+    public Long lifeformTech12106;
+
+    @Basic
+    @Column(name = "lifeformTech12107")
+    public Long lifeformTech12107;
+
+    @Basic
+    @Column(name = "lifeformTech12108")
+    public Long lifeformTech12108;
+
+    @Basic
+    @Column(name = "lifeformTech12109")
+    public Long lifeformTech12109;
+
+    @Basic
+    @Column(name = "lifeformTech12110")
+    public Long lifeformTech12110;
+
+    @Basic
+    @Column(name = "lifeformTech12111")
+    public Long lifeformTech12111;
+
+    @Basic
+    @Column(name = "lifeformTech12112")
+    public Long lifeformTech12112;
+
+    // Mecha
+    @Basic
+    @Column(name = "lifeformTech13101")
+    public Long lifeformTech13101;
+
+    @Basic
+    @Column(name = "lifeformTech13102")
+    public Long lifeformTech13102;
+
+    @Basic
+    @Column(name = "lifeformTech13103")
+    public Long lifeformTech13103;
+
+    @Basic
+    @Column(name = "lifeformTech13104")
+    public Long lifeformTech13104;
+
+    @Basic
+    @Column(name = "lifeformTech13105")
+    public Long lifeformTech13105;
+
+    @Basic
+    @Column(name = "lifeformTech13106")
+    public Long lifeformTech13106;
+
+    @Basic
+    @Column(name = "lifeformTech13107")
+    public Long lifeformTech13107;
+
+    @Basic
+    @Column(name = "lifeformTech13108")
+    public Long lifeformTech13108;
+
+    @Basic
+    @Column(name = "lifeformTech13109")
+    public Long lifeformTech13109;
+
+    @Basic
+    @Column(name = "lifeformTech13110")
+    public Long lifeformTech13110;
+
+    @Basic
+    @Column(name = "lifeformTech13111")
+    public Long lifeformTech13111;
+
+    @Basic
+    @Column(name = "lifeformTech13112")
+    public Long lifeformTech13112;
+
+// Kaelesh
     @Basic
     @Column(name = "lifeformTech14101")
     public Long lifeformTech14101;
@@ -395,6 +542,45 @@ public abstract class PlanetEntity extends IdEntity{
             case naniteFactory: return naniteFactory;
             case terraformer: return terraformer;
             case repairDock: return repairDock;
+
+            case lifeformTech11101: return lifeformTech11101;
+            case lifeformTech11102: return lifeformTech11102;
+            case lifeformTech11103: return lifeformTech11103;
+            case lifeformTech11104: return lifeformTech11104;
+            case lifeformTech11105: return lifeformTech11105;
+            case lifeformTech11106: return lifeformTech11106;
+            case lifeformTech11107: return lifeformTech11107;
+            case lifeformTech11108: return lifeformTech11108;
+            case lifeformTech11109: return lifeformTech11109;
+            case lifeformTech11110: return lifeformTech11110;
+            case lifeformTech11111: return lifeformTech11111;
+            case lifeformTech11112: return lifeformTech11112;
+
+            case lifeformTech12101: return lifeformTech12101;
+            case lifeformTech12102: return lifeformTech12102;
+            case lifeformTech12103: return lifeformTech12103;
+            case lifeformTech12104: return lifeformTech12104;
+            case lifeformTech12105: return lifeformTech12105;
+            case lifeformTech12106: return lifeformTech12106;
+            case lifeformTech12107: return lifeformTech12107;
+            case lifeformTech12108: return lifeformTech12108;
+            case lifeformTech12109: return lifeformTech12109;
+            case lifeformTech12110: return lifeformTech12110;
+            case lifeformTech12111: return lifeformTech12111;
+            case lifeformTech12112: return lifeformTech12112;
+
+            case lifeformTech13101: return lifeformTech13101;
+            case lifeformTech13102: return lifeformTech13102;
+            case lifeformTech13103: return lifeformTech13103;
+            case lifeformTech13104: return lifeformTech13104;
+            case lifeformTech13105: return lifeformTech13105;
+            case lifeformTech13106: return lifeformTech13106;
+            case lifeformTech13107: return lifeformTech13107;
+            case lifeformTech13108: return lifeformTech13108;
+            case lifeformTech13109: return lifeformTech13109;
+            case lifeformTech13110: return lifeformTech13110;
+            case lifeformTech13111: return lifeformTech13111;
+            case lifeformTech13112: return lifeformTech13112;
 
             case lifeformTech14101: return lifeformTech14101;
             case lifeformTech14102: return lifeformTech14102;

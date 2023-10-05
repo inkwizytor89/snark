@@ -20,6 +20,7 @@ public class Config {
     public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
 
     public static final String TIME = "time";
+    public static final String PAUSE = "pause";
     public static final String ON = "on";
     public static final String OFF = "off";
     public static final String STOP = "stop";

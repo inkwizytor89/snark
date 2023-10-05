@@ -37,17 +37,9 @@ public class BuildCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
-        boolean upgraded = gi.upgrade(requirements);
-        if(upgraded) {
-            // resource in database refresh
-            new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
-
-            Integer seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
-            if(seconds == null) {
-                System.err.println("wrong seconds read");
-                this.setSecondToDelayAfterCommand(seconds);
-                this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
-            }
+        boolean isUpgraded = gi.upgradeBuilding(requirements);
+        if(isUpgraded) {
+            refreshColonyWhenBuildingIsDone();
         } else {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
@@ -67,6 +59,16 @@ public class BuildCommand extends AbstractCommand {
             BuildingCost.getInstance().put(requirements.request, resources);
         }
         return true;
+    }
+
+    private void refreshColonyWhenBuildingIsDone() {
+        new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
+        Integer seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
+        if(seconds != null) {
+            System.out.println(colony+" build "+ requirements.request + ", refresh after "+ seconds);
+            this.setSecondToDelayAfterCommand(seconds);
+            this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
+        }
     }
 
     private Long getCost(WebElement costsElement, String resourceName) {

@@ -33,6 +33,10 @@ public class ColonyEntity extends PlanetEntity {
     @Column(name = "level")
     public Long level;
 
+    @Basic
+    @Column(name = "forms_level")
+    public Long formsLevel;
+
     public Collection<SystemView> generateSystemToView() {
 
         List<SystemView> result = new ArrayList<>();

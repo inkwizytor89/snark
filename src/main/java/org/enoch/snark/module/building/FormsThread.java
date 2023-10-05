@@ -11,21 +11,22 @@ import org.enoch.snark.module.AbstractThread;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BuildingThread extends AbstractThread {
+public class FormsThread extends AbstractThread {
 
-    public static final String threadName = "building";
+    public static final String threadName = "forms";
+    public static final String TYPE = "type";
     public static final int SHORT_PAUSE = 20;
     public static final String LEVEL = "level";
     private final Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
     private int pause = SHORT_PAUSE;
     private final QueueManger queueManger;
-    private BuildingManager buildingManager;
+    private FormsManager formsManager;
     private ColonyDAO colonyDAO;
     private BuildingCost buildingCost;
 
-    public BuildingThread() {
+    public FormsThread() {
         super();
-        buildingManager = new BuildingManager();
+        formsManager = new FormsManager();
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();
         queueManger = QueueManger.getInstance();
@@ -51,19 +52,17 @@ public class BuildingThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-//        System.err.println(queueManger);
         for(ColonyEntity colony : colonyMap.keySet()) {
-            if(colony.level > getColonyLastLevelToProcess()) {
+            if(colony.formsLevel > getColonyLastLevelToProcess()) {
                 continue;
             }
             if(isColonyNotYetLoaded(colony) || isQueueBusy(colony)) {
-//                System.err.println("colony "+colony+" not ready "+ isColonyNotYetLoaded(colony) +" "+ isQueueBusy(colony));
                 continue;
             }
 
             BuildRequirements requirements = colonyMap.get(colony);
             if(requirements == null || requirements.isResourceUnknown()) {
-                BuildingRequest buildRequest = buildingManager.getBuildRequest(colony);
+                BuildingRequest buildRequest = formsManager.getBuildRequest(colony);
                 if (buildRequest == null) continue; //nothing to build
                 Resources resources = buildingCost.getCosts(buildRequest);
                 requirements = new BuildRequirements(buildRequest, resources);
@@ -74,17 +73,16 @@ public class BuildingThread extends AbstractThread {
                 colonyMap.put(colony, null);
             }
         }
-//        System.err.println("Building end step, sleep in "+pause);
     }
     public static Integer getColonyLastLevelToProcess() {
-        return Instance.config.getConfigInteger(threadName, LEVEL, 2);
+        return Instance.config.getConfigInteger(threadName, LEVEL, 1);
     }
 
     private boolean isColonyNotYetLoaded(ColonyEntity colony) {
-        return colony.level == null;
+        return colony.formsLevel == null;
     }
 
     private boolean isQueueBusy(ColonyEntity colony) {
-        return !queueManger.isFree(colony, QueueManger.BUILDING);
+        return !queueManger.isFree(colony, QueueManger.LIFEFORM_BUILDINGS);
     }
 }
