@@ -34,7 +34,7 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return 600;
+        return 120;
     }
 
     @Override

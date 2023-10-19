@@ -5,8 +5,10 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
+import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.config.Config;
 
 import java.util.logging.Logger;
@@ -96,5 +98,13 @@ public abstract class AbstractThread extends Thread {
 
     protected boolean noWaitingElementsForProcess() {
         return fleetDAO.findToProcess().isEmpty();
+    }
+
+    protected boolean stillWaitingForFleet() {
+        long fsCount = Navigator.getInstance().getEventFleetList().stream()
+                .filter(eventFleet -> Mission.STATIONED.equals(eventFleet.mission) || Mission.COLONIZATION.equals(eventFleet.mission))
+                .count();
+        int flyPointsSize = instance.getFlyPoints().size();
+        return fsCount > flyPointsSize/2;
     }
 }

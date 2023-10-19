@@ -54,6 +54,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        if(stillWaitingForFleet()) return;
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = getNextFlyPoint();
             if (colony == null) return;

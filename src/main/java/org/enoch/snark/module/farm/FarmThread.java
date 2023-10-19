@@ -57,6 +57,7 @@ public class FarmThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
+        if(stillWaitingForFleet()) return;
         spyCacheEntry = cacheEntryDAO.getCacheEntryNotNull(SPY_CACHE_CODE);
         warCacheEntry = cacheEntryDAO.getCacheEntryNotNull(WAR_CACHE_CODE);
         //skip all spy fleet that is incomplete from last try

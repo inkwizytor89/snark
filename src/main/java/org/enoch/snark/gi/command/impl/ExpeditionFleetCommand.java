@@ -30,19 +30,22 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
 
     private void addBattlerShip() {
         ColonyEntity source = ColonyDAO.getInstance().fetch(fleet.source);
-        if(source.reaper > 0) {
-            fleet.reaper = 1L;
-        } else if (source.destroyer > 0) {
-            fleet.destroyer = 1L;
-        } else if (source.bomber > 0) {
-            fleet.bomber = 1L;
-        } else if (source.interceptor > 0) {
-            fleet.interceptor = 1L;
-        } else if (source.battleship > 0) {
+//        if(source.reaper > 0) {
+//            fleet.reaper = 1L;
+//        } else if (source.destroyer > 0) {
+//            fleet.destroyer = 1L;
+//        } else if (source.bomber > 0) {
+//            fleet.bomber = 1L;
+//        } else if (source.interceptor > 0) {
+//            fleet.interceptor = 1L;
+//        } else
+            if (source.battleship > 0) {
             fleet.battleship = 1L;
         } else if (source.cruiser > 0) {
             fleet.cruiser = 1L;
-        }
+        } else if (source.fighterHeavy > 0) {
+                fleet.fighterHeavy = 1L;
+            }
     }
 
     @Override

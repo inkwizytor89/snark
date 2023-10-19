@@ -18,6 +18,7 @@ import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
+import org.openqa.selenium.NoSuchSessionException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -80,7 +81,11 @@ public class Instance {
         do {
             try {
                 if (session != null) {
-                    session.getWebDriver().close();
+                    try {
+                        session.getWebDriver().close();
+                    } catch (NoSuchSessionException e) {
+                        e.printStackTrace();
+                    }
                     session.getWebDriver().quit();
 
                 }
