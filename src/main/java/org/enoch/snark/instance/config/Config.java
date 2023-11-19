@@ -51,7 +51,7 @@ public class Config {
     public String getConfig(String area, String key, String defaultValue) {
         String propertiesKey = createPropertiesKey(area, key);
         if(!properties.containsKey(propertiesKey)) {
-            System.err.println("Missing "+propertiesKey+" in properties file, set defaultValue '"+defaultValue+"'");
+//            System.err.println("Missing "+propertiesKey+" in properties file, set defaultValue '"+defaultValue+"'");
             return defaultValue;
         }
         String propertyValue = properties.getProperty(propertiesKey);
@@ -98,7 +98,7 @@ public class Config {
         if(configArray == null || configArray.length == 0)  return true;
         if(configArray.length == 1 && configArray[0].contains(ON))  return true;
         if(configArray.length == 1 && configArray[0].contains(OFF))  return false;
-        if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return true;
+        if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return false;
 
         for(String configTerm : configArray) {
             String[] vars = configTerm.split("-");

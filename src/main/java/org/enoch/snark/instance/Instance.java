@@ -102,6 +102,10 @@ public class Instance {
         }while(isException);
     }
 
+    public void addNewTabForServer(){
+       session.addNewTabForServer();
+    }
+
     public void run() {
         colonyDAO = ColonyDAO.getInstance();
         MessageService.getInstance();

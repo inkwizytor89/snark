@@ -10,6 +10,7 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.*;
 import static org.enoch.snark.instance.config.Config.*;
@@ -34,10 +35,23 @@ public class GISession {
                 System.err.println(e);
             }
         }
-        switchToServerTab();
+        addNewTabForServer();
     }
 
-    private void switchToServerTab() {
+    public void addNewTabForServer() {
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+        for (int i = 1; i<tabs.size(); i++) {
+            webDriver.switchTo().window(tabs.get(i));
+            SleepUtil.pause();
+            webDriver.close();
+            SleepUtil.pause();
+        }
+        webDriver.switchTo().window(tabs.get(0));
+        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
+        SleepUtil.sleep();
+        gi.doubleClickText(Instance.config.getConfig(SERVER));
+        SleepUtil.sleep(TimeUnit.SECONDS,4);
+
         String server = new ArrayList<>(webDriver.getWindowHandles()).get(1);
         webDriver.switchTo().window(server);
     }
@@ -62,7 +76,8 @@ public class GISession {
     }
 
     private void logIn() {
-
+    webDriver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+//    webDriver.manage().timeouts().setScriptTimeout(40, TimeUnit.SECONDS);
         //insertLoginData
 //        gi.findText("Login").click();
 //        gi.findElement(TAG_INPUT, ATTRIBUTE_NAME, Marker.LOGIN_MAIL_NAME).sendKeys(instance.universeEntity.login);
@@ -74,23 +89,27 @@ public class GISession {
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
         SleepUtil.secondsToSleep(2);
 
+//        try {
+            gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.config.getConfig(PASSWORD));
+            gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();//        webDriver.navigate().refresh();
+            SleepUtil.secondsToSleep(10);
 
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.config.getConfig(PASSWORD));
-        gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();
+//        String expectedURL="gameforge.com/pl-PL";
+//        for(int i =0; i<20;i++) {
+//            SleepUtil.secondsToSleep(1);
+//            if(expectedURL.contains(webDriver.getCurrentUrl())) {
+//                System.err.println("correct page");
+//                break;
+//            }
+//            System.err.println(webDriver.getCurrentUrl() + " is not contains " + expectedURL);
+//        }
 
-        String expectedURL="https://gameforge.com/pl-PL";
-        for(int i =0; i<20;i++) {
-            SleepUtil.secondsToSleep(1);
-            if(expectedURL.equals(webDriver.getCurrentUrl())) {
-                break;
-            }
-        }
-
-        //chooseServer
-        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
-        gi.doubleClickText(Instance.config.getConfig(SERVER));
-
+//            webDriver.manage().addCookie(new Cookie("OACCAP", "6160.1", "ads-delivery.gameforge.com", "/", null));
+//            webDriver.manage().addCookie(new Cookie("OACBLOCK", "6160.1698704752", "ads-delivery.gameforge.com", "/", null));
+//            webDriver.manage().addCookie(new Cookie("OAID", "0abaf6a728a0c583382ef25c4dd72e93", "ads-delivery.gameforge.com", "/", null));
         isLoggedIn = true;
+
+
     }
 
     private void logOut() {

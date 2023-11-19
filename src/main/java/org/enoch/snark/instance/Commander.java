@@ -153,7 +153,8 @@ public class Commander extends Thread {
                 stopCommander();
                 System.err.println("sleep 300 before restart");
                 SleepUtil.secondsToSleep(300);
-                instance.browserReset();
+//                SleepUtil.secondsToSleep(300);
+                instance.addNewTabForServer();
                 startCommander();
             }
         } catch (WebDriverException e) {
