@@ -14,6 +14,7 @@ import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -32,6 +33,10 @@ public class DefenseThread extends AbstractThread {
 
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
+
+    public DefenseThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

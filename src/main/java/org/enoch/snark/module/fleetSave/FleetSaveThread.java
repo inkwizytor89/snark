@@ -11,6 +11,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,10 @@ public class FleetSaveThread extends AbstractThread {
     public static final int DESTINATION_INDEX = 2;
     public static final String FS_KEY = "fs";
     private ColonyDAO colonyDAO;
+
+    public FleetSaveThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

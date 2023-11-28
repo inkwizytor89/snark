@@ -9,11 +9,23 @@ import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
-import org.enoch.snark.instance.config.Config;
+import org.enoch.snark.module.building.BuildingThread;
+import org.enoch.snark.module.building.FormsThread;
+import org.enoch.snark.module.collector.CollectorThread;
+import org.enoch.snark.module.defense.DefenseThread;
+import org.enoch.snark.module.expedition.ExpeditionThread;
+import org.enoch.snark.module.farm.FarmThread;
+import org.enoch.snark.module.fleetSave.FleetSaveThread;
+import org.enoch.snark.module.hunting.HuntingThread;
+import org.enoch.snark.module.scan.ScanThread;
+import org.enoch.snark.module.space.SpaceThread;
+import org.enoch.snark.module.update.UpdateThread;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.instance.config.Config.PAUSE;
+import static org.enoch.snark.instance.config.Config.TYPE;
 
 public abstract class AbstractThread extends Thread {
 
@@ -26,8 +38,13 @@ public abstract class AbstractThread extends Thread {
     protected final TargetDAO targetDAO;
 
     protected int pause = 1;
+    protected ConfigMap map;
 
-    public AbstractThread() {
+    public AbstractThread(ConfigMap map) {
+        if(map != null) {
+            this.map = map;
+            this.map.put(TYPE, this.getThreadName());
+        }
         instance = Instance.getInstance();
         commander = Commander.getInstance();
         fleetDAO = FleetDAO.getInstance();
@@ -76,6 +93,10 @@ public abstract class AbstractThread extends Thread {
         return Instance.config.isOn(getThreadName());
     }
 
+    public void updateMap(ConfigMap map) {
+        this.map = map;
+    }
+
     public boolean isRunning() {
         return isRunning;
     }
@@ -106,5 +127,20 @@ public abstract class AbstractThread extends Thread {
                 .count();
         int flyPointsSize = instance.getFlyPoints().size();
         return fsCount > flyPointsSize/2;
+    }
+
+    public static AbstractThread create(ConfigMap map) {
+        if(map.name().contains(UpdateThread.threadName)) return new UpdateThread(map);
+        else if(map.name().contains(DefenseThread.threadName)) return new DefenseThread(map);
+        else if(map.name().contains(FleetSaveThread.threadName)) return new FleetSaveThread(map);
+        else if(map.name().contains(ExpeditionThread.threadName)) return new ExpeditionThread(map);
+        else if(map.name().contains(BuildingThread.threadName)) return new BuildingThread(map);
+        else if(map.name().contains(FormsThread.threadName)) return new FormsThread(map);
+        else if(map.name().contains(SpaceThread.threadName)) return new SpaceThread(map);
+        else if(map.name().contains(ScanThread.threadName)) return new ScanThread(map);
+        else if(map.name().contains(FarmThread.threadName)) return new FarmThread(map);
+        else if(map.name().contains(CollectorThread.threadName)) return new CollectorThread(map);
+        else if(map.name().contains(HuntingThread.threadName)) return new HuntingThread(map);
+        else throw new RuntimeException("Unknown threadName "+map.name());
     }
 }

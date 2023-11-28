@@ -7,6 +7,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,8 @@ public class BuildingThread extends AbstractThread {
     private ColonyDAO colonyDAO;
     private BuildingCost buildingCost;
 
-    public BuildingThread() {
-        super();
+    public BuildingThread(ConfigMap map) {
+        super(map);
         buildingManager = new BuildingManager();
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();

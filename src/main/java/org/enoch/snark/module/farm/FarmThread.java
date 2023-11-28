@@ -9,6 +9,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +39,10 @@ public class FarmThread extends AbstractThread {
     private Integer propertiesSlotToUse;
     private Integer explorationArea;
     private ColonyPlaner planer;
+
+    public FarmThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

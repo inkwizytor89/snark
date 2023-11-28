@@ -9,6 +9,7 @@ import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -25,6 +26,10 @@ public class UpdateThread extends AbstractThread {
     private Navigator navigator;
     private List<EventFleet> events;
     private final HashMap<LocalDateTime, Planet> arrivedMap = new HashMap<>();
+
+    public UpdateThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     protected void onStart() {

@@ -14,6 +14,7 @@ import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,10 @@ public class CollectorThread extends AbstractThread {
 
     public static final String threadName = "collector";
     public static final String COLLECTION_DESTINATION = "coll_dest";
+
+    public CollectorThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

@@ -10,6 +10,7 @@ import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -25,6 +26,10 @@ public class ExpeditionThread extends AbstractThread {
 
     private Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
     private Long maxTL;
+
+    public ExpeditionThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

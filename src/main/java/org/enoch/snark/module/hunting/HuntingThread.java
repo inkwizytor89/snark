@@ -5,14 +5,11 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.command.impl.UpdateHighScoreCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
 import static org.enoch.snark.instance.config.Config.HIGH_SCORE_PAGES;
@@ -24,6 +21,10 @@ public class HuntingThread extends AbstractThread {
     public static final int UPDATE_TIME_IN_SECONDS = 10;
 
     private List<PlayerEntity> targets = new ArrayList<>();
+
+    public HuntingThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

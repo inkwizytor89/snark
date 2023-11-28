@@ -5,9 +5,9 @@ import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +25,10 @@ public class SpaceThread extends AbstractThread {
     public static final int DATA_COUNT = 10;
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
     private List<GalaxyEntity> galaxyToView = new ArrayList<>();
+
+    public SpaceThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

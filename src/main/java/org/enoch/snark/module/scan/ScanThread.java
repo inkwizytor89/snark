@@ -3,6 +3,7 @@ package org.enoch.snark.module.scan;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -14,6 +15,10 @@ public class ScanThread extends AbstractThread {
     public static final String threadName = "scan";
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
+
+    public ScanThread(ConfigMap map) {
+        super(map);
+    }
 
     @Override
     public String getThreadName() {

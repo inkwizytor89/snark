@@ -7,6 +7,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.AbstractThread;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +25,8 @@ public class FormsThread extends AbstractThread {
     private ColonyDAO colonyDAO;
     private BuildingCost buildingCost;
 
-    public FormsThread() {
-        super();
+    public FormsThread(ConfigMap map) {
+        super(map);
         formsManager = new FormsManager();
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();

@@ -12,6 +12,7 @@ import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.exception.ShipDoNotExists;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
@@ -159,6 +160,8 @@ public class Commander extends Thread {
             }
         } catch (WebDriverException e) {
             e.printStackTrace();
+            System.err.println("URL error: "+e.getMessage());
+            instance.addNewTabForServer();
 //            stopCommander();
 //            System.err.println("sleep 500 before restart");
 //            SleepUtil.secondsToSleep(500);
@@ -186,6 +189,10 @@ public class Commander extends Thread {
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
             return;
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+            System.err.println(e.getMessage());
+            success = false;
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());

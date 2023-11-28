@@ -2,9 +2,11 @@ package org.enoch.snark.instance.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class Config {
@@ -17,13 +19,15 @@ public class Config {
     public static final String PASSWORD = "password";
     public static final String MODE = "mode";
     public static final String CONFIG = "config";
-    public static final String WEBDRIVER_CHROME_DRIVER = "webdriver.chrome.driver";
+    public static final String WEBDRIVER_CHROME_DRIVER = "main.driver";
 
     public static final String TIME = "time";
     public static final String PAUSE = "pause";
     public static final String ON = "on";
     public static final String OFF = "off";
     public static final String STOP = "stop";
+    public static final String NAME = "name";
+    public static final String TYPE = "type";
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String FLY_POINTS = "fly_points";
@@ -34,14 +38,31 @@ public class Config {
     public static final String HIDING_ACTIVITY = "hiding_activity";
     public static final String HIGH_SCORE_PAGES = "high_score_pages";
     public static final String MASTER = "master_href";
+
     private final Properties properties;
 
     public String pathToChromeWebdriver;
 
+    public HashMap<String, ConfigMap> globalMap = new HashMap<>();
+
     public Config(Properties properties) {
         this.properties = properties;
         pathToChromeWebdriver = properties.getProperty(WEBDRIVER_CHROME_DRIVER);
-        System.setProperty(WEBDRIVER_CHROME_DRIVER, pathToChromeWebdriver);
+        System.setProperty("webdriver.chrome.driver", pathToChromeWebdriver);
+
+        for(String propertyString : properties.stringPropertyNames()) {
+            int index = propertyString.indexOf('.');
+            String name = propertyString.substring(0, index);
+            String key = propertyString.substring(index+1);
+            String value = properties.getProperty(propertyString);
+
+            if(!globalMap.containsKey(name)){
+                globalMap.put(name, new ConfigMap());
+            }
+            ConfigMap threadMap = globalMap.get(name);
+            threadMap.put(key, value);
+        }
+        globalMap.forEach((s, map) -> map.put(NAME, s));
     }
 
     public String getConfig(String key) {
