@@ -18,6 +18,7 @@ import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
+import org.enoch.snark.module.ConfigMap;
 import org.openqa.selenium.NoSuchSessionException;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
+import static org.enoch.snark.instance.config.Config.MAIN;
 import static org.enoch.snark.instance.config.Config.MODE;
 
 public class Instance {
@@ -154,5 +156,16 @@ public class Instance {
         } else {
             commander.push(command);
         }
+    }
+
+    public static String getGlobalConfig(String tag, String key) {
+        if(!config.globalMap.containsKey(tag)) return null;
+        ConfigMap configMap = config.globalMap.get(tag);
+        if(!configMap.containsKey(tag)) return null;
+        return configMap.get(key);
+    }
+
+    public static ConfigMap getMainConfigMap() {
+        return config.globalMap.get(ConfigMap.MAIN);
     }
 }

@@ -21,11 +21,7 @@ import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.space.SpaceThread;
 import org.enoch.snark.module.update.UpdateThread;
 
-import java.util.HashMap;
 import java.util.logging.Logger;
-
-import static org.enoch.snark.instance.config.Config.PAUSE;
-import static org.enoch.snark.instance.config.Config.TYPE;
 
 public abstract class AbstractThread extends Thread {
 
@@ -43,7 +39,7 @@ public abstract class AbstractThread extends Thread {
     public AbstractThread(ConfigMap map) {
         if(map != null) {
             this.map = map;
-            this.map.put(TYPE, this.getThreadName());
+            this.map.put(ConfigMap.TYPE, this.getThreadName());
         }
         instance = Instance.getInstance();
         commander = Commander.getInstance();
@@ -69,7 +65,7 @@ public abstract class AbstractThread extends Thread {
 
         while(true) {
             RunningStatus runningStatus = new RunningStatus(isRunning, shouldRunning());
-            runningStatus.log("Thread " + getThreadName());
+            runningStatus.log("Thread " + map.name());
             isRunning = runningStatus.shouldRunning();
             if (isRunning) {
                 try {
@@ -85,12 +81,13 @@ public abstract class AbstractThread extends Thread {
     }
 
     private int getPause() {
-        return Instance.config.getConfigInteger(getThreadName(), PAUSE, getPauseInSeconds());
+        return map.getConfigInteger(ConfigMap.PAUSE, getPauseInSeconds());
     }
 
     private boolean shouldRunning() {
         if(!commander.isRunning()) return false;
-        return Instance.config.isOn(getThreadName());
+        if(!map.containsKey(ConfigMap.TIME)) return false;
+        return map.isOn();
     }
 
     public void updateMap(ConfigMap map) {

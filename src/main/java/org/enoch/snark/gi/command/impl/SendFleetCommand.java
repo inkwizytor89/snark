@@ -161,7 +161,7 @@ public class SendFleetCommand extends GICommand {
         } catch(FleetCantStart e) {
             e.printStackTrace();
             Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
-            System.err.println("Can not send fleer to target " + target);
+            System.err.println("Can not send fleet to target " + target);
             instance.push(new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)));
 //            instance.removePlanet(new Planet(fleet.getCoordinate()));
             if(fleet.code != null) fleet.code = - fleet.code;

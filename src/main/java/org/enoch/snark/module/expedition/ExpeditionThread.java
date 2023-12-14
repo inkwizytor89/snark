@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.Queue;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+// na start mogl by przeleceic swoje flypointy
+// jak sa starsze niz 4h to powinien go sobie zaktualizowac flypoint
+// z tych co zostały znajdz najlepszego ?
 
 public class ExpeditionThread extends AbstractThread {
 
@@ -54,11 +57,14 @@ public class ExpeditionThread extends AbstractThread {
 
     private void chooseColoniesForExpeditionsStart() {
         expeditionQueue = new LinkedList<>();
-        expeditionQueue.addAll(instance.getFlyPoints());
+        expeditionQueue.addAll(map.getFlyPoints());
     }
 
     @Override
     protected void onStep() {
+
+//        Boolean waiting = map.getConfigBoolean("waiting", true);
+//        if(waiting && stillWaitingForFleet()) return;
         if(stillWaitingForFleet()) return;
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = getNextFlyPoint();
@@ -151,11 +157,11 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     public Long calculateMaxExpeditionSize() {
-        return Instance.config.getConfigLong(threadName, MAX_DT, 2500L);
+        return map.getConfigLong(MAX_DT, 2500L);
     }
 
     private void setExpeditionReadyToStart(FleetEntity expedition) {
-        boolean battleExtension = Instance.config.getConfigBoolean(threadName, BATTLE_EXTENSION, true);
+        boolean battleExtension = map.getConfigBoolean(BATTLE_EXTENSION, true);
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
         expeditionFleetCommand.addTag(threadName);
         instance.push(expeditionFleetCommand);

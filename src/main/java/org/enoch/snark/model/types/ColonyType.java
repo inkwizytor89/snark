@@ -13,4 +13,11 @@ public enum ColonyType {
             return DEBRIS;
         } else return PLANET;
     }
+
+    public String code() {
+        if (name().equals("MOON")) return "m";
+        if (name().equals("PLANET")) return "p";
+        if (name().equals("DEBRIS")) return "d";
+        return "u";
+    }
 }

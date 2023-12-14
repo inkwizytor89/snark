@@ -3,8 +3,11 @@ package org.enoch.snark.gi;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ToStrongPlayerException;
+import org.enoch.snark.model.types.ResourceType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -12,6 +15,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
+
+import static org.enoch.snark.module.ConfigMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
 
@@ -44,12 +49,15 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
-            Long deuterium = rememberToLeaveSomeDeuterium(fleet);
+            Resources defaultResources = Instance.getMainConfigMap().getConfigResource(LEAVE_MIN_RESOURCES, new Resources("d4m"));
+            Long metal = rememberToLeaveSome(fleet, defaultResources.metal, ResourceType.METAL);
+            Long crystal = rememberToLeaveSome(fleet, defaultResources.crystal, ResourceType.CRYSTAL);
+            Long deuterium = rememberToLeaveSome(fleet, defaultResources.deuterium, ResourceType.DEUTERIUM);
             for(int i=0; i<3; i++) {
                 SleepUtil.pause();
                 deuteriumAmount.sendKeys(deuterium.toString());
-                crystalAmount.sendKeys(fleet.crystal.toString());
-                metalAmount.sendKeys(fleet.metal.toString());
+                crystalAmount.sendKeys(crystal.toString());
+                metalAmount.sendKeys(metal.toString());
 
                 long remainingresources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
                 long maxresources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
@@ -60,11 +68,23 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    public Long rememberToLeaveSomeDeuterium(FleetEntity fleet) {
-        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
-        long consumption = toLong(consumptionInput.split("\\s")[0]);
+    public Long rememberToLeaveSome(FleetEntity fleet, Long toLeave, ResourceType resource) {
+        switch(resource) {
+            case METAL:{
+                return Math.min(fleet.metal, fleet.source.metal) - toLeave;
+            }
+            case CRYSTAL:{
+                return Math.min(fleet.crystal, fleet.source.crystal) - toLeave;
+            }
+            case DEUTERIUM:{
+                String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+                long consumption = toLong(consumptionInput.split("\\s")[0]);
 
-        return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - 1000000L;
+                long l = 4000000L;
+                return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - toLeave;
+            }
+        }
+        throw new IllegalStateException("Unknown resource "+resource.name());
     }
 
     public void setSpeed(FleetEntity fleet) {

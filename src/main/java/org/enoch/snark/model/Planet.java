@@ -1,8 +1,13 @@
 package org.enoch.snark.model;
 
+import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.types.ColonyType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.enoch.snark.instance.config.Config.GALAXY_MAX;
 import static org.enoch.snark.instance.config.Config.MAIN;
@@ -38,6 +43,15 @@ public class Planet {
         this.system = system;
         this.position = position;
         this.type = type;
+    }
+
+    public static List<Planet> fromString(String code) {
+        List<Planet> colonies = new ArrayList<>();
+        String[] planetStrings = code.split(";");
+        for(String string : planetStrings) {
+            colonies.add(new Planet(string));
+        }
+        return colonies;
     }
 
     public Long calculateDistance(Planet planet) {
@@ -83,12 +97,20 @@ public class Planet {
         return "["+galaxy+":"+system+":"+position+"]";
     }
 
+
+    public ColonyEntity toColonyEntity() {
+        return ColonyDAO.getInstance().get(this);
+    }
+
     @Override
     public String toString() {
-        return type+" "+getCordinate(galaxy, system, position);
+        return type.code()+getCordinate(galaxy, system, position);
     }
     public String toFileName() {
         return toString().replace(":","_");
     }
 
+    public ColonyEntity getSimilarColony() {
+        return new ColonyPlaner(ColonyDAO.getInstance().fetchAll()).findSimilar(this);
+    }
 }

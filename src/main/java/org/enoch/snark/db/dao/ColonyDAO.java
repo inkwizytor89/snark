@@ -1,12 +1,16 @@
 package org.enoch.snark.db.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.types.ColonyType;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ColonyDAO extends AbstractDAO<ColonyEntity> {
 
@@ -73,6 +77,41 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
                             "order by updated asc", ColonyEntity.class)
                     .getResultList();
             return resultList.stream().findFirst().get();
+        }
+    }
+
+    public List<ColonyEntity> getColonies(String code) {
+        String lowerCode = code.toLowerCase();
+        if(lowerCode.contains("moon")) {
+            return fetchAll()
+                    .stream()
+                    .filter(colonyEntity -> !colonyEntity.isPlanet)
+                    .sorted(Comparator.comparing(o -> -o.galaxy))
+                    .collect(Collectors.toList());
+        } else if(lowerCode.contains("planet")) {
+            return fetchAll()
+                    .stream()
+                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .sorted(Comparator.comparing(o -> -o.galaxy))
+                    .collect(Collectors.toList());
+        } else if(lowerCode.equals(StringUtils.EMPTY)) {
+            List<ColonyEntity> flyPoints = new ArrayList<>();
+            List<ColonyEntity> planetList = fetchAll()
+                    .stream()
+                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .sorted(Comparator.comparing(o -> -o.galaxy))
+                    .collect(Collectors.toList());
+            for (ColonyEntity planet : planetList) {
+                ColonyEntity colony = planet;
+                if (planet.cpm != null) {
+                    colony = find(planet.cpm);
+                }
+                flyPoints.add(colony);
+            } return flyPoints;
+        } else {
+            return Planet.fromString(lowerCode).stream()
+                    .map(this::get)
+                    .collect(Collectors.toList());
         }
     }
 }

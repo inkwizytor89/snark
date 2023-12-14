@@ -30,6 +30,13 @@ public class ColonyPlaner {
                 .min(Comparator.comparingLong(Map.Entry::getValue)).get().getKey();
     }
 
+    public ColonyEntity findSimilar(Planet planet) {
+        HashMap<ColonyEntity, Long> distanceMap = new HashMap<>();
+        colonies.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet())));
+        return distanceMap.entrySet().stream()
+                .min(Comparator.comparingLong(Map.Entry::getValue)).get().getKey();
+    }
+
     public boolean isNear(TargetEntity target) {
         return isNear(target.toPlanet());
     }

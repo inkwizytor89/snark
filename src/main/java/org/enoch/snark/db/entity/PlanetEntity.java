@@ -3,6 +3,7 @@ package org.enoch.snark.db.entity;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.gi.macro.ShipEnum;
+import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 import org.enoch.snark.model.types.ColonyType;
@@ -11,6 +12,8 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.enoch.snark.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
 
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{
@@ -603,8 +606,14 @@ public abstract class PlanetEntity extends IdEntity{
         if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }
-        Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
-        long amount = 5000 + (250 * (hyperspaceTechnology +1));
+        Long configCapacity = Instance.getMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
+        long amount;
+        if(configCapacity == -1L) {
+            Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
+            amount = 5000 + (250 * (hyperspaceTechnology +1));
+        } else {
+            amount = configCapacity;
+        }
         long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
 //        System.err.println("planet = " + this.toString());
 //        System.err.println("amount = " + amount);
@@ -621,8 +630,14 @@ public abstract class PlanetEntity extends IdEntity{
         if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }
-        Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
-        long amount = 25000 + (250 * (hyperspaceTechnology +1));
+        Long configCapacity = Instance.getMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
+        long amount;
+        if(configCapacity == -1L) {
+            Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
+            amount = 25000 + (250 * (hyperspaceTechnology + 1));
+        } else {
+            amount = configCapacity * 5;
+        }
         long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
 //        System.err.println("planet = " + this.toString());
 //        System.err.println("amount = " + amount);

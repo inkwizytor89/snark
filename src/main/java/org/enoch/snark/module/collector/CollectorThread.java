@@ -2,6 +2,7 @@ package org.enoch.snark.module.collector;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -18,6 +19,7 @@ import org.enoch.snark.module.ConfigMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.instance.config.Config.MAIN;
@@ -26,6 +28,7 @@ public class CollectorThread extends AbstractThread {
 
     public static final String threadName = "collector";
     public static final String COLLECTION_DESTINATION = "coll_dest";
+    public static final String FLEET_SIZE = "fleet_size";
 
     public CollectorThread(ConfigMap map) {
         super(map);
@@ -49,7 +52,7 @@ public class CollectorThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        SleepUtil.sleep(TimeUnit.MINUTES, 10);
+//        SleepUtil.sleep(TimeUnit.MINUTES, 10);
     }
 
     @Override
@@ -119,13 +122,37 @@ public class CollectorThread extends AbstractThread {
     }
 
     private ColonyEntity getCollectionDestinationFromConfig() {
-        String config = Instance.config.getConfig(threadName, COLLECTION_DESTINATION, StringUtils.EMPTY);
-        if(config == null || config.isEmpty()) {
-            long oneBeforeLast = Instance.config.getConfigLong(MAIN, Config.GALAXY_MAX, 6L)-1;
-            return new ColonyPlaner(ColonyDAO.getInstance().fetchAll()).getNearestColony(new Planet("["+oneBeforeLast+":325:8]"));
-        } else {
-            return ColonyDAO.getInstance().get(config);
+        Planet configPlanet = map.getConfigPlanet(COLLECTION_DESTINATION);
+        if(configPlanet == null) {
+            Long fleetSize = map.getConfigLong(FLEET_SIZE, -1L);
+            if(fleetSize == -1) return anyColony();
+            Optional<Planet> planetOptional = Navigator.getInstance().getEventFleetList().stream()
+                    .filter(eventFleet -> Long.parseLong(eventFleet.detailsFleet) > fleetSize)
+                    .map(eventFleet -> eventFleet.getTo())
+                    .findAny();
+            if(!planetOptional.isPresent()) {
+                String value = CacheEntryDAO.getInstance().getValue(COLLECTION_DESTINATION);
+                if(value == null) return anyColony();
+                ColonyEntity colonyEntity = new Planet(value).toColonyEntity();
+                System.out.println("Collector has cached destination "+value+" and selected " + colonyEntity);
+                return colonyEntity;
+            }
+            Planet planet = planetOptional.get();
+            CacheEntryDAO.getInstance().setValue(COLLECTION_DESTINATION, planet.toString());
+            ColonyEntity colonyEntity = planet.toColonyEntity();
+            System.out.println("Collector see fleet flying to "+planet+" and selected " + colonyEntity);
+            return colonyEntity;
         }
+        ColonyEntity similarColony = configPlanet.getSimilarColony();
+        System.out.println("Collector has destination "+configPlanet+" and selected " + similarColony);
+        return similarColony;
+    }
+
+    private ColonyEntity anyColony() {
+        long oneBeforeLast = Instance.getMainConfigMap().getConfigLong(ConfigMap.GALAXY_MAX, 6L)-1;
+        ColonyEntity similarColony = new Planet("[" + oneBeforeLast + ":325:8]").getSimilarColony();
+        System.out.println("Collector has no destination and selected " + similarColony.toString());
+        return similarColony;
     }
 
     private boolean canItTransport(ColonyEntity colony) {
