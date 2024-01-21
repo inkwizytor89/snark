@@ -70,6 +70,18 @@ public enum Mission {
         return this.equals(SPY) || this.equals(ATTACK) || this.equals(DESTROY) || this.equals(GROUP_ATTACK);
     }
 
+    public boolean isNotComingBack() {
+        return Arrays.asList(STATIONED, COLONIZATION).contains(this);
+    }
+
+    public boolean isComingBack() {
+        return !isNotComingBack();
+    }
+
+    public boolean isIn(Mission... missions) {
+        return Arrays.asList(missions).contains(this);
+    }
+
     static List<Mission> allMissions() {
         return Arrays.asList(EXPEDITION, COLONIZATION, RECYCLE, TRANSPORT, STATIONED, SPY, STOP, ATTACK, GROUP_ATTACK, DESTROY);
     }

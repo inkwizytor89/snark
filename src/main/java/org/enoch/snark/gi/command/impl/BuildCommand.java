@@ -50,11 +50,11 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costs, "metal"),
                     getCost(costs, "crystal"),
                     getCost(costs, "deuterium"));
-            String masterHref = Instance.config.getConfig(MAIN, MASTER, StringUtils.EMPTY);
+            String masterHref = Instance.getMainConfigMap().getConfig(MASTER, StringUtils.EMPTY);
             if(masterHref != null && !masterHref.isEmpty()) {
                 SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(masterHref,
                         "Master poprosze "+resources+ " na "+colony);
-                Instance.commander.push(messageCommend);
+                messageCommend.push();
             }
             BuildingCost.getInstance().put(requirements.request, resources);
         }
@@ -63,11 +63,10 @@ public class BuildCommand extends AbstractCommand {
 
     private void refreshColonyWhenBuildingIsDone() {
         new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
-        Integer seconds = instance.gi.updateQueue(colony, QueueManger.BUILDING);
+        Long seconds = Instance.gi.updateQueue(colony, QueueManger.BUILDING);
         if(seconds != null) {
             System.out.println(colony+" build "+ requirements.request + ", refresh after "+ seconds);
-            this.setSecondToDelayAfterCommand(seconds);
-            this.setAfterCommand(new OpenPageCommand(requirements.request.building.getPage(), colony));
+            setNext(new OpenPageCommand(requirements.request.building.getPage(), colony), seconds);
         }
     }
 

@@ -21,6 +21,7 @@ import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 public class UpdateThread extends AbstractThread {
 
     public static final String threadName = "update";
+    public static final String REFRESH = "refresh";
     public int updateTimeInMinutes = 12;
 
     private Navigator navigator;
@@ -50,7 +51,7 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        updateTimeInMinutes = Instance.config.getConfigInteger(threadName, "refresh", 12);
+        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
         if(isNavigatorExpired() && noWaitingElementsByTag(threadName)) {
             sendCommandToUpdateEventFleets();
         }
@@ -68,7 +69,7 @@ public class UpdateThread extends AbstractThread {
     private void sendCommandToUpdateEventFleets() {
         OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true);
         command.addTag(threadName);
-        commander.push(command);
+        command.push();
     }
 
     private void putIncomingInArriveMap() {
@@ -95,7 +96,7 @@ public class UpdateThread extends AbstractThread {
                     .filter(col -> col.getCordinate().equals(Planet.getCordinate(planet)))
                     .findAny();
             if(optionalColony.isPresent()) {
-                commander.push(new OpenPageCommand(PAGE_BASE_FLEET, optionalColony.get()));
+                new OpenPageCommand(PAGE_BASE_FLEET, optionalColony.get()).push();
             } else System.err.println("\nShould find colony "+planet.toString()+"\n");
         });
     }

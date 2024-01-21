@@ -6,6 +6,7 @@ public class Resources {
 
     public static Resources unknown = new Resources(-1L, -1L, -1L);
     public static Resources everything = new Resources(-100L, -100L, -100L);
+    public static Resources nothing = new Resources(0L, 0L, 0L);
 
     public Long metal = 0L;
     public Long crystal = 0L;
@@ -41,5 +42,9 @@ public class Resources {
     @Override
     public String toString() {
         return "{" + metal + ", " + crystal + ", " + deuterium +"}";
+    }
+
+    public boolean isMoreThan(String s) {
+        return (metal + crystal + deuterium) > NumberUtil.toLong(s);
     }
 }

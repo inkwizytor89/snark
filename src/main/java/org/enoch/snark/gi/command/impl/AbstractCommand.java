@@ -1,15 +1,19 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.WaitingThread;
+import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.model.types.QueueRunType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION;
+import static org.enoch.snark.model.types.QueueRunType.INTERFACE_ACTION;
+
 public abstract class AbstractCommand {
-    private AbstractCommand afterCommand;
-    private boolean shouldUseFleetActionQueue;
-    public int secondsToDelay = 0;
+    private FollowingAction followingAction;
+    private QueueRunType runType = INTERFACE_ACTION;
     protected Instance instance;
     public int failed = 0;
     Integer priority = 100;
@@ -18,47 +22,73 @@ public abstract class AbstractCommand {
 
     protected AbstractCommand() {
         this.instance = Instance.getInstance();
+        if(this instanceof SendFleetCommand) runType = FLEET_ACTION;
     }
 
     public abstract boolean execute();
 
-    public void doAfter() {
-        if(afterCommand == null) {
-            return;
-        }
-
-        WaitingThread waitingThread = new WaitingThread(afterCommand, shouldUseFleetActionQueue, secondsToDelay);
-        waitingThread.start();
+    public void push() {
+        Commander.getInstance().push(this);
     }
 
-    public boolean isAfterCommand() {
-        return afterCommand != null;
+    public void push(String tag) {
+        Commander.getInstance().push(this, tag);
+    }
+
+    public void doFallowing() {
+        if(followingAction == null) {
+            return;
+        }
+        new WaitingThread(followingAction).start();
+    }
+
+    public boolean isFollowingAction() {
+        return followingAction != null;
     }
 
     public void retry(Integer secondsToDelay) {
-        new WaitingThread(this, shouldUseFleetActionQueue, secondsToDelay).start();
+        new WaitingThread(followingAction.setSecondsToDelay(secondsToDelay)).start();
     }
 
-    protected void setSecondToDelayAfterCommand(Integer secondToDelay) {
-        this.secondsToDelay = secondToDelay;
+    public FollowingAction setNext(AbstractCommand command, String... args) {
+        return setNext(command, 0L, args);
     }
 
-    public void setAfterCommand(AbstractCommand afterCommand) {
-        setAfterCommand(afterCommand, false);
+    public FollowingAction setNext(AbstractCommand command, Long delay, String... args) {
+        FollowingAction followingAction = new FollowingAction(command, delay, args);
+        this.followingAction = followingAction;
+        return followingAction;
     }
-    public void setAfterCommand(AbstractCommand afterCommand, boolean shouldUseFleetActionQueue) {
-        this.afterCommand = afterCommand;
-        this.shouldUseFleetActionQueue = shouldUseFleetActionQueue;
+
+    public void clearNext() {
+        followingAction = null;
+    }
+
+    public FollowingAction getFollowingAction() {
+        return followingAction;
+    }
+
+    public boolean isRequiredAction(String action) {
+        return followingAction != null && followingAction.contains(action);
     }
 
     public void onInterrupt() {
     }
 
-    public void addTag(String tag) {
+    public AbstractCommand addTag(String tag) {
         tags.add(tag);
+        return this;
     }
 
     public List<String> getTags() {
         return tags;
+    }
+
+    public QueueRunType getRunType() {
+        return runType;
+    }
+
+    public void setRunType(QueueRunType runType) {
+        this.runType = runType;
     }
 }

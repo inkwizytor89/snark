@@ -1,19 +1,14 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.gi.command.impl.AbstractCommand;
-import org.enoch.snark.instance.Commander;
+import org.enoch.snark.gi.command.impl.FollowingAction;
 
 public class WaitingThread extends Thread {
 
-    private final AbstractCommand command;
-    private final boolean shouldUseFleetActionQueue;
-    private final int secondsToDelay;
+    private FollowingAction followingAction;
 
-    public WaitingThread(AbstractCommand command, boolean shouldUseFleetActionQueue, int secondsToDelay) {
+    public WaitingThread(FollowingAction followingAction) {
         super();
-        this.command = command;
-        this.shouldUseFleetActionQueue = shouldUseFleetActionQueue;
-        this.secondsToDelay = secondsToDelay;
+        this.followingAction = followingAction;
     }
 
     @Override
@@ -24,12 +19,7 @@ public class WaitingThread extends Thread {
     @Override
     public void run() {
         super.run();
-        SleepUtil.secondsToSleep(secondsToDelay);
-        Commander commander = Commander.getInstance();
-        if(shouldUseFleetActionQueue) {
-            commander.pushFleet(command);
-        } else {
-            commander.push(command);
-        }
+        SleepUtil.secondsToSleep(followingAction.getSecondsToDelay());
+        followingAction.getCommand().push();
     }
 }

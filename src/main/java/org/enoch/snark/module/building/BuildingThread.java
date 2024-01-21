@@ -1,23 +1,29 @@
 package org.enoch.snark.module.building;
 
+import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
+import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.ConfigMap;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.enoch.snark.module.ConfigMap.NAME;
+import static org.enoch.snark.module.ConfigMap.SOURCE;
 
 public class BuildingThread extends AbstractThread {
 
     public static final String threadName = "building";
     public static final int SHORT_PAUSE = 20;
     public static final String LEVEL = "level";
-    private final Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
+    private Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
     private int pause = SHORT_PAUSE;
     private final QueueManger queueManger;
     private BuildingManager buildingManager;
@@ -26,7 +32,7 @@ public class BuildingThread extends AbstractThread {
 
     public BuildingThread(ConfigMap map) {
         super(map);
-        buildingManager = new BuildingManager();
+        buildingManager = new BuildingManager(map.getConfig(NAME));
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();
         queueManger = QueueManger.getInstance();
@@ -43,15 +49,8 @@ public class BuildingThread extends AbstractThread {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        colonyDAO.fetchAll().stream()
-                .filter(colony -> colony.isPlanet)
-                .forEach(colony -> colonyMap.put(colony, null));
-    }
-
-    @Override
     protected void onStep() {
+        updateSourceMap();
 //        System.err.println(queueManger);
         for(ColonyEntity colony : colonyMap.keySet()) {
             if(colony.level > getColonyLastLevelToProcess()) {
@@ -71,14 +70,25 @@ public class BuildingThread extends AbstractThread {
                 colonyMap.put(colony, requirements);
             }
             if(requirements.canBuildOn(colony)) {
-                Instance.getInstance().commander.push(new BuildCommand(colony, requirements));
+                new BuildCommand(colony, requirements).push();
                 colonyMap.put(colony, null);
             }
         }
 //        System.err.println("Building end step, sleep in "+pause);
     }
-    public static Integer getColonyLastLevelToProcess() {
-        return Instance.config.getConfigInteger(threadName, LEVEL, 2);
+
+    private void updateSourceMap() {
+        List<ColonyEntity> planets = map.getColonies(SOURCE, "planet").stream()
+                .filter(colonyEntity -> ColonyType.PLANET.equals(colonyEntity.type))
+                .collect(Collectors.toList());
+        Util.updateMapKeys(colonyMap, planets, null);
+//        colonyDAO.fetchAll().stream()
+//                .filter(colony -> colony.isPlanet)
+//                .forEach(colony -> colonyMap.put(colony, null));
+    }
+
+    public Integer getColonyLastLevelToProcess() {
+        return map.getConfigInteger(LEVEL, 2);
     }
 
     private boolean isColonyNotYetLoaded(ColonyEntity colony) {

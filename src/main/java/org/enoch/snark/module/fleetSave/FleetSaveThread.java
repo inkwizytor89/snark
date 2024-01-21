@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.model.Resources.everything;
 
 public class FleetSaveThread extends AbstractThread {
 
@@ -70,18 +71,18 @@ public class FleetSaveThread extends AbstractThread {
             if(noWaitingElementsByTag(colonizationCode)) {
                 SendFleetCommand command = new SendFleetCommand(fleet);
                 command.setAllShips(true);
-                command.setAllResources(true);
+                command.setResources(everything);
                 command.addTag(colonizationCode);
-                commander.push(command);
+                command.push();
                 System.err.println(fleet.source+" push to send with code "+colonizationCode);
             }
         }
     }
 
     private void loadFlyPoints() {
-        instance.getFlyPoints().forEach(col -> commander.push(new OpenPageCommand(PAGE_BASE_FLEET, col)));
+        instance.getFlyPoints().forEach(col -> new OpenPageCommand(PAGE_BASE_FLEET, col).push());
         System.err.println("reloading fleets points");
-        SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10);
+        SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10L);
     }
 
     private String getColonizationCode(FleetEntity fleet) {
@@ -108,7 +109,7 @@ public class FleetSaveThread extends AbstractThread {
      * fs=m[1:1:8]-30-p[1:1:1];m[2:2:8]-30-p[2:2:1]
      */
     private List<FleetEntity> loadFleetToSave() {
-        String[] allFleetToSaveConfig = Instance.config.getConfigArray(threadName, FS_KEY);
+        String[] allFleetToSaveConfig = map.getConfigArray(FS_KEY);
         List<FleetEntity> fleetToSave = new ArrayList<>();
         for(String fleetToSaveConfig : allFleetToSaveConfig){
             String[] configValues = fleetToSaveConfig.split("-");

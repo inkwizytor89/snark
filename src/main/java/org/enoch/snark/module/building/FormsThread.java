@@ -12,6 +12,8 @@ import org.enoch.snark.module.ConfigMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.enoch.snark.module.ConfigMap.NAME;
+
 public class FormsThread extends AbstractThread {
 
     public static final String threadName = "forms";
@@ -27,7 +29,7 @@ public class FormsThread extends AbstractThread {
 
     public FormsThread(ConfigMap map) {
         super(map);
-        formsManager = new FormsManager();
+        formsManager = new FormsManager(map.getConfig(NAME));
         colonyDAO = ColonyDAO.getInstance();
         buildingCost = BuildingCost.getInstance();
         queueManger = QueueManger.getInstance();
@@ -70,13 +72,13 @@ public class FormsThread extends AbstractThread {
                 colonyMap.put(colony, requirements);
             }
             if(requirements.canBuildOn(colony)) {
-                Instance.getInstance().commander.push(new BuildCommand(colony, requirements));
+                new BuildCommand(colony, requirements).push();
                 colonyMap.put(colony, null);
             }
         }
     }
-    public static Integer getColonyLastLevelToProcess() {
-        return Instance.config.getConfigInteger(threadName, LEVEL, 1);
+    public Integer getColonyLastLevelToProcess() {
+        return map.getConfigInteger(LEVEL, 1);
     }
 
     private boolean isColonyNotYetLoaded(ColonyEntity colony) {

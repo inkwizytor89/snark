@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.macro.Mission;
@@ -14,8 +15,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
+import static org.enoch.snark.model.Resources.everything;
+import static org.enoch.snark.model.Resources.nothing;
 import static org.enoch.snark.module.ConfigMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
@@ -42,17 +47,23 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    public void setResources(FleetEntity fleet) {
-        if(fleet.metal != null || fleet.crystal != null || fleet.deuterium != null) {
+    public void setResources(Resources resources, FleetEntity fleet) {
+        if(resources == null || nothing.equals(resources)) return;
+        if(everything.equals(resources)) selectAllResources();
+        else setCustomResources(resources, fleet);
+    }
+
+    private void setCustomResources(Resources resources, FleetEntity fleet) {
+        if(resources.metal != null || resources.crystal != null || resources.deuterium != null) {
             WebElement resourcesArea = wd.findElement(By.id("resources"));
             WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
             Resources defaultResources = Instance.getMainConfigMap().getConfigResource(LEAVE_MIN_RESOURCES, new Resources("d4m"));
-            Long metal = rememberToLeaveSome(fleet, defaultResources.metal, ResourceType.METAL);
-            Long crystal = rememberToLeaveSome(fleet, defaultResources.crystal, ResourceType.CRYSTAL);
-            Long deuterium = rememberToLeaveSome(fleet, defaultResources.deuterium, ResourceType.DEUTERIUM);
+            Long metal = rememberToLeaveSome(resources, fleet, defaultResources.metal, ResourceType.METAL);
+            Long crystal = rememberToLeaveSome(resources, fleet, defaultResources.crystal, ResourceType.CRYSTAL);
+            Long deuterium = rememberToLeaveSome(resources, fleet, defaultResources.deuterium, ResourceType.DEUTERIUM);
             for(int i=0; i<3; i++) {
                 SleepUtil.pause();
                 deuteriumAmount.sendKeys(deuterium.toString());
@@ -68,20 +79,24 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    public Long rememberToLeaveSome(FleetEntity fleet, Long toLeave, ResourceType resource) {
+    private void selectAllResources() {
+        wd.findElement(By.id("allresources")).findElement(By.tagName("img")).click();
+    }
+
+    public Long rememberToLeaveSome(Resources resources, FleetEntity fleet, Long toLeave, ResourceType resource) {
         switch(resource) {
             case METAL:{
-                return Math.min(fleet.metal, fleet.source.metal) - toLeave;
+                return Math.min(resources.metal, fleet.source.metal) - toLeave;
             }
             case CRYSTAL:{
-                return Math.min(fleet.crystal, fleet.source.crystal) - toLeave;
+                return Math.min(resources.crystal, fleet.source.crystal) - toLeave;
             }
             case DEUTERIUM:{
                 String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
                 long consumption = toLong(consumptionInput.split("\\s")[0]);
 
                 long l = 4000000L;
-                return Math.min(fleet.deuterium, fleet.source.deuterium) - consumption - toLeave;
+                return Math.min(resources.deuterium, fleet.source.deuterium) - consumption - toLeave;
             }
         }
         throw new IllegalStateException("Unknown resource "+resource.name());
@@ -101,7 +116,26 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         wd.findElement(By.id("sendall")).click();
     }
 
-    public void selectAllResources() {
-        wd.findElement(By.id("allresources")).findElement(By.tagName("img")).click();
+    public LocalTime parseDurationSecounds() {
+        final String durationString = Instance.gi.findElement("span", "id", "duration", "").getText();
+        //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
+        return DateUtil.parseDuration(durationString);
+    }
+
+    public LocalDateTime parseFleetVisited() {
+        return parseDate("arrivalTime");
+    }
+
+    public LocalDateTime parseFleetBack() {
+        return parseDate("returnTime");
+    }
+
+    private LocalDateTime parseDate(String dateId) {
+        String dateString = wd.findElement(By.id(dateId)).getText();
+        if(dateString.contains("-")) {
+            SleepUtil.sleep();
+            dateString = wd.findElement(By.id(dateId)).getText();
+        }
+        return DateUtil.parseToLocalDateTime(dateString);
     }
 }

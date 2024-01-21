@@ -9,8 +9,8 @@ import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
-import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.model.exception.ShipDoNotExists;
+import org.enoch.snark.model.types.QueueRunType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
@@ -19,13 +19,17 @@ import org.openqa.selenium.WebElement;
 import java.util.*;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
-import static org.enoch.snark.instance.config.Config.MODE;
-import static org.enoch.snark.instance.config.Config.STOP;
+import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION;
+import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
+import static org.enoch.snark.module.ConfigMap.MODE;
+import static org.enoch.snark.module.ConfigMap.STOP;
 
 public class Commander extends Thread {
 
-    private static final int SLEEP_PAUSE = 1;
+    private static final Long SLEEP_PAUSE = 1L;
     public static final String LOBBY_URL = "https://lobby.ogame.gameforge.com/";
+    public static final String FLEET_ACTION_STRING = "FLEET_ACTION";
+    public static final String FLEET_ACTION_WITH_PRIORITY_STRING = "FLEET_ACTION_WITH_PRIORITY";
     private static Commander INSTANCE;
 
     private final Instance instance;
@@ -71,10 +75,10 @@ public class Commander extends Thread {
 
                 restartIfSessionIsOver();
 
-                if (instance.isStopped()) {
-                    stopCommander();
-                    continue;
-                }
+//                if (instance.isStopped()) {
+//                    stopCommander();
+//                    continue;
+//                }
 
                 startCommander();
 
@@ -121,8 +125,8 @@ public class Commander extends Thread {
     }
 
     public RunningStatus createRunningStatus() {
-        boolean stopRunning = Instance.config.getConfig(MODE).toLowerCase().contains(STOP);
-        boolean runningStatus = !stopRunning && Instance.config.isOn(Config.MAIN);
+        boolean stopRunning = Instance.getMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
+        boolean runningStatus = !stopRunning && Instance.getMainConfigMap().isOn();
         return new RunningStatus(isRunning, runningStatus);
     }
 
@@ -202,18 +206,17 @@ public class Commander extends Thread {
         if(success) {
             String commandMessage = command.toString();
 //            log.info(command.toString());
-            if(command.isAfterCommand()) {
-//                log.info("Next move in "+ command.secondsToDelay+"s is "+ command.getAfterCommand());
-                command.doAfter();
+            if(command.isFollowingAction()) {
+                command.doFallowing();
             }
         } else {
-//            command.failed++;
-//            if (command.failed < 2) {
-//                command.retry(2);
-//            } else {
-//                command.onInterrupt();
+            command.failed++;
+            if (command.failed < 2) {
+                command.retry(2);
+            } else {
+                command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
-//            }
+            }
         }
         actualProcessedCommand = null;
     }
@@ -232,20 +235,21 @@ public class Commander extends Thread {
         this.expeditionMax = expeditionMax;
     }
 
-    public synchronized void pushFleet(AbstractCommand command) {
-        pushFleet(command, false);
-    }
-
-    public synchronized void pushFleet(AbstractCommand command, boolean withPriority) {
-        if (withPriority) {
-            fleetActionQueue.addFirst(command);
-        } else {
-            fleetActionQueue.offer(command);
-        }
-    }
-
     public synchronized void push(AbstractCommand command) {
-        interfaceActionQueue.offer(command);
+        if(FLEET_ACTION_WITH_PRIORITY.equals(command.getRunType())) fleetActionQueue.addFirst(command);
+        else if (FLEET_ACTION.equals(command.getRunType())) fleetActionQueue.offer(command);
+        else interfaceActionQueue.offer(command);
+    }
+
+    public synchronized void push(AbstractCommand command, String tag) {
+        if(noWaitingElementsByTag(tag))
+            command.push();
+    }
+
+    public boolean noWaitingElementsByTag(String tag) {
+        return peekQueues().stream()
+                .flatMap(abstractCommand -> abstractCommand.getTags().stream())
+                .noneMatch(s -> s.equals(tag));
     }
 
     public synchronized List<AbstractCommand> peekQueues() {

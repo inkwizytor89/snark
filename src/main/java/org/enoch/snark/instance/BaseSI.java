@@ -23,7 +23,6 @@ public class BaseSI extends Thread{
     private static BaseSI INSTANCE;
 
     private final Map<String, AbstractThread> threadsMap= new HashMap<>();
-    private final List<AbstractThread> operationThreads = new ArrayList<>();
 
     private BaseSI() {
 //        HashMap<String, ConfigMap> globalMap = Instance.config.globalMap;
@@ -39,9 +38,14 @@ public class BaseSI extends Thread{
 //        operationThreads.add(new CollectorThread(globalMap.get(CollectorThread.threadName))); // in progress
 //        operationThreads.add(new HuntingThread(globalMap.get(HuntingThread.threadName)));
 
-        while(Navigator.getInstance().getEventFleetList() == null) SleepUtil.pause();
+//        while(Navigator.getInstance().getEventFleetList() == null) SleepUtil.pause();
+        waitForEndOfInitialActions();
 //        operationThreads.forEach(Thread::start);
         start();
+    }
+
+    private void waitForEndOfInitialActions() {
+        while(!Commander.getInstance().peekQueues().isEmpty()) SleepUtil.pause();
     }
 
     public static BaseSI getInstance() {
@@ -71,7 +75,7 @@ public class BaseSI extends Thread{
 // todo: zatrzymać je
 
 //            operationThreads.forEach(thread -> thread.updateMap(new ConfigMap()));
-            SleepUtil.secondsToSleep(10);
+            SleepUtil.secondsToSleep(10L);
         }
     }
 
@@ -80,7 +84,7 @@ public class BaseSI extends Thread{
         if(fleetMax == 0) return 0;
 
         int fleetInUse = 0;
-        for(AbstractThread thread : operationThreads) {
+        for(AbstractThread thread : threadsMap.values()) {
             if(thread.isRunning() && !thread.getThreadName().equals(withOutThreadName)) {
                 fleetInUse += thread.getRequestedFleetCount();
             }

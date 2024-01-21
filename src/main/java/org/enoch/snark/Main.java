@@ -10,15 +10,16 @@ import java.io.FilenameFilter;
 
 import static org.enoch.snark.db.entity.JPAUtility.H2_PERSISTENCE;
 import static org.enoch.snark.db.entity.JPAUtility.H2_URL;
-import static org.enoch.snark.instance.config.Config.*;
 import static org.enoch.snark.instance.config.Universe.configPath;
+import static org.enoch.snark.module.ConfigMap.DATABASE;
+import static org.enoch.snark.module.ConfigMap.SERVER;
 
 public class Main {
 
     public static void main(String[] args) {
         setConfigPath(args);
         Instance instance = Instance.getInstance();
-        if(Instance.config.getConfigBoolean(MAIN, DATABASE, false))
+        if(Instance.getMainConfigMap().getConfigBoolean(DATABASE, false))
             migratePostgresDatabase();
         else {
             JPAUtility.buildDefaultEntityManager(H2_PERSISTENCE);
@@ -56,7 +57,7 @@ public class Main {
     }
 
     private static void migratePostgresDatabase() {
-        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.config.getConfig(SERVER), "postgres", "").load();
+        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.getMainConfigMap().getConfig(SERVER), "postgres", "").load();
         flyway.migrate();
     }
 }

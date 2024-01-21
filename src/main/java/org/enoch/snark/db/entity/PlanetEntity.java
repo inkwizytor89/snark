@@ -5,6 +5,7 @@ import org.enoch.snark.gi.macro.BuildingEnum;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
 import org.enoch.snark.model.types.ColonyType;
 
@@ -652,6 +653,10 @@ public abstract class PlanetEntity extends IdEntity{
 
     public String getResourceString() {
         return "m"+metal+" c"+crystal+" d"+deuterium;
+    }
+
+    public Resources getResources() {
+        return new Resources(metal, crystal, deuterium);
     }
 
     @Override

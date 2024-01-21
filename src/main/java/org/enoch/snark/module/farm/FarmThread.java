@@ -16,8 +16,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.config.Config.MAIN;
-
 public class FarmThread extends AbstractThread {
 
     public static final String threadName = "farm";
@@ -62,7 +60,10 @@ public class FarmThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        if(stillWaitingForFleet()) return;
+        clearFarmState();
+    }
+
+    private void clearFarmState() {
         spyCacheEntry = cacheEntryDAO.getCacheEntryNotNull(SPY_CACHE_CODE);
         warCacheEntry = cacheEntryDAO.getCacheEntryNotNull(WAR_CACHE_CODE);
         //skip all spy fleet that is incomplete from last try
@@ -74,6 +75,7 @@ public class FarmThread extends AbstractThread {
             });
         cacheEntryDAO.setValue(SPY_CACHE_CODE, null);
         cacheEntryDAO.setValue(WAR_CACHE_CODE, null);
+        System.out.println("farm state cleared");
     }
 
     @Override
@@ -116,7 +118,8 @@ public class FarmThread extends AbstractThread {
         reloadSpyTargets();
         attackWave = selectAvailableTargets(selectTargetsWithoutDefense(), slotToUse);
         if(attackWave.isEmpty()) {
-            System.err.println("Error: attackWave is empty");
+            System.err.println("Error: attackWave is empty, is time to clear farm status");
+            clearFarmState();
             return;
         }
         attackWave.stream().filter(target -> target.updated == null ||
@@ -172,7 +175,7 @@ public class FarmThread extends AbstractThread {
     }
 
     public boolean createSpyWave() {
-        spyWave = findNextFarms(slotToUse * FARM_SPY_SCALE); System.out.print("farm index="+cacheEntryDAO.getCacheEntryNotNull(FARM_INDEX_CACHE).getInt()+": "+spyWave.size());
+        spyWave = findNextFarms(slotToUse * FARM_SPY_SCALE); System.out.print("farm s"+slotToUse+" index="+cacheEntryDAO.getCacheEntryNotNull(FARM_INDEX_CACHE).getInt()+": "+spyWave.size());
         List<TargetEntity> richFarm = findRichFarm(slotToUse); System.out.print("+"+richFarm.size());
         spyWave.addAll(richFarm);
         spyWave = removeFarmsForWhichMissingShips();System.out.print("-removeFarmsForWhichMissingShips="+spyWave.size()+"\n");
@@ -199,7 +202,7 @@ public class FarmThread extends AbstractThread {
         Integer farmIndex = loadFarmIndex();
         int startIndex = count * farmIndex;
         int endIndex = startIndex + count -1;
-        Integer indexCount = Instance.config.getConfigInteger(threadName, INDEX_COUNT_CONFIG, 8);
+        Integer indexCount = map.getConfigInteger(INDEX_COUNT_CONFIG, 8);
         List<TargetEntity> farms = findNearedFarms();
         if(farms.size()-1 < endIndex) {
             endIndex = farms.size() - 1;
@@ -218,9 +221,9 @@ public class FarmThread extends AbstractThread {
     }
 
     private Integer typeExplorationArea() {
-        Integer explorationArea = Instance.config.getConfigInteger(threadName, EXPLORATION_AREA_CONFIG, -1);
+        Integer explorationArea = map.getConfigInteger(EXPLORATION_AREA_CONFIG, -1);
         if(explorationArea>=0) return explorationArea;
-        return Instance.config.getConfigInteger(MAIN, EXPLORATION_AREA_CONFIG, -1);
+        return Instance.getMainConfigMap().getConfigInteger(EXPLORATION_AREA_CONFIG, -1);
     }
 
     private List<ColonyEntity> typeReadyColony() {
@@ -284,6 +287,8 @@ public class FarmThread extends AbstractThread {
     public boolean isFleetAlmostBack(Long code) {
         if(code == null) return true;
         List<FleetEntity> withCode = fleetDAO.findWithCode(code);
+        boolean fleetNotAllStarted = withCode.stream().anyMatch(fleetEntity -> fleetEntity.back == null);
+        if(fleetNotAllStarted) return false;
         List<LocalDateTime> backTimes = withCode.stream()
                 .map(fleetEntity -> fleetEntity.back)
                 .sorted()
@@ -293,8 +298,11 @@ public class FarmThread extends AbstractThread {
     }
 
     private boolean isSlotsToUseValid() {
-        propertiesSlotToUse = Instance.config.getConfigInteger(threadName, SLOT_CONFIG, -1);
-        if(propertiesSlotToUse == -1) propertiesSlotToUse = BaseSI.getInstance().getAvailableFleetCount(threadName);
+        propertiesSlotToUse = map.getConfigInteger(SLOT_CONFIG, -1);
+        if(propertiesSlotToUse < 0) {
+            int availableFleetCount = BaseSI.getInstance().getAvailableFleetCount(threadName);
+            propertiesSlotToUse = availableFleetCount + propertiesSlotToUse;
+        }
         return propertiesSlotToUse > 0;
     }
 }

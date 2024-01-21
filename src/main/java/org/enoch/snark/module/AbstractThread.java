@@ -6,6 +6,7 @@ import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
@@ -19,6 +20,7 @@ import org.enoch.snark.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.module.hunting.HuntingThread;
 import org.enoch.snark.module.scan.ScanThread;
 import org.enoch.snark.module.space.SpaceThread;
+import org.enoch.snark.module.transport.TransportThread;
 import org.enoch.snark.module.update.UpdateThread;
 
 import java.util.logging.Logger;
@@ -126,6 +128,10 @@ public abstract class AbstractThread extends Thread {
         return fsCount > flyPointsSize/2;
     }
 
+    protected boolean isAny(ShipEnum... ships) {
+        return true;
+    }
+
     public static AbstractThread create(ConfigMap map) {
         if(map.name().contains(UpdateThread.threadName)) return new UpdateThread(map);
         else if(map.name().contains(DefenseThread.threadName)) return new DefenseThread(map);
@@ -137,6 +143,7 @@ public abstract class AbstractThread extends Thread {
         else if(map.name().contains(ScanThread.threadName)) return new ScanThread(map);
         else if(map.name().contains(FarmThread.threadName)) return new FarmThread(map);
         else if(map.name().contains(CollectorThread.threadName)) return new CollectorThread(map);
+        else if(map.name().contains(TransportThread.threadName)) return new TransportThread(map);
         else if(map.name().contains(HuntingThread.threadName)) return new HuntingThread(map);
         else throw new RuntimeException("Unknown threadName "+map.name());
     }

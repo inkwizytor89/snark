@@ -1,6 +1,5 @@
 package org.enoch.snark.module.collector;
 
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -10,9 +9,8 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
-import org.enoch.snark.instance.config.Config;
-import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.types.ColonyType;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.ConfigMap;
@@ -20,9 +18,6 @@ import org.enoch.snark.module.ConfigMap;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static org.enoch.snark.instance.config.Config.MAIN;
 
 public class CollectorThread extends AbstractThread {
 
@@ -67,13 +62,15 @@ public class CollectorThread extends AbstractThread {
         }
         FleetEntity fleet = buildCollectingFleetEntity(destination);
 
-        fleet.metal = fleet.source.metal;
-        fleet.crystal = fleet.source.crystal;
-        fleet.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
+        Resources resources = new Resources();
+        resources.metal = fleet.source.metal;
+        resources.crystal = fleet.source.crystal;
+        resources.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
 
         SendFleetCommand collecting = new SendFleetCommand(fleet);
+        collecting.setResources(resources);
         collecting.addTag(threadName);
-        commander.push(collecting);
+        collecting.push();
     }
 
     private boolean notEnoughReadyPlanets() {
@@ -139,7 +136,7 @@ public class CollectorThread extends AbstractThread {
             }
             Planet planet = planetOptional.get();
             CacheEntryDAO.getInstance().setValue(COLLECTION_DESTINATION, planet.toString());
-            ColonyEntity colonyEntity = planet.toColonyEntity();
+            ColonyEntity colonyEntity = planet.getSimilarColony();
             System.out.println("Collector see fleet flying to "+planet+" and selected " + colonyEntity);
             return colonyEntity;
         }

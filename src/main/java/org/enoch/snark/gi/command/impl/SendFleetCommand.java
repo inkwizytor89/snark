@@ -1,7 +1,7 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -14,6 +14,7 @@ import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.SystemView;
 import org.enoch.snark.model.exception.FleetCantStart;
 import org.enoch.snark.model.exception.ShipDoNotExists;
@@ -24,19 +25,22 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.zip.Adler32;
 
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.model.Resources.everything;
 
 public class SendFleetCommand extends GICommand {
 
+    public static final Long TIME_BUFFOR = 3L;
     public Mission mission;
     protected GIUrlBuilder giUrlBuilder;
     protected boolean autoComplete;
-    protected boolean allResources;
+    protected Resources resources;
     protected boolean allShips;
 
     public FleetEntity fleet;
@@ -77,6 +81,7 @@ public class SendFleetCommand extends GICommand {
         if(!prepere()) {
             return true;
         };
+        Long durationSeconds;
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
@@ -120,24 +125,13 @@ public class SendFleetCommand extends GICommand {
         }
 
         gir.setSpeed(fleet);
+        gir.setResources(resources, fleet);
 
-        if(allResources) gir.selectAllResources();
-        else gir.setResources(fleet);
-
-        final String duration = instance.gi.findElement("span", "id", "duration", "").getText();
-        //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
-        final LocalTime durationTime = DateUtil.parseDuration(duration);
-         String arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
-        if(arrivalTimeString.contains("-")) {
-            SleepUtil.sleep();
-            arrivalTimeString = webDriver.findElement(By.id("arrivalTime")).getText();
-        }
+        durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFOR;
         fleet.start = LocalDateTime.now();
-        fleet.visited = DateUtil.parseToLocalDateTime(arrivalTimeString);
-        final String returnTimeString = webDriver.findElement(By.id("returnTime")).getText();
-        fleet.back = DateUtil.parseToLocalDateTime(returnTimeString);
-//        setSecoundToDelayAfterCommand(durationTime.toSecondOfDay()+ 5L);
-//        fleetSelector.next();
+        fleet.visited = gir.parseFleetVisited();
+        fleet.back = gir.parseFleetBack();
+
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
             Optional<TargetEntity> target = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
             if (target.isPresent()) {
@@ -150,11 +144,6 @@ public class SendFleetCommand extends GICommand {
             }
             return true;
         }
-        if(Mission.SPY.equals(mission)) {
-            int secondToCheck = durationTime.toSecondOfDay()+3;
-            setSecondToDelayAfterCommand(secondToCheck*2);
-            setAfterCommand(new OpenPageCommand(PAGE_BASE_FLEET, fleet.source));
-        }
 
         try {
             gir.sendFleet(fleet);
@@ -162,31 +151,51 @@ public class SendFleetCommand extends GICommand {
             e.printStackTrace();
             Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
             System.err.println("Can not send fleet to target " + target);
-            instance.push(new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)));
+            new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)).push();
 //            instance.removePlanet(new Planet(fleet.getCoordinate()));
             if(fleet.code != null) fleet.code = - fleet.code;
-            setAfterCommand(null);
+            clearNext();
             return true;
-        }
-        catch(ToStrongPlayerException e) {
+        } catch(ToStrongPlayerException e) {
             System.err.println(e);
-            setAfterCommand(null);
+            clearNext();
             if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
-        SleepUtil.secondsToSleep(1); //without it many strange problems with send fleet - random active planet
-
-        //open after pause to wait for game to reload fleet and expedition statuses
-        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, fleet.source);
-//        int expeditionCount = instance.commander.getExpeditionCount();
-//        System.err.println("Sent fleet and read expedition count to "+ expeditionCount);
+        reloadColonyAfterFleetIsBack(durationSeconds);
+        updateDelayForAction(durationSeconds);
+        reloadColony();
         return true;
+    }
+
+    private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
+        if(mission.isComingBack()) {
+            OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, fleet.source);
+            long secondsToBack = durationSeconds * 2;
+            if(Mission.EXPEDITION.equals(fleet.mission)) {
+                secondsToBack+=3600;
+                System.out.println("Expedition is probably back "+LocalDateTime.now().plusSeconds(secondsToBack)+
+                        " back is "+fleet.back);
+            }
+            new WaitingThread(new FollowingAction(command, secondsToBack)).start();
+        }
+    }
+
+    private void reloadColony() {
+        SleepUtil.sleep();
+        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, fleet.source);
+    }
+
+    private void updateDelayForAction(Long durationSeconds) {
+        if(isRequiredAction(DELAY_TO_FLEET_BACK)) {
+            getFollowingAction().setSecondsToDelay(durationSeconds*2);
+        }
     }
 
     public void typeShip(ShipEnum shipEnum, Long count) {
         WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
         if(!element.isEnabled()) {
-            throw new ShipDoNotExists("Missings ships " + shipEnum.getId());
+            throw new ShipDoNotExists("Missing ships " + shipEnum.getId());
         }
         element.sendKeys(count.toString());
     }
@@ -219,8 +228,8 @@ public class SendFleetCommand extends GICommand {
         FleetDAO.getInstance().saveOrUpdate(fleet);
     }
 
-    public void setAllResources(boolean allResources) {
-        this.allResources = allResources;
+    public void setResources(Resources resources) {
+        this.resources = resources;
     }
 
     public void setAllShips(boolean allShips) {

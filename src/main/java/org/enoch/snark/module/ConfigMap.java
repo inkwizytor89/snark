@@ -1,8 +1,10 @@
 package org.enoch.snark.module;
 
+import org.apache.bcel.generic.ALOAD;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.Resources;
@@ -24,6 +26,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String WEBDRIVER_CHROME_DRIVER = "main.driver";
 
     public static final String TIME = "time";
+    public static final String TAG = "tag";
     public static final String PAUSE = "pause";
     public static final String ON = "on";
     public static final String OFF = "off";
@@ -33,6 +36,11 @@ public class ConfigMap extends HashMap<String, String> {
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String FLY_POINTS = "fly_points";
+    public static final String SOURCE = "source";
+    public static final String SHIPS_WAVE = "ships_wave";
+    public static final String MISSION = "mission";
+    public static final String RESOURCES = "resources";
+    public static final String SPEED = "speed";
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String DATABASE = "database";
     public static final String GALAXY_MAX = "galaxy_max";
@@ -49,6 +57,10 @@ public class ConfigMap extends HashMap<String, String> {
 
     public ConfigMap(Map map) {
         super(map);
+    }
+
+    public String getConfig(String key) {
+        return getConfig(key, "missing_value");
     }
 
     public String getConfig(String key, String defaultValue) {
@@ -139,6 +151,22 @@ public class ConfigMap extends HashMap<String, String> {
     }
 
     public List<ColonyEntity> getFlyPoints() {
-        return ColonyDAO.getInstance().getColonies(getNearestConfig(FLY_POINTS ,StringUtils.EMPTY));
+        return ColonyDAO.getInstance().getColonies(getNearestConfig(FLY_POINTS, StringUtils.EMPTY));
+    }
+
+    public List<ColonyEntity> getColonies(String key, String defaultValue) {
+        return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
+    }
+
+    public List<Map<ShipEnum,Long>> getShipsWaves() {
+        List<Map<ShipEnum, Long>> empty = Collections.singletonList(new HashMap<>());
+        if(!keySet().contains(SHIPS_WAVE)) return empty;
+        String[] shipsWavesArray = getConfigArray(SHIPS_WAVE);
+        if(shipsWavesArray.length == 0) return empty;
+        ArrayList<Map<ShipEnum,Long>> waves = new ArrayList<>();
+        for(String waveString : shipsWavesArray) {
+            waves.add(ShipEnum.parse(waveString));
+        }
+        return waves;
     }
 }

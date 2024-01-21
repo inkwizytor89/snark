@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -50,6 +51,7 @@ abstract class GraphicalInterfaceReader {
      * @return 6283777L
      */
     protected Long toLong(String string) {
+        if(StringUtils.isEmpty(string)) return 0L;
         return Long.parseLong(string.replaceAll("\\.",""));
     }
 

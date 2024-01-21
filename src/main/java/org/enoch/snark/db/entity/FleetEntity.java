@@ -7,12 +7,16 @@ import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.ColonyPlaner;
 import org.enoch.snark.model.Planet;
+import org.enoch.snark.model.Resources;
 import org.enoch.snark.model.types.ColonyType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
+
+import static org.enoch.snark.model.Resources.everything;
 
 @Entity
 @Table(name = "fleet", schema = "public", catalog = "snark")
@@ -20,6 +24,7 @@ public class FleetEntity extends IdEntity {
 
     public static final Long DEFENCE_CODE = 1L;
     public static final Long FLEET_SAVE_CODE = 2L;
+    public static final Long FLEET_THREAD = 3L;
 
     @Basic
     @Column(name = "target_galaxy")
@@ -207,7 +212,7 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createExpedition(@Nonnull ColonyEntity colony) {
+    public static FleetEntity createExpeditionDirection(@Nonnull ColonyEntity colony) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = colony.galaxy;
         fleet.targetSystem = colony.system;
@@ -264,7 +269,8 @@ public class FleetEntity extends IdEntity {
 
     @Override
     public String toString() {
-        return "[" + id + ": " + mission + " " + source + " -> " + targetSystem.toString() + "]";
+        String targetSystemString = targetSystem!=null? targetSystem.toString():null;
+        return "[" + id + ": " + mission + " " + source + " -> " + targetSystemString + "]";
     }
 
     public void setTarget(Planet planet) {

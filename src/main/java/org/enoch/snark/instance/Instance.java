@@ -120,10 +120,10 @@ public class Instance {
 
     public void initialActionOnStart() {
         commander = Commander.getInstance();
-        commander.pushFleet(new LoadColoniesCommand());
+        new LoadColoniesCommand().push();
         PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-        commander.pushFleet(new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true));
-        commander.pushFleet(new RefreshColoniesStateCommand());
+        new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true).push();
+        new RefreshColoniesStateCommand().push();
     }
 
     public void removePlanet(Planet target) {
@@ -141,28 +141,21 @@ public class Instance {
     public ColonyEntity getMainColony() {
         return colonyDAO.fetchAll().get(0);
     }
-
-    public synchronized boolean isStopped() {
-        return config.getConfig(MODE)!= null && config.getConfig(MODE).contains("stop");
-    }
-
-    public void push(AbstractCommand command) {
-        push(command, false);
-    }
-
-    public void push(AbstractCommand command, boolean shouldUseFleetActionQueue) {
-        if(shouldUseFleetActionQueue) {
-            commander.pushFleet(command);
-        } else {
-            commander.push(command);
-        }
-    }
+//
+//    public synchronized boolean isStopped() {
+//        return config.getConfig(MODE)!= null && config.getConfig(MODE).contains("stop");
+//    }
 
     public static String getGlobalConfig(String tag, String key) {
         if(!config.globalMap.containsKey(tag)) return null;
         ConfigMap configMap = config.globalMap.get(tag);
         if(!configMap.containsKey(tag)) return null;
         return configMap.get(key);
+    }
+
+    public static ConfigMap getConfigMap(String tag) {
+        if(!config.globalMap.containsKey(tag)) return new ConfigMap();
+        return config.globalMap.get(tag);
     }
 
     public static ConfigMap getMainConfigMap() {

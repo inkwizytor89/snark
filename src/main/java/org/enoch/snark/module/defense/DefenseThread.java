@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import static org.enoch.snark.db.entity.FleetEntity.DEFENCE_CODE;
 import static org.enoch.snark.gi.macro.Mission.*;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
+import static org.enoch.snark.model.Resources.everything;
+import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
 
 public class DefenseThread extends AbstractThread {
 
@@ -101,9 +103,10 @@ public class DefenseThread extends AbstractThread {
 
         SendFleetCommand command = new SendFleetCommand(fleetEntity);
         command.addTag(threadName);
-        command.setAllResources(true);
+        command.setResources(everything);
         command.setAllShips(true);
-        commander.pushFleet(command, true);
+        command.setRunType(FLEET_ACTION_WITH_PRIORITY);
+        command.push();
     }
 
     private ColonyEntity chooseDestination(Planet source) {
@@ -121,7 +124,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void loadAggressiveFleet() {
-        Long limit = Instance.config.getConfigLong(threadName, LIMIT, 3000L);
+        Long limit = map.getConfigLong(LIMIT, 3000L);
 
         aggressorsEvents = Navigator.getInstance().getEventFleetList().stream()
         .filter(event -> (event.isHostile && event.mission.isAggressive())
@@ -152,7 +155,7 @@ public class DefenseThread extends AbstractThread {
                 .filter(event -> event.isHostile && Mission.ATTACK.equals(event.mission))
                 .filter(event -> !aggressorsAttacks.contains(event.sendMail))
                 .forEach(event -> {
-                    commander.push(new SendMessageToPlayerCommand(event.sendMail, Msg.get(BAZINGA_PL)));
+                    new SendMessageToPlayerCommand(event.sendMail, Msg.get(BAZINGA_PL)).push();
                     aggressorsAttacks.add(event.sendMail);
                 });
     }

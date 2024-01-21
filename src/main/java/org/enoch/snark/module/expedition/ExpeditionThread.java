@@ -1,5 +1,6 @@
 package org.enoch.snark.module.expedition;
 
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -12,6 +13,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.ConfigMap;
 
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -27,7 +29,7 @@ public class ExpeditionThread extends AbstractThread {
     public static final String BATTLE_EXTENSION = "battle_extension";
     public static final String MAX_DT = "max_dt";
 
-    private Queue<ColonyEntity> expeditionQueue = new LinkedList<>();
+    private Queue<ColonyEntity> expeditionSource = new LinkedList<>();
     private Long maxTL;
 
     public ExpeditionThread(ConfigMap map) {
@@ -56,8 +58,9 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void chooseColoniesForExpeditionsStart() {
-        expeditionQueue = new LinkedList<>();
-        expeditionQueue.addAll(map.getFlyPoints());
+        expeditionSource = new LinkedList<>();
+        expeditionSource.addAll(map.getFlyPoints());
+        loadExpeditionPoints();
     }
 
     @Override
@@ -65,9 +68,9 @@ public class ExpeditionThread extends AbstractThread {
 
 //        Boolean waiting = map.getConfigBoolean("waiting", true);
 //        if(waiting && stillWaitingForFleet()) return;
-        if(stillWaitingForFleet()) return;
+//        if(stillWaitingForFleet()) return;
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
-            ColonyEntity colony = getNextFlyPoint();
+            ColonyEntity colony = getSource();
             if (colony == null) return;
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {
@@ -76,15 +79,15 @@ public class ExpeditionThread extends AbstractThread {
         }
     }
 
-    private ColonyEntity getNextFlyPoint() {
-        if(expeditionQueue.isEmpty()) chooseColoniesForExpeditionsStart();
-        ColonyEntity poll = expeditionQueue.poll();
+    private ColonyEntity getSource() {
+        if(expeditionSource.isEmpty()) chooseColoniesForExpeditionsStart();
+        ColonyEntity poll = expeditionSource.poll();
         if(poll == null) {
             System.err.println("expeditionQueue in ExpeditionThread is empty");
             chooseColoniesForExpeditionsStart();
             return null;
         } else {
-            expeditionQueue.add(poll);
+            expeditionSource.add(poll);
             return ColonyDAO.getInstance().fetch(poll);
         }
     }
@@ -99,42 +102,59 @@ public class ExpeditionThread extends AbstractThread {
 
     private FleetEntity buildExpeditionFleet(ColonyEntity colony) {
         maxTL = calculateMaxExpeditionSize();
-        FleetEntity expeditionToSend = FleetEntity.createExpedition(colony);
+        FleetEntity expeditionToSend = FleetEntity.createExpeditionDirection(colony);
 
-        Map<ShipEnum, Long> expeditionMap = ShipEnum.createExpeditionMap(maxTL, 0L, 1L);
-        if(colony.hasEnoughShips(expeditionMap)) {
+        Map<ShipEnum, Long> requestedExpeditionShipMap = ShipEnum.createExpeditionShipMap(maxTL, 0L, 1L);
+        if(colony.hasEnoughShips(requestedExpeditionShipMap)) {
 
-            expeditionToSend.setShips(expeditionMap);
+            expeditionToSend.setShips(requestedExpeditionShipMap);
             return expeditionToSend;
         }
-        if(anyExpeditionStartPointHasEnoughShips(expeditionMap)) {
+
+        if(anyExpeditionStartPointHasEnoughShips(requestedExpeditionShipMap)) {
             return null;
-        } else {
-            loadExpeditionPoints();
+        } else if(allExpeditionStartPointHasNoneTransporters()) {
+            return null;
         }
         return sendWhatYouCan();
     }
 
+    private boolean allExpeditionStartPointHasNoneTransporters() {
+        refreshColoniesFromDb();
+        return expeditionSource.stream().allMatch(colony -> colony.transporterLarge<1 && colony.transporterSmall<1);
+    }
+
+    private void refreshColoniesFromDb() {
+        expeditionSource.forEach(colonyEntity -> ColonyDAO.getInstance().refresh(colonyEntity));
+    }
+
     private boolean anyExpeditionStartPointHasEnoughShips(Map<ShipEnum, Long> expeditionMap) {
-        return expeditionQueue.stream().anyMatch(colony -> colony.hasEnoughShips(expeditionMap));
+        refreshColoniesFromDb();
+        return expeditionSource.stream().anyMatch(colony -> colony.hasEnoughShips(expeditionMap));
     }
 
     private void loadExpeditionPoints() {
-        expeditionQueue.forEach(col -> commander.push(new OpenPageCommand(PAGE_BASE_FLEET, col)));
+        refreshColoniesFromDb();
+        expeditionSource.stream()
+                .filter(colonyEntity -> DateUtil.isExpired(colonyEntity.updated, 2L, ChronoUnit.HOURS))
+                .forEach(col -> {
+                    OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, col);
+                    command.addTag(command.toString()).push();
+                });
         System.err.println("reloading expedition points");
-        SleepUtil.secondsToSleep(expeditionQueue.size() * 5);
+        SleepUtil.secondsToSleep(expeditionSource.size() * 5L);
     }
 
     private FleetEntity sendWhatYouCan() {
         System.err.println("\nsendWhatYouCan expedition - why?!\n");
         ColonyEntity anotherExpeditionStartPoint = findBestExpeditionStartPoint();
-        FleetEntity expedition = FleetEntity.createExpedition(anotherExpeditionStartPoint);
+        FleetEntity expedition = FleetEntity.createExpeditionDirection(anotherExpeditionStartPoint);
         if(anotherExpeditionStartPoint.explorer > 0) {
             expedition.explorer = 1L;
         }
         if(anotherExpeditionStartPoint.transporterLarge > maxTL) {
             expedition.transporterLarge = maxTL;
-        } else {
+        } else {// send what you have
             expedition.transporterLarge = anotherExpeditionStartPoint.transporterLarge;
             long missingLT = (maxTL - expedition.transporterLarge) * 5;
             Long actualTransporterSmall = anotherExpeditionStartPoint.transporterSmall;
@@ -146,7 +166,7 @@ public class ExpeditionThread extends AbstractThread {
     private ColonyEntity findBestExpeditionStartPoint() {
         ColonyEntity bestColony = null;
         long bestAmount = 0L;
-        for (ColonyEntity expPoint : expeditionQueue) {
+        for (ColonyEntity expPoint : expeditionSource) {
             long amount = 5*expPoint.transporterLarge + expPoint.transporterSmall;
             if(amount > bestAmount) {
                 bestAmount = amount;
@@ -164,6 +184,6 @@ public class ExpeditionThread extends AbstractThread {
         boolean battleExtension = map.getConfigBoolean(BATTLE_EXTENSION, true);
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
         expeditionFleetCommand.addTag(threadName);
-        instance.push(expeditionFleetCommand);
+        expeditionFleetCommand.push();
     }
 }

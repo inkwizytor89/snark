@@ -16,6 +16,12 @@ import java.util.Map;
 
 public class FormsManager {
 
+    private String tag;
+
+    public FormsManager(String tag) {
+        this.tag = tag;
+    }
+
     public BuildingRequest getBuildRequest(ColonyEntity colony) {
         final Map<Long, List<BuildingRequest>> levelUpMap = generateLevelUpMap(colony);
         if(getLevel(colony) > levelUpMap.size()) {
@@ -45,7 +51,7 @@ public class FormsManager {
 
     private Map<Long, List<BuildingRequest>> generateLevelUpMap(final ColonyEntity colony) {
         final Map<Long, List<BuildingRequest>> map = new HashMap<>();
-        final String lfType = Instance.config.getConfig(FormsThread.threadName, FormsThread.TYPE, KAELESH.name());
+        final String lfType = Instance.getConfigMap(tag).getConfig(FormsThread.TYPE, KAELESH.name());
         if(HUMAN.equalsTo(lfType)) {
             buildHumans(map);
         } else if(ROCKTAL.equalsTo(lfType)) {

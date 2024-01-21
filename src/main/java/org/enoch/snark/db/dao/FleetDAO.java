@@ -72,6 +72,18 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         }
     }
 
+    public List<FleetEntity> findWithTag(LocalDateTime from, String tag) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                    "from FleetEntity " +
+                    "where visited > :from or start = null and " +
+                    " false", FleetEntity.class)
+                    .setParameter("from", from)
+                    .setParameter("tag", tag)
+                    .getResultList();
+        }
+    }
+
     public void clean(LocalDateTime from) {
         synchronized (JPAUtility.dbSynchro) {
 
@@ -114,23 +126,34 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
 
     public void createNewWave(Mission mission, List<TargetEntity> farmTargets, Long code) {
         synchronized (JPAUtility.dbSynchro) {
-            entityManager.getTransaction().begin();
-            for(TargetEntity farm : farmTargets) {
-                FleetEntity fleet;
-                if(Mission.SPY.equals(mission)) {
-                    fleet = FleetEntity.createSpyFleet(farm);
-                } else if(Mission.ATTACK.equals(mission)) {
-                    fleet = FleetEntity.createFarmFleet(farm);
-                } else throw new RuntimeException("Unknown mission on farm wave");
 
-                fleet.spaceTarget = ColonyType.PLANET;
-                fleet.code = code;
-                entityManager.persist(fleet);
-                entityManager.flush();
-                entityManager.clear();
+            EntityTransaction transaction = entityManager.getTransaction();
+            try {
+                transaction.begin();
+                for (TargetEntity farm : farmTargets) {
+                    FleetEntity fleet;
+                    if (Mission.SPY.equals(mission)) {
+                        fleet = FleetEntity.createSpyFleet(farm);
+                    } else if (Mission.ATTACK.equals(mission)) {
+                        fleet = FleetEntity.createFarmFleet(farm);
+                    } else throw new RuntimeException("Unknown mission on farm wave");
+
+                    fleet.spaceTarget = ColonyType.PLANET;
+                    fleet.code = code;
+                    entityManager.persist(fleet);
+                    entityManager.flush();
+                    entityManager.clear();
+                }
+
+                transaction.commit();
+            } catch (Exception e) {
+                System.err.println("transaction error "+e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if(transaction.isActive()){
+                    transaction.rollback();
+                }
             }
-
-            entityManager.getTransaction().commit();
         }
     }
 }

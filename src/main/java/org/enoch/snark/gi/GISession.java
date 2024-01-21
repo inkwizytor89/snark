@@ -49,7 +49,7 @@ public class GISession {
         webDriver.switchTo().window(tabs.get(0));
         webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
         SleepUtil.sleep();
-        gi.doubleClickText(Instance.config.getConfig(SERVER));
+        gi.doubleClickText(Instance.getMainConfigMap().getConfig(SERVER));
         SleepUtil.sleep(TimeUnit.SECONDS,4);
 
         String server = new ArrayList<>(webDriver.getWindowHandles()).get(1);
@@ -85,12 +85,12 @@ public class GISession {
 //        gi.findElement(TAG_BUTTON, ATTRIBUTE_TYPE, VALUE_SUBMIT).click();
 
 //        gi.findText("Login").click();
-        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(Instance.config.getConfig(LOGIN));
+        gi.findElement(TAG_INPUT, "id", "QA_SignIn_Email_Input").sendKeys(Instance.getMainConfigMap().getConfig(LOGIN));
         gi.findElement(TAG_BUTTON, "id", "QA_SignIn_Next_Button").click();
         SleepUtil.secondsToSleep(2);
 
 //        try {
-            gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.config.getConfig(PASSWORD));
+            gi.findElement(TAG_INPUT, "id", "QA_SignIn_Password_Input").sendKeys(Instance.getMainConfigMap().getConfig(PASSWORD));
             gi.findElement(TAG_BUTTON, "id", "QA_SignIn_SignIn_Button").click();//        webDriver.navigate().refresh();
             SleepUtil.secondsToSleep(10);
 

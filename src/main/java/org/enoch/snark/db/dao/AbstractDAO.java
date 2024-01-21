@@ -2,7 +2,6 @@ package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.IdEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.db.entity.TargetEntity;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -67,6 +66,15 @@ public abstract class AbstractDAO<T extends IdEntity> {
             transaction.begin();
             entityManager.remove(entity);
             entityManager.flush();
+            transaction.commit();
+        }
+    }
+
+    public void refresh(T entity) {
+        synchronized (JPAUtility.dbSynchro) {
+            final EntityTransaction transaction = entityManager.getTransaction();
+            transaction.begin();
+            entityManager.refresh(entity);
             transaction.commit();
         }
     }

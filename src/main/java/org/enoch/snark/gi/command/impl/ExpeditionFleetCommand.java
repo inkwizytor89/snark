@@ -39,11 +39,11 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
 //        } else if (source.interceptor > 0) {
 //            fleet.interceptor = 1L;
 //        } else
-            if (source.battleship > 0) {
+        if (source.battleship > 0) {
             fleet.battleship = 1L;
-        } else if (source.cruiser > 0) {
+        } else if (source.cruiser > 0 && source.explorer < 1) {
             fleet.cruiser = 1L;
-        } else if (source.fighterHeavy > 0) {
+        } else if (source.fighterHeavy > 0 && source.explorer < 1) {
                 fleet.fighterHeavy = 1L;
             }
     }

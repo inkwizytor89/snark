@@ -81,7 +81,7 @@ public class AlarmSoundPlayer implements LineListener {
     }
 
     private String getAlarmAudioFilePath() {
-        String alarmPath = Instance.config.getConfig(DefenseThread.threadName, ALARM, MISSING_WAV);
+        String alarmPath = Instance.getConfigMap(DefenseThread.threadName).getConfig(ALARM, MISSING_WAV);
         if(!alarmPath.equals(MISSING_WAV)) return alarmPath;
         File[] files = new File("").listFiles((dir, name) -> name.toLowerCase().endsWith(".wav"));
         if(files== null || files.length == 0) return null;

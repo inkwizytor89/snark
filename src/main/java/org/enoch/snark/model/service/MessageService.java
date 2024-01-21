@@ -24,9 +24,9 @@ public class MessageService {
             while(true) {
 
                 if(isTimeForReadMessages()) {
-                    Instance.getInstance().push(new ReadMessageCommand());
+                    new ReadMessageCommand().push();
                 }
-                SleepUtil.secondsToSleep(10);
+                SleepUtil.secondsToSleep(10L);
 
 //                List<FleetEntity> notLoadedSpyActions = FleetDAO.getInstance().findLastSend(lastChecked).stream()
 //                        .filter(fleet -> SPY.getName().equals(fleet.type))

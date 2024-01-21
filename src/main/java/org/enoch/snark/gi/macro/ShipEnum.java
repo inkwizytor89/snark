@@ -1,5 +1,7 @@
 package org.enoch.snark.gi.macro;
 
+import org.apache.commons.lang3.EnumUtils;
+import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.db.entity.FleetEntity;
 
 import java.util.HashMap;
@@ -32,6 +34,16 @@ public enum ShipEnum {
         return id;
     }
 
+    public static Map<ShipEnum, Long> parse(String string) {
+        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        for (String position : string.trim().split(",")) {
+            String[] entry = position.split(":");
+            ShipEnum shipEnumValue = EnumUtils.getEnum(ShipEnum.class, entry[0]);
+            shipsMap.put(shipEnumValue, NumberUtil.toLong(entry[1]));
+        }
+        return shipsMap;
+    }
+
     public static Map<ShipEnum, Long> createShipsMap(FleetEntity fleet) {
         Map<ShipEnum, Long> shipsMap = new HashMap<>();
         if(fleet.fighterLight != null && fleet.fighterLight > 0) shipsMap.put(fighterLight, fleet.fighterLight);
@@ -53,7 +65,7 @@ public enum ShipEnum {
         return shipsMap;
     }
 
-    public static Map<ShipEnum, Long> createExpeditionMap(Long tl, Long ts, Long ex) {
+    public static Map<ShipEnum, Long> createExpeditionShipMap(Long tl, Long ts, Long ex) {
         Map<ShipEnum, Long> shipsMap = new HashMap<>();
         shipsMap.put(ShipEnum.transporterLarge, tl);
         shipsMap.put(ShipEnum.transporterSmall, ts);

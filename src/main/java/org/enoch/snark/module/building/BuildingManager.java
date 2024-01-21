@@ -4,10 +4,15 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.macro.BuildingEnum;
+import org.enoch.snark.instance.Instance;
+import org.enoch.snark.module.ConfigMap;
 
 import java.util.*;
 
+import static org.enoch.snark.module.building.BuildingThread.LEVEL;
+
 public class BuildingManager {
+    private String tag;
 
 //    private final Map<Long, List<BuildingRequest>> levelUpMap;
 
@@ -34,11 +39,15 @@ public class BuildingManager {
     private Map<Long, List<BuildingRequest>> generateLevelUpMap(ColonyEntity colony) {
         final Map<Long, List<BuildingRequest>> map = new HashMap<>();
         final int colonyCount = ColonyDAO.getInstance().fetchAll().size();
-        final Integer maxLevel = BuildingThread.getColonyLastLevelToProcess();
+        final Integer maxLevel = getColonyLastLevelToProcess();
         if (colonyCount < 5) addSimpleBuildings(map, maxLevel);
         else addFastGrowBuildings(map, maxLevel);
         addMines(map, colony, maxLevel);
         return map;
+    }
+
+    public Integer getColonyLastLevelToProcess() {
+        return Instance.getConfigMap(tag).getConfigInteger(LEVEL, 2);
     }
 
     private void addMines(Map<Long, List<BuildingRequest>> map, ColonyEntity colony, Integer maxLevel) {
@@ -48,6 +57,7 @@ public class BuildingManager {
                 list.add(new BuildingRequest(BuildingEnum.deuteriumSynthesizer, i));
                 list.add(new BuildingRequest(BuildingEnum.crystalMine, i-1));
                 list.add(new BuildingRequest(BuildingEnum.metalMine, i-2));
+                list.add(new BuildingRequest(BuildingEnum.fusionPlant, i/2));
                 map.put(i, list);
             }
         } else {
@@ -172,7 +182,8 @@ public class BuildingManager {
                 ));
     }
 
-    public BuildingManager() {
+    public BuildingManager(String tag) {
+        this.tag = tag;
 //        levelUpMap = new HashMap<>();
 //        levelUpMap.put(1L, Arrays.asList(
 //                new BuildingRequest(BuildingEnum.solarPlant, 1),

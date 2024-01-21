@@ -110,7 +110,7 @@ public class LoadColoniesCommand extends AbstractCommand {
 
     private synchronized void typeFlyPoints() {
         List<ColonyEntity> flyPoints = new ArrayList<>();
-        String flyPointsConfig = Instance.config.getConfig(MAIN, FLY_POINTS, StringUtils.EMPTY);
+        String flyPointsConfig = Instance.getMainConfigMap().getConfig(FLY_POINTS, StringUtils.EMPTY);
         List<ColonyEntity> planetList = colonyDAO.fetchAll()
                 .stream()
                 .filter(colonyEntity -> colonyEntity.isPlanet)

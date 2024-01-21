@@ -40,7 +40,7 @@ public class JPAUtility {
         EntityManagerFactory managerFactory = null;
         Map<String, String> persistenceMap = new HashMap<String, String>();
 
-        persistenceMap.put("javax.persistence.jdbc.url", "jdbc:postgresql://localhost/"+ Instance.config.getConfig(Config.SERVER));
+        persistenceMap.put("javax.persistence.jdbc.url", "jdbc:postgresql://localhost/"+ Instance.getMainConfigMap().getConfig(Config.SERVER));
 
         managerFactory = Persistence.createEntityManagerFactory("default", persistenceMap);
         return  managerFactory.createEntityManager();

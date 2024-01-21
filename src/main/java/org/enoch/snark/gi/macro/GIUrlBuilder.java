@@ -48,7 +48,7 @@ public class GIUrlBuilder {
 
     public GIUrlBuilder() {
         instance = Instance.getInstance();
-        url = Instance.config.getConfig(URL);
+        url = Instance.getMainConfigMap().getConfig(URL);
     }
 
     public void openFleetView(ColonyEntity source, Planet target, Mission mission) {
@@ -142,7 +142,7 @@ public class GIUrlBuilder {
     }
 
     private ColonyEntity selectColony() {
-        Boolean isHidingActivity = Instance.config.getConfigBoolean(MAIN, HIDING_ACTIVITY, false);
+        Boolean isHidingActivity = Instance.getMainConfigMap().getConfigBoolean(HIDING_ACTIVITY, false);
         if(isHidingActivity) {
             Optional<ColonyEntity> temporaryPlanet = ColonyDAO.getInstance().fetchAll().stream()
                     .filter(colonyEntity -> colonyEntity.isPlanet)

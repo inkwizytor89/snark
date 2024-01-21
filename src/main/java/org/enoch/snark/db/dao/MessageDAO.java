@@ -33,16 +33,23 @@ public class MessageDAO extends AbstractDAO<MessageEntity> {
             JPAUtility.syncMethod = "org.enoch.snark.db.dao.MessageDAO.clean";
 
             final EntityTransaction transaction = entityManager.getTransaction();
-            transaction.begin();
-            entityManager.createQuery("" +
-                    "delete from MessageEntity " +
-                    "where created < :from ")
-                    .setParameter("from", from)
-                    .executeUpdate();
+            try {
+                transaction.begin();
+                entityManager.createQuery("" +
+                        "delete from MessageEntity " +
+                        "where created < :from ")
+                        .setParameter("from", from)
+                        .executeUpdate();
 
-            JPAUtility.syncMethod = null;
-            entityManager.flush();
-            transaction.commit();
+                JPAUtility.syncMethod = null;
+                entityManager.flush();
+                transaction.commit();
+            } catch (Exception e) {
+                System.err.println("transaction MessageDAO.clean error "+e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if(transaction.isActive()) transaction.rollback();
+            }
         }
     }
 }

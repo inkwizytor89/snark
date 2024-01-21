@@ -356,7 +356,7 @@ public class GI {
         return true;
     }
 
-    public Integer updateQueue(ColonyEntity colony, String queueType) {
+    public Long updateQueue(ColonyEntity colony, String queueType) {
         List<WebElement> elements = webDriver.findElements(By.id(queueType));
         if(elements.isEmpty()) {
             return null;
@@ -367,7 +367,7 @@ public class GI {
             queueManger.clean(colony, queueType);
         } else {
             String timeString = queueElement.findElement(By.className("timer")).getText();
-            Integer second = DateUtil.parseCountDownToSec(timeString);
+            Long second = DateUtil.parseCountDownToSec(timeString)+0L;
             queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
             return second;
         }

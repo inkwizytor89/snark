@@ -43,8 +43,8 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        int galaxyMax = Instance.config.getConfigInteger(MAIN, GALAXY_MAX, 6);
-        int systemMax = Instance.config.getConfigInteger(MAIN, SYSTEM_MAX, 499);
+        int galaxyMax = Instance.getMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
+        int systemMax = Instance.getMainConfigMap().getConfigInteger(SYSTEM_MAX, 499);
         for(int i = 1 ; i <= galaxyMax; i++) {
             if(isNecessaryGalaxyPersist(i))
                 GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);
@@ -71,7 +71,7 @@ public class SpaceThread extends AbstractThread {
             for (int i = 0; i < DATA_COUNT; i++) {
                 GalaxyEntity poll = notExplored.poll();
                 if(poll != null) {
-                    instance.push(new GalaxyAnalyzeCommand(poll));
+                    new GalaxyAnalyzeCommand(poll).push();
                 }
             }
             return;
@@ -91,6 +91,6 @@ public class SpaceThread extends AbstractThread {
         }
 
         toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
-        toView.forEach(galaxy -> instance.push(new GalaxyAnalyzeCommand(galaxy)));
+        toView.forEach(galaxy -> new GalaxyAnalyzeCommand(galaxy).push());
     }
 }
