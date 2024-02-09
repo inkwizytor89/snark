@@ -73,9 +73,16 @@ public abstract class AbstractDAO<T extends IdEntity> {
     public void refresh(T entity) {
         synchronized (JPAUtility.dbSynchro) {
             final EntityTransaction transaction = entityManager.getTransaction();
-            transaction.begin();
-            entityManager.refresh(entity);
-            transaction.commit();
+            try {
+                transaction.begin();
+                entityManager.refresh(entity);
+                transaction.commit();
+            } catch (Exception e) {
+                System.err.println("transaction AbstractDAO.refresh error " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if (transaction.isActive()) transaction.rollback();
+            }
         }
     }
 }
