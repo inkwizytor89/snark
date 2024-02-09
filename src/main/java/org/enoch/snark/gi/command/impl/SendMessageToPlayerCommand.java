@@ -1,5 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.enoch.snark.gi.GI;
 import org.openqa.selenium.JavascriptExecutor;
 
 public class SendMessageToPlayerCommand extends AbstractCommand {
@@ -15,13 +16,14 @@ public class SendMessageToPlayerCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        instance.gi.webDriver.get(herf);
+        GI gi = GI.getInstance();
+        gi.webDriver.get(herf);
 
         //Scroll down till the bottom of the page
-        ((JavascriptExecutor) instance.gi.webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+        ((JavascriptExecutor) gi.webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
-        instance.gi.findElement("textarea", "name", "text").sendKeys(message);
-        instance.gi.findElement("a", "class", "btn_blue fright send_new_msg").click();
+        gi.findElement("textarea", "name", "text").sendKeys(message);
+        gi.findElement("a", "class", "btn_blue fright send_new_msg").click();
 
         return true;
     }

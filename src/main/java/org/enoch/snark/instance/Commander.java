@@ -4,16 +4,15 @@ import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.exception.ShipDoNotExists;
-import org.enoch.snark.model.types.QueueRunType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.util.*;
@@ -26,8 +25,6 @@ import static org.enoch.snark.module.ConfigMap.STOP;
 
 public class Commander extends Thread {
 
-    private static final Long SLEEP_PAUSE = 1L;
-    public static final String LOBBY_URL = "https://lobby.ogame.gameforge.com/";
     public static final String FLEET_ACTION_STRING = "FLEET_ACTION";
     public static final String FLEET_ACTION_WITH_PRIORITY_STRING = "FLEET_ACTION_WITH_PRIORITY";
     private static Commander INSTANCE;
@@ -73,7 +70,7 @@ public class Commander extends Thread {
                 runningStatus.log(Commander.class.getName());
                 if(!runningStatus.shouldRunning()) continue;
 
-                restartIfSessionIsOver();
+                session.reopenServerIfSessionIsOver();
 
 //                if (instance.isStopped()) {
 //                    stopCommander();
@@ -111,7 +108,7 @@ public class Commander extends Thread {
                         continue;
                     }
                 }
-                SleepUtil.secondsToSleep(SLEEP_PAUSE);
+                SleepUtil.sleep();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -119,7 +116,7 @@ public class Commander extends Thread {
     }
 
     private void waitingToOpenServerTab() {
-        while (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
+        while (session.isCurrentUrlBackToLobby()) {
             SleepUtil.pause();
         }
     }
@@ -132,7 +129,7 @@ public class Commander extends Thread {
 
     private boolean isSomethingAttacking() {
         try {
-            WebElement attack_alert = instance.gi.webDriver.findElement(By.id("attack_alert"));
+            WebElement attack_alert = GI.getInstance().webDriver.findElement(By.id("attack_alert"));
             if(attack_alert.getAttribute("class").contains("soon")) {
                 return true;
             }
@@ -142,36 +139,14 @@ public class Commander extends Thread {
         return false;
     }
 
-    private void startCommander() {
+    public void startCommander() {
+        System.err.println("Commander is startedped");
         this.isRunning = true;
     }
 
-    private void stopCommander() {
+    public void stopCommander() {
         System.err.println("Commander is stopped");
         this.isRunning = false;
-        SleepUtil.secondsToSleep(SLEEP_PAUSE * 30);
-    }
-
-    private void restartIfSessionIsOver() {
-        try {
-            if (instance.gi.webDriver.getCurrentUrl().contains(LOBBY_URL)) {
-                stopCommander();
-                System.err.println("sleep 300 before restart");
-                SleepUtil.secondsToSleep(300);
-//                SleepUtil.secondsToSleep(300);
-                instance.addNewTabForServer();
-                startCommander();
-            }
-        } catch (WebDriverException e) {
-            e.printStackTrace();
-            System.err.println("URL error: "+e.getMessage());
-            instance.addNewTabForServer();
-//            stopCommander();
-//            System.err.println("sleep 500 before restart");
-//            SleepUtil.secondsToSleep(500);
-//            instance.browserReset();
-//            startCommander();
-        }
     }
 
     private synchronized void resolve(AbstractCommand command) {
@@ -181,9 +156,9 @@ public class Commander extends Thread {
             System.err.println("Skipping resolving null command");
             return;
         }
-        if(!session.isLoggedIn()) {
-            session.open();
-        }
+//        if(!session.isLoggedIn()) {
+//            session.open();
+//        }
         // każdy wyjątek powinien miec czy powtórzyć procedure
         // jesli nie ma tego to nalezy powtorzyc
         // poza tym wprost mozna zwrocic falsz czyli nie powtarzac

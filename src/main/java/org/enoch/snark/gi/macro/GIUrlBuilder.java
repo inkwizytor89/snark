@@ -4,6 +4,8 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.gi.GI;
+import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.GeneralGIR;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.instance.Instance;
@@ -61,11 +63,11 @@ public class GIUrlBuilder {
                 "&position=" + target.position +
                 "&type=" +  generateTargetType(target.type) +
                 "&mission=" + mission.getValue();
-        Instance.session.getWebDriver().get(builder);
+        GISession.getInstance().getWebDriver().get(builder);
 
         updateColony(source);
         loadFleetStatus();
-        Instance.getInstance().gi.updateFleet(source);
+        GI.getInstance().updateFleet(source);
     }
 
     private String generateTargetType(ColonyType type) {
@@ -79,7 +81,7 @@ public class GIUrlBuilder {
     public void loadFleetStatus() {
         try {
             Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
-            final WebElement slotsLabel = instance.session.getWebDriver().findElement(By.id("slots"));
+            final WebElement slotsLabel = GISession.getInstance().getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
                 Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
@@ -95,14 +97,14 @@ public class GIUrlBuilder {
     public void openMessages() {
         String builder = url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
-        Instance.session.getWebDriver().get(builder);
+        GISession.getInstance().getWebDriver().get(builder);
     }
 
     public void openHighScore(String site) {
         String builder = url + "?" +
                 PAGE_TERM + PAGE_HIGH_SCORE + "&" +
                 SITE_TERM +site;
-        Instance.session.getWebDriver().get(builder.toString());
+        GISession.getInstance().getWebDriver().get(builder.toString());
     }
 
     public void openComponent(String component, ColonyEntity colony) {
@@ -113,28 +115,28 @@ public class GIUrlBuilder {
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + component);
         builder.append("&cp=" + colony.cp);
-        Instance.session.getWebDriver().get(builder.toString());
+        GISession.getInstance().getWebDriver().get(builder.toString());
         instance.lastVisited = colony;
 
         updateColony(colony);
         if (PAGE_RESOURCES.equals(component)) {
-            Instance.gi.updateResourcesProducers(colony);
-            Instance.gi.updateQueue(colony, QueueManger.BUILDING);
-            Instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+            GI.getInstance().updateResourcesProducers(colony);
+            GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
+            GI.getInstance().updateQueue(colony, QueueManger.SHIPYARD);
         } else if (PAGE_FACILITIES.equals(component)) {
-            instance.gi.updateFacilities(colony);
-            instance.gi.updateQueue(colony, QueueManger.BUILDING);
+            GI.getInstance().updateFacilities(colony);
+            GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
         } else if (PAGE_LIFEFORM.equals(component)) {
-            instance.gi.updateLifeform(colony);
-            instance.gi.updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
+            GI.getInstance().updateLifeform(colony);
+            GI.getInstance().updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
         } else if (PAGE_BASE_FLEET.equals(component)) {
             if (instance.commander != null) {
                 loadFleetStatus();
             }
-            Instance.getInstance().gi.updateFleet(colony);
+            GI.getInstance().updateFleet(colony);
         } else if (PAGE_DEFENSES.equals(component)) {
-            Instance.getInstance().gi.updateDefence(colony);
-            instance.gi.updateQueue(colony, QueueManger.SHIPYARD);
+            GI.getInstance().updateDefence(colony);
+            GI.getInstance().updateQueue(colony, QueueManger.SHIPYARD);
         }
         if (checkEventFleet) {
             Navigator.getInstance().informAboutEventFleets(new GeneralGIR().readEventFleet());
@@ -160,7 +162,7 @@ public class GIUrlBuilder {
     }
 
     public void updateColony(ColonyEntity colony) {
-        instance.gi.updateResources(colony);
+        GI.getInstance().updateResources(colony);
         colony.updated = LocalDateTime.now();
         colony.save();
     }
@@ -169,10 +171,10 @@ public class GIUrlBuilder {
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM).append(page);
-        Instance.session.getWebDriver().get(builder.toString());
+        GISession.getInstance().getWebDriver().get(builder.toString());
         if(PAGE_RESEARCH.equals(page) && player != null) {
-            Instance.gi.updateResearch(player);
-            Instance.gi.updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
+            GI.getInstance().updateResearch(player);
+            GI.getInstance().updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
             player.updated = LocalDateTime.now();
             PlayerDAO.getInstance().saveOrUpdate(player);
         }
@@ -193,10 +195,10 @@ public class GIUrlBuilder {
                 "&galaxy=" + systemView.galaxy +
                 "&system=" + systemView.system +
                 "&cp=" + colony.cp;
-        Instance.session.getWebDriver().get(builder);
+        GISession.getInstance().getWebDriver().get(builder);
         instance.lastVisited = colony;
         updateColony(colony);
-        Instance.gi.updateGalaxy(systemView);
+        GI.getInstance().updateGalaxy(systemView);
     }
 
     public GIUrlBuilder setCheckEventFleet(boolean checkEventFleet) {

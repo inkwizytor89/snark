@@ -117,7 +117,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     public LocalTime parseDurationSecounds() {
-        final String durationString = Instance.gi.findElement("span", "id", "duration", "").getText();
+        final String durationString = GI.getInstance().findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         return DateUtil.parseDuration(durationString);
     }

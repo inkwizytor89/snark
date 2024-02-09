@@ -39,7 +39,7 @@ public class GI {
     public static final String ID_ATTRIBUTE = "id";
     public static final String CLASS_ATTRIBUTE = "class";
     public static final String TECHNOLOGIES = "technologies";
-    public final WebDriver webDriver;
+    public static WebDriver webDriver;
     private final PlayerDAO playerDAO;
     private final Instance instance;
     private final GalaxyDAO galaxyDAO;
@@ -47,7 +47,6 @@ public class GI {
     private final QueueManger queueManger;
 
     private GI() {
-        webDriver = new ChromeDriver();
         queueManger = QueueManger.getInstance();
         instance = Instance.getInstance();
         playerDAO = PlayerDAO.getInstance();
@@ -62,8 +61,14 @@ public class GI {
         return INSTANCE;
     }
 
-    public static void restartInstance() {
-        INSTANCE = null;
+    public static WebDriver reopenWebDriver() {
+        if(webDriver != null) closeWebDriver();
+        webDriver = new ChromeDriver();
+        return webDriver;
+    }
+
+    public static void closeWebDriver() {
+        webDriver.quit();
     }
 
     public void doubleClickText(String text) {

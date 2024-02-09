@@ -9,7 +9,6 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.RefreshColoniesStateCommand;
@@ -19,19 +18,15 @@ import org.enoch.snark.instance.config.Universe;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.ConfigMap;
-import org.openqa.selenium.NoSuchSessionException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
-import static org.enoch.snark.instance.config.Config.MAIN;
-import static org.enoch.snark.instance.config.Config.MODE;
 
 public class Instance {
 
@@ -40,7 +35,7 @@ public class Instance {
     private static Instance INSTANCE;
     public static Config config;
     public static Commander commander;
-    public static GI gi;
+//    public static GI gi;
     public static GISession session;
     public static Integer level = 1;
     private ColonyDAO colonyDAO;
@@ -78,41 +73,15 @@ public class Instance {
         return flyPoints;
     }
 
-    public void browserReset() {
-        boolean isException;
-        do {
-            try {
-                if (session != null) {
-                    try {
-                        session.getWebDriver().close();
-                    } catch (NoSuchSessionException e) {
-                        e.printStackTrace();
-                    }
-                    session.getWebDriver().quit();
-
-                }
-                GI.restartInstance();
-                gi = GI.getInstance();
-                session = new GISession(this);
-
-                isException = false;
-            } catch (Throwable e) {
-                e.printStackTrace();
-                isException = true;
-                SleepUtil.sleep(TimeUnit.MINUTES, 1);
-            }
-        }while(isException);
-    }
-
-    public void addNewTabForServer(){
-       session.addNewTabForServer();
+    public void startBrowser() {
+        session = GISession.getInstance();
     }
 
     public void run() {
         colonyDAO = ColonyDAO.getInstance();
         MessageService.getInstance();
 
-        browserReset();
+        startBrowser();
         initialActionOnStart();
         BaseSI.getInstance();
         Cleaner.getInstance();

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
+import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
@@ -63,7 +64,7 @@ public class BuildCommand extends AbstractCommand {
 
     private void refreshColonyWhenBuildingIsDone() {
         new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
-        Long seconds = Instance.gi.updateQueue(colony, QueueManger.BUILDING);
+        Long seconds = GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
         if(seconds != null) {
             System.out.println(colony+" build "+ requirements.request + ", refresh after "+ seconds);
             setNext(new OpenPageCommand(requirements.request.building.getPage(), colony), seconds);
