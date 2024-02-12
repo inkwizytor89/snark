@@ -1,9 +1,11 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.WaitingThread;
+import org.enoch.snark.gi.GI;
 import org.enoch.snark.instance.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.types.QueueRunType;
+import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION;
 import static org.enoch.snark.model.types.QueueRunType.INTERFACE_ACTION;
 
 public abstract class AbstractCommand {
+    protected final WebDriver webDriver;
     private FollowingAction followingAction;
     private QueueRunType runType = INTERFACE_ACTION;
     protected Instance instance;
@@ -22,6 +25,7 @@ public abstract class AbstractCommand {
 
     protected AbstractCommand() {
         this.instance = Instance.getInstance();
+        webDriver = GI.getInstance().getWebDriver();
         if(this instanceof SendFleetCommand) runType = FLEET_ACTION;
     }
 

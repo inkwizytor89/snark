@@ -34,7 +34,7 @@ import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BAC
 import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 import static org.enoch.snark.model.Resources.everything;
 
-public class SendFleetCommand extends GICommand {
+public class SendFleetCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFOR = 3L;
     public Mission mission;
@@ -203,16 +203,16 @@ public class SendFleetCommand extends GICommand {
     public void next() {
         SleepUtil.pause();
         // to button continue to recalculate
-        session.getWebDriver().findElement(By.className("planet-header")).click();
+        webDriver.findElement(By.className("planet-header")).click();
 
-        final WebElement continueButton = session.getWebDriver().findElement(By.id("continueToFleet2"));
+        final WebElement continueButton = webDriver.findElement(By.id("continueToFleet2"));
         if(continueButton.getAttribute("class").equals("continue off")) {
             throw new ShipDoNotExists();
         }
 //        continueButton.click();
 
 
-        Actions actions = new Actions(session.getWebDriver());
+        Actions actions = new Actions(webDriver);
 
         actions.moveToElement(continueButton).click().perform();
     }

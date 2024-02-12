@@ -2,7 +2,6 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.gi.HighScoreGIR;
-import org.enoch.snark.instance.Instance;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -10,8 +9,6 @@ import java.util.List;
 
 import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
 import static org.enoch.snark.gi.HighScoreGIR.*;
-import static org.enoch.snark.instance.config.Config.HIGH_SCORE_PAGES;
-import static org.enoch.snark.instance.config.Config.MAIN;
 
 public class UpdateHighScoreCommand extends AbstractCommand {
 

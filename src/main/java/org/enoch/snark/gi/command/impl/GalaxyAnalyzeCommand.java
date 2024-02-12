@@ -9,7 +9,7 @@ import org.enoch.snark.model.SystemView;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class GalaxyAnalyzeCommand extends GICommand {
+public class GalaxyAnalyzeCommand extends AbstractCommand {
 
     private GalaxyEntity galaxyEntity;
     private LocalDateTime lastUpdated;

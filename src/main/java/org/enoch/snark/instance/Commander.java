@@ -77,7 +77,8 @@ public class Commander extends Thread {
 //                    continue;
 //                }
 
-                startCommander();
+//                startCommander();
+
 
                 if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
                     resolve(new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true));

@@ -71,6 +71,10 @@ public class GI {
         webDriver.quit();
     }
 
+    public WebDriver getWebDriver() {
+        return webDriver;
+    }
+
     public void doubleClickText(String text) {
         try {
             WebElement serverElement = findTextByXPath(text);

@@ -25,6 +25,7 @@ public class GISession {
 
     private WebDriver webDriver;
     public GI gi;
+    private SessionGIR gir = new SessionGIR();
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
