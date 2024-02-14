@@ -20,12 +20,13 @@ import static org.enoch.snark.instance.config.Config.*;
 
 public class GISession {
     public static final String LOBBY_URL = "https://lobby.ogame.gameforge.com/";
+    public static final String LOBBY_WITH_ACCOUNTS = LOBBY_URL+"pl_PL/accounts";
 
     private static GISession INSTANCE;
 
     private WebDriver webDriver;
     public GI gi;
-    private SessionGIR gir = new SessionGIR();
+//    private SessionGIR gir = new SessionGIR();
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
@@ -45,7 +46,7 @@ public class GISession {
     }
 
     public void startBrowserWindow() {
-        webDriver = gi.reopenWebDriver();
+        webDriver = GI.reopenWebDriver();
         webDriver.manage().window().maximize();
     }
 
@@ -103,7 +104,7 @@ public class GISession {
         closeOtherTabs(tabs);
         webDriver.switchTo().window(tabs.get(0));
 
-        webDriver.get("https://lobby.ogame.gameforge.com/pl_PL/accounts"); //gi.clickText(Test.PLAY_TEXT);
+        webDriver.get(LOBBY_WITH_ACCOUNTS); //gi.clickText(Test.PLAY_TEXT);
         SleepUtil.sleep();
         gi.doubleClickText(Instance.getMainConfigMap().getConfig(SERVER));
         SleepUtil.sleep(TimeUnit.SECONDS,4);
@@ -181,7 +182,7 @@ public class GISession {
     }
 
     public boolean isCurrentUrlBackToLobby() {
-        return gi.webDriver.getCurrentUrl().contains(LOBBY_URL);
+        return GI.webDriver.getCurrentUrl().contains(LOBBY_URL);
     }
 
     public WebDriver getWebDriver() {
