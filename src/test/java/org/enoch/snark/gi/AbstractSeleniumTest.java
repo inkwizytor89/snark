@@ -38,6 +38,5 @@ public class AbstractSeleniumTest {
 
     @After
     public void tearDown() {
-        instance.session.close();
     }
 }
