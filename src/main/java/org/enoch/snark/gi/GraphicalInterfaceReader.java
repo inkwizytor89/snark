@@ -24,7 +24,7 @@ abstract class GraphicalInterfaceReader {
     protected final WebDriverWait wait;
 
     GraphicalInterfaceReader() {
-        wd =(ChromeDriver) GI.getInstance().webDriver;
+        wd =(ChromeDriver) GI.getInstance().getWebDriver();
         wait = new WebDriverWait(wd, 1);
     }
 

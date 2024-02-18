@@ -55,7 +55,7 @@ public class SessionGIR extends GraphicalInterfaceReader {
         wd.switchTo().window(tabs.get(0));
 
         wd.get(LOBBY_WITH_ACCOUNTS);
-        SleepUtil.sleep();
+        SleepUtil.secondsToSleep(2L);
 
         String serverName = Instance.getMainConfigMap().getConfig(SERVER);
         wd.findElements(By.xpath("//div[@role='row']")).stream()

@@ -16,7 +16,7 @@ public class GISession {
 
     private WebDriver webDriver;
     public GI gi;
-    private final SessionGIR gir;
+    private SessionGIR gir;
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
@@ -27,12 +27,12 @@ public class GISession {
 
     private GISession() {
         gi = GI.getInstance();
-        gir = new SessionGIR();
         start();
     }
 
     private void start() {
         startBrowserWindow();
+        gir = new SessionGIR();
         gir.signIn();
         gir.openServer();
     }
