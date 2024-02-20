@@ -110,6 +110,10 @@ public class Commander extends Thread {
                     }
                 }
                 SleepUtil.sleep();
+            } catch (org.openqa.selenium.TimeoutException e) {
+                System.err.println("TimeoutException znowu");
+                System.err.println(e);
+                session.makeRestart(0L);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -117,7 +121,7 @@ public class Commander extends Thread {
     }
 
     private void waitingToOpenServerTab() {
-        while (session.isCurrentUrlBackToLobby()) {
+        while (!session.isRunning()) {
             SleepUtil.pause();
         }
     }

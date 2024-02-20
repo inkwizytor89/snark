@@ -7,6 +7,7 @@ import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.SpyReportGIR;
 import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
@@ -39,7 +40,7 @@ public class ReadMessageCommand extends AbstractCommand {
     }
 
     private List<String> loadMessagesLinks() {
-        final WebDriver chromeDriver = Instance.session.getWebDriver();
+        final WebDriver chromeDriver = GI.getInstance().getWebDriver();
         final List<WebElement> elements = chromeDriver.findElements(By.tagName("a"));
         List<String> spyReports = new ArrayList<>();
         for (WebElement element : elements) {
@@ -73,7 +74,7 @@ public class ReadMessageCommand extends AbstractCommand {
         }
 //        System.err.println("parsing message id "+messageId);
 
-        MessageEntity messageEntity = MessageEntity.create(Instance.session.getWebDriver().getPageSource());
+        MessageEntity messageEntity = MessageEntity.create(GI.getInstance().getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
         MessageDAO.getInstance().saveOrUpdate(messageEntity);
         if(MessageEntity.SPY.equals(messageEntity.type)) {

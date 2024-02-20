@@ -63,7 +63,7 @@ public class GIUrlBuilder {
                 "&position=" + target.position +
                 "&type=" +  generateTargetType(target.type) +
                 "&mission=" + mission.getValue();
-        GISession.getInstance().getWebDriver().get(builder);
+        GI.getInstance().getWebDriver().get(builder);
 
         updateColony(source);
         loadFleetStatus();
@@ -81,7 +81,7 @@ public class GIUrlBuilder {
     public void loadFleetStatus() {
         try {
             Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
-            final WebElement slotsLabel = GISession.getInstance().getWebDriver().findElement(By.id("slots"));
+            final WebElement slotsLabel = GI.getInstance().getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
                 Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
@@ -97,14 +97,14 @@ public class GIUrlBuilder {
     public void openMessages() {
         String builder = url + "?" +
                 PAGE_TERM + PAGE_MESSAGES;
-        GISession.getInstance().getWebDriver().get(builder);
+        GI.getInstance().getWebDriver().get(builder);
     }
 
     public void openHighScore(String site) {
         String builder = url + "?" +
                 PAGE_TERM + PAGE_HIGH_SCORE + "&" +
                 SITE_TERM +site;
-        GISession.getInstance().getWebDriver().get(builder.toString());
+        GI.getInstance().getWebDriver().get(builder.toString());
     }
 
     public void openComponent(String component, ColonyEntity colony) {
@@ -115,7 +115,7 @@ public class GIUrlBuilder {
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM + component);
         builder.append("&cp=" + colony.cp);
-        GISession.getInstance().getWebDriver().get(builder.toString());
+        GI.getInstance().getWebDriver().get(builder.toString());
         instance.lastVisited = colony;
 
         updateColony(colony);
@@ -171,7 +171,7 @@ public class GIUrlBuilder {
         StringBuilder builder = new StringBuilder(url + "?");
         builder.append(PAGE_TERM + PAGE_INGAME + "&");
         builder.append(COMPONENT_TERM).append(page);
-        GISession.getInstance().getWebDriver().get(builder.toString());
+        GI.getInstance().getWebDriver().get(builder.toString());
         if(PAGE_RESEARCH.equals(page) && player != null) {
             GI.getInstance().updateResearch(player);
             GI.getInstance().updateQueue(instance.getMainColony(), QueueManger.RESEARCH);
@@ -195,7 +195,7 @@ public class GIUrlBuilder {
                 "&galaxy=" + systemView.galaxy +
                 "&system=" + systemView.system +
                 "&cp=" + colony.cp;
-        GISession.getInstance().getWebDriver().get(builder);
+        GI.getInstance().getWebDriver().get(builder);
         instance.lastVisited = colony;
         updateColony(colony);
         GI.getInstance().updateGalaxy(systemView);

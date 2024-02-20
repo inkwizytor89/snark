@@ -61,13 +61,12 @@ public class GI {
         return INSTANCE;
     }
 
-    public static WebDriver reopenWebDriver() {
+    public static void reopenWebDriver() {
         if(webDriver != null) closeWebDriver();
         webDriver = new ChromeDriver();
-        return webDriver;
     }
 
-    public static void closeWebDriver() {
+    private static void closeWebDriver() {
         webDriver.quit();
     }
 

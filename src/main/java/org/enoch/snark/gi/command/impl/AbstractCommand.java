@@ -51,7 +51,7 @@ public abstract class AbstractCommand {
     }
 
     public void retry(Integer secondsToDelay) {
-        new WaitingThread(followingAction.setSecondsToDelay(secondsToDelay)).start();
+        new WaitingThread(new FollowingAction(this, secondsToDelay)).start();
     }
 
     public FollowingAction setNext(AbstractCommand command, String... args) {

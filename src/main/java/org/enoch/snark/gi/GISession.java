@@ -1,22 +1,21 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Commander;
 import org.openqa.selenium.*;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static org.enoch.snark.gi.SessionGIR.LOBBY_URL;
 
 public class GISession {
 
     private static GISession INSTANCE;
 
-    private WebDriver webDriver;
     public GI gi;
     private SessionGIR gir;
+
+    private boolean isRunning;
+    private Set<Cookie> cookies = new HashSet<>();
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
@@ -31,70 +30,41 @@ public class GISession {
     }
 
     private void start() {
-        startBrowserWindow();
+        GI.reopenWebDriver();
         gir = new SessionGIR();
-        gir.signIn();
-        gir.openServer();
+        gir.manageDriver();
+        if(canUseCookies()) {
+            gir.applyCookies(cookies);
+        } else {
+            gir.signIn();
+            gir.openServer();
+        }
+        isRunning = true;
     }
 
-    private void startBrowserWindow() {
-        webDriver = GI.reopenWebDriver();
-        webDriver.manage().window().maximize();
-        webDriver.manage().timeouts().pageLoadTimeout(4, TimeUnit.SECONDS);
+    private boolean canUseCookies() {
+        return !cookies.isEmpty() && cookies.stream().anyMatch(cookie -> cookie.getName().contains("PHPSESSID"));
     }
 
     public void reopenServerIfSessionIsOver() {
-        Commander commander = Commander.getInstance();
-        try {
-            if (isCurrentUrlBackToLobby()) {
-                commander.stopCommander();
-                System.err.println("sleep 300 before restart");
-                SleepUtil.secondsToSleep(300L);
-                gir.openServer();
-                restart();
-                commander.startCommander();
-            }
-        } catch (WebDriverException e) {
-            e.printStackTrace();
-            System.err.println("URL error: "+e.getMessage());
-            gir.openServer();
-//            stopCommander();
-//            System.err.println("sleep 500 before restart");
-//            SleepUtil.secondsToSleep(500);
-//            instance.browserReset();
-//            startCommander();
+
+        if (gir.isCurrentUrlBackToLobby()) {
+            makeRestart(300);
         }
     }
 
-    private void restart() {
-        Set<Cookie> cookies = webDriver.manage().getCookies();
-        close();
-        startBrowserWindow();
-        webDriver.get("https://gameforge.com/pl-PL/sign-in");
-        cookies.forEach(cookie -> webDriver.manage().addCookie(cookie));
-        new GIUrlBuilder().openComponent(GIUrlBuilder.PAGE_OVERVIEW, null);
+    public void makeRestart(long secondsToSleep) {
+        Commander commander = Commander.getInstance();
+        isRunning = false;
+        commander.stopCommander();
+        System.err.println("before restart sleep " + secondsToSleep);
+        SleepUtil.secondsToSleep(secondsToSleep);
+        cookies = gir.loadCookies();
+        start();
+        commander.startCommander();
     }
 
-    private void close() {
-        boolean isException;
-        do {
-            try {
-                GI.closeWebDriver();
-                isException = false;
-            } catch (Throwable e) {
-                e.printStackTrace();
-                isException = true;
-                SleepUtil.sleep(TimeUnit.MINUTES, 1);
-            }
-        } while(isException);
+    public boolean isRunning() {
+        return isRunning;
     }
-
-    public boolean isCurrentUrlBackToLobby() {
-        return GI.webDriver.getCurrentUrl().contains(LOBBY_URL);
-    }
-
-    public WebDriver getWebDriver() {
-        return webDriver;
-    }
-
 }
