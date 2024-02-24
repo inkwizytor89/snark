@@ -1,5 +1,6 @@
 package org.enoch.snark.gi;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
@@ -20,11 +21,15 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static org.enoch.snark.module.ConfigMap.WEBDRIVER_PATH;
 
 public class GI {
     private static GI INSTANCE;
@@ -47,6 +52,10 @@ public class GI {
     private final QueueManger queueManger;
 
     private GI() {
+        String pathToDriver = Instance.getMainConfigMap().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
+        if(!new File(pathToDriver).exists()) System.err.println("Missing file for driver "+pathToDriver);
+        System.setProperty("webdriver.chrome.driver", pathToDriver);
+
         queueManger = QueueManger.getInstance();
         instance = Instance.getInstance();
         playerDAO = PlayerDAO.getInstance();
@@ -63,6 +72,19 @@ public class GI {
 
     public static void reopenWebDriver() {
         if(webDriver != null) closeWebDriver();
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("start-maximized"); // open Browser in maximized mode
+        options.addArguments("disable-infobars"); // disabling infobars
+        options.addArguments("--disable-extensions"); // disabling extensions
+        options.addArguments("--disable-gpu"); // applicable to Windows os only
+        options.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
+        options.addArguments("--no-sandbox"); // Bypass OS security model
+        options.addArguments("--disable-in-process-stack-traces");
+        options.addArguments("--disable-logging");
+        options.addArguments("--log-level=3");
+        options.addArguments("--remote-allow-origins=*");
+
         webDriver = new ChromeDriver();
     }
 
@@ -74,33 +96,33 @@ public class GI {
         return webDriver;
     }
 
-    public void doubleClickText(String text) {
-        try {
-            WebElement serverElement = findTextByXPath(text);
-            Actions actions = new Actions(webDriver);
-            actions.doubleClick(serverElement).perform();
-        } catch (NoSuchElementException e) {
-            System.err.println("Skip text '" + text + "' to click");
-        }
-    }
+//    public void doubleClickText(String text) {
+//        try {
+//            WebElement serverElement = findTextByXPath(text);
+//            Actions actions = new Actions(webDriver);
+//            actions.doubleClick(serverElement).perform();
+//        } catch (NoSuchElementException e) {
+//            System.err.println("Skip text '" + text + "' to click");
+//        }
+//    }
 
-    private WebElement findTextByXPath(String text) {
-        List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
-        int i = 1;
-        while(elements.isEmpty() && i <= 10) {
-            SleepUtil.pause(i);
-            i++;
-            elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
-        }
-
-        if(elements.isEmpty()) {
-            System.err.println("No element '" + text + "' to click");
-            return ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]").get(0);
-        } else if(elements.size() > 1) {
-            System.err.println("Were many elements '" + text + "' to click");
-        }
-        return elements.get(0);
-    }
+//    private WebElement findTextByXPath(String text) {
+//        List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
+//        int i = 1;
+//        while(elements.isEmpty() && i <= 10) {
+//            SleepUtil.pause(i);
+//            i++;
+//            elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
+//        }
+//
+//        if(elements.isEmpty()) {
+//            System.err.println("No element '" + text + "' to click");
+//            return ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]").get(0);
+//        } else if(elements.size() > 1) {
+//            System.err.println("Were many elements '" + text + "' to click");
+//        }
+//        return elements.get(0);
+//    }
 
     public WebElement findElement(String tag, String attribute, String value, String unacceptable) {
         WebElement element = findByXPath("//" + tag + "[@" + attribute + "='" + value + "']");
@@ -123,12 +145,12 @@ public class GI {
     }
 
     private WebElement findByXPath(String using) {
-        List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
+        List<WebElement> elements = webDriver.findElements(By.xpath(using));
         int i = 1;
         while(elements.isEmpty() && i <= 10) {
             SleepUtil.pause(i);
             i++;
-            elements = ((ChromeDriver) webDriver).findElementsByXPath(using);
+            elements = webDriver.findElements(By.xpath(using));
         }
 
         if(elements.isEmpty()) {

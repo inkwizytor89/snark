@@ -41,14 +41,10 @@ public class Config {
 
     private final Properties properties;
 
-    public String pathToChromeWebdriver;
-
     public HashMap<String, ConfigMap> globalMap = new HashMap<>();
 
     public Config(Properties properties) {
         this.properties = properties;
-        pathToChromeWebdriver = properties.getProperty(WEBDRIVER_CHROME_DRIVER);
-        System.setProperty("webdriver.chrome.driver", pathToChromeWebdriver);
 
         for(String propertyString : properties.stringPropertyNames()) {
             int index = propertyString.indexOf('.');

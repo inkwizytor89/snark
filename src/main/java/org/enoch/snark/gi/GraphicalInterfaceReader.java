@@ -8,6 +8,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
+
 abstract class GraphicalInterfaceReader {
 
     public static final String A_TAG = "a";
@@ -21,11 +23,11 @@ abstract class GraphicalInterfaceReader {
     public static final String CLASS_ATTRIBUTE = "class";
 
     protected final ChromeDriver wd;
-    protected final WebDriverWait wait;
+//    protected final WebDriverWait wait;
 
     GraphicalInterfaceReader() {
         wd =(ChromeDriver) GI.getInstance().getWebDriver();
-        wait = new WebDriverWait(wd, 1);
+//        wait = new WebDriverWait(wd, 1);
     }
 
     protected String getText(ChromeDriver wd) {
@@ -60,7 +62,7 @@ abstract class GraphicalInterfaceReader {
     }
 
     public WebElement getIfPresentById(String id, long timeOutInSeconds) {
-        WebDriverWait wait = new WebDriverWait(wd, timeOutInSeconds);
+        WebDriverWait wait = new WebDriverWait(wd, Duration.ofSeconds(timeOutInSeconds));
         WebElement webElement = null;
         try {
             webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));

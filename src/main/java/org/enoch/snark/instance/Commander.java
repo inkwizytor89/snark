@@ -113,7 +113,7 @@ public class Commander extends Thread {
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
-                session.makeRestart(0L);
+                //session.makeRestart(0L);
             } catch (Exception e) {
                 e.printStackTrace();
             }

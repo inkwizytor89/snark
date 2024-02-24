@@ -10,6 +10,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
         wd.findElement(By.id("typeButtons")).findElement(By.id(area)).click();
         SleepUtil.sleep();
         final WebElement ranks = wd.findElement(By.id("ranks"));
-        List<WebElement> rankPositions = new WebDriverWait(wd, 10)
+        List<WebElement> rankPositions = new WebDriverWait(wd, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(ranks, By.tagName(TR_TAG)));
 
         rankPositions = rankPositions.stream()

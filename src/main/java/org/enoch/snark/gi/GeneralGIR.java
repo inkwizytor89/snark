@@ -11,6 +11,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class GeneralGIR extends GraphicalInterfaceReader {
             event_list.get(0).click();
             SleepUtil.sleep();
             List<WebElement> tableRows = null;
-            WebDriverWait wait = new WebDriverWait(wd, 15);
+            WebDriverWait wait = new WebDriverWait(wd, Duration.ofSeconds(15));
             WebElement eventContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("eventContent")));
             tableRows = wait.until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(eventContent, By.tagName(TR_TAG)));
 

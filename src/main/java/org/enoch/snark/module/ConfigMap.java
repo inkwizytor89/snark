@@ -23,7 +23,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String PASSWORD = "password";
     public static final String MODE = "mode";
     public static final String CONFIG = "config";
-    public static final String WEBDRIVER_CHROME_DRIVER = "main.driver";
+    public static final String WEBDRIVER_PATH = "driver";
 
     public static final String TIME = "time";
     public static final String TAG = "tag";

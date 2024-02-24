@@ -47,7 +47,6 @@ public class GISession {
     }
 
     public void reopenServerIfSessionIsOver() {
-
         if (gir.isCurrentUrlBackToLobby()) {
             makeRestart(300);
         }

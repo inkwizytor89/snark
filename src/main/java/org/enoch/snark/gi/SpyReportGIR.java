@@ -16,14 +16,14 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
         String msgTitle = wd.findElement(By.className("msg_title")).getText();
         TargetEntity target = new TargetEntity(extractCoordinateFromTitle(msgTitle));// type moon-planet missing
 
-        WebElement resourceSection = wd.findElementsByXPath("//ul[@data-type='resources']").get(0);
+        WebElement resourceSection = wd.findElements(By.xpath("//ul[@data-type='resources']")).get(0);
         List<WebElement> resourceList = resourceSection.findElements(By.className("resource_list_el"));
         target.metal = toLong(resourceList.get(0).getAttribute("title"));
         target.crystal = toLong(resourceList.get(1).getAttribute("title"));
         target.deuterium = toLong(resourceList.get(2).getAttribute("title"));
         target.energy = toLong(resourceList.get(3).getAttribute("title"));
 
-        WebElement fleetSection = wd.findElementsByXPath("//ul[@data-type='ships']").get(0);
+        WebElement fleetSection = wd.findElements(By.xpath("//ul[@data-type='ships']")).get(0);
         List<WebElement> toLowSpyLevel = fleetSection.findElements(By.className("detail_list_fail"));
         if(!toLowSpyLevel.isEmpty()) {
             increaseSpy = true;
@@ -54,7 +54,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
             }
         }
 
-        WebElement defenseSection = wd.findElementsByXPath("//ul[@data-type='defense']").get(0);
+        WebElement defenseSection = wd.findElements(By.xpath("//ul[@data-type='defense']")).get(0);
         toLowSpyLevel = defenseSection.findElements(By.className("detail_list_fail"));
         if(!toLowSpyLevel.isEmpty()) {
             increaseSpy = true;
@@ -80,7 +80,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
             }
         }
 
-        WebElement buildingsSection = wd.findElementsByXPath("//ul[@data-type='buildings']").get(0);
+        WebElement buildingsSection = wd.findElements(By.xpath("//ul[@data-type='buildings']")).get(0);
         toLowSpyLevel = buildingsSection.findElements(By.className("detail_list_fail"));
         if(!toLowSpyLevel.isEmpty()) {
             increaseSpy = true;

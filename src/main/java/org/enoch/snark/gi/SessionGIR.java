@@ -8,6 +8,7 @@ import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,9 @@ public class SessionGIR extends GraphicalInterfaceReader {
 
     public void manageDriver() {
         wd.manage().window().maximize();
-        wd.manage().timeouts().pageLoadTimeout(4, TimeUnit.SECONDS);
+        wd.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+//        wd.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+//        wd.manage().timeouts().scriptTimeout(Duration.ofSeconds(2));
     }
 
     public Set<Cookie> loadCookies() {

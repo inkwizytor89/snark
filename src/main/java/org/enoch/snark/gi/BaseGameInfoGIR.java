@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,14 +18,15 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
 
     public List<ColonyEntity> loadPlanetList() {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
-        List<WebElement> coloniesWebElements = new WebDriverWait(wd, 10)
+        List<WebElement> coloniesWebElements = new WebDriverWait(wd, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(wd.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
         for(WebElement colonyWebElement : coloniesWebElements) {
             try {
                 ColonyEntity colonyEntity = new ColonyEntity();
 
                 colonyEntity.cp = Integer.parseInt(colonyWebElement.getAttribute(ID_ATTRIBUTE).split("-")[1]);
-                Planet planet = new Planet(colonyWebElement.findElement(By.className("planet-koords ")).getText());
+                WebElement element = colonyWebElement.findElement(By.className("planet-koords"));
+                Planet planet = new Planet(element.getText());
                 colonyEntity.galaxy = planet.galaxy;
                 colonyEntity.system = planet.system;
                 colonyEntity.position = planet.position;

@@ -15,6 +15,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -29,7 +30,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         SleepUtil.pause();
         final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
         try {
-            new WebDriverWait(wd, 2)
+            new WebDriverWait(wd, Duration.ofSeconds(2))
                     .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
         } catch (TimeoutException e) {
             throw new FleetCantStart();
