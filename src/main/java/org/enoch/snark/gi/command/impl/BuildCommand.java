@@ -4,12 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.gi.macro.GIUrl;
+import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueManger;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.module.building.BuildRequirements;
-import org.enoch.snark.module.building.BuildingCost;
+import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.si.module.building.BuildRequirements;
+import org.enoch.snark.instance.si.module.building.BuildingCost;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 

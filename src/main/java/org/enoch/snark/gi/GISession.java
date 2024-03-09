@@ -1,7 +1,7 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.Commander;
+import org.enoch.snark.instance.commander.Commander;
 import org.openqa.selenium.*;
 
 import java.util.HashSet;

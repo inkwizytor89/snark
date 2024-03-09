@@ -1,14 +1,9 @@
 package org.enoch.snark.db.entity;
 
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SpyInfoParser;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.enoch.snark.instance.model.action.SpyInfoParser;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 @Entity
 @Table(name = "messages", schema = "public", catalog = "snark")

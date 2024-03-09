@@ -2,7 +2,7 @@ package org.enoch.snark.instance.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

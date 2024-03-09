@@ -1,8 +1,8 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.macro.GIUrl;
-import org.enoch.snark.gi.macro.UrlComponent;
+import org.enoch.snark.gi.types.GIUrl;
+import org.enoch.snark.gi.types.UrlComponent;
 
 public class OpenPageCommand extends AbstractCommand {
 

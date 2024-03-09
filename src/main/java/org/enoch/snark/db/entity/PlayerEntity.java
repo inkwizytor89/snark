@@ -2,7 +2,7 @@ package org.enoch.snark.db.entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.model.HighScorePosition;
+import org.enoch.snark.instance.model.to.HighScorePosition;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;

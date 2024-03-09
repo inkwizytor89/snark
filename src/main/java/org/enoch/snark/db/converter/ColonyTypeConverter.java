@@ -1,6 +1,6 @@
 package org.enoch.snark.db.converter;
 
-import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

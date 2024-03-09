@@ -3,7 +3,7 @@ package org.enoch.snark.gi;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.exception.GIException;
-import org.enoch.snark.gi.macro.GIUrl;
+import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.Instance;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.enoch.snark.gi.macro.UrlComponent.OVERVIEW;
+import static org.enoch.snark.gi.types.UrlComponent.OVERVIEW;
 import static org.enoch.snark.gi.text.HtmlElements.TAG_BUTTON;
 import static org.enoch.snark.gi.text.HtmlElements.TAG_INPUT;
 import static org.enoch.snark.instance.config.Config.*;

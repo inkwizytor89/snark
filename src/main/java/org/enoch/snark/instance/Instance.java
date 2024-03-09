@@ -9,12 +9,14 @@ import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.gi.command.impl.UpdateResearchCommand;
-import org.enoch.snark.instance.commander.Cleaner;
+import org.enoch.snark.instance.service.Cleaner;
+import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.instance.config.Universe;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.service.MessageService;
-import org.enoch.snark.module.ConfigMap;
+import org.enoch.snark.instance.si.BaseSI;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.service.MessageService;
+import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class Instance {
 

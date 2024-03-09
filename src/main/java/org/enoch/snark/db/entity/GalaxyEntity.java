@@ -1,12 +1,10 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.SystemView;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.SystemView;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;

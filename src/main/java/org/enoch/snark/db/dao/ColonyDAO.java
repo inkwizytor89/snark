@@ -2,10 +2,9 @@ package org.enoch.snark.db.dao;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import java.util.ArrayList;
 import java.util.Comparator;

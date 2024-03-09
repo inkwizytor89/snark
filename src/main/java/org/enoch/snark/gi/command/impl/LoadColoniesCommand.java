@@ -3,12 +3,10 @@ package org.enoch.snark.gi.command.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.BaseGameInfoGIR;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.transaction.Transactional;
 import java.util.*;

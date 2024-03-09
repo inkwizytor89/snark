@@ -1,6 +1,6 @@
 package org.enoch.snark.db.converter;
 
-import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.gi.types.Mission;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

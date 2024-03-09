@@ -1,7 +1,7 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Planet;
+import org.enoch.snark.instance.model.to.Planet;
 import org.junit.After;
 import org.junit.Before;
 

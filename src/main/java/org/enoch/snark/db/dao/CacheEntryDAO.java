@@ -1,8 +1,6 @@
 package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.*;
-import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.model.types.ColonyType;
 
 import java.time.LocalDateTime;
 import java.util.List;

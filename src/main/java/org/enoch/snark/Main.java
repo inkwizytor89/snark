@@ -11,8 +11,8 @@ import java.io.FilenameFilter;
 import static org.enoch.snark.db.entity.JPAUtility.H2_PERSISTENCE;
 import static org.enoch.snark.db.entity.JPAUtility.H2_URL;
 import static org.enoch.snark.instance.config.Universe.configPath;
-import static org.enoch.snark.module.ConfigMap.DATABASE;
-import static org.enoch.snark.module.ConfigMap.SERVER;
+import static org.enoch.snark.instance.si.module.ConfigMap.DATABASE;
+import static org.enoch.snark.instance.si.module.ConfigMap.SERVER;
 
 public class Main {
 

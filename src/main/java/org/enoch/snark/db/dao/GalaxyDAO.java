@@ -2,11 +2,9 @@ package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.JPAUtility;
-import org.enoch.snark.model.SystemView;
+import org.enoch.snark.instance.model.to.SystemView;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

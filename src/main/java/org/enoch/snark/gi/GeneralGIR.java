@@ -2,10 +2,10 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.model.EventFleet;
-import org.enoch.snark.model.types.ColonyType;
-import org.enoch.snark.model.types.FleetDirectionType;
+import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.model.to.EventFleet;
+import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;

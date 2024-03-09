@@ -1,20 +1,20 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.gi.macro.BuildingEnum;
-import org.enoch.snark.gi.macro.ShipEnum;
+import org.enoch.snark.gi.types.BuildingEnum;
+import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.model.exception.TargetMissingResourceInfoException;
-import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.exception.TargetMissingResourceInfoException;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.enoch.snark.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
+import static org.enoch.snark.instance.si.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
 
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{

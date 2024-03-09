@@ -10,15 +10,15 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
-import org.enoch.snark.gi.macro.GIUrl;
-import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.model.SystemView;
-import org.enoch.snark.model.exception.FleetCantStart;
-import org.enoch.snark.model.exception.ShipDoNotExists;
-import org.enoch.snark.model.exception.ToStrongPlayerException;
+import org.enoch.snark.gi.types.GIUrl;
+import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.to.SystemView;
+import org.enoch.snark.instance.model.exception.FleetCantStart;
+import org.enoch.snark.instance.model.exception.ShipDoNotExists;
+import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class SendFleetCommand extends AbstractCommand {
 
@@ -54,7 +54,7 @@ public class SendFleetCommand extends AbstractCommand {
     }
 
     public boolean prepere() {
-        giUrl.openFleetView(fleet.source, fleet.getDestination(), mission);
+        giUrl.openSendFleetView(fleet.source, fleet.getDestination(), mission);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;

@@ -2,21 +2,16 @@ package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.ColonyPlaner;
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.model.types.ColonyType;
+import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.action.ColonyPlaner;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
-
-import static org.enoch.snark.model.Resources.everything;
 
 @Entity
 @Table(name = "fleet", schema = "public", catalog = "snark")

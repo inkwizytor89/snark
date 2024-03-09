@@ -9,8 +9,8 @@ import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.SpyReportGIR;
-import org.enoch.snark.gi.macro.GIUrl;
-import org.enoch.snark.model.service.MessageService;
+import org.enoch.snark.gi.types.GIUrl;
+import org.enoch.snark.instance.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.gi.macro.UrlComponent.OVERVIEW;
+import static org.enoch.snark.gi.types.UrlComponent.OVERVIEW;
 
 public class ReadMessageCommand extends AbstractCommand {
 

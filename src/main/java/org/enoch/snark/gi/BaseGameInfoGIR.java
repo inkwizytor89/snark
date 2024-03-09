@@ -1,8 +1,8 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.macro.GIUrl;
-import org.enoch.snark.model.Planet;
+import org.enoch.snark.gi.types.GIUrl;
+import org.enoch.snark.instance.model.to.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,8 +12,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.gi.macro.GIUrl.*;
-import static org.enoch.snark.gi.macro.UrlComponent.*;
+import static org.enoch.snark.gi.types.UrlComponent.*;
 
 public class BaseGameInfoGIR extends GraphicalInterfaceReader {
 
@@ -65,10 +64,5 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
         GIUrl.openComponent(FLEETDISPATCH, colony);
         GIUrl.openComponent(DEFENSES, colony);
     }
-
-    public boolean isLifeformAvailable() {
-        return !wd.findElements(By.id("lifeform")).isEmpty();
-    }
-
 
 }

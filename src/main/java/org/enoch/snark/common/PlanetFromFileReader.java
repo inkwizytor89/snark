@@ -1,6 +1,6 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.model.Planet;
+import org.enoch.snark.instance.model.to.Planet;
 
 import java.io.IOException;
 import java.nio.file.Files;

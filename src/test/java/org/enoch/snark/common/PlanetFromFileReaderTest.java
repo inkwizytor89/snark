@@ -1,10 +1,8 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.model.Planet;
-import org.enoch.snark.model.TargetPlanet;
+import org.enoch.snark.instance.model.to.Planet;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.*;

@@ -2,16 +2,16 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.instance.Commander;
+import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.types.QueueRunType;
+import org.enoch.snark.instance.model.types.QueueRunType;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION;
-import static org.enoch.snark.model.types.QueueRunType.INTERFACE_ACTION;
+import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION;
+import static org.enoch.snark.instance.model.types.QueueRunType.INTERFACE_ACTION;
 
 public abstract class AbstractCommand {
     protected final WebDriver webDriver;

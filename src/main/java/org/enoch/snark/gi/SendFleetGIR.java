@@ -3,12 +3,12 @@ package org.enoch.snark.gi;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.macro.Mission;
+import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.model.exception.FleetCantStart;
-import org.enoch.snark.model.exception.ToStrongPlayerException;
-import org.enoch.snark.model.types.ResourceType;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.exception.FleetCantStart;
+import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
+import org.enoch.snark.instance.model.types.ResourceType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -20,9 +20,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.enoch.snark.model.Resources.everything;
-import static org.enoch.snark.model.Resources.nothing;
-import static org.enoch.snark.module.ConfigMap.LEAVE_MIN_RESOURCES;
+import static org.enoch.snark.instance.model.to.Resources.everything;
+import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.si.module.ConfigMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
 

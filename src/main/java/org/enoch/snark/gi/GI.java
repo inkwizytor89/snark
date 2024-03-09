@@ -12,24 +12,22 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueManger;
-import org.enoch.snark.model.SystemView;
-import org.enoch.snark.model.types.ColonyType;
-import org.enoch.snark.module.building.BuildRequirements;
+import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.model.to.SystemView;
+import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.si.module.building.BuildRequirements;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.enoch.snark.module.ConfigMap.WEBDRIVER_PATH;
+import static org.enoch.snark.instance.si.module.ConfigMap.WEBDRIVER_PATH;
 
 public class GI {
     private static GI INSTANCE;

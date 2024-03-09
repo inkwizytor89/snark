@@ -1,9 +1,8 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.model.Resources;
-import org.enoch.snark.model.SystemView;
+import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.to.SystemView;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
