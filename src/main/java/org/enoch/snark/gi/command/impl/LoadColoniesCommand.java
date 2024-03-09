@@ -7,18 +7,14 @@ import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.BaseGameInfoGIR;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.model.types.ColonyType;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
 import static org.enoch.snark.instance.config.Config.FLY_POINTS;
-import static org.enoch.snark.instance.config.Config.MAIN;
 
 public class LoadColoniesCommand extends AbstractCommand {
 
@@ -34,6 +30,7 @@ public class LoadColoniesCommand extends AbstractCommand {
     @Override
     @Transactional
     public boolean execute() {
+        System.out.println("LoadColoniesCommand.execute");
         try {
             Map<ColonyEntity, Boolean> stillExistMap = new HashMap<>();
             colonyDAO.fetchAll().forEach(colony -> stillExistMap.put(colony, false));
@@ -95,11 +92,11 @@ public class LoadColoniesCommand extends AbstractCommand {
                 }
                 colonyDAO.saveOrUpdate(colony);
 
-                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-                if(mainPlayer.spyLevel == null) {
-                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
-                    mainPlayer.spyLevel = 1L;
-                }
+//                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
+//                if(mainPlayer.spyLevel == null) {
+////                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
+//                    mainPlayer.spyLevel = 1L;
+//                }
             }
         } catch (Exception e) {
             typeFlyPoints();

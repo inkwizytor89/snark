@@ -371,8 +371,8 @@ public class GI {
 
     public boolean      upgradeBuilding(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.getName()));
-        Long buildingLevel = getLevel(technologies, requirements.request.building.getName());
+        WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.name()));
+        Long buildingLevel = getLevel(technologies, requirements.request.building.name());
         if(buildingLevel >= requirements.request.level) {
             System.err.println(requirements + " already achieved");
             return true;

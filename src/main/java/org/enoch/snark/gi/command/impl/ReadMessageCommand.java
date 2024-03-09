@@ -9,8 +9,7 @@ import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.SpyReportGIR;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
-import org.enoch.snark.instance.Instance;
+import org.enoch.snark.gi.macro.GIUrl;
 import org.enoch.snark.model.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -22,6 +21,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.enoch.snark.gi.macro.UrlComponent.OVERVIEW;
+
 public class ReadMessageCommand extends AbstractCommand {
 
     public ReadMessageCommand() {
@@ -30,7 +31,7 @@ public class ReadMessageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        new GIUrlBuilder().openMessages();
+        new GIUrl().openMessages();
         SleepUtil.sleep();
 
         List<String> spyReports = loadMessagesLinks();
@@ -59,7 +60,7 @@ public class ReadMessageCommand extends AbstractCommand {
                 break;
             }
         }
-        new GIUrlBuilder().openComponent(GIUrlBuilder.PAGE_OVERVIEW, null);
+        GIUrl.openComponent(OVERVIEW, null);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie

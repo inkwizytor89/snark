@@ -14,6 +14,6 @@ public class BuildingRequest {
 
     @Override
     public String toString() {
-        return building.getName() + " " + level;
+        return building.name() + " " + level;
     }
 }

@@ -1,7 +1,7 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.macro.GIUrl;
 import org.enoch.snark.model.Planet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -12,7 +12,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.*;
+import static org.enoch.snark.gi.macro.GIUrl.*;
+import static org.enoch.snark.gi.macro.UrlComponent.*;
 
 public class BaseGameInfoGIR extends GraphicalInterfaceReader {
 
@@ -58,13 +59,11 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
     }
 
     public void updateColony(ColonyEntity colony) {
-        new GIUrlBuilder().openComponent(PAGE_RESOURCES, colony);
-        new GIUrlBuilder().openComponent(PAGE_FACILITIES, colony);
-        if(isLifeformAvailable() && colony.isPlanet) {
-            new GIUrlBuilder().openComponent(PAGE_LIFEFORM, colony);
-        }
-        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, colony);
-        new GIUrlBuilder().openComponent(PAGE_DEFENSES, colony);
+        GIUrl.openComponent(SUPPLIES, colony);
+        GIUrl.openComponent(FACILITIES, colony);
+        GIUrl.openComponent(LFBUILDINGS, colony);
+        GIUrl.openComponent(FLEETDISPATCH, colony);
+        GIUrl.openComponent(DEFENSES, colony);
     }
 
     public boolean isLifeformAvailable() {

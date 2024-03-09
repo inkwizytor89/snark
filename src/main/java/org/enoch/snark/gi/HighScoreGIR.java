@@ -3,7 +3,7 @@ package org.enoch.snark.gi;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.PlayerEntity;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.macro.GIUrl;
 import org.enoch.snark.model.HighScorePosition;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -27,7 +27,7 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
 
         HashMap<String, HighScorePosition> highScore = new HashMap<>();
         for (String page : generatePagesToCheck(maxPages)) {
-            new GIUrlBuilder().openHighScore(page);
+            new GIUrl().openHighScore(page);
             for (String area : areas) {
                 update(highScore, area);
             }

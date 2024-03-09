@@ -7,7 +7,6 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.ShipEnum;
-import org.enoch.snark.instance.Commander;
 import org.enoch.snark.model.Resources;
 import org.enoch.snark.module.AbstractThread;
 import org.enoch.snark.module.ConfigMap;
@@ -18,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
 import static org.enoch.snark.gi.macro.Mission.TRANSPORT;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.model.Resources.everything;
 
 public class TransportThread extends AbstractThread {
@@ -59,7 +58,7 @@ public class TransportThread extends AbstractThread {
         for(ColonyEntity colony : sources) {
 
             if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {
-                OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, colony);
+                OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, colony);
                 command.addTag(command.toString()).push(command.toString());
                 System.out.println(threadName+" first check "+command.toString());
                 continue;

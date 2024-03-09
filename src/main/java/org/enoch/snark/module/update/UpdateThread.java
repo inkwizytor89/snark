@@ -2,8 +2,9 @@ package org.enoch.snark.module.update;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.instance.Instance;
+import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.EventFleet;
 import org.enoch.snark.model.Planet;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 
 public class UpdateThread extends AbstractThread {
 
@@ -53,7 +54,7 @@ public class UpdateThread extends AbstractThread {
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
         if(isNavigatorExpired() && noWaitingElementsByTag(threadName)) {
-            sendCommandToUpdateEventFleets();
+            updateState();
         }
 
         events = navigator.getEventFleetList();
@@ -64,12 +65,6 @@ public class UpdateThread extends AbstractThread {
 
     private boolean isNavigatorExpired() {
         return navigator.isExpiredAfterMinutes(updateTimeInMinutes);
-    }
-
-    private void sendCommandToUpdateEventFleets() {
-        OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true);
-        command.addTag(threadName);
-        command.push();
     }
 
     private void putIncomingInArriveMap() {
@@ -96,8 +91,13 @@ public class UpdateThread extends AbstractThread {
                     .filter(col -> col.getCordinate().equals(Planet.getCordinate(planet)))
                     .findAny();
             if(optionalColony.isPresent()) {
-                new OpenPageCommand(PAGE_BASE_FLEET, optionalColony.get()).push();
+                new OpenPageCommand(FLEETDISPATCH, optionalColony.get()).push();
             } else System.err.println("\nShould find colony "+planet.toString()+"\n");
         });
+    }
+
+    public static void updateState() {
+        new LoadColoniesCommand().addTag(threadName).push();
+        new UpdateFleetEventsCommand().addTag(threadName).push();
     }
 }

@@ -1,17 +1,14 @@
 package org.enoch.snark.instance;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.command.impl.RefreshColoniesStateCommand;
+import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
+import org.enoch.snark.gi.command.impl.UpdateResearchCommand;
 import org.enoch.snark.instance.commander.Cleaner;
 import org.enoch.snark.instance.config.Config;
 import org.enoch.snark.instance.config.Universe;
@@ -20,13 +17,12 @@ import org.enoch.snark.model.service.MessageService;
 import org.enoch.snark.module.ConfigMap;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_RESEARCH;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 
 public class Instance {
 
@@ -38,13 +34,10 @@ public class Instance {
 //    public static GI gi;
     public static GISession session;
     public static Integer level = 1;
-    private ColonyDAO colonyDAO;
 
     public List<Planet> cachedPlaned = new ArrayList<>();
     public List<ColonyEntity> flyPoints = new ArrayList<>();
     public ColonyEntity lastVisited = null;
-
-    public LocalDateTime instanceStart = LocalDateTime.now();
 
     private Instance() {
         updateConfig();
@@ -78,7 +71,6 @@ public class Instance {
     }
 
     public void run() {
-        colonyDAO = ColonyDAO.getInstance();
         MessageService.getInstance();
 
         startBrowser();
@@ -89,10 +81,11 @@ public class Instance {
 
     public void initialActionOnStart() {
         commander = Commander.getInstance();
+        // LoadColoniesCommand to refactor
         new LoadColoniesCommand().push();
-        PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-        new OpenPageCommand(PAGE_RESEARCH, mainPlayer).setCheckEventFleet(true).push();
-        new RefreshColoniesStateCommand().push();
+        new UpdateFleetEventsCommand().push();
+        new UpdateResearchCommand().push();
+        getMainConfigMap().getFlyPoints().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
     }
 
     public void removePlanet(Planet target) {
@@ -105,10 +98,6 @@ public class Instance {
             LOG.info("Removed "+target);
             //TODO: remove messegas and others
         }
-    }
-
-    public ColonyEntity getMainColony() {
-        return colonyDAO.fetchAll().get(0);
     }
 //
 //    public synchronized boolean isStopped() {

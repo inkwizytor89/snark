@@ -10,7 +10,7 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.macro.GIUrl;
 import org.enoch.snark.gi.macro.Mission;
 import org.enoch.snark.gi.macro.ShipEnum;
 import org.enoch.snark.model.Planet;
@@ -28,17 +28,15 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.zip.Adler32;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
-import static org.enoch.snark.model.Resources.everything;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 
 public class SendFleetCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFOR = 3L;
     public Mission mission;
-    protected GIUrlBuilder giUrlBuilder;
+    protected GIUrl giUrl;
     protected boolean autoComplete;
     protected Resources resources;
     protected boolean allShips;
@@ -52,11 +50,11 @@ public class SendFleetCommand extends AbstractCommand {
         this.fleet = fleet;
         this.mission = fleet.mission;
         gir = new SendFleetGIR();
-        giUrlBuilder = new GIUrlBuilder();
+        giUrl = new GIUrl();
     }
 
     public boolean prepere() {
-        giUrlBuilder.openFleetView(fleet.source, fleet.getDestination(), mission);
+        giUrl.openFleetView(fleet.source, fleet.getDestination(), mission);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;
@@ -140,7 +138,7 @@ public class SendFleetCommand extends AbstractCommand {
                 PlayerDAO.getInstance().saveOrUpdate(player);
             } else {
                 // look at galaxy to reload player
-                giUrlBuilder.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+                giUrl.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
             }
             return true;
         }
@@ -170,7 +168,7 @@ public class SendFleetCommand extends AbstractCommand {
 
     private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
         if(mission.isComingBack()) {
-            OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, fleet.source);
+            OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, fleet.source);
             long secondsToBack = durationSeconds * 2;
             if(Mission.EXPEDITION.equals(fleet.mission)) {
                 secondsToBack+=3600;
@@ -183,7 +181,7 @@ public class SendFleetCommand extends AbstractCommand {
 
     private void reloadColony() {
         SleepUtil.sleep();
-        new GIUrlBuilder().openComponent(PAGE_BASE_FLEET, fleet.source);
+        GIUrl.openComponent(FLEETDISPATCH, fleet.source);
     }
 
     private void updateDelayForAction(Long durationSeconds) {

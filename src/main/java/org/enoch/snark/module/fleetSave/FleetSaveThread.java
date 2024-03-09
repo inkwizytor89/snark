@@ -7,7 +7,6 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.macro.Mission;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.Planet;
 import org.enoch.snark.module.AbstractThread;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.model.Resources.everything;
 
 public class FleetSaveThread extends AbstractThread {
@@ -80,7 +79,7 @@ public class FleetSaveThread extends AbstractThread {
     }
 
     private void loadFlyPoints() {
-        instance.getFlyPoints().forEach(col -> new OpenPageCommand(PAGE_BASE_FLEET, col).push());
+        instance.getFlyPoints().forEach(col -> new OpenPageCommand(FLEETDISPATCH, col).push());
         System.err.println("reloading fleets points");
         SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10L);
     }

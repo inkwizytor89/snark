@@ -11,13 +11,14 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.commander.Navigator;
 import org.enoch.snark.model.exception.ShipDoNotExists;
+import org.enoch.snark.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import java.util.*;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION;
 import static org.enoch.snark.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
 import static org.enoch.snark.module.ConfigMap.MODE;
@@ -25,8 +26,6 @@ import static org.enoch.snark.module.ConfigMap.STOP;
 
 public class Commander extends Thread {
 
-    public static final String FLEET_ACTION_STRING = "FLEET_ACTION";
-    public static final String FLEET_ACTION_WITH_PRIORITY_STRING = "FLEET_ACTION_WITH_PRIORITY";
     private static Commander INSTANCE;
 
     private final Instance instance;
@@ -81,12 +80,12 @@ public class Commander extends Thread {
 
 
                 if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
-                    resolve(new OpenPageCommand(PAGE_BASE_FLEET).setCheckEventFleet(true));
+                    UpdateThread.updateState();
                 }
 
                 // check if fleet slot is free because is something fleet to send
                 if(!isFleetFreeSlot() && !fleetActionQueue.isEmpty()) {
-                    resolve(new OpenPageCommand(PAGE_BASE_FLEET));
+                    resolve(new OpenPageCommand(FLEETDISPATCH));
                 }
                 // method for put top in fleet queue
                 if(isFleetFreeSlot()) {

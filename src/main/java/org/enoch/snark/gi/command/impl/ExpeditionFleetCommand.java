@@ -16,7 +16,7 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
 
     @Override
     public boolean prepere() {
-        giUrlBuilder.openFleetView(fleet.source, fleet.getDestination(), Mission.EXPEDITION);
+        giUrl.openFleetView(fleet.source, fleet.getDestination(), Mission.EXPEDITION);
         autoComplete = true;
         if(!canSendExpedition()) {
             System.err.println("Colony "+fleet.source+" have not enough ships - skipping expedition");

@@ -4,8 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.macro.GIUrlBuilder;
+import org.enoch.snark.gi.macro.GIUrl;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueManger;
 import org.enoch.snark.model.Resources;
@@ -17,7 +16,6 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 
 import static org.enoch.snark.gi.GI.TECHNOLOGIES;
-import static org.enoch.snark.instance.config.Config.MAIN;
 import static org.enoch.snark.instance.config.Config.MASTER;
 
 public class BuildCommand extends AbstractCommand {
@@ -37,13 +35,13 @@ public class BuildCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
-        new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
+        GIUrl.openComponent(requirements.request.building.getPage(), colony);
         boolean isUpgraded = gi.upgradeBuilding(requirements);
         if(isUpgraded) {
             refreshColonyWhenBuildingIsDone();
         } else {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
-            WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.getName()));
+            WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.name()));
             buildingIcon.click();
             SleepUtil.sleep();
             WebElement costs = gi.webDriver.findElement(By.className("costs"));
@@ -63,7 +61,7 @@ public class BuildCommand extends AbstractCommand {
     }
 
     private void refreshColonyWhenBuildingIsDone() {
-        new GIUrlBuilder().openComponent(requirements.request.building.getPage(), colony);
+        GIUrl.openComponent(requirements.request.building.getPage(), colony);
         Long seconds = GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
         if(seconds != null) {
             System.out.println(colony+" build "+ requirements.request + ", refresh after "+ seconds);

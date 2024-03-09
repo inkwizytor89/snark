@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import static org.enoch.snark.gi.macro.GIUrlBuilder.PAGE_BASE_FLEET;
+import static org.enoch.snark.gi.macro.UrlComponent.FLEETDISPATCH;
 // na start mogl by przeleceic swoje flypointy
 // jak sa starsze niz 4h to powinien go sobie zaktualizowac flypoint
 // z tych co zostały znajdz najlepszego ?
@@ -138,7 +138,7 @@ public class ExpeditionThread extends AbstractThread {
         expeditionSource.stream()
                 .filter(colonyEntity -> DateUtil.isExpired(colonyEntity.updated, 2L, ChronoUnit.HOURS))
                 .forEach(col -> {
-                    OpenPageCommand command = new OpenPageCommand(PAGE_BASE_FLEET, col);
+                    OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, col);
                     command.addTag(command.toString()).push();
                 });
         System.err.println("reloading expedition points");

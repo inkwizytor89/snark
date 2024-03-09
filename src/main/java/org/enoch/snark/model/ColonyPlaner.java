@@ -55,7 +55,7 @@ public class ColonyPlaner {
 
     public static Long mapSystemToDistance(Integer systemMax) {
         if(systemMax == -1) return 13000L;
-        Long systemMaxLong = new Long(systemMax);
+        Long systemMaxLong = Long.valueOf(systemMax);
         return systemMaxLong* 95 + 2700;
     }
 
