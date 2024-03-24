@@ -11,7 +11,6 @@ import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import java.util.*;
@@ -22,7 +21,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.STOP;
 public class Commander extends Thread {
 
     private static Commander INSTANCE;
-    private CommandDeque commandDeque = new CommandDeque();
+    private final CommandDeque commandDeque = new CommandDeque();
 
     private final GISession session;
     private boolean isRunning = true;
@@ -32,8 +31,6 @@ public class Commander extends Thread {
     private int expeditionCount = 0;
     private int expeditionMax = 0;
 
-    private final Deque<AbstractCommand> fleetActionQueue = new LinkedList<>();
-    private final Deque<AbstractCommand> interfaceActionQueue = new LinkedList<>();
     private AbstractCommand actualProcessedCommand = null;
 
     public Commander() {
@@ -65,43 +62,10 @@ public class Commander extends Thread {
 
                 session.reopenServerIfSessionIsOver();
 
-//                if (instance.isStopped()) {
-//                    stopCommander();
-//                    continue;
-//                }
-
-//                startCommander();
-
-
                 if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
                     UpdateThread.updateState();
                 }
 
-//                // check if fleet slot is free because is something fleet to send
-//                if(!isFleetFreeSlot() && !fleetActionQueue.isEmpty()) {
-//                    resolve(new OpenPageCommand(FLEETDISPATCH));
-//                }
-//                // method for put top in fleet queue
-//                if(isFleetFreeSlot()) {
-//                    if (!fleetActionQueue.isEmpty()) {
-//                        resolve(Objects.requireNonNull(fleetActionQueue.poll()));
-//                        SleepUtil.sleep();
-//                        continue;
-//                    }
-//                }
-//                if (!interfaceActionQueue.isEmpty()) {
-//                        resolve(interfaceActionQueue.poll());
-//                        continue;
-//                }
-//                if(isFleetFreeSlot()) {
-//                    List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
-//                    if (!toProcess.isEmpty()) {
-//                        resolve(new SendFleetCommand(toProcess.get(0)));
-//                        SleepUtil.sleep();
-//                        fleetCount++;
-//                        continue;
-//                    }
-//                }
                 resolve(commandDeque.pool());
                 SleepUtil.sleep();
             } catch (org.openqa.selenium.TimeoutException e) {
@@ -127,7 +91,7 @@ public class Commander extends Thread {
 
     private boolean isSomethingAttacking() {
         try {
-            WebElement attack_alert = GI.getInstance().webDriver.findElement(By.id("attack_alert"));
+            WebElement attack_alert = GI.getInstance().getWebDriver().findElement(By.id("attack_alert"));
             if(attack_alert.getAttribute("class").contains("soon")) {
                 return true;
             }
@@ -158,10 +122,6 @@ public class Commander extends Thread {
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
             return;
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-            System.err.println(e.getMessage());
-            success = false;
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
@@ -169,8 +129,6 @@ public class Commander extends Thread {
         }
 
         if(success) {
-            String commandMessage = command.toString();
-//            log.info(command.toString());
             if(command.isFollowingAction()) {
                 command.doFallowing();
             }
@@ -212,9 +170,6 @@ public class Commander extends Thread {
     }
 
     public synchronized void push(AbstractCommand command) {
-//        if(MAJOR.equals(command.getRunType())) fleetActionQueue.addFirst(command);
-//        else if (NORMAL.equals(command.getRunType())) fleetActionQueue.offer(command);
-//        else interfaceActionQueue.offer(command);
         if(noBlockingHash(command.hash()))
             commandDeque.push(command);
     }
@@ -222,8 +177,6 @@ public class Commander extends Thread {
     public synchronized List<AbstractCommand> peekQueues() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-//        commandsToView.addAll(fleetActionQueue);
-//        commandsToView.addAll(interfaceActionQueue);
         commandsToView.addAll(commandDeque.peek());
         return commandsToView;
     }

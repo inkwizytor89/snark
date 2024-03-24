@@ -11,8 +11,6 @@ import org.openqa.selenium.Cookie;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.TAG_BUTTON;
@@ -40,11 +38,6 @@ public class SessionGIR extends GraphicalInterfaceReader {
 //        wd.manage().timeouts().scriptTimeout(Duration.ofSeconds(2));
     }
 
-//    public Set<Cookie> loadCookies() {
-//        openServer();
-//        return wd.manage().getCookies();
-//    }
-
     public boolean applyCookies() {
         ArrayList<String> tabs = new ArrayList<>(wd.getWindowHandles());
         wd.switchTo().window(tabs.get(0));
@@ -55,7 +48,6 @@ public class SessionGIR extends GraphicalInterfaceReader {
         addCookie(GF_TOKEN_PRODUCTION, CacheEntryDAO.getInstance().getValue(GF_TOKEN_PRODUCTION, StringUtils.EMPTY));
         // cookie consent
         addCookie(GF_COOKIE_CONSENT, GF_COOKIE_CONSENT_YES);
-//        cookies.forEach(cookie -> wd.manage().addCookie(cookie));
         wd.get(LOBBY_WITH_ACCOUNTS);
         return true;
     }

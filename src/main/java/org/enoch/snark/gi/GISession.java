@@ -2,10 +2,6 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.commander.Commander;
-import org.openqa.selenium.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class GISession {
 
@@ -15,7 +11,6 @@ public class GISession {
     private SessionGIR gir;
 
     private boolean isRunning;
-//    private Set<Cookie> cookies = new HashSet<>();
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
@@ -33,10 +28,9 @@ public class GISession {
         isRunning = false;
         boolean failAction = false;
         while(!isRunning) {
-            if(failAction) {
-                SleepUtil.secondsToSleep(600L);
-                failAction = true;
-            }
+            if(failAction) SleepUtil.secondsToSleep(600L);
+            failAction = true;
+
             GI.reopenWebDriver();
             gir = new SessionGIR();
             gir.manageDriver();
@@ -61,7 +55,6 @@ public class GISession {
         commander.stopCommander();
         System.err.println("before restart sleep " + secondsToSleep);
         SleepUtil.secondsToSleep(secondsToSleep);
-//        cookies = gir.loadCookies();
         start();
         commander.startCommander();
     }
