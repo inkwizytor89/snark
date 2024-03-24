@@ -76,9 +76,9 @@ public abstract class AbstractThread extends Thread {
                     System.err.println(getThreadName() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(getPause());
+                SleepUtil.secondsToSleep(Long.valueOf(getPause()));
             }
-            else SleepUtil.secondsToSleep(60);
+            else SleepUtil.secondsToSleep(60L);
         }
     }
 
@@ -102,34 +102,6 @@ public abstract class AbstractThread extends Thread {
 
     public int getRequestedFleetCount() {
         return 0;
-    }
-
-    protected boolean noWaitingElementsByTag(String tag) {
-        return commander.peekQueues().stream().noneMatch(command -> command.getTags().contains(tag));
-    }
-
-    protected boolean noWaitingElements() {
-        return noWaitingElementsOnQueues() && noWaitingElementsForProcess();
-    }
-
-    protected boolean noWaitingElementsOnQueues() {
-        return commander.peekQueues().isEmpty();
-    }
-
-    protected boolean noWaitingElementsForProcess() {
-        return fleetDAO.findToProcess().isEmpty();
-    }
-
-    protected boolean stillWaitingForFleet() {
-        long fsCount = Navigator.getInstance().getEventFleetList().stream()
-                .filter(eventFleet -> Mission.STATIONED.equals(eventFleet.mission) || Mission.COLONIZATION.equals(eventFleet.mission))
-                .count();
-        int flyPointsSize = instance.getFlyPoints().size();
-        return fsCount > flyPointsSize/2;
-    }
-
-    protected boolean isAny(ShipEnum... ships) {
-        return true;
     }
 
     public static AbstractThread create(ConfigMap map) {

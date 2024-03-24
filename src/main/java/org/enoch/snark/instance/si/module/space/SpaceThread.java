@@ -59,7 +59,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if (!noWaitingElements()) return;
+        if (!commander.notingToPool()) return;
         int timeToBack = 95;
         pause = 300;
         if(LocalDateTime.now().getHour() < 5) {

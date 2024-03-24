@@ -9,8 +9,6 @@ public class OpenPageCommand extends AbstractCommand {
     private final UrlComponent component;
     private ColonyEntity colony;
 
-    private boolean updateCurrentState = false;
-
     public OpenPageCommand(UrlComponent component, ColonyEntity colony) {
         super();
         this.component = component;
@@ -20,11 +18,6 @@ public class OpenPageCommand extends AbstractCommand {
     public OpenPageCommand(UrlComponent component) {
         super();
         this.component = component;
-    }
-
-    public OpenPageCommand updateCurrentState(boolean updateCurrentState) {
-        this.updateCurrentState = updateCurrentState;
-        return this;
     }
 
     @Override

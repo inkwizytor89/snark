@@ -59,7 +59,7 @@ public class TransportThread extends AbstractThread {
 
             if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {
                 OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, colony);
-                command.addTag(command.toString()).push(command.toString());
+                command.hash(command.toString()).push();
                 System.out.println(threadName+" first check "+command.toString());
                 continue;
             }
@@ -68,7 +68,7 @@ public class TransportThread extends AbstractThread {
             if(resources.isMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
                 FleetEntity fleetEntity = creteFleetToTransport(colony);
                 SendFleetCommand command = new SendFleetCommand(fleetEntity);
-                command.addTag(threadName);
+                command.hash(threadName);
                 command.setResources(everything);
                 command.push();
             }

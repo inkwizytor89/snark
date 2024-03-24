@@ -24,7 +24,7 @@ public class UpdateHighScoreCommand extends AbstractCommand {
         super();
         this.areasToCheck = areasToCheck;
         this.maxPages = maxPages;
-        this.addTag(HIGH_SCORE);
+        this.hash(HIGH_SCORE);
     }
 
     public List<String> getAreas() {

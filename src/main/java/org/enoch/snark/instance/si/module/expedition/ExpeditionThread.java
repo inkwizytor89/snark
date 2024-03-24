@@ -93,7 +93,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        return noWaitingElementsByTag(threadName);
+        return commander.noBlockingHash(threadName);
     }
 
     private boolean areFreeSlotsForExpedition() {
@@ -138,8 +138,7 @@ public class ExpeditionThread extends AbstractThread {
         expeditionSource.stream()
                 .filter(colonyEntity -> DateUtil.isExpired(colonyEntity.updated, 2L, ChronoUnit.HOURS))
                 .forEach(col -> {
-                    OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, col);
-                    command.addTag(command.toString()).push();
+                    new OpenPageCommand(FLEETDISPATCH, col).hash(threadName+"_"+col).push();
                 });
         System.err.println("reloading expedition points");
         SleepUtil.secondsToSleep(expeditionSource.size() * 5L);
@@ -183,7 +182,7 @@ public class ExpeditionThread extends AbstractThread {
     private void setExpeditionReadyToStart(FleetEntity expedition) {
         boolean battleExtension = map.getConfigBoolean(BATTLE_EXTENSION, true);
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
-        expeditionFleetCommand.addTag(threadName);
+        expeditionFleetCommand.hash(threadName);
         expeditionFleetCommand.push();
     }
 }

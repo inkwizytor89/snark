@@ -23,7 +23,7 @@ public class MessageService {
             while(true) {
 
                 if(isTimeForReadMessages()) {
-                    new ReadMessageCommand().push();
+                    new ReadMessageCommand().hash(MessageService.class.getName()).push();
                 }
                 SleepUtil.secondsToSleep(10L);
 

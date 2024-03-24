@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_THREAD;
 import static org.enoch.snark.gi.types.Mission.STATIONED;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
-import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
+import static org.enoch.snark.instance.commander.QueueRunType.MAJOR;
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public class FleetThread extends AbstractThread {
@@ -65,19 +65,19 @@ public class FleetThread extends AbstractThread {
                 String tagKey = generateTagKey(fleetEntity, index);
                 if(shouldFleetBeSend(tagKey)) {
                     SendFleetCommand command = new SendFleetCommand(fleetEntity);
-                    command.addTag(threadName);
-                    command.addTag(tagKey);
+                    command.hash(threadName);
+                    command.hash(tagKey);
                     command.setResources(map.getConfigResource(RESOURCES, nothing));
                     command.setAllShips(shipWave.isEmpty());
-                    command.setRunType(FLEET_ACTION_WITH_PRIORITY);
+                    command.setRunType(MAJOR);
                     command.push();
                 }
             }
         }
     }
 
-    private boolean shouldFleetBeSend(String tagKey) {
-        boolean noWaitingElement = Commander.getInstance().noWaitingElementsByTag(tagKey);
+    private boolean shouldFleetBeSend(String hash) {
+        boolean noWaitingElement = Commander.getInstance().noBlockingHash(hash);
         if(!noWaitingElement) return false;
 //        FleetDAO.getInstance().findLastSend()
         return false;

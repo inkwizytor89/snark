@@ -8,6 +8,7 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
@@ -69,7 +70,7 @@ public class CollectorThread extends AbstractThread {
 
         SendFleetCommand collecting = new SendFleetCommand(fleet);
         collecting.setResources(resources);
-        collecting.addTag(threadName);
+        collecting.hash(threadName);
         collecting.push();
     }
 
@@ -108,7 +109,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean isCollectingOngoing() {
-        return !(noCollectingByNavigator() && noWaitingElementsByTag(threadName) && noActiveCollectingInDB());
+        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHash(threadName) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {

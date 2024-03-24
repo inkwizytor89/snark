@@ -4,39 +4,36 @@ import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.model.types.QueueRunType;
+import org.enoch.snark.instance.commander.QueueRunType;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION;
-import static org.enoch.snark.instance.model.types.QueueRunType.INTERFACE_ACTION;
+import static org.enoch.snark.instance.commander.QueueRunType.NORMAL;
+import static org.enoch.snark.instance.commander.QueueRunType.MINOR;
 
 public abstract class AbstractCommand {
     protected final WebDriver webDriver;
     private FollowingAction followingAction;
-    private QueueRunType runType = INTERFACE_ACTION;
+    private QueueRunType runType = MINOR;
     protected Instance instance;
     public int failed = 0;
     Integer priority = 100;
+    private String hash;
     private final List<String> tags = new ArrayList<>();
 
 
     protected AbstractCommand() {
         this.instance = Instance.getInstance();
         webDriver = GI.getInstance().getWebDriver();
-        if(this instanceof SendFleetCommand) runType = FLEET_ACTION;
+        if(this instanceof SendFleetCommand) runType = NORMAL;
     }
 
     public abstract boolean execute();
 
     public void push() {
         Commander.getInstance().push(this);
-    }
-
-    public void push(String tag) {
-        Commander.getInstance().push(this, tag);
     }
 
     public void doFallowing() {
@@ -79,7 +76,17 @@ public abstract class AbstractCommand {
     public void onInterrupt() {
     }
 
-    public AbstractCommand addTag(String tag) {
+    public AbstractCommand hash(String hash) {
+        this.hash = hash;
+        tags.add(hash);
+        return this;
+    }
+
+    public String hash() {
+        return hash;
+    }
+
+    public AbstractCommand addNoneHashTag(String tag) {
         tags.add(tag);
         return this;
     }
@@ -92,7 +99,8 @@ public abstract class AbstractCommand {
         return runType;
     }
 
-    public void setRunType(QueueRunType runType) {
+    public AbstractCommand setRunType(QueueRunType runType) {
         this.runType = runType;
+        return this;
     }
 }

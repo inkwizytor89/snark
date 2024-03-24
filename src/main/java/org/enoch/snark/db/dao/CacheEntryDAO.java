@@ -54,6 +54,12 @@ public class CacheEntryDAO extends AbstractDAO<CacheEntryEntity> {
         return cacheEntry.value;
     }
 
+    public String getValue(String key, String defaultValue) {
+        CacheEntryEntity cacheEntry = getCacheEntry(key);
+        if(cacheEntry == null) return defaultValue;
+        return cacheEntry.value;
+    }
+
     public LocalDateTime getDate(String key) {
         String value = getValue(key);
         if(value == null) return null;

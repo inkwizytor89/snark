@@ -47,7 +47,7 @@ public class ScanThread extends AbstractThread {
             pause = 600;
             return;
         }
-        if(noWaitingElements()) {
+        if(commander.notingToPool()) {
             setWaitingScan();
         }
     }

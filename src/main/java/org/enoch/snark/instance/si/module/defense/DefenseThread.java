@@ -22,8 +22,9 @@ import java.util.stream.Collectors;
 import static org.enoch.snark.db.entity.FleetEntity.DEFENCE_CODE;
 import static org.enoch.snark.gi.types.Mission.*;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
+import static org.enoch.snark.instance.commander.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
-import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
+import static org.enoch.snark.instance.commander.QueueRunType.MAJOR;
 
 public class DefenseThread extends AbstractThread {
 
@@ -72,7 +73,7 @@ public class DefenseThread extends AbstractThread {
         System.err.println("incomingAction "+ incomingAction.size());
 
 
-        if(!incomingAction.isEmpty() && noWaitingElementsByTag(threadName)) {
+        if(!incomingAction.isEmpty() && commander.noBlockingHash(threadName)) {
             incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
             Set<Planet> attackedPlanets = incomingAction.stream()
                     .map(EventFleet::getTo)
@@ -101,10 +102,10 @@ public class DefenseThread extends AbstractThread {
         fleetEntity.code = DEFENCE_CODE;
 
         SendFleetCommand command = new SendFleetCommand(fleetEntity);
-        command.addTag(threadName);
+        command.hash(threadName+sourceEntity);
         command.setResources(everything);
         command.setAllShips(true);
-        command.setRunType(FLEET_ACTION_WITH_PRIORITY);
+        command.setRunType(CRITICAL);
         command.push();
     }
 

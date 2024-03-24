@@ -5,6 +5,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
+import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.Planet;
@@ -53,7 +54,7 @@ public class UpdateThread extends AbstractThread {
     @Override
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
-        if(isNavigatorExpired() && noWaitingElementsByTag(threadName)) {
+        if(isNavigatorExpired() && commander.noBlockingHash(threadName)) {
             updateState();
         }
 
@@ -97,7 +98,13 @@ public class UpdateThread extends AbstractThread {
     }
 
     public static void updateState() {
-        new LoadColoniesCommand().addTag(threadName).push();
-        new UpdateFleetEventsCommand().addTag(threadName).push();
+        new LoadColoniesCommand()
+                .hash(threadName+"_LoadColoniesCommand")
+                .setRunType(QueueRunType.MAJOR)
+                .push();
+        new UpdateFleetEventsCommand()
+                .hash(threadName+"_UpdateFleetEventsCommand")
+                .setRunType(QueueRunType.MAJOR)
+                .push();
     }
 }

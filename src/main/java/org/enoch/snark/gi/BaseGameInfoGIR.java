@@ -60,7 +60,7 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
     public void updateColony(ColonyEntity colony) {
         GIUrl.openComponent(SUPPLIES, colony);
         GIUrl.openComponent(FACILITIES, colony);
-        GIUrl.openComponent(LFBUILDINGS, colony);
+        if(colony.isPlanet) GIUrl.openComponent(LFBUILDINGS, colony);
         GIUrl.openComponent(FLEETDISPATCH, colony);
         GIUrl.openComponent(DEFENSES, colony);
     }

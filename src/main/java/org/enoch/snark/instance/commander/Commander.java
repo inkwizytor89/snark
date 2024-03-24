@@ -3,12 +3,9 @@ package org.enoch.snark.instance.commander;
 import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
@@ -19,17 +16,14 @@ import org.openqa.selenium.WebElement;
 
 import java.util.*;
 
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
-import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION;
-import static org.enoch.snark.instance.model.types.QueueRunType.FLEET_ACTION_WITH_PRIORITY;
 import static org.enoch.snark.instance.si.module.ConfigMap.MODE;
 import static org.enoch.snark.instance.si.module.ConfigMap.STOP;
 
 public class Commander extends Thread {
 
     private static Commander INSTANCE;
+    private CommandDeque commandDeque = new CommandDeque();
 
-    private final Instance instance;
     private final GISession session;
     private boolean isRunning = true;
 
@@ -43,7 +37,6 @@ public class Commander extends Thread {
     private AbstractCommand actualProcessedCommand = null;
 
     public Commander() {
-        this.instance = Instance.getInstance();
         this.session = Instance.session;
         start();
     }
@@ -84,36 +77,36 @@ public class Commander extends Thread {
                     UpdateThread.updateState();
                 }
 
-                // check if fleet slot is free because is something fleet to send
-                if(!isFleetFreeSlot() && !fleetActionQueue.isEmpty()) {
-                    resolve(new OpenPageCommand(FLEETDISPATCH));
-                }
-                // method for put top in fleet queue
-                if(isFleetFreeSlot()) {
-                    if (!fleetActionQueue.isEmpty()) {
-                        resolve(Objects.requireNonNull(fleetActionQueue.poll()));
-                        SleepUtil.sleep();
-                        continue;
-                    }
-                }
-                if (!interfaceActionQueue.isEmpty()) {
-                        resolve(interfaceActionQueue.poll());
-                        continue;
-                }
-                if(isFleetFreeSlot()) {
-                    List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
-                    if (!toProcess.isEmpty()) {
-                        resolve(new SendFleetCommand(toProcess.get(0)));
-                        SleepUtil.sleep();
-                        fleetCount++;
-                        continue;
-                    }
-                }
+//                // check if fleet slot is free because is something fleet to send
+//                if(!isFleetFreeSlot() && !fleetActionQueue.isEmpty()) {
+//                    resolve(new OpenPageCommand(FLEETDISPATCH));
+//                }
+//                // method for put top in fleet queue
+//                if(isFleetFreeSlot()) {
+//                    if (!fleetActionQueue.isEmpty()) {
+//                        resolve(Objects.requireNonNull(fleetActionQueue.poll()));
+//                        SleepUtil.sleep();
+//                        continue;
+//                    }
+//                }
+//                if (!interfaceActionQueue.isEmpty()) {
+//                        resolve(interfaceActionQueue.poll());
+//                        continue;
+//                }
+//                if(isFleetFreeSlot()) {
+//                    List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
+//                    if (!toProcess.isEmpty()) {
+//                        resolve(new SendFleetCommand(toProcess.get(0)));
+//                        SleepUtil.sleep();
+//                        fleetCount++;
+//                        continue;
+//                    }
+//                }
+                resolve(commandDeque.pool());
                 SleepUtil.sleep();
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
-                //session.makeRestart(0L);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -158,16 +151,8 @@ public class Commander extends Thread {
         actualProcessedCommand = command;
         boolean success;
         if(command == null) {
-            System.err.println("Skipping resolving null command");
             return;
         }
-//        if(!session.isLoggedIn()) {
-//            session.open();
-//        }
-        // każdy wyjątek powinien miec czy powtórzyć procedure
-        // jesli nie ma tego to nalezy powtorzyc
-        // poza tym wprost mozna zwrocic falsz czyli nie powtarzac
-        //
         try {
             success = command.execute();
         } catch (ShipDoNotExists e) {
@@ -201,10 +186,6 @@ public class Commander extends Thread {
         actualProcessedCommand = null;
     }
 
-    private boolean isFleetFreeSlot() {
-        return getFleetFreeSlots() > 0;
-    }
-
     public void setFleetStatus(int fleetCount, int fleetMax) {
         this.fleetCount = fleetCount;
         this.fleetMax = fleetMax;
@@ -215,42 +196,44 @@ public class Commander extends Thread {
         this.expeditionMax = expeditionMax;
     }
 
+    public boolean noBlockingHash(String hash) {
+        return hash == null || peekQueues().stream()
+                .filter(command -> command.hash() != null)
+                .map(AbstractCommand::hash)
+                .noneMatch(s -> s.equals(hash));
+    }
+
+    public boolean noCommands() {
+        return peekQueues().isEmpty();
+    }
+
+    public boolean notingToPool() {
+        return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
+    }
+
     public synchronized void push(AbstractCommand command) {
-        if(FLEET_ACTION_WITH_PRIORITY.equals(command.getRunType())) fleetActionQueue.addFirst(command);
-        else if (FLEET_ACTION.equals(command.getRunType())) fleetActionQueue.offer(command);
-        else interfaceActionQueue.offer(command);
-    }
-
-    public synchronized void push(AbstractCommand command, String tag) {
-        if(noWaitingElementsByTag(tag))
-            command.push();
-    }
-
-    public boolean noWaitingElementsByTag(String tag) {
-        return peekQueues().stream()
-                .flatMap(abstractCommand -> abstractCommand.getTags().stream())
-                .noneMatch(s -> s.equals(tag));
+//        if(MAJOR.equals(command.getRunType())) fleetActionQueue.addFirst(command);
+//        else if (NORMAL.equals(command.getRunType())) fleetActionQueue.offer(command);
+//        else interfaceActionQueue.offer(command);
+        if(noBlockingHash(command.hash()))
+            commandDeque.push(command);
     }
 
     public synchronized List<AbstractCommand> peekQueues() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-        commandsToView.addAll(fleetActionQueue);
-        commandsToView.addAll(interfaceActionQueue);
+//        commandsToView.addAll(fleetActionQueue);
+//        commandsToView.addAll(interfaceActionQueue);
+        commandsToView.addAll(commandDeque.peek());
         return commandsToView;
     }
 
-    @Deprecated
-    public synchronized AbstractCommand getActualProcessedCommand() {
-        return actualProcessedCommand;
+    public boolean isFleetFreeSlot() {
+        return getFleetFreeSlots() > 0;
     }
 
     public int getFleetFreeSlots() {
         return fleetMax - fleetCount;
-    }
-
-    public int getExpeditionFreeSlots() {
-        return expeditionMax - expeditionCount;
     }
 
     public int getFleetCount() {
@@ -259,6 +242,10 @@ public class Commander extends Thread {
 
     public int getFleetMax() {
         return fleetMax;
+    }
+
+    public int getExpeditionFreeSlots() {
+        return expeditionMax - expeditionCount;
     }
 
     public int getExpeditionCount() {

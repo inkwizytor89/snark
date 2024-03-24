@@ -38,8 +38,8 @@ public class QueueManger {
             planetQueues.put(LIFEFORM_RESEARCH, new QueueMonitor());
             queueMap.put(colony, planetQueues);
 
-            if(queueMap.size() > 20) {
-                throw new RuntimeException("QueueManger leak: too many queue");
+            if(queueMap.size() > 30) {
+                throw new RuntimeException("QueueManger leak: too many queue "+queueMap.size());
             }
         }
     }

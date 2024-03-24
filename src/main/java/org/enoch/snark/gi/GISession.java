@@ -15,7 +15,7 @@ public class GISession {
     private SessionGIR gir;
 
     private boolean isRunning;
-    private Set<Cookie> cookies = new HashSet<>();
+//    private Set<Cookie> cookies = new HashSet<>();
 
     public static GISession getInstance() {
         if(INSTANCE == null) {
@@ -30,20 +30,23 @@ public class GISession {
     }
 
     private void start() {
-        GI.reopenWebDriver();
-        gir = new SessionGIR();
-        gir.manageDriver();
-        if(canUseCookies()) {
-            gir.applyCookies(cookies);
-        } else {
-            gir.signIn();
-            gir.openServer();
+        isRunning = false;
+        boolean failAction = false;
+        while(!isRunning) {
+            if(failAction) {
+                SleepUtil.secondsToSleep(600L);
+                failAction = true;
+            }
+            GI.reopenWebDriver();
+            gir = new SessionGIR();
+            gir.manageDriver();
+            if(!gir.applyCookies()) continue;
+            if(!gir.isCurrentUrlLobbyAccount()) {
+                if(!gir.signInWithRetry()) continue;
+            }
+            if(!gir.openServer()) continue;
+            isRunning = true;
         }
-        isRunning = true;
-    }
-
-    private boolean canUseCookies() {
-        return !cookies.isEmpty() && cookies.stream().anyMatch(cookie -> cookie.getName().contains("PHPSESSID"));
     }
 
     public void reopenServerIfSessionIsOver() {
@@ -52,13 +55,13 @@ public class GISession {
         }
     }
 
-    public void makeRestart(long secondsToSleep) {
+    private void makeRestart(long secondsToSleep) {
         Commander commander = Commander.getInstance();
         isRunning = false;
         commander.stopCommander();
         System.err.println("before restart sleep " + secondsToSleep);
         SleepUtil.secondsToSleep(secondsToSleep);
-        cookies = gir.loadCookies();
+//        cookies = gir.loadCookies();
         start();
         commander.startCommander();
     }

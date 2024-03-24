@@ -67,11 +67,11 @@ public class FleetSaveThread extends AbstractThread {
             }
 
             String colonizationCode = getColonizationCode(fleet);
-            if(noWaitingElementsByTag(colonizationCode)) {
+            if(commander.noBlockingHash(colonizationCode)) {
                 SendFleetCommand command = new SendFleetCommand(fleet);
                 command.setAllShips(true);
                 command.setResources(everything);
-                command.addTag(colonizationCode);
+                command.hash(colonizationCode);
                 command.push();
                 System.err.println(fleet.source+" push to send with code "+colonizationCode);
             }

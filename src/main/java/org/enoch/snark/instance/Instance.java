@@ -121,4 +121,10 @@ public class Instance {
     public static ConfigMap getMainConfigMap() {
         return config.globalMap.get(ConfigMap.MAIN);
     }
+
+    public static void playCriticalErrorSound() {
+        for (int i = 0; i < 11; i++) {
+            System.err.println("play Error music");
+        }
+    }
 }
