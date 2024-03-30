@@ -16,6 +16,11 @@ public class JPAUtility {
     public static String syncMethod;
 
     public static final String H2_PERSISTENCE = "H2-PERSISTENCE";
+
+    /*
+    table Colony isPlanet,collection to remove
+    table colony add life form string
+     */
     public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";
 
     public static void buildDefaultEntityManager(String persistence) {
@@ -37,8 +42,8 @@ public class JPAUtility {
     }
 
     public static EntityManager createEntityManager(){
-        EntityManagerFactory managerFactory = null;
-        Map<String, String> persistenceMap = new HashMap<String, String>();
+        EntityManagerFactory managerFactory;
+        Map<String, String> persistenceMap = new HashMap<>();
 
         persistenceMap.put("javax.persistence.jdbc.url", "jdbc:postgresql://localhost/"+ Instance.getMainConfigMap().getConfig(ConfigMap.SERVER));
 

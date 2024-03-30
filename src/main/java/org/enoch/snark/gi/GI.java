@@ -94,34 +94,6 @@ public class GI {
         return webDriver;
     }
 
-//    public void doubleClickText(String text) {
-//        try {
-//            WebElement serverElement = findTextByXPath(text);
-//            Actions actions = new Actions(webDriver);
-//            actions.doubleClick(serverElement).perform();
-//        } catch (NoSuchElementException e) {
-//            System.err.println("Skip text '" + text + "' to click");
-//        }
-//    }
-
-//    private WebElement findTextByXPath(String text) {
-//        List<WebElement> elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
-//        int i = 1;
-//        while(elements.isEmpty() && i <= 10) {
-//            SleepUtil.pause(i);
-//            i++;
-//            elements = ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]");
-//        }
-//
-//        if(elements.isEmpty()) {
-//            System.err.println("No element '" + text + "' to click");
-//            return ((ChromeDriver) webDriver).findElementsByXPath("//*[contains(text(), '" + text + "')]").get(0);
-//        } else if(elements.size() > 1) {
-//            System.err.println("Were many elements '" + text + "' to click");
-//        }
-//        return elements.get(0);
-//    }
-
     public WebElement findElement(String tag, String attribute, String value, String unacceptable) {
         WebElement element = findByXPath("//" + tag + "[@" + attribute + "='" + value + "']");
         for (int i = 1; i <= 10; i++) {

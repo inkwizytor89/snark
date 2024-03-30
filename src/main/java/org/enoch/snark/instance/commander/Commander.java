@@ -122,9 +122,8 @@ public class Commander extends Thread {
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
             return;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println(e.getMessage());
+        } catch (Throwable e) {
+            System.err.println(command+" with error "+e.getMessage());
             success = false;
         }
 

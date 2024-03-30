@@ -113,4 +113,8 @@ public class Planet {
     public ColonyEntity getSimilarColony() {
         return new ColonyPlaner(ColonyDAO.getInstance().fetchAll()).findSimilar(this);
     }
+
+    public boolean is(ColonyType type) {
+        return type.equals(this.type);
+    }
 }

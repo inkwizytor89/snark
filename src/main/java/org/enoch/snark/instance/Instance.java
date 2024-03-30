@@ -71,11 +71,10 @@ public class Instance {
 
     public void initialActionOnStart() {
         commander = Commander.getInstance();
-        // LoadColoniesCommand to refactor
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();
-        getMainConfigMap().getSources().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
+        getSources().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
     }
 
     public void removePlanet(Planet target) {

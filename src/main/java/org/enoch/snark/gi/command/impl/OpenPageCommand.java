@@ -7,17 +7,12 @@ import org.enoch.snark.gi.types.UrlComponent;
 public class OpenPageCommand extends AbstractCommand {
 
     private final UrlComponent component;
-    private ColonyEntity colony;
+    private final ColonyEntity colony;
 
     public OpenPageCommand(UrlComponent component, ColonyEntity colony) {
         super();
         this.component = component;
         this.colony = colony;
-    }
-
-    public OpenPageCommand(UrlComponent component) {
-        super();
-        this.component = component;
     }
 
     @Override
@@ -28,6 +23,6 @@ public class OpenPageCommand extends AbstractCommand {
 
     @Override
     public String toString() {
-        return "open " + component + " on " + colony;
+        return "On " + colony + " open page component " + component ;
     }
 }

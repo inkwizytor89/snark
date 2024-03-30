@@ -471,6 +471,10 @@ public abstract class PlanetEntity extends IdEntity{
         loadPlanetCoordinate(input);
     }
 
+    public boolean is(ColonyType type) {
+        return toPlanet().is(type);
+    }
+
     private int roundDistance(Integer x1, Integer x2, Integer max) {
         return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
     }

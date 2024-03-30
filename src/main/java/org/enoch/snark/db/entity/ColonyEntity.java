@@ -8,10 +8,7 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "colonies", schema = "public", catalog = "snark")
@@ -68,5 +65,18 @@ public class ColonyEntity extends PlanetEntity {
     public ColonyEntity save() {
         ColonyDAO.getInstance().saveOrUpdate(this);
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ColonyEntity that = (ColonyEntity) o;
+        return Objects.equals(cp, that.cp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cp);
     }
 }
