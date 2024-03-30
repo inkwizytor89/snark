@@ -6,6 +6,7 @@ import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.si.module.ConfigMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.gi.text.HtmlElements.TAG_BUTTON;
 import static org.enoch.snark.gi.text.HtmlElements.TAG_INPUT;
-import static org.enoch.snark.instance.config.Config.*;
 
 public class SessionGIR extends GraphicalInterfaceReader {
 
@@ -73,11 +73,11 @@ public class SessionGIR extends GraphicalInterfaceReader {
                 GI gi = GI.getInstance();
                 wd.get(SIGN_IN_PAGE);
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(Instance.getMainConfigMap().getConfig(LOGIN));
+                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(Instance.getMainConfigMap().getConfig(ConfigMap.LOGIN));
                 gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, LOGIN_BUTTON).click();
                 SleepUtil.sleep();
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(Instance.getMainConfigMap().getConfig(PASSWORD));
+                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(Instance.getMainConfigMap().getConfig(ConfigMap.PASSWORD));
                 gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, PASSWORD_BUTTON).click();
                 SleepUtil.secondsToSleep(6L);
 
@@ -110,7 +110,7 @@ public class SessionGIR extends GraphicalInterfaceReader {
             try {
                 SleepUtil.secondsToSleep(3L);
 
-                String serverName = Instance.getMainConfigMap().getConfig(SERVER);
+                String serverName = Instance.getMainConfigMap().getConfig(ConfigMap.SERVER);
                 wd.findElements(By.xpath("//div[@role='row']")).stream()
                         .filter(webElement -> webElement.getText().contains(serverName))
                         .findFirst()

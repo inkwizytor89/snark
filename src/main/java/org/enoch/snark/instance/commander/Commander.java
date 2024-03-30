@@ -53,7 +53,7 @@ public class Commander extends Thread {
     public void run() {
         waitingToOpenServerTab();
         while(true) {
-            Instance.updateConfig();
+            Instance.updatePropertiesMap();
             try {
                 RunningStatus runningStatus = createRunningStatus();
                 isRunning = createRunningStatus().shouldRunning();

@@ -16,7 +16,8 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.instance.config.Config.*;
+import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
+import static org.enoch.snark.instance.si.module.ConfigMap.SYSTEM_MAX;
 
 public class SpaceThread extends AbstractThread {
 

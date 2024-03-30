@@ -54,7 +54,7 @@ public class TransportThread extends AbstractThread {
     @Override
     protected void onStep() {
         pause = 60;
-        List<ColonyEntity> sources = map.getFlyPoints();
+        List<ColonyEntity> sources = map.getSources();
         for(ColonyEntity colony : sources) {
 
             if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {

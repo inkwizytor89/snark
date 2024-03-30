@@ -16,7 +16,7 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 
 import static org.enoch.snark.gi.GI.TECHNOLOGIES;
-import static org.enoch.snark.instance.config.Config.MASTER;
+import static org.enoch.snark.instance.si.module.ConfigMap.MASTER;
 
 public class BuildCommand extends AbstractCommand {
 

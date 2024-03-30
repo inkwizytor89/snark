@@ -1,6 +1,5 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -11,15 +10,14 @@ import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.gi.command.impl.UpdateResearchCommand;
 import org.enoch.snark.instance.service.Cleaner;
 import org.enoch.snark.instance.commander.Commander;
-import org.enoch.snark.instance.config.Config;
-import org.enoch.snark.instance.config.Universe;
+import org.enoch.snark.instance.config.ConfigReader;
 import org.enoch.snark.instance.si.BaseSI;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -31,18 +29,16 @@ public class Instance {
     protected static final Logger LOG = Logger.getLogger(Instance.class.getName());
 
     private static Instance INSTANCE;
-    public static Config config;
+
+    private static HashMap<String, ConfigMap> propertiesMap = new HashMap<>();
     public static Commander commander;
-//    public static GI gi;
     public static GISession session;
     public static Integer level = 1;
 
-    public List<Planet> cachedPlaned = new ArrayList<>();
-    public List<ColonyEntity> flyPoints = new ArrayList<>();
     public ColonyEntity lastVisited = null;
 
     private Instance() {
-        updateConfig();
+        updatePropertiesMap();
     }
 
     public static Instance getInstance() {
@@ -52,20 +48,12 @@ public class Instance {
         return INSTANCE;
     }
 
-    public static synchronized void updateConfig() {
+    public static synchronized void updatePropertiesMap() {
         try {
-            config = Universe.load();
+            propertiesMap = ConfigReader.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public List<ColonyEntity> getFlyPoints() {
-        while(flyPoints.isEmpty()) {
-            System.err.println("Waiting for FlyPoints");
-            SleepUtil.sleep();
-        }
-        return flyPoints;
     }
 
     public void startBrowser() {
@@ -87,7 +75,7 @@ public class Instance {
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();
-        getMainConfigMap().getFlyPoints().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
+        getMainConfigMap().getSources().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
     }
 
     public void removePlanet(Planet target) {
@@ -101,30 +89,21 @@ public class Instance {
             //TODO: remove messegas and others
         }
     }
-//
-//    public synchronized boolean isStopped() {
-//        return config.getConfig(MODE)!= null && config.getConfig(MODE).contains("stop");
-//    }
-
-    public static String getGlobalConfig(String tag, String key) {
-        if(!config.globalMap.containsKey(tag)) return null;
-        ConfigMap configMap = config.globalMap.get(tag);
-        if(!configMap.containsKey(tag)) return null;
-        return configMap.get(key);
-    }
 
     public static ConfigMap getConfigMap(String tag) {
-        if(!config.globalMap.containsKey(tag)) return new ConfigMap();
-        return config.globalMap.get(tag);
+        if(!propertiesMap.containsKey(tag)) return new ConfigMap();
+        return propertiesMap.get(tag);
     }
 
     public static ConfigMap getMainConfigMap() {
-        return config.globalMap.get(ConfigMap.MAIN);
+        return propertiesMap.get(ConfigMap.MAIN);
     }
 
-    public static void playCriticalErrorSound() {
-        for (int i = 0; i < 11; i++) {
-            System.err.println("play Error music");
-        }
+    public static List<ColonyEntity> getSources() {
+        return getMainConfigMap().getSources();
+    }
+
+    public static HashMap<String, ConfigMap> getPropertiesMap() {
+        return propertiesMap;
     }
 }

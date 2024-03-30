@@ -59,6 +59,23 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
                     "from FleetEntity " +
                     "where start is null ", FleetEntity.class)
                     .getResultList();
+//            mar 25, 2024 10:36:35 AM org.hibernate.AssertionFailure <init>
+//            ERROR: HHH000099: an assertion failure occurred (this may indicate a bug in Hibernate, but is more likely due to unsafe use of the session): org.hibernate.AssertionFailure: null id in org.enoch.snark.db.entity.FleetEntity entry (don't flush the Session after an exception occurs)
+//            org.hibernate.AssertionFailure: null id in org.enoch.snark.db.entity.FleetEntity entry (don't flush the Session after an exception occurs)
+//            at org.hibernate.event.internal.DefaultFlushEntityEventListener.checkId(DefaultFlushEntityEventListener.java:71)
+//            at org.hibernate.event.internal.DefaultFlushEntityEventListener.getValues(DefaultFlushEntityEventListener.java:186)
+//            at org.hibernate.event.internal.DefaultFlushEntityEventListener.onFlushEntity(DefaultFlushEntityEventListener.java:146)
+//            at org.hibernate.event.internal.AbstractFlushingEventListener.flushEntities(AbstractFlushingEventListener.java:235)
+//            at org.hibernate.event.internal.AbstractFlushingEventListener.flushEverythingToExecutions(AbstractFlushingEventListener.java:94)
+//            at org.hibernate.event.internal.DefaultAutoFlushEventListener.onAutoFlush(DefaultAutoFlushEventListener.java:44)
+//            at org.hibernate.internal.SessionImpl.autoFlushIfRequired(SessionImpl.java:1445)
+//            at org.hibernate.internal.SessionImpl.list(SessionImpl.java:1531)
+//            at org.hibernate.query.internal.AbstractProducedQuery.doList(AbstractProducedQuery.java:1561)
+//            at org.hibernate.query.internal.AbstractProducedQuery.list(AbstractProducedQuery.java:1529)
+//            at org.hibernate.query.Query.getResultList(Query.java:168)
+//            at org.enoch.snark.db.dao.FleetDAO.findToProcess(FleetDAO.java:61)
+//            at org.enoch.snark.instance.commander.CommandDeque.pool(CommandDeque.java:53)
+//            at org.enoch.snark.instance.commander.Commander.run(Commander.java:69)
         }
     }
 

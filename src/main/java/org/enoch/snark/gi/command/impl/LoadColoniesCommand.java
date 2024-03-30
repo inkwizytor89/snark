@@ -1,18 +1,13 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.BaseGameInfoGIR;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.transaction.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.enoch.snark.instance.config.Config.FLY_POINTS;
 
 public class LoadColoniesCommand extends AbstractCommand {
 
@@ -75,64 +70,19 @@ public class LoadColoniesCommand extends AbstractCommand {
                     colonyDAO.remove(colonyEntity);
                 }
             });
-            typeFlyPoints();
 
-                        // update colonies
-            instance.cachedPlaned = new ArrayList<>();
             for(ColonyEntity colony : colonyDAO.fetchAll()) {
-                if(colony.isPlanet) {
-                    instance.cachedPlaned.add(colony.toPlanet());
-                }
                 if(colony.level == null) {
                     baseGameInfoGIR.updateColony(colony);
                     colony.level = 1L;
                     colony.formsLevel = 1L;
                 }
                 colonyDAO.saveOrUpdate(colony);
-
-//                PlayerEntity mainPlayer = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-//                if(mainPlayer.spyLevel == null) {
-////                    new GIUrlBuilder().openWithPlayerInfo(PAGE_RESEARCH, mainPlayer);
-//                    mainPlayer.spyLevel = 1L;
-//                }
             }
         } catch (Exception e) {
-            typeFlyPoints();
             e.printStackTrace();
         }
         return true;
-    }
-
-    private synchronized void typeFlyPoints() {
-        List<ColonyEntity> flyPoints = new ArrayList<>();
-        String flyPointsConfig = Instance.getMainConfigMap().getConfig(FLY_POINTS, StringUtils.EMPTY);
-        List<ColonyEntity> planetList = colonyDAO.fetchAll()
-                .stream()
-                .filter(colonyEntity -> colonyEntity.isPlanet)
-                .sorted(Comparator.comparing(o -> -o.galaxy))
-                .collect(Collectors.toList());
-
-        if(flyPointsConfig.isEmpty()) {
-            for (ColonyEntity planet : planetList) {
-                ColonyEntity colony = planet;
-                if (planet.cpm != null) {
-                    colony = colonyDAO.find(planet.cpm);
-                }
-                flyPoints.add(colony);
-            }
-        } else if (flyPointsConfig.contains("moon")) {
-            flyPoints = colonyDAO.fetchAll()
-                    .stream()
-                    .filter(colonyEntity -> !colonyEntity.isPlanet)
-                    .sorted(Comparator.comparing(o -> -o.galaxy))
-                    .collect(Collectors.toList());
-        } else {
-            flyPoints.addAll(planetList);
-        }
-
-//        System.err.println("\nCount of fly points: "+flyPoints.size());
-//        flyPoints.forEach(System.err::println);
-        Instance.getInstance().flyPoints = flyPoints;
     }
 
     @Override

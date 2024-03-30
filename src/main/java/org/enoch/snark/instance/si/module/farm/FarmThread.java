@@ -150,7 +150,7 @@ public class FarmThread extends AbstractThread {
 
     private List<TargetEntity> selectAvailableTargets(List<TargetEntity> collect, int count) {
         Map<Integer, Long> flyPointsAvailability = new HashMap<>();
-        instance.flyPoints.forEach(colony -> flyPointsAvailability.put(colony.cp, 0L));
+        Instance.getSources().forEach(colony -> flyPointsAvailability.put(colony.cp, 0L));
         List<TargetEntity> result = new ArrayList<>();
 
         for (TargetEntity target: collect) {
@@ -228,7 +228,7 @@ public class FarmThread extends AbstractThread {
 
     private List<ColonyEntity> typeReadyColony() {
         List<ColonyEntity> readyColony = new ArrayList<>();
-        Instance.getInstance().getFlyPoints().forEach(colonyEntity -> {
+        Instance.getSources().forEach(colonyEntity -> {
             ColonyEntity fetch = ColonyDAO.getInstance().fetch(colonyEntity);
             if(fetch.transporterSmall > 0 && fetch.espionageProbe > 0) {
                 readyColony.add(fetch);

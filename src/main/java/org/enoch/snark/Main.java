@@ -2,7 +2,7 @@ package org.enoch.snark;
 
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.config.Universe;
+import org.enoch.snark.instance.config.ConfigReader;
 import org.flywaydb.core.Flyway;
 
 import java.io.File;
@@ -10,7 +10,7 @@ import java.io.FilenameFilter;
 
 import static org.enoch.snark.db.entity.JPAUtility.H2_PERSISTENCE;
 import static org.enoch.snark.db.entity.JPAUtility.H2_URL;
-import static org.enoch.snark.instance.config.Universe.configPath;
+import static org.enoch.snark.instance.config.ConfigReader.configPath;
 import static org.enoch.snark.instance.si.module.ConfigMap.DATABASE;
 import static org.enoch.snark.instance.si.module.ConfigMap.SERVER;
 
@@ -30,7 +30,7 @@ public class Main {
 
     public static void setConfigPath(String[] args) {
         if(args.length > 0) {
-            Universe.setConfigPath(args[0]);
+            ConfigReader.setConfigPath(args[0]);
         } else {
             File defaultProperties = new File(configPath);
             if(!defaultProperties.exists()) {
@@ -42,7 +42,7 @@ public class Main {
                 });
 
                 if(files!= null && files.length > 0) {
-                    Universe.setConfigPath(files[0].getName());
+                    ConfigReader.setConfigPath(files[0].getName());
                 } else {
                     throw new RuntimeException("Missing "+configPath+" and "+
                             defaultProperties.getParentFile().getAbsolutePath()+" do not contains file *.properties ");

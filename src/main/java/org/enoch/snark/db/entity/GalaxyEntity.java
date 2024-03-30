@@ -1,6 +1,6 @@
 package org.enoch.snark.db.entity;
 
-import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
 
@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.enoch.snark.instance.si.module.ConfigMap.PLANET;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
@@ -48,7 +50,7 @@ public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
     }
 
     private int distance() {
-        List<Planet> cachedPlaned = Instance.getInstance().cachedPlaned;
+        List<Planet> cachedPlaned = PlanetCache.get(PLANET);
         Optional<Planet> min = cachedPlaned.stream().min(Comparator.comparingInt(this::distance));
         if(min.isPresent()) {
             return distance(min.get());

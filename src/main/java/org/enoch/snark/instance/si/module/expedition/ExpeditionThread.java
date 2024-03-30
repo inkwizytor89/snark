@@ -59,7 +59,7 @@ public class ExpeditionThread extends AbstractThread {
 
     private void chooseColoniesForExpeditionsStart() {
         expeditionSource = new LinkedList<>();
-        expeditionSource.addAll(map.getFlyPoints());
+        expeditionSource.addAll(map.getSources());
         loadExpeditionPoints();
     }
 

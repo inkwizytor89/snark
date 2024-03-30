@@ -9,7 +9,8 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.instance.config.Config.GALAXY_MAX;
+import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
+
 
 public class Planet {
     public static final Integer GALAXY_INDEX = 1;

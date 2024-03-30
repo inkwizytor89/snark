@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
-import static org.enoch.snark.instance.config.Config.HIGH_SCORE_PAGES;
+import static org.enoch.snark.instance.si.module.ConfigMap.HIGH_SCORE_PAGES;
 
 public class HuntingThread extends AbstractThread {
 

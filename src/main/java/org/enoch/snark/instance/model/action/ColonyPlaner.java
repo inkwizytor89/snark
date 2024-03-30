@@ -12,7 +12,7 @@ public class ColonyPlaner {
     private final List<ColonyEntity> colonies;
 
     public ColonyPlaner() {
-        this(Instance.getInstance().flyPoints);
+        this(Instance.getSources());
     }
 
     public ColonyPlaner(List<ColonyEntity> colonies) {

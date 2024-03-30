@@ -18,10 +18,13 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
 
     public List<ColonyEntity> loadPlanetList() {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
+
+        WebElement myPlanets = wd.findElement(By.id("myPlanets"));
         List<WebElement> coloniesWebElements = new WebDriverWait(wd, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(wd.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
-        for(WebElement colonyWebElement : coloniesWebElements) {
-            try {
+                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(myPlanets.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
+
+        try {
+            for(WebElement colonyWebElement : coloniesWebElements) {
                 ColonyEntity colonyEntity = new ColonyEntity();
 
                 colonyEntity.cp = Integer.parseInt(colonyWebElement.getAttribute(ID_ATTRIBUTE).split("-")[1]);
@@ -49,10 +52,18 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
                 }
 
                 colonyEntities.add(colonyEntity);
-//                System.err.println(colonyEntity.getCordinate()+" "+colonyEntity.cp+" "+colonyEntity.cpm);
-            }catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String countColoniesText = myPlanets.findElement(By.id("countColonies")).getText();
+        int expectedColoniesCount = Integer.parseInt(countColoniesText.substring(0, countColoniesText.indexOf("/")).trim());
+
+        long actualColoniesCount = colonyEntities.stream().filter(colonyEntity -> colonyEntity.isPlanet).count();
+
+        if(expectedColoniesCount != actualColoniesCount) {
+            throw new RuntimeException("Incorrect colonies load - expected "+expectedColoniesCount+" but was "+coloniesWebElements.size());
         }
         return colonyEntities;
     }

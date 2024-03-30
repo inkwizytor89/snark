@@ -32,9 +32,10 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String STOP = "stop";
     public static final String NAME = "name";
     public static final String TYPE = "type";
+    public static final String PLANET = "planet";
+    public static final String MOON = "moon";
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
-    public static final String FLY_POINTS = "fly_points";
     public static final String SOURCE = "source";
     public static final String SHIPS_WAVE = "ships_wave";
     public static final String MISSION = "mission";
@@ -149,8 +150,8 @@ public class ConfigMap extends HashMap<String, String> {
         return this.get(NAME);
     }
 
-    public List<ColonyEntity> getFlyPoints() {
-        return ColonyDAO.getInstance().getColonies(getNearestConfig(FLY_POINTS, StringUtils.EMPTY));
+    public List<ColonyEntity> getSources() {
+        return ColonyDAO.getInstance().getColonies(getNearestConfig(SOURCE, StringUtils.EMPTY));
     }
 
     public List<ColonyEntity> getColonies(String key, String defaultValue) {

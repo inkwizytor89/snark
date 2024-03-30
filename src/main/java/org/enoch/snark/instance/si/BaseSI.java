@@ -48,7 +48,7 @@ public class BaseSI extends Thread{
     @Override
     public void run() {
         while(true) {
-            HashMap<String, ConfigMap> globalMap = Instance.config.globalMap;
+            HashMap<String, ConfigMap> globalMap = Instance.getPropertiesMap();
             globalMap.forEach((s, map) -> {
                 if("main".equals(s)) return;
                 if(threadsMap.containsKey(s)) {

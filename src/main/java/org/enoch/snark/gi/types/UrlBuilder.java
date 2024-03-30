@@ -5,7 +5,7 @@ import org.enoch.snark.instance.Instance;
 
 import java.util.HashMap;
 
-import static org.enoch.snark.instance.config.Config.URL;
+import static org.enoch.snark.instance.si.module.ConfigMap.URL;
 
 public class UrlBuilder {
 

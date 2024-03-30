@@ -1,12 +1,11 @@
 package org.enoch.snark.instance.si.module.fleetSave;
 
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -16,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.Resources.everything;
+import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
 
 public class FleetSaveThread extends AbstractThread {
 
@@ -44,7 +43,7 @@ public class FleetSaveThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return instance.getFlyPoints().size();
+        return PlanetCache.get(SOURCE).size();
     }
 
     @Override
@@ -78,11 +77,11 @@ public class FleetSaveThread extends AbstractThread {
         }
     }
 
-    private void loadFlyPoints() {
-        instance.getFlyPoints().forEach(col -> new OpenPageCommand(FLEETDISPATCH, col).push());
-        System.err.println("reloading fleets points");
-        SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10L);
-    }
+//    private void loadFlyPoints() {
+//        instance.getFlyPoints().forEach(col -> new OpenPageCommand(FLEETDISPATCH, col).push());
+//        System.err.println("reloading fleets points");
+//        SleepUtil.secondsToSleep(instance.getFlyPoints().size() * 10L);
+//    }
 
     private String getColonizationCode(FleetEntity fleet) {
         return threadName+fleet.getDestination();

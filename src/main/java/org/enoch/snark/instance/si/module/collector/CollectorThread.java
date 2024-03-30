@@ -75,7 +75,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean notEnoughReadyPlanets() {
-        List<ColonyEntity> flyPoints = instance.getFlyPoints();
+        List<ColonyEntity> flyPoints = Instance.getSources();
         int minFlyPoints = flyPoints.size()/2;
         long readyPlanetCount = flyPoints.stream()
                 .map(colony -> ColonyDAO.getInstance().fetch(colony))
@@ -98,7 +98,7 @@ public class CollectorThread extends AbstractThread {
 
     private ColonyEntity getColonyToCollect(ColonyEntity destination) {
         ColonyEntity source = null;
-        for(ColonyEntity fp : instance.flyPoints) {
+        for(ColonyEntity fp : Instance.getSources()) {
             ColonyEntity colony = ColonyDAO.getInstance().fetch(fp);
             if(colony.cp.equals(destination.cp)) continue;
             if(calculateResources(colony) > calculateResources(source) && canItTransport(colony)) {
