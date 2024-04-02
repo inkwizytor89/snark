@@ -77,7 +77,7 @@ public class FleetThread extends AbstractThread {
     }
 
     private boolean shouldFleetBeSend(String hash) {
-        boolean noWaitingElement = Commander.getInstance().noBlockingHash(hash);
+        boolean noWaitingElement = Commander.getInstance().noBlockingHashInQueue(hash);
         if(!noWaitingElement) return false;
 //        FleetDAO.getInstance().findLastSend()
         return false;

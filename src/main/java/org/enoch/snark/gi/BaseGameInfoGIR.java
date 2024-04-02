@@ -34,7 +34,6 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
             colonyEntity.system = planet.system;
             colonyEntity.position = planet.position;
             colonyEntity.type = ColonyType.PLANET;
-            colonyEntity.isPlanet = true;
 
             List<WebElement> moons = colonyWebElement.findElements(By.className("moonlink"));
             if(!moons.isEmpty()) {
@@ -47,7 +46,6 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
                 moonColonyEntity.system = planet.system;
                 moonColonyEntity.position = planet.position;
                 moonColonyEntity.type = ColonyType.MOON;
-                moonColonyEntity.isPlanet = false;
                 moonColonyEntity.cp = colonyEntity.cpm;
                 moonColonyEntity.cpm = colonyEntity.cp;
                 colonyEntities.add(moonColonyEntity);
@@ -58,7 +56,7 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
         String countColoniesText = myPlanets.findElement(By.id("countColonies")).getText();
         int expectedColoniesCount = Integer.parseInt(countColoniesText.substring(0, countColoniesText.indexOf("/")).trim());
 
-        long actualColoniesCount = colonyEntities.stream().filter(colonyEntity -> colonyEntity.isPlanet).count();
+        long actualColoniesCount = colonyEntities.stream().filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET)).count();
 
         if(expectedColoniesCount != actualColoniesCount) {
             throw new RuntimeException("Incorrect colonies load - expected "+expectedColoniesCount+" but was "+coloniesWebElements.size());

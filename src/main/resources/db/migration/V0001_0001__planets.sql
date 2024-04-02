@@ -11,6 +11,7 @@ create table colonies
   deuterium   bigint,
   power       integer,
   level       integer,
+  forms             text,
   forms_level       integer,
   updated    timestamp default now(),
   created       timestamp default now(),
@@ -23,8 +24,6 @@ create table colonies
   cpm          integer,
   type          text default 'PLANET',
   tags              text,
-  is_planet boolean default true,
-  collecting_order    integer,
 
   -- fleet
   fighterLight    integer default 0,
@@ -154,7 +153,6 @@ create table targets
   last_attacked    timestamp default now(),
   type        varchar(15) not null default 'PLANET',
   tags              text,
-  is_planet boolean default true,
 
   debris_metal       bigint,
   debris_crystal     bigint,

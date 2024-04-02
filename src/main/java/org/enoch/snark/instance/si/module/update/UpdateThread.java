@@ -54,7 +54,7 @@ public class UpdateThread extends AbstractThread {
     @Override
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
-        if(isNavigatorExpired() && commander.noBlockingHash(threadName)) {
+        if(isNavigatorExpired() && commander.noBlockingHashInQueue(threadName)) {
             updateState();
         }
 
@@ -88,7 +88,7 @@ public class UpdateThread extends AbstractThread {
         toVisit.forEach((localDateTime, planet) -> {
             arrivedMap.remove(localDateTime, planet);
             Optional<ColonyEntity> optionalColony = ColonyDAO.getInstance().fetchAll().stream()
-                    .filter(col -> col.isPlanet == ColonyType.PLANET.equals(planet.type))
+                    .filter(col -> col.is(ColonyType.PLANET) == ColonyType.PLANET.equals(planet.type))
                     .filter(col -> col.getCordinate().equals(Planet.getCordinate(planet)))
                     .findAny();
             if(optionalColony.isPresent()) {

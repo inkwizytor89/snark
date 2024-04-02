@@ -268,7 +268,7 @@ public class GI {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         colony.roboticsFactory = getLevel(technologies,"roboticsFactory");
         colony.shipyard = getLevel(technologies,"shipyard");
-        if(colony.isPlanet) {
+        if(colony.is(ColonyType.PLANET)) {
             colony.researchLaboratory = getLevel(technologies, "researchLaboratory");
             colony.allianceDepot = getLevel(technologies, "allianceDepot");
             colony.missileSilo = getLevel(technologies, "missileSilo");
@@ -339,7 +339,7 @@ public class GI {
         return Long.parseLong(resultString);
     }
 
-    public boolean      upgradeBuilding(BuildRequirements requirements) {
+    public boolean upgradeBuilding(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
         WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.name()));
         Long buildingLevel = getLevel(technologies, requirements.request.building.name());

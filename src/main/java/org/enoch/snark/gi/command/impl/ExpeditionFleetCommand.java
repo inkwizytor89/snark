@@ -3,6 +3,7 @@ package org.enoch.snark.gi.command.impl;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.gi.types.Mission;
 
 public class ExpeditionFleetCommand extends SendFleetCommand {
@@ -16,7 +17,7 @@ public class ExpeditionFleetCommand extends SendFleetCommand {
 
     @Override
     public boolean prepere() {
-        giUrl.openSendFleetView(fleet.source, fleet.getDestination(), Mission.EXPEDITION);
+        GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), Mission.EXPEDITION);
         autoComplete = true;
         if(!canSendExpedition()) {
             System.err.println("Colony "+fleet.source+" have not enough ships - skipping expedition");

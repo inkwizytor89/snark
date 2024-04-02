@@ -132,7 +132,7 @@ public class GIUrl {
         Boolean isHidingActivity = Instance.getMainConfigMap().getConfigBoolean(HIDING_ACTIVITY, false);
         if(isHidingActivity) {
             Optional<ColonyEntity> temporaryPlanet = ColonyDAO.getInstance().fetchAll().stream()
-                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET))
                     .filter(colonyEntity -> colonyEntity.cpm == null)
                     .max(Comparator.comparing(o -> o.created));
 

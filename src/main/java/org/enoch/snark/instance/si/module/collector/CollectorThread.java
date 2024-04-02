@@ -53,7 +53,7 @@ public class CollectorThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(notEnoughReadyPlanets()) { System.out.println(threadName+": not enough ready planets - sleep");SleepUtil.secondsToSleep(600); return;}
+        if(notEnoughReadyPlanets()) { System.out.println(threadName+": not enough ready planets - sleep");SleepUtil.secondsToSleep(600L); return;}
         if(isCollectingOngoing()) return;
 
         ColonyEntity destination = getCollectionDestinationFromConfig();
@@ -91,25 +91,25 @@ public class CollectorThread extends AbstractThread {
         fleet.targetGalaxy = destination.galaxy;
         fleet.targetSystem = destination.system;
         fleet.targetPosition = destination.position;
-        fleet.spaceTarget = destination.isPlanet ? ColonyType.PLANET: ColonyType.MOON;
+        fleet.spaceTarget = destination.is(ColonyType.PLANET) ? ColonyType.PLANET: ColonyType.MOON;
         fleet.transporterLarge = fleet.source.calculateTransportByTransporterLarge();
         return fleet;
     }
 
     private ColonyEntity getColonyToCollect(ColonyEntity destination) {
-        ColonyEntity source = null;
-        for(ColonyEntity fp : Instance.getSources()) {
-            ColonyEntity colony = ColonyDAO.getInstance().fetch(fp);
+        ColonyEntity result = null;
+        for(ColonyEntity source : Instance.getSources()) {
+            ColonyEntity colony = ColonyDAO.getInstance().fetch(source);
             if(colony.cp.equals(destination.cp)) continue;
-            if(calculateResources(colony) > calculateResources(source) && canItTransport(colony)) {
-                source = colony;
+            if(calculateResources(colony) > calculateResources(result) && canItTransport(colony)) {
+                result = colony;
             }
         }
-        return source;
+        return result;
     }
 
     private boolean isCollectingOngoing() {
-        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHash(threadName) && noActiveCollectingInDB());
+        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHashInQueue(threadName) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {

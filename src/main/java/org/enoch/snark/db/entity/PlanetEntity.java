@@ -56,10 +56,6 @@ public abstract class PlanetEntity extends IdEntity{
     public String tags;
 
     @Basic
-    @Column(name = "is_planet")
-    public boolean isPlanet = true;
-
-    @Basic
     @Column(name = "power")
     public Long energy;
 
@@ -665,7 +661,7 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Override
     public String toString() {
-        String type = isPlanet?"p":"m";
+        String type = ColonyType.PLANET.equals(this.type)?"p":"m";
         return type + "[" + galaxy + ", " + system + ", " + position + "]";
     }
 }

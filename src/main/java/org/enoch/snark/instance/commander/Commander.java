@@ -153,11 +153,15 @@ public class Commander extends Thread {
         this.expeditionMax = expeditionMax;
     }
 
-    public boolean noBlockingHash(String hash) {
+    public boolean noBlockingHashInQueue(String hash) {
         return hash == null || peekQueues().stream()
                 .filter(command -> command.hash() != null)
                 .map(AbstractCommand::hash)
                 .noneMatch(s -> s.equals(hash));
+    }
+
+    private boolean noBlockingHashInDb(String hash, Long sometime) {
+        return false;
     }
 
     public boolean noCommands() {
@@ -168,8 +172,13 @@ public class Commander extends Thread {
         return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
     }
 
+    public synchronized void push(AbstractCommand command, Long sometime) {
+        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), sometime))
+            commandDeque.push(command);
+    }
+
     public synchronized void push(AbstractCommand command) {
-        if(noBlockingHash(command.hash()))
+        if(noBlockingHashInQueue(command.hash()))
             commandDeque.push(command);
     }
 

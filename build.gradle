@@ -26,6 +26,8 @@ dependencies {
     implementation group: 'org.seleniumhq.selenium', name: 'htmlunit-driver', version: '2.52.0'
     implementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.6.4'
     implementation 'org.jsoup:jsoup:1.11.3'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 jar {

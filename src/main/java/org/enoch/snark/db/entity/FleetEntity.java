@@ -1,7 +1,6 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
@@ -83,6 +82,10 @@ public class FleetEntity extends IdEntity {
     @Column(name = "code")
     public Long code;
 
+    @Basic
+    @Column(name = "hash_code")
+    public Long hash;
+
     @Column(name = "LM")
     public Long fighterLight;
 
@@ -127,9 +130,6 @@ public class FleetEntity extends IdEntity {
 
     @Column(name = "SON")
     public Long espionageProbe;
-
-    @Transient
-    private  Planet planet;
 
     public FleetEntity() {
         super();
@@ -180,7 +180,7 @@ public class FleetEntity extends IdEntity {
         fleet.targetSystem = target.system;
         fleet.targetPosition = target.position;
         fleet.spaceTarget = ColonyType.PLANET;
-        if(!target.isPlanet) {
+        if(!target.is(ColonyType.PLANET)) {
             fleet.spaceTarget = ColonyType.MOON;
         }
         fleet.source = new ColonyPlaner().getNearestColony(target);
@@ -241,7 +241,6 @@ public class FleetEntity extends IdEntity {
     }
 
     public FleetEntity to(Planet planet) {
-        this.planet = planet;
         this.targetGalaxy = planet.galaxy;
         this.targetSystem = planet.system;
         this.targetPosition = planet.position;
@@ -250,16 +249,6 @@ public class FleetEntity extends IdEntity {
 
     public Planet getDestination() {
         return new Planet(this.targetGalaxy, this.targetSystem, this.targetPosition, spaceTarget);
-    }
-
-    public void send() {
-        if(targetGalaxy == null || targetSystem == null || targetPosition == null) {
-            throw new RuntimeException("missing target for fleet in FleetBuilder");
-        }
-        if(source == null) {
-            this.source = new ColonyPlaner().getNearestColony(planet);
-        }
-        FleetDAO.getInstance().saveOrUpdate(this);
     }
 
     @Override

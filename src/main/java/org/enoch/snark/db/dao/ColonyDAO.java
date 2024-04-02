@@ -45,11 +45,11 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
                     "where galaxy = :galaxy and " +
                     "system = :system and " +
                     "position = :position and " +
-                    "isPlanet = :isPlanet", ColonyEntity.class)
+                    "type = :type", ColonyEntity.class)
                     .setParameter("galaxy", planet.galaxy)
                     .setParameter("system", planet.system)
                     .setParameter("position", planet.position)
-                    .setParameter("isPlanet", planet.type.equals(ColonyType.PLANET))
+                    .setParameter("type", planet.type)
                     .getResultList();
             if(resultList.isEmpty()) {
                 System.err.println("Error: ColonyDAO.get missing colony "+planet);
@@ -89,20 +89,20 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
         if(lowerCode.contains(MOON)) {
             colonies = fetchAll()
                     .stream()
-                    .filter(colonyEntity -> !colonyEntity.isPlanet)
+                    .filter(colonyEntity -> !colonyEntity.is(ColonyType.PLANET))
                     .sorted(Comparator.comparing(o -> -o.galaxy))
                     .collect(Collectors.toList());
         } else if(lowerCode.contains(PLANET)) {
             colonies = fetchAll()
                     .stream()
-                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET))
                     .sorted(Comparator.comparing(o -> -o.galaxy))
                     .collect(Collectors.toList());
         } else if(lowerCode.equals(StringUtils.EMPTY)) {
             colonies = new ArrayList<>();
             List<ColonyEntity> planetList = fetchAll()
                     .stream()
-                    .filter(colonyEntity -> colonyEntity.isPlanet)
+                    .filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET))
                     .sorted(Comparator.comparing(o -> -o.galaxy))
                     .collect(Collectors.toList());
             for (ColonyEntity planet : planetList) {

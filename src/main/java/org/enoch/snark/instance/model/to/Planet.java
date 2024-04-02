@@ -9,6 +9,8 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.instance.model.types.ColonyType.MOON;
+import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
 
 
@@ -17,7 +19,7 @@ public class Planet {
     public static final Integer SYSTEM_INDEX = 2;
     public static final Integer POSITION_INDEX = 3;
 
-    public ColonyType type = ColonyType.PLANET;
+    public ColonyType type = PLANET;
     public Integer galaxy;
     public Integer system;
     public Integer position;
@@ -26,7 +28,7 @@ public class Planet {
     }
 
     public Planet(String input) {
-        this(input, 'm' == input.charAt(0) ? ColonyType.MOON : ColonyType.PLANET);
+        this(input, 'm' == input.charAt(0) ? ColonyType.MOON : PLANET);
     }
 
     public Planet(String input, ColonyType type) {
@@ -35,7 +37,7 @@ public class Planet {
     }
 
     public Planet(Integer galaxy, Integer system, Integer position) {
-        this(galaxy, system, position, ColonyType.PLANET);
+        this(galaxy, system, position, PLANET);
     }
 
     public Planet(Integer galaxy, Integer system, Integer position, ColonyType type) {
@@ -52,6 +54,11 @@ public class Planet {
             colonies.add(new Planet(string));
         }
         return colonies;
+    }
+
+    public Planet swapType() {
+        type = PLANET.equals(type) ? MOON : PLANET;
+        return this;
     }
 
     public Long calculateDistance(Planet planet) {

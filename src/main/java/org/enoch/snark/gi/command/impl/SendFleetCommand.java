@@ -36,8 +36,8 @@ public class SendFleetCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFOR = 3L;
     public Mission mission;
-    protected GIUrl giUrl;
     protected boolean autoComplete;
+    // promise
     protected Resources resources;
     protected boolean allShips;
 
@@ -50,11 +50,10 @@ public class SendFleetCommand extends AbstractCommand {
         this.fleet = fleet;
         this.mission = fleet.mission;
         gir = new SendFleetGIR();
-        giUrl = new GIUrl();
     }
 
     public boolean prepere() {
-        giUrl.openSendFleetView(fleet.source, fleet.getDestination(), mission);
+        GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), mission);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;
@@ -78,7 +77,7 @@ public class SendFleetCommand extends AbstractCommand {
 
         if(!prepere()) {
             return true;
-        };
+        }
         Long durationSeconds;
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         //Scroll down till the bottom of the page
@@ -138,7 +137,7 @@ public class SendFleetCommand extends AbstractCommand {
                 PlayerDAO.getInstance().saveOrUpdate(player);
             } else {
                 // look at galaxy to reload player
-                giUrl.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+                GIUrl.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
             }
             return true;
         }
@@ -155,7 +154,7 @@ public class SendFleetCommand extends AbstractCommand {
             clearNext();
             return true;
         } catch(ToStrongPlayerException e) {
-            System.err.println(e);
+            System.err.println(e.getMessage());
             clearNext();
             if(fleet.code != null) fleet.code = -fleet.code;
         }
@@ -237,5 +236,9 @@ public class SendFleetCommand extends AbstractCommand {
     @Override
     public String toString() {
         return mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
+    }
+
+    public void generateHash(String code) {
+        hash(fleet.source+"_"+mission+"_"+fleet.getTarget()+"_"+code);
     }
 }

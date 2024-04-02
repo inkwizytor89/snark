@@ -44,20 +44,22 @@ public class BuildCommand extends AbstractCommand {
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.building.name()));
             buildingIcon.click();
             SleepUtil.sleep();
-            WebElement costs = gi.webDriver.findElement(By.className("costs"));
-            Resources resources = new Resources(
-                    getCost(costs, "metal"),
-                    getCost(costs, "crystal"),
-                    getCost(costs, "deuterium"));
+            WebElement costsWe = gi.webDriver.findElement(By.className("costs"));
+            Resources costs = new Resources(
+                    getCost(costsWe, "metal"),
+                    getCost(costsWe, "crystal"),
+                    getCost(costsWe, "deuterium"));
+            BuildingCost.getInstance().put(requirements.request, costs);
             String masterHref = Instance.getMainConfigMap().getConfig(MASTER, StringUtils.EMPTY);
             if(masterHref != null && !masterHref.isEmpty()) {
-                SendMessageToPlayerCommand messageCommend = new SendMessageToPlayerCommand(masterHref,
-                        "Master poprosze "+resources+ " na "+colony);
-                messageCommend.push();
+                new SendMessageToPlayerCommand(masterHref, "Master poprosze "+costs+ " na "+colony).push();
             }
-            BuildingCost.getInstance().put(requirements.request, resources);
         }
         return true;
+    }
+
+    private boolean noDuplication() {
+        return false;
     }
 
     private void refreshColonyWhenBuildingIsDone() {

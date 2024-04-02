@@ -93,7 +93,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        return commander.noBlockingHash(threadName);
+        return commander.noBlockingHashInQueue(threadName);
     }
 
     private boolean areFreeSlotsForExpedition() {

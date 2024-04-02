@@ -5,6 +5,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
 import org.enoch.snark.instance.model.action.QueueManger;
 import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
@@ -48,7 +49,7 @@ public class FormsThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         colonyDAO.fetchAll().stream()
-                .filter(colony -> colony.isPlanet)
+                .filter(colony -> colony.is(ColonyType.PLANET))
                 .forEach(colony -> colonyMap.put(colony, null));
     }
 

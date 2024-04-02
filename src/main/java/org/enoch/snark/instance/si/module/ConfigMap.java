@@ -7,6 +7,7 @@ import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.to.ShipsMap;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +35,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String TYPE = "type";
     public static final String PLANET = "planet";
     public static final String MOON = "moon";
+    public static final String ARRAY_SEPARATOR = ";";
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String SOURCE = "source";
@@ -102,16 +104,17 @@ public class ConfigMap extends HashMap<String, String> {
         }
     }
 
-    public String[] getConfigArray(String key) {
-        return get(key).split(";");
+    public List<String> getConfigArray(String key) {
+        if(!containsKey(key)) return new ArrayList<>();
+        return Arrays.asList(get(key).split(ARRAY_SEPARATOR));
     }
 
     public boolean isOn() {
-        String[] configArray = getConfigArray(TIME);
-        if(configArray == null || configArray.length == 0)  return true;
-        if(configArray.length == 1 && configArray[0].contains(ON))  return true;
-        if(configArray.length == 1 && configArray[0].contains(OFF))  return false;
-        if(configArray.length == 1 && configArray[0].equals(StringUtils.EMPTY))  return false;
+        List<String> configArray = getConfigArray(TIME);
+        if(configArray == null || configArray.size() == 0)  return true;
+        if(configArray.size() == 1 && configArray.get(0).contains(ON))  return true;
+        if(configArray.size() == 1 && configArray.get(0).contains(OFF))  return false;
+        if(configArray.size() == 1 && configArray.get(0).equals(StringUtils.EMPTY))  return false;
 
         for(String configTerm : configArray) {
             String[] vars = configTerm.split("-");
@@ -158,15 +161,15 @@ public class ConfigMap extends HashMap<String, String> {
         return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
     }
 
-    public List<Map<ShipEnum,Long>> getShipsWaves() {
-        List<Map<ShipEnum, Long>> empty = Collections.singletonList(new HashMap<>());
-        if(!keySet().contains(SHIPS_WAVE)) return empty;
-        String[] shipsWavesArray = getConfigArray(SHIPS_WAVE);
-        if(shipsWavesArray.length == 0) return empty;
-        ArrayList<Map<ShipEnum,Long>> waves = new ArrayList<>();
-        for(String waveString : shipsWavesArray) {
-            waves.add(ShipEnum.parse(waveString));
+    public List<ShipsMap> getShipsWaves() {
+        List<ShipsMap> empty = Collections.singletonList(ShipsMap.EMPTY);
+        List<String> shipsWavesList = getConfigArray(SHIPS_WAVE);
+
+        if(keySet().contains(SHIPS_WAVE) && !shipsWavesList.isEmpty()) {
+            List<ShipsMap> result = new ArrayList<>();
+            shipsWavesList.forEach(wave -> result.add(ShipsMap.create(wave)));
+            return result;
         }
-        return waves;
+        return empty;
     }
 }

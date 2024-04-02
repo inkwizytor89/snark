@@ -15,6 +15,7 @@ create table fleet(
     deuterium bigint,
     acs_code text,
     code bigint,
+    hash_code text,
   updated    timestamp default now(),
     lm int default 0,
     cm int default 0,

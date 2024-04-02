@@ -8,6 +8,7 @@ import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.gi.text.Msg;
+import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -24,7 +25,6 @@ import static org.enoch.snark.gi.types.Mission.*;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 import static org.enoch.snark.instance.commander.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
-import static org.enoch.snark.instance.commander.QueueRunType.MAJOR;
 
 public class DefenseThread extends AbstractThread {
 
@@ -73,7 +73,7 @@ public class DefenseThread extends AbstractThread {
         System.err.println("incomingAction "+ incomingAction.size());
 
 
-        if(!incomingAction.isEmpty() && commander.noBlockingHash(threadName)) {
+        if(!incomingAction.isEmpty() && commander.noBlockingHashInQueue(threadName)) {
             incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
             Set<Planet> attackedPlanets = incomingAction.stream()
                     .map(EventFleet::getTo)
@@ -111,10 +111,10 @@ public class DefenseThread extends AbstractThread {
 
     private ColonyEntity chooseDestination(Planet source) {
         List<ColonyEntity> destinationList = ColonyDAO.getInstance().fetchAll().stream()
-                .filter(colony -> !colony.isPlanet).collect(Collectors.toList());
+                .filter(colony -> !colony.is(ColonyType.PLANET)).collect(Collectors.toList());
         if(destinationList.isEmpty()) {
             destinationList = ColonyDAO.getInstance().fetchAll().stream()
-                    .filter(colony -> colony.isPlanet).collect(Collectors.toList());
+                    .filter(colony -> colony.is(ColonyType.PLANET)).collect(Collectors.toList());
         }
 
         destinationList = destinationList.stream()

@@ -15,7 +15,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.types.Mission.TRANSPORT;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
@@ -23,7 +22,6 @@ import static org.enoch.snark.instance.model.to.Resources.everything;
 
 public class TransportThread extends AbstractThread {
 
-    protected static final Logger LOG = Logger.getLogger(TransportThread.class.getName());
     public static final String threadName = "transport";
 
     public TransportThread(ConfigMap map) {

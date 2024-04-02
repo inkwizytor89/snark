@@ -23,8 +23,8 @@ public class ColonyEntity extends PlanetEntity {
     public Integer cpm;
 
     @Basic
-    @Column(name = "collecting_order")
-    public Integer collectingOrder;
+    @Column(name = "forms")
+    public String forms;
 
     @Basic
     @Column(name = "level")

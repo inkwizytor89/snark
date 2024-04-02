@@ -3,6 +3,7 @@ package org.enoch.snark.gi.types;
 import org.apache.commons.lang3.EnumUtils;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.instance.model.to.ShipsMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +35,8 @@ public enum ShipEnum {
         return id;
     }
 
-    public static Map<ShipEnum, Long> parse(String string) {
-        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+    public static ShipsMap parse(String string) {
+        ShipsMap shipsMap = new ShipsMap();
         for (String position : string.trim().split(",")) {
             String[] entry = position.split(":");
             ShipEnum shipEnumValue = EnumUtils.getEnum(ShipEnum.class, entry[0]);

@@ -20,6 +20,7 @@ public class JPAUtility {
     /*
     table Colony isPlanet,collection to remove
     table colony add life form string
+    table fleet add hash
      */
     public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";
 

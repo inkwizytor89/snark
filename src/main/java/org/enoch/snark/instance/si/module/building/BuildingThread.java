@@ -4,6 +4,8 @@ import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
+import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.QueueManger;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
@@ -72,6 +74,17 @@ public class BuildingThread extends AbstractThread {
             if(requirements.canBuildOn(colony)) {
                 new BuildCommand(colony, requirements).push();
                 colonyMap.put(colony, null);
+            } else {
+//                ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
+//                if (requirements.canBuildOn(swapColony)) {
+//                    new FleetBuilder()
+//                            .from(swapColony)
+//                            .mission(Mission.TRANSPORT)
+//                            .resources(requirements.resources)
+//                            .buildOne()
+//                            // todo tu trzeba dokończyć bo push potrzebuje w fleetEntit wsparcia do hash
+//                            .push(0L);
+//                }
             }
         }
 //        System.err.println("Building end step, sleep in "+pause);

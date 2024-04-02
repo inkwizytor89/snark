@@ -66,7 +66,7 @@ public class FleetSaveThread extends AbstractThread {
             }
 
             String colonizationCode = getColonizationCode(fleet);
-            if(commander.noBlockingHash(colonizationCode)) {
+            if(commander.noBlockingHashInQueue(colonizationCode)) {
                 SendFleetCommand command = new SendFleetCommand(fleet);
                 command.setAllShips(true);
                 command.setResources(everything);
@@ -107,7 +107,7 @@ public class FleetSaveThread extends AbstractThread {
      * fs=m[1:1:8]-30-p[1:1:1];m[2:2:8]-30-p[2:2:1]
      */
     private List<FleetEntity> loadFleetToSave() {
-        String[] allFleetToSaveConfig = map.getConfigArray(FS_KEY);
+        List<String> allFleetToSaveConfig = map.getConfigArray(FS_KEY);
         List<FleetEntity> fleetToSave = new ArrayList<>();
         for(String fleetToSaveConfig : allFleetToSaveConfig){
             String[] configValues = fleetToSaveConfig.split("-");

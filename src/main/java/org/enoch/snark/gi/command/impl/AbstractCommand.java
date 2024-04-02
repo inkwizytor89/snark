@@ -32,6 +32,10 @@ public abstract class AbstractCommand {
 
     public abstract boolean execute();
 
+    public void push(Long someTime) {
+        Commander.getInstance().push(this, someTime);
+    }
+
     public void push() {
         Commander.getInstance().push(this);
     }
