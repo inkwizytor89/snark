@@ -7,6 +7,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.openqa.selenium.WebDriver;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +33,8 @@ public abstract class AbstractCommand {
 
     public abstract boolean execute();
 
-    public void push(Long someTime) {
-        Commander.getInstance().push(this, someTime);
+    public void push(LocalDateTime from) {
+        Commander.getInstance().push(this, from);
     }
 
     public void push() {
@@ -104,7 +105,8 @@ public abstract class AbstractCommand {
     }
 
     public AbstractCommand setRunType(QueueRunType runType) {
-        this.runType = runType;
+        if(runType != null)
+            this.runType = runType;
         return this;
     }
 }

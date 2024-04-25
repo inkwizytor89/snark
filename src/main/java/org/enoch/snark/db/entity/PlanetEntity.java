@@ -7,6 +7,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.exception.TargetMissingResourceInfoException;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.persistence.*;
@@ -504,8 +505,8 @@ public abstract class PlanetEntity extends IdEntity{
         return new Planet(this.toString());
     }
 
-    public Map<ShipEnum, Long> getShipsMap() {
-        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+    public ShipsMap getShipsMap() {
+        ShipsMap shipsMap = new ShipsMap();
         shipsMap.put(ShipEnum.fighterLight, fighterLight);
         shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
         shipsMap.put(ShipEnum.cruiser, cruiser);

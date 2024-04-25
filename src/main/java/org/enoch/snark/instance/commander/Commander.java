@@ -13,6 +13,7 @@ import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.MODE;
@@ -160,8 +161,10 @@ public class Commander extends Thread {
                 .noneMatch(s -> s.equals(hash));
     }
 
-    private boolean noBlockingHashInDb(String hash, Long sometime) {
-        return false;
+    private boolean noBlockingHashInDb(String hash, LocalDateTime date) {
+        Long aLong = FleetDAO.getInstance().hashCount(hash, date);
+        System.err.println(hash+" "+aLong);
+        return aLong < 1L;
     }
 
     public boolean noCommands() {
@@ -172,8 +175,8 @@ public class Commander extends Thread {
         return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
     }
 
-    public synchronized void push(AbstractCommand command, Long sometime) {
-        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), sometime))
+    public synchronized void push(AbstractCommand command, LocalDateTime from) {
+        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
             commandDeque.push(command);
     }
 

@@ -5,6 +5,7 @@ import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.annotation.Nonnull;
@@ -84,7 +85,7 @@ public class FleetEntity extends IdEntity {
 
     @Basic
     @Column(name = "hash_code")
-    public Long hash;
+    public String hash;
 
     @Column(name = "LM")
     public Long fighterLight;
@@ -139,7 +140,7 @@ public class FleetEntity extends IdEntity {
         return back != null && LocalDateTime.now().isAfter(back);
     }
 
-    public void setShips(Map<ShipEnum, Long> toApply) {
+    public void setShips(ShipsMap toApply) {
         for(Map.Entry<ShipEnum, Long> entry : toApply.entrySet()) {
             if(entry.getKey() == ShipEnum.fighterLight) fighterLight = entry.getValue();
             else if(entry.getKey() == ShipEnum.fighterHeavy) fighterHeavy = entry.getValue();

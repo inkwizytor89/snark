@@ -16,6 +16,7 @@ import org.enoch.snark.instance.si.module.collector.CollectorThread;
 import org.enoch.snark.instance.si.module.defense.DefenseThread;
 import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
 import org.enoch.snark.instance.si.module.farm.FarmThread;
+import org.enoch.snark.instance.si.module.fleet.FleetThread;
 import org.enoch.snark.instance.si.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.instance.si.module.hunting.HuntingThread;
 import org.enoch.snark.instance.si.module.scan.ScanThread;
@@ -117,6 +118,7 @@ public abstract class AbstractThread extends Thread {
         else if(map.name().contains(CollectorThread.threadName)) return new CollectorThread(map);
         else if(map.name().contains(TransportThread.threadName)) return new TransportThread(map);
         else if(map.name().contains(HuntingThread.threadName)) return new HuntingThread(map);
+        else if(map.name().contains(FleetThread.threadName)) return new FleetThread(map);
         else throw new RuntimeException("Unknown threadName "+map.name());
     }
 }

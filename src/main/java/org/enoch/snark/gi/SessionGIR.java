@@ -53,7 +53,8 @@ public class SessionGIR extends GraphicalInterfaceReader {
     }
 
     private void addCookie(String key, String value) {
-        GI.getInstance().getWebDriver().manage().addCookie(new Cookie(key, value,".gameforge.com", "/", null));
+        if(value != null)
+            GI.getInstance().getWebDriver().manage().addCookie(new Cookie(key, value,".gameforge.com", "/", null));
         SleepUtil.pause();
     }
 

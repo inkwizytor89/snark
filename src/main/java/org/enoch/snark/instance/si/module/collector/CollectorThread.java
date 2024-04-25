@@ -69,7 +69,7 @@ public class CollectorThread extends AbstractThread {
         resources.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
 
         SendFleetCommand collecting = new SendFleetCommand(fleet);
-        collecting.setResources(resources);
+        collecting.promise().setResources(resources);
         collecting.hash(threadName);
         collecting.push();
     }

@@ -101,6 +101,19 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         }
     }
 
+    public Long hashCount(String hash, LocalDateTime from) {
+        synchronized (JPAUtility.dbSynchro) {
+            Long singleResult = entityManager.createQuery("" +
+                    "select count(e.hash) from FleetEntity e " +
+                    "where updated > :from and hash = :hash  ", Long.class)
+                    .setParameter("from", from)
+                    .setParameter("hash", hash)
+                    .getSingleResult();
+            if(singleResult == null) return 0L;
+            return singleResult;
+        }
+    }
+
     public void clean(LocalDateTime from) {
         synchronized (JPAUtility.dbSynchro) {
 

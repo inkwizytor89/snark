@@ -3,7 +3,6 @@ package org.enoch.snark.instance.si.module;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
@@ -39,10 +38,16 @@ public class ConfigMap extends HashMap<String, String> {
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String SOURCE = "source";
+    public static final String TARGET = "target";
+    public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";
+    public static final String CONDITION_RESOURCES = "condition_resources";
+    public static final String CONDITION_SHIPS_WAVE = "condition_ships_wave";
     public static final String SHIPS_WAVE = "ships_wave";
+    public static final String LEAVE_SHIPS_WAVE = "leave_ships_wave";
     public static final String MISSION = "mission";
     public static final String RESOURCES = "resources";
     public static final String SPEED = "speed";
+    public static final String EXPIRED_TIME = "expired_time";
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String DATABASE = "database";
     public static final String GALAXY_MAX = "galaxy_max";
@@ -94,9 +99,16 @@ public class ConfigMap extends HashMap<String, String> {
         }
     }
 
+    public LocalTime getLocalTime(String key, LocalTime defaultValue) {
+        if(!containsKey(key)) return defaultValue;
+        return LocalTime.parse(getConfig(key), dtf);
+    }
+
     public Long getConfigLong(String key, Long defaultValue) {
         try {
-            return Long.parseLong(getConfig(key, defaultValue.toString()));
+            String defaultString = defaultValue == null ? null : defaultValue.toString();
+            String config = getConfig(key, defaultString);
+            return config == null ? null : Long.parseLong(config);
         } catch (NumberFormatException e) {
             System.err.println("For "+get(NAME)+" key "+key+" get default value " + defaultValue +
                     " because "+e.getMessage());
@@ -142,7 +154,7 @@ public class ConfigMap extends HashMap<String, String> {
     public Resources getConfigResource(String key, Resources defaultResources) {
         String config = getConfig(key, null);
         if (config == null) return defaultResources;
-        return new Resources(config);
+        return Resources.create(config);
     }
 
     public String name() {
@@ -162,12 +174,16 @@ public class ConfigMap extends HashMap<String, String> {
     }
 
     public List<ShipsMap> getShipsWaves() {
-        List<ShipsMap> empty = Collections.singletonList(ShipsMap.EMPTY);
-        List<String> shipsWavesList = getConfigArray(SHIPS_WAVE);
+        return getShipsWaves(SHIPS_WAVE);
+    }
 
-        if(keySet().contains(SHIPS_WAVE) && !shipsWavesList.isEmpty()) {
+    public List<ShipsMap> getShipsWaves(String code) {
+        List<ShipsMap> empty = Collections.singletonList(ShipsMap.NO_SHIPS);
+        List<String> shipsWavesList = getConfigArray(code);
+
+        if(keySet().contains(code) && !shipsWavesList.isEmpty()) {
             List<ShipsMap> result = new ArrayList<>();
-            shipsWavesList.forEach(wave -> result.add(ShipsMap.create(wave)));
+            shipsWavesList.forEach(wave -> result.add(ShipsMap.parse(wave)));
             return result;
         }
         return empty;

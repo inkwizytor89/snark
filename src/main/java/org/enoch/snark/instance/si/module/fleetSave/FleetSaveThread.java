@@ -5,6 +5,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
@@ -68,8 +69,8 @@ public class FleetSaveThread extends AbstractThread {
             String colonizationCode = getColonizationCode(fleet);
             if(commander.noBlockingHashInQueue(colonizationCode)) {
                 SendFleetCommand command = new SendFleetCommand(fleet);
-                command.setAllShips(true);
-                command.setResources(everything);
+                command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
+                command.promise().setResources(everything);
                 command.hash(colonizationCode);
                 command.push();
                 System.err.println(fleet.source+" push to send with code "+colonizationCode);

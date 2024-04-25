@@ -35,18 +35,8 @@ public enum ShipEnum {
         return id;
     }
 
-    public static ShipsMap parse(String string) {
+    public static ShipsMap createShipsMap(FleetEntity fleet) {
         ShipsMap shipsMap = new ShipsMap();
-        for (String position : string.trim().split(",")) {
-            String[] entry = position.split(":");
-            ShipEnum shipEnumValue = EnumUtils.getEnum(ShipEnum.class, entry[0]);
-            shipsMap.put(shipEnumValue, NumberUtil.toLong(entry[1]));
-        }
-        return shipsMap;
-    }
-
-    public static Map<ShipEnum, Long> createShipsMap(FleetEntity fleet) {
-        Map<ShipEnum, Long> shipsMap = new HashMap<>();
         if(fleet.fighterLight != null && fleet.fighterLight > 0) shipsMap.put(fighterLight, fleet.fighterLight);
         if(fleet.fighterHeavy != null && fleet.fighterHeavy > 0) shipsMap.put(fighterHeavy, fleet.fighterHeavy);
         if(fleet.cruiser != null && fleet.cruiser > 0) shipsMap.put(cruiser, fleet.cruiser);
@@ -66,8 +56,8 @@ public enum ShipEnum {
         return shipsMap;
     }
 
-    public static Map<ShipEnum, Long> createExpeditionShipMap(Long tl, Long ts, Long ex) {
-        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+    public static ShipsMap createExpeditionShipMap(Long tl, Long ts, Long ex) {
+        ShipsMap shipsMap = new ShipsMap();
         shipsMap.put(ShipEnum.transporterLarge, tl);
         shipsMap.put(ShipEnum.transporterSmall, ts);
         shipsMap.put(ShipEnum.explorer, ex);

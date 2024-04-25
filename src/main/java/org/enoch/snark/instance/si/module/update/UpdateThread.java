@@ -80,8 +80,8 @@ public class UpdateThread extends AbstractThread {
     private void sendCommandToCheckColonyWhenFleetArrives() {
         HashMap<LocalDateTime, Planet> toVisit = new HashMap<>();
         arrivedMap.forEach((localDateTime, planet) -> {
-            //plus 4sek because refreshed page is not updated
-            if(LocalDateTime.now().minusSeconds(4).isAfter(localDateTime)) {
+            //plus 5sek because refreshed page is not updated
+            if(LocalDateTime.now().minusSeconds(5).isAfter(localDateTime)) {
                 toVisit.put(localDateTime, planet);
             }
         });

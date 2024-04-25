@@ -10,6 +10,7 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
@@ -104,7 +105,7 @@ public class ExpeditionThread extends AbstractThread {
         maxTL = calculateMaxExpeditionSize();
         FleetEntity expeditionToSend = FleetEntity.createExpeditionDirection(colony);
 
-        Map<ShipEnum, Long> requestedExpeditionShipMap = ShipEnum.createExpeditionShipMap(maxTL, 0L, 1L);
+        ShipsMap requestedExpeditionShipMap = ShipEnum.createExpeditionShipMap(maxTL, 0L, 1L);
         if(colony.hasEnoughShips(requestedExpeditionShipMap)) {
 
             expeditionToSend.setShips(requestedExpeditionShipMap);
@@ -128,7 +129,7 @@ public class ExpeditionThread extends AbstractThread {
         expeditionSource.forEach(colonyEntity -> ColonyDAO.getInstance().refresh(colonyEntity));
     }
 
-    private boolean anyExpeditionStartPointHasEnoughShips(Map<ShipEnum, Long> expeditionMap) {
+    private boolean anyExpeditionStartPointHasEnoughShips(ShipsMap expeditionMap) {
         refreshColoniesFromDb();
         return expeditionSource.stream().anyMatch(colony -> colony.hasEnoughShips(expeditionMap));
     }

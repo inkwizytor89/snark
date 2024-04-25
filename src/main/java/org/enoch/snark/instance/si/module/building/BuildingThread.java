@@ -12,6 +12,7 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,16 +76,15 @@ public class BuildingThread extends AbstractThread {
                 new BuildCommand(colony, requirements).push();
                 colonyMap.put(colony, null);
             } else {
-//                ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
-//                if (requirements.canBuildOn(swapColony)) {
-//                    new FleetBuilder()
-//                            .from(swapColony)
-//                            .mission(Mission.TRANSPORT)
-//                            .resources(requirements.resources)
-//                            .buildOne()
-//                            // todo tu trzeba dokończyć bo push potrzebuje w fleetEntit wsparcia do hash
-//                            .push(0L);
-//                }
+                ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
+                if (requirements.canBuildOn(swapColony)) {
+                    new FleetBuilder()
+                            .from(swapColony)
+                            .mission(Mission.TRANSPORT)
+                            .resources(requirements.resources)
+                            .buildOne()
+                            .push(LocalDateTime.now().minusMinutes(10L));
+                }
             }
         }
 //        System.err.println("Building end step, sleep in "+pause);

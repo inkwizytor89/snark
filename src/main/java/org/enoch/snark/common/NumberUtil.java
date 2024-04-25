@@ -11,10 +11,12 @@ public class NumberUtil {
     }
 
     public static Long toLong(String input) {
+        if(input.toLowerCase().contains("all")) return Long.MAX_VALUE;
         return Long.parseLong(normalizationString(input));
     }
 
     public static Integer toInt(String input) {
+        if(input.toLowerCase().contains("all")) return Integer.MAX_VALUE;
         return Integer.parseInt(normalizationString(input));
     }
 }

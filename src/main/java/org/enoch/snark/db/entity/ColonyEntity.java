@@ -2,6 +2,8 @@ package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.to.SystemView;
 
 import javax.persistence.Basic;
@@ -9,6 +11,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.*;
+
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 
 @Entity
 @Table(name = "colonies", schema = "public", catalog = "snark")
@@ -46,10 +51,16 @@ public class ColonyEntity extends PlanetEntity {
         return result;
     }
 
-    public boolean hasEnoughShips(Map<ShipEnum, Long> required) {
-        Map<ShipEnum, Long> located = this.getShipsMap();
+    public boolean hasEnoughResources(Resources required) {
+        return getResources().isMoreThan(required);
+    }
+
+    public boolean hasEnoughShips(ShipsMap required) {
+        if(required == null || ALL_SHIPS.equals(required) || NO_SHIPS.equals(required)) return true;
+        ShipsMap located = this.getShipsMap();
         for(Map.Entry<ShipEnum, Long> entry : required.entrySet()) {
             Long requiredCont = required.get(entry.getKey());
+            if(requiredCont.equals(Long.MAX_VALUE)) continue;
             Long locatedCount = located.get(entry.getKey());
             if(locatedCount < requiredCont) {
                 return false;

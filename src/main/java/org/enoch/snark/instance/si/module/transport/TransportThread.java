@@ -8,13 +8,12 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.enoch.snark.gi.types.Mission.TRANSPORT;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
@@ -63,11 +62,11 @@ public class TransportThread extends AbstractThread {
             }
 
             Resources resources = colony.getResources();
-            if(resources.isMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
+            if(resources.isCountMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
                 FleetEntity fleetEntity = creteFleetToTransport(colony);
                 SendFleetCommand command = new SendFleetCommand(fleetEntity);
                 command.hash(threadName);
-                command.setResources(everything);
+                command.promise().setResources(everything);
                 command.push();
             }
         }
@@ -78,7 +77,7 @@ public class TransportThread extends AbstractThread {
     }
 
     private FleetEntity creteFleetToTransport(ColonyEntity colony) {
-        Map<ShipEnum, Long> shipsMap = new HashMap<>();
+        ShipsMap shipsMap = new ShipsMap();
         shipsMap.put(ShipEnum.transporterSmall, colony.transporterSmall);
         shipsMap.put(ShipEnum.transporterLarge, colony.transporterLarge);
 

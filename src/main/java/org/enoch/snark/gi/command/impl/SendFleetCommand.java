@@ -13,9 +13,7 @@ import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
-import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.to.SystemView;
+import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
@@ -34,12 +32,11 @@ import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class SendFleetCommand extends AbstractCommand {
 
-    public static final Long TIME_BUFFOR = 3L;
+    public static final Long TIME_BUFFER = 3L;
     public Mission mission;
     protected boolean autoComplete;
-    // promise
+    protected FleetPromise fleetPromise = new FleetPromise();
     protected Resources resources;
-    protected boolean allShips;
 
     public FleetEntity fleet;
     private final SendFleetGIR gir;
@@ -54,6 +51,7 @@ public class SendFleetCommand extends AbstractCommand {
 
     public boolean prepere() {
         GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), mission);
+        fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;
@@ -78,16 +76,23 @@ public class SendFleetCommand extends AbstractCommand {
         if(!prepere()) {
             return true;
         }
+        if(!promise().fit(fleet.source)) return true;
         Long durationSeconds;
+        fleet.hash = this.hash();
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
 
         Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
-        if(allShips) {
+        if(isAllShips()) {
             gir.selectAllShips();
-        } else {
+        } else if (promise().getShipsMap() != null) {
+            for (Map.Entry<ShipEnum, Long> entry : promise().getShipsMap().entrySet()) {
+                typeShip(entry.getKey(), entry.getValue());
+            }
+        } else { //todo: nie powinno byc wyciagania z fleetEntity statkow i wybieranie ich
+            // tylko z shipMap powinno byc wybierane. Do Fleet entity powinno byc zapisywane to co zostalo ostatecznie typowane
             for (Map.Entry<ShipEnum, Long> entry : entries) {
                 typeShip(entry.getKey(), entry.getValue());
             }
@@ -97,7 +102,7 @@ public class SendFleetCommand extends AbstractCommand {
             SleepUtil.sleep();
         } catch (ShipDoNotExists e) {
             System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
-            if(allShips) {
+            if(isAllShips()) {
                 System.err.println("allShips selected");
             } else {
                 for (Map.Entry<ShipEnum, Long> entry : entries) {
@@ -122,9 +127,9 @@ public class SendFleetCommand extends AbstractCommand {
         }
 
         gir.setSpeed(fleet);
-        gir.setResources(resources, fleet);
+        gir.setResources(promise().getResources(), fleet);
 
-        durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFOR;
+        durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFER;
         fleet.start = LocalDateTime.now();
         fleet.visited = gir.parseFleetVisited();
         fleet.back = gir.parseFleetBack();
@@ -225,12 +230,12 @@ public class SendFleetCommand extends AbstractCommand {
         FleetDAO.getInstance().saveOrUpdate(fleet);
     }
 
-    public void setResources(Resources resources) {
-        this.resources = resources;
+    public boolean isAllShips() {
+        return ShipsMap.ALL_SHIPS.equals(promise().getShipsMap());
     }
 
-    public void setAllShips(boolean allShips) {
-        this.allShips = allShips;
+    public FleetPromise promise() {
+        return fleetPromise;
     }
 
     @Override

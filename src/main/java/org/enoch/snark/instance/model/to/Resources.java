@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.NumberUtil;
 
 public class Resources {
@@ -11,6 +12,17 @@ public class Resources {
     public Long metal = 0L;
     public Long crystal = 0L;
     public Long deuterium = 0L;
+
+    public static Resources create(String resourceExpression) {
+        if (StringUtils.isEmpty(resourceExpression) ||
+                resourceExpression.contains("nothing") ||
+                resourceExpression.contains("none"))
+            return nothing;
+        if (resourceExpression.contains("all") ||
+                resourceExpression.contains("everything"))
+            return everything;
+        return new Resources(resourceExpression);
+    }
 
     public Resources() {
     }
@@ -44,7 +56,19 @@ public class Resources {
         return "{" + metal + ", " + crystal + ", " + deuterium +"}";
     }
 
-    public boolean isMoreThan(String s) {
-        return (metal + crystal + deuterium) > NumberUtil.toLong(s);
+    public boolean isCountMoreThan(String s) {
+        return isCountMoreThan(NumberUtil.toLong(s));
+    }
+
+    public boolean isCountMoreThan(Long value) {
+        if(value == null) return true;
+        return (metal + crystal + deuterium) >= value;
+    }
+
+    public boolean isMoreThan(Resources resources) {
+        if(resources == null || everything.equals(resources) || nothing.equals(resources)) return true;
+        return metal >= resources.metal &&
+                crystal >= resources.crystal &&
+                deuterium >= resources.deuterium;
     }
 }
