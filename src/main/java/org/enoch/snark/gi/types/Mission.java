@@ -44,6 +44,7 @@ public enum Mission {
     }
 
     public static Mission convert(String input) {
+        if(input == null) return UNKNOWN;
         String string = input.toLowerCase();
         if(string.contains(EXPEDITION.name().toLowerCase()) || string.contains("ekspedycja")) {
             return EXPEDITION;

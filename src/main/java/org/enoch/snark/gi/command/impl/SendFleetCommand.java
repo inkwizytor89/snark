@@ -1,5 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -29,6 +30,7 @@ import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
 public class SendFleetCommand extends AbstractCommand {
 
@@ -85,11 +87,18 @@ public class SendFleetCommand extends AbstractCommand {
 
 
         Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
-        if(isAllShips()) {
+        if(isAllShips() && (promise().getLeaveShipsMap() == null || promise().getLeaveShipsMap().isEmpty())) {
             gir.selectAllShips();
         } else if (promise().getShipsMap() != null) {
-            for (Map.Entry<ShipEnum, Long> entry : promise().getShipsMap().entrySet()) {
-                typeShip(entry.getKey(), entry.getValue());
+            ShipsMap sourceShipsMap = fleet.source.getShipsMap();
+            ShipsMap maxToSend = sourceShipsMap.leave(promise().getLeaveShipsMap());
+            if(ALL_SHIPS.equals(promise().getShipsMap()))
+                promise().setShipsMap(maxToSend);
+            ShipsMap realCanToSend = promise().getShipsMap().reduce(maxToSend);
+            for (Map.Entry<ShipEnum, Long> entry : realCanToSend.entrySet()) {
+                Long value = typeShip(entry.getKey(), entry.getValue());
+                fleet.setShips(ShipsMap.createSingle(entry.getKey(), value));
+
             }
         } else { //todo: nie powinno byc wyciagania z fleetEntity statkow i wybieranie ich
             // tylko z shipMap powinno byc wybierane. Do Fleet entity powinno byc zapisywane to co zostalo ostatecznie typowane
@@ -194,12 +203,13 @@ public class SendFleetCommand extends AbstractCommand {
         }
     }
 
-    public void typeShip(ShipEnum shipEnum, Long count) {
+    public Long typeShip(ShipEnum shipEnum, Long count) {
         WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
         if(!element.isEnabled()) {
             throw new ShipDoNotExists("Missing ships " + shipEnum.getId());
         }
         element.sendKeys(count.toString());
+        return count;
     }
 
     public void next() {
@@ -231,7 +241,7 @@ public class SendFleetCommand extends AbstractCommand {
     }
 
     public boolean isAllShips() {
-        return ShipsMap.ALL_SHIPS.equals(promise().getShipsMap());
+        return ALL_SHIPS.equals(promise().getShipsMap());
     }
 
     public FleetPromise promise() {

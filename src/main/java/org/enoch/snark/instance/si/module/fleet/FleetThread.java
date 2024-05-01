@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.model.to.ShipsMap.*;
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public class FleetThread extends AbstractThread {
@@ -42,19 +44,17 @@ public class FleetThread extends AbstractThread {
         List<SendFleetCommand> sendFleetCommands = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
-                .conditionShip(map.getShipsWaves(CONDITION_SHIPS_WAVE).get(0))
-                .conditionResource(map.getConfigLong(CONDITION_RESOURCES_COUNT, null))
+                .conditionShip(map.getShipsWaves(CONDITION_SHIPS_WAVE, singletonList(NO_SHIPS)).get(0))
+                .conditionResourceCount(map.getConfigLong(CONDITION_RESOURCES_COUNT, null))
                 .conditionResource(map.getConfigResource(CONDITION_RESOURCES, null))
-                .ships(map.getShipsWaves())
-                .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE))
+                .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
+                .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))
                 .mission(Mission.convert(map.getConfig(MISSION, null)))
                 .resources(map.getConfigResource(RESOURCES, nothing))
                 .speed(map.getConfigLong(SPEED, null))
                 .buildAll();
 
-        sendFleetCommands.forEach(fleetCommand -> {
-            fleetCommand.push(dateToCheck());
-        });
+        sendFleetCommands.forEach(fleetCommand -> fleetCommand.push(dateToCheck()));
     }
 
     private LocalDateTime dateToCheck() {

@@ -62,7 +62,7 @@ public class ColonyEntity extends PlanetEntity {
             Long requiredCont = required.get(entry.getKey());
             if(requiredCont.equals(Long.MAX_VALUE)) continue;
             Long locatedCount = located.get(entry.getKey());
-            if(locatedCount < requiredCont) {
+            if(locatedCount == null || locatedCount < requiredCont) {
                 return false;
             }
         }

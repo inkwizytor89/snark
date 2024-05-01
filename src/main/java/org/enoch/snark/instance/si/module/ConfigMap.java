@@ -173,12 +173,11 @@ public class ConfigMap extends HashMap<String, String> {
         return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
     }
 
-    public List<ShipsMap> getShipsWaves() {
-        return getShipsWaves(SHIPS_WAVE);
+    public List<ShipsMap> getShipsWaves(List<ShipsMap> defaultList) {
+        return getShipsWaves(SHIPS_WAVE, defaultList);
     }
 
-    public List<ShipsMap> getShipsWaves(String code) {
-        List<ShipsMap> empty = Collections.singletonList(ShipsMap.NO_SHIPS);
+    public List<ShipsMap> getShipsWaves(String code, List<ShipsMap> defaultList) {
         List<String> shipsWavesList = getConfigArray(code);
 
         if(keySet().contains(code) && !shipsWavesList.isEmpty()) {
@@ -186,6 +185,6 @@ public class ConfigMap extends HashMap<String, String> {
             shipsWavesList.forEach(wave -> result.add(ShipsMap.parse(wave)));
             return result;
         }
-        return empty;
+        return defaultList;
     }
 }

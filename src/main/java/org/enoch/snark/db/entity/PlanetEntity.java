@@ -507,22 +507,22 @@ public abstract class PlanetEntity extends IdEntity{
 
     public ShipsMap getShipsMap() {
         ShipsMap shipsMap = new ShipsMap();
-        shipsMap.put(ShipEnum.fighterLight, fighterLight);
-        shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
-        shipsMap.put(ShipEnum.cruiser, cruiser);
-        shipsMap.put(ShipEnum.battleship, battleship);
-        shipsMap.put(ShipEnum.interceptor, interceptor);
-        shipsMap.put(ShipEnum.bomber, bomber);
-        shipsMap.put(ShipEnum.destroyer, destroyer);
-        shipsMap.put(ShipEnum.deathstar, deathstar);
-        shipsMap.put(ShipEnum.reaper, reaper);
-        shipsMap.put(ShipEnum.explorer, explorer);
+        if(fighterLight > 0) shipsMap.put(ShipEnum.fighterLight, fighterLight);
+        if(fighterHeavy > 0) shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
+        if(cruiser > 0) shipsMap.put(ShipEnum.cruiser, cruiser);
+        if(battleship > 0) shipsMap.put(ShipEnum.battleship, battleship);
+        if(interceptor > 0) shipsMap.put(ShipEnum.interceptor, interceptor);
+        if(bomber > 0) shipsMap.put(ShipEnum.bomber, bomber);
+        if(destroyer > 0) shipsMap.put(ShipEnum.destroyer, destroyer);
+        if(deathstar > 0) shipsMap.put(ShipEnum.deathstar, deathstar);
+        if(reaper > 0) shipsMap.put(ShipEnum.reaper, reaper);
+        if(explorer > 0) shipsMap.put(ShipEnum.explorer, explorer);
 
-        shipsMap.put(ShipEnum.transporterSmall, transporterSmall);
-        shipsMap.put(ShipEnum.transporterLarge, transporterLarge);
-        shipsMap.put(ShipEnum.colonyShip, colonyShip);
-        shipsMap.put(ShipEnum.recycler, recycler);
-        shipsMap.put(ShipEnum.espionageProbe, espionageProbe);
+        if(transporterSmall > 0) shipsMap.put(ShipEnum.transporterSmall, transporterSmall);
+        if(transporterLarge > 0) shipsMap.put(ShipEnum.transporterLarge, transporterLarge);
+        if(colonyShip > 0) shipsMap.put(ShipEnum.colonyShip, colonyShip);
+        if(recycler > 0) shipsMap.put(ShipEnum.recycler, recycler);
+        if(espionageProbe > 0) shipsMap.put(ShipEnum.espionageProbe, espionageProbe);
 
         return shipsMap;
     }

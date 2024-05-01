@@ -57,7 +57,7 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder conditionResource(Long conditionResourceCount) {
+    public FleetBuilder conditionResourceCount(Long conditionResourceCount) {
         if(conditionResourceCount != null)
             this.conditionResourceCount = conditionResourceCount;
         return this;
@@ -70,7 +70,7 @@ public class FleetBuilder {
     }
 
     public FleetBuilder mission(Mission mission) {
-        if(!Mission.UNKNOWN.equals(mission))
+        if(mission!= null && !Mission.UNKNOWN.equals(mission))
             this.mission = mission;
         return this;
     }
@@ -84,16 +84,23 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder leaveShips(ShipsMap shipsMap) {
-        return ships(Collections.singletonList(shipsMap));
+    public FleetBuilder leaveShips(ShipsMap leaveShips) {
+        return leaveShips(Collections.singletonList(leaveShips));
     }
 
-    public FleetBuilder leaveShips(List<ShipsMap> shipsMaps) {
-        leaveShipWaves = shipsMaps;
+    public FleetBuilder leaveShips(List<ShipsMap> leaveShipWaves) {
+        if(leaveShipWaves != null && !leaveShipWaves.isEmpty())
+            this.leaveShipWaves = leaveShipWaves;
         return this;
     }
 
     public FleetBuilder resources(Resources resources) {
+        if(!nothing.equals(resources))
+            this.resources = resources;
+        return this;
+    }
+
+    public FleetBuilder leaveResources(Resources resources) {
         if(!nothing.equals(resources))
             this.resources = resources;
         return this;
@@ -131,7 +138,9 @@ public class FleetBuilder {
 
                 SendFleetCommand command = new SendFleetCommand(fleetEntity);
                 command.promise().setShipsMap(shipsWave);
+                commandPromiseSetLeaveShipsMap(command, index);
                 command.promise().setResources(resources);
+                command.promise().setLeaveResources(leaveResources);
 
                 command.promise().setConditionShipsMap(conditionShipMap);
                 command.promise().setConditionResources(conditionResource);
@@ -157,7 +166,6 @@ public class FleetBuilder {
     private void validate() {
         //main source maybe
         if(from.isEmpty()) throw new RuntimeException("Missing source for "+this);
-
     }
 
     private boolean shipConditionFit(ColonyEntity colony) {
@@ -180,6 +188,12 @@ public class FleetBuilder {
         ColonyEntity colony = ColonyDAO.getInstance().get(target);
         if(colony != null) return Mission.STATIONED;
         return Mission.ATTACK;
+    }
+
+    public void commandPromiseSetLeaveShipsMap(SendFleetCommand command, int index) {
+        if(leaveShipWaves != null && !leaveShipWaves.isEmpty()) {
+            command.promise().setLeaveShipsMap(leaveShipWaves.get(Math.min(index, leaveShipWaves.size()-1)));
+        }
     }
 
     @Override

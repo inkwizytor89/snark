@@ -2,12 +2,11 @@ package org.enoch.snark.instance.model.to;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.enoch.snark.common.NumberUtil;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.types.ShipEnum;
-import org.enoch.snark.instance.model.types.Expression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static org.enoch.snark.instance.model.types.Expression.ALL;
 import static org.enoch.snark.instance.model.types.Expression.NONE;
@@ -16,6 +15,7 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
 
     public static final ShipsMap NO_SHIPS = new ShipsMap();
     public static final ShipsMap ALL_SHIPS = new ShipsMap();
+    public static final List<ShipsMap> EMPTY_SHIP_WAVE = new ArrayList<>();
 
     public static ShipsMap parse(String expression) {
         if(ALL.is(expression)) return ALL_SHIPS;
@@ -28,5 +28,49 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
             shipsMap.put(shipEnumValue, NumberUtil.toLong(entry[1]));
         }
         return shipsMap;
+    }
+
+    public static ShipsMap createSingle(ShipEnum key, Long value) {
+        ShipsMap shipsMap = new ShipsMap();
+        shipsMap.put(key, value);
+        return shipsMap;
+    }
+
+//    public boolean isEmpty() {
+//        return this.values().stream()
+//                .anyMatch(value ->value > 0L);
+//    }
+
+    public ShipsMap leave(ShipsMap leaveMap) {
+        if(ALL_SHIPS.equals(this) || NO_SHIPS.equals(this))
+            throw new IllegalStateException("Expression maps are abstract - leave");
+
+        ShipsMap result = new ShipsMap();
+        if(ALL_SHIPS.equals(leaveMap)) return result;
+        else if(leaveMap == null || NO_SHIPS.equals(leaveMap)) result.putAll(this);
+        else this.forEach((baseKey, baseValue) -> {
+            Long leaveValue = leaveMap.get(baseKey);
+            if (leaveValue == null) result.put(baseKey, baseValue);
+            else {
+                long newValue = baseValue - leaveValue;
+                if(newValue > 0) result.put(baseKey, newValue);
+            }
+        });
+        return result;
+    }
+
+    public ShipsMap reduce(ShipsMap reduceMap) {
+        if(ALL_SHIPS.equals(this) || NO_SHIPS.equals(this))
+            throw new IllegalStateException("Expression maps are abstract - reduce");
+
+        ShipsMap result = new ShipsMap();
+        if(ALL_SHIPS.equals(reduceMap)) result.putAll(this);
+        if(reduceMap == null || NO_SHIPS.equals(reduceMap))  return result;
+
+        this.forEach((baseKey, baseValue) -> {
+            Long reduceValue = reduceMap.get(baseKey);
+            if (reduceValue != null) result.put(baseKey, Math.min(baseValue, reduceValue));
+        });
+        return result;
     }
 }

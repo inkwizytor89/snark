@@ -2,6 +2,8 @@ package org.enoch.snark.instance.model.to;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+
 public class FleetPromise {
     private ShipsMap shipsMap;
     private Resources resources;
@@ -33,6 +35,17 @@ public class FleetPromise {
         }
         return true;
     }
+
+    public ShipsMap calculateShipMap(ColonyEntity colony) {
+        ShipsMap sourceShipsMap = colony.getShipsMap();
+        ShipsMap maxToSend = sourceShipsMap.leave(getLeaveShipsMap());
+        ShipsMap shipsMap = getShipsMap();
+        if(ALL_SHIPS.equals(getShipsMap()))
+            shipsMap = maxToSend;
+        return shipsMap.reduce(maxToSend);
+    }
+
+
 
     public ShipsMap getShipsMap() {
         return shipsMap;
