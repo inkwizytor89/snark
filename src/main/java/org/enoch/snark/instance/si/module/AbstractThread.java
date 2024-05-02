@@ -68,7 +68,7 @@ public abstract class AbstractThread extends Thread {
 
         while(true) {
             RunningStatus runningStatus = new RunningStatus(isRunning, shouldRunning());
-            runningStatus.log("Thread " + map.name());
+            runningStatus.log("Thread " + map.name(), map);
             isRunning = runningStatus.shouldRunning();
             if (isRunning) {
                 try {
@@ -118,7 +118,6 @@ public abstract class AbstractThread extends Thread {
         else if(map.name().contains(CollectorThread.threadName)) return new CollectorThread(map);
         else if(map.name().contains(TransportThread.threadName)) return new TransportThread(map);
         else if(map.name().contains(HuntingThread.threadName)) return new HuntingThread(map);
-        else if(map.name().contains(FleetThread.threadName)) return new FleetThread(map);
-        else throw new RuntimeException("Unknown threadName "+map.name());
+        else return new FleetThread(map);
     }
 }

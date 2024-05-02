@@ -1,5 +1,7 @@
 package org.enoch.snark.common;
 
+import java.util.Arrays;
+
 public class RunningStatus {
 
     private final boolean oldStatus;
@@ -22,11 +24,17 @@ public class RunningStatus {
         return oldStatus && !newStatus;
     }
 
-    public void log(String name) {
+    public void log(String name, Object... objects) {
         if(shouldStart()) {
-            System.err.println(name + " start");
+            logAction(name, "start", objects);
         } else if(shouldStop()) {
-            System.err.println(name + " stop");
+            logAction(name, "stop", objects);
         }
+    }
+
+    public void logAction(String name, String action, Object[] objects) {
+        StringBuilder builder = new StringBuilder(name + " " + action + " ");
+        Arrays.asList(objects).forEach(builder::append);
+        System.err.println(builder);
     }
 }

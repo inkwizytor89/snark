@@ -90,11 +90,7 @@ public class SendFleetCommand extends AbstractCommand {
         if(isAllShips() && (promise().getLeaveShipsMap() == null || promise().getLeaveShipsMap().isEmpty())) {
             gir.selectAllShips();
         } else if (promise().getShipsMap() != null) {
-            ShipsMap sourceShipsMap = fleet.source.getShipsMap();
-            ShipsMap maxToSend = sourceShipsMap.leave(promise().getLeaveShipsMap());
-            if(ALL_SHIPS.equals(promise().getShipsMap()))
-                promise().setShipsMap(maxToSend);
-            ShipsMap realCanToSend = promise().getShipsMap().reduce(maxToSend);
+            ShipsMap realCanToSend = promise().calculateShipMap(fleet.source);
             for (Map.Entry<ShipEnum, Long> entry : realCanToSend.entrySet()) {
                 Long value = typeShip(entry.getKey(), entry.getValue());
                 fleet.setShips(ShipsMap.createSingle(entry.getKey(), value));

@@ -11,6 +11,7 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConfigMap extends HashMap<String, String> {
 
@@ -186,5 +187,12 @@ public class ConfigMap extends HashMap<String, String> {
             return result;
         }
         return defaultList;
+    }
+
+    @Override
+    public String toString() {
+        return "{"+this.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", "))+"}";
     }
 }

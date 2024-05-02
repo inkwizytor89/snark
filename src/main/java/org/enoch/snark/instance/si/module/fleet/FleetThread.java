@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.fleet;
 
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.action.FleetBuilder;
@@ -54,7 +55,14 @@ public class FleetThread extends AbstractThread {
                 .speed(map.getConfigLong(SPEED, null))
                 .buildAll();
 
-        sendFleetCommands.forEach(fleetCommand -> fleetCommand.push(dateToCheck()));
+        sendFleetCommands.stream()
+                .filter(this::noSkip)
+                .forEach(fleetCommand -> fleetCommand.push(dateToCheck()));
+    }
+
+    private boolean noSkip(SendFleetCommand command) {
+        ColonyEntity source = command.fleet.source;
+        return !command.promise().calculateShipMap(source).isEmpty();
     }
 
     private LocalDateTime dateToCheck() {

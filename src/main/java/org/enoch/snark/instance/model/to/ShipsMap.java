@@ -73,4 +73,9 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
         });
         return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (this == obj);
+    }
 }
