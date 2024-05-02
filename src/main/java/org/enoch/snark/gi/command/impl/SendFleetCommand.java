@@ -249,7 +249,8 @@ public class SendFleetCommand extends AbstractCommand {
         return mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
     }
 
-    public void generateHash(String code) {
-        hash(fleet.source+"_"+mission+"_"+fleet.getTarget()+"_"+code);
+    public void generateHash(String hashPrefix, String code) {
+        String prefix = hashPrefix != null ? hashPrefix+"_" : "";
+        hash(prefix+fleet.source+"_"+mission+"_"+fleet.getTarget()+"_"+code);
     }
 }

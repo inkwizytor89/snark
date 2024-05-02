@@ -3,6 +3,7 @@ package org.enoch.snark.instance.si.module.fleet;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
@@ -46,23 +47,27 @@ public class FleetThread extends AbstractThread {
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
                 .conditionShip(map.getShipsWaves(CONDITION_SHIPS_WAVE, singletonList(NO_SHIPS)).get(0))
-                .conditionResourceCount(map.getConfigLong(CONDITION_RESOURCES_COUNT, null))
-                .conditionResource(map.getConfigResource(CONDITION_RESOURCES, null))
+                .conditionResource(map.getConfigResources(CONDITION_RESOURCES, null))
+                .conditionResourceCount(map.getConfigNumber(CONDITION_RESOURCES_COUNT, null))
                 .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
                 .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))
                 .mission(Mission.convert(map.getConfig(MISSION, null)))
-                .resources(map.getConfigResource(RESOURCES, nothing))
+                .resources(map.getConfigResources(RESOURCES, nothing))
+                .leaveResources(map.getConfigResources(LEAVE_RESOURCES, nothing))
                 .speed(map.getConfigLong(SPEED, null))
+                .queue(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())))
+                .hashPrefix(map.name())
                 .buildAll();
 
         sendFleetCommands.stream()
-                .filter(this::noSkip)
+                .filter(this::skip)
                 .forEach(fleetCommand -> fleetCommand.push(dateToCheck()));
     }
 
-    private boolean noSkip(SendFleetCommand command) {
+    private boolean skip(SendFleetCommand command) {
         ColonyEntity source = command.fleet.source;
-        return !command.promise().calculateShipMap(source).isEmpty();
+        boolean noShips = command.promise().calculateShipMap(source).isEmpty();
+        return !noShips;
     }
 
     private LocalDateTime dateToCheck() {

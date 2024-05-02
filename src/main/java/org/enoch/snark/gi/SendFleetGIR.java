@@ -61,7 +61,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
-            Resources defaultResources = Instance.getMainConfigMap().getConfigResource(LEAVE_MIN_RESOURCES, new Resources("d4m"));
+            Resources defaultResources = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, new Resources("d4m"));
             Long metal = rememberToLeaveSome(resources, fleet, defaultResources.metal, ResourceType.METAL);
             Long crystal = rememberToLeaveSome(resources, fleet, defaultResources.crystal, ResourceType.CRYSTAL);
             Long deuterium = rememberToLeaveSome(resources, fleet, defaultResources.deuterium, ResourceType.DEUTERIUM);

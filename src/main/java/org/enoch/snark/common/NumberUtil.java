@@ -13,6 +13,7 @@ public class NumberUtil {
     }
 
     public static Long toLong(String input) {
+        if(input == null || input.isEmpty()) return 0L;
         if(input.toLowerCase().contains(Expression.ALL.name().toLowerCase())) return Long.MAX_VALUE;
         return Long.parseLong(normalizationString(input));
     }

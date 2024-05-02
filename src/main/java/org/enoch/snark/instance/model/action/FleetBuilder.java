@@ -32,6 +32,7 @@ public class FleetBuilder {
     private Resources resources;
     private Resources leaveResources;
     private QueueRunType queue;
+    private String hashPrefix;
 
     public FleetBuilder from(ColonyEntity colony) {
         return from(Collections.singletonList(colony));
@@ -100,9 +101,9 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder leaveResources(Resources resources) {
+    public FleetBuilder leaveResources(Resources leaveResources) {
         if(!nothing.equals(resources))
-            this.resources = resources;
+            this.leaveResources = leaveResources;
         return this;
     }
 
@@ -111,8 +112,15 @@ public class FleetBuilder {
         return this;
     }
 
+    public FleetBuilder hashPrefix(String hashPrefix) {
+        if(hashPrefix!= null && !hashPrefix.isEmpty())
+            this.hashPrefix = hashPrefix;
+        return this;
+    }
+
     public FleetBuilder queue(QueueRunType queue) {
-        this.queue = queue;
+        if(queue != null)
+            this.queue = queue;
         return this;
     }
 
@@ -130,7 +138,9 @@ public class FleetBuilder {
 
                 FleetEntity fleetEntity = new FleetEntity();
                 fleetEntity.source = colony;
-                fleetEntity.setTarget(toExpression(colony, to));
+                Planet planetExpression = toExpression(colony, to);
+                if(planetExpression == null) continue;
+                fleetEntity.setTarget(planetExpression);
                 fleetEntity.mission = missionExpression(fleetEntity.getTarget(), mission);
                 fleetEntity.setShips(shipsWave);
                 fleetEntity.speed = speed;
@@ -147,7 +157,7 @@ public class FleetBuilder {
                 command.promise().setConditionResourcesCount(conditionResourceCount);
                 
                 command.setRunType(queue);
-                command.generateHash(Integer.toString(index));
+                command.generateHash(hashPrefix, Integer.toString(index));
 
                 results.add(command);
             }
@@ -180,7 +190,7 @@ public class FleetBuilder {
 
     private Planet toExpression(ColonyEntity colony, String to) {
         if(to != null) return new Planet(to);
-        return colony.toPlanet().swapType();
+        return colony.cpm != null ? colony.toPlanet().swapType() : null;
     }
 
     private Mission missionExpression(Planet target, Mission mission) {

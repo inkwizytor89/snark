@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
@@ -47,7 +48,9 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String LEAVE_SHIPS_WAVE = "leave_ships_wave";
     public static final String MISSION = "mission";
     public static final String RESOURCES = "resources";
+    public static final String LEAVE_RESOURCES = "leave_resources";
     public static final String SPEED = "speed";
+    public static final String QUEUE = "queue";
     public static final String EXPIRED_TIME = "expired_time";
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String DATABASE = "database";
@@ -117,6 +120,11 @@ public class ConfigMap extends HashMap<String, String> {
         }
     }
 
+    public Long getConfigNumber(String key, String defaultValue) {
+        String config = getConfig(key, defaultValue);
+        return config == null ? null : NumberUtil.toLong(config);
+    }
+
     public List<String> getConfigArray(String key) {
         if(!containsKey(key)) return new ArrayList<>();
         return Arrays.asList(get(key).split(ARRAY_SEPARATOR));
@@ -152,7 +160,7 @@ public class ConfigMap extends HashMap<String, String> {
         return new Planet(config);
     }
 
-    public Resources getConfigResource(String key, Resources defaultResources) {
+    public Resources getConfigResources(String key, Resources defaultResources) {
         String config = getConfig(key, null);
         if (config == null) return defaultResources;
         return Resources.create(config);
