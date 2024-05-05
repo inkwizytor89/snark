@@ -7,6 +7,7 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -136,26 +137,23 @@ public class FleetBuilder {
                 if(!shipConditionFit(colony)) continue;
                 if(!resourceConditionFit(colony)) continue;
 
-                FleetEntity fleetEntity = new FleetEntity();
-                fleetEntity.source = colony;
-                Planet planetExpression = toExpression(colony, to);
-                if(planetExpression == null) continue;
-                fleetEntity.setTarget(planetExpression);
-                fleetEntity.mission = missionExpression(fleetEntity.getTarget(), mission);
-                fleetEntity.setShips(shipsWave);
-                fleetEntity.speed = speed;
-                fleetEntity.code = FLEET_THREAD;
+                FleetPromise promise = new FleetPromise();
+                promise.setSource(colony);
+                Planet target = toExpression(colony, to);
+                if(target == null) continue;
+                promise.setTarget(target);
+                promise.setMission(missionExpression(target, mission));
+                promise.setShipsMap(shipsWave);
+                promise.setSpeed(speed);
 
-                SendFleetCommand command = new SendFleetCommand(fleetEntity);
-                command.promise().setShipsMap(shipsWave);
+                promise.setResources(resources);
+                promise.setLeaveResources(leaveResources);
+                promise.setConditionShipsMap(conditionShipMap);
+                promise.setConditionResources(conditionResource);
+                promise.setConditionResourcesCount(conditionResourceCount);
+
+                SendFleetCommand command = new SendFleetCommand(promise);
                 commandPromiseSetLeaveShipsMap(command, index);
-                command.promise().setResources(resources);
-                command.promise().setLeaveResources(leaveResources);
-
-                command.promise().setConditionShipsMap(conditionShipMap);
-                command.promise().setConditionResources(conditionResource);
-                command.promise().setConditionResourcesCount(conditionResourceCount);
-                
                 command.setRunType(queue);
                 command.generateHash(hashPrefix, Integer.toString(index));
 
@@ -189,8 +187,12 @@ public class FleetBuilder {
     }
 
     private Planet toExpression(ColonyEntity colony, String to) {
-        if(to != null) return new Planet(to);
-        return colony.cpm != null ? colony.toPlanet().swapType() : null;
+        String expression = to;
+        if(to == null && colony.cpm != null) expression = PlanetExpression.swap(colony.toPlanet());
+        else if(to == null) return null;
+        else if(to.contains(PlanetExpression.NEXT)) expression = PlanetExpression.next(colony.toPlanet());
+
+        return PlanetExpression.from(expression);
     }
 
     private Mission missionExpression(Planet target, Mission mission) {
@@ -204,12 +206,5 @@ public class FleetBuilder {
         if(leaveShipWaves != null && !leaveShipWaves.isEmpty()) {
             command.promise().setLeaveShipsMap(leaveShipWaves.get(Math.min(index, leaveShipWaves.size()-1)));
         }
-    }
-
-    @Override
-    public String toString() {
-        return "FleetBuilder{" +
-                "sources=" + from +
-                '}';
     }
 }

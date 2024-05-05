@@ -20,7 +20,6 @@ public abstract class AbstractCommand {
     private QueueRunType runType = MINOR;
     protected Instance instance;
     public int failed = 0;
-    Integer priority = 100;
     private String hash;
     private final List<String> tags = new ArrayList<>();
 

@@ -4,6 +4,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
@@ -79,6 +80,7 @@ public class FleetEntity extends IdEntity {
     @Column(name = "acs_code")
     public String acsCode;
 
+    //todo: code to remove - hash has enought information
     @Basic
     @Column(name = "code")
     public Long code;
@@ -134,6 +136,14 @@ public class FleetEntity extends IdEntity {
 
     public FleetEntity() {
         super();
+    }
+
+    public FleetEntity(FleetPromise promise) {
+        super();
+        source = promise.getSource();
+        setTarget(promise.getTarget());
+        mission = promise.getMission();
+        speed = promise.getSpeed();
     }
 
     public boolean isItBack() {

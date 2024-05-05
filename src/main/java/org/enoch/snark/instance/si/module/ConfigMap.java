@@ -59,6 +59,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String HIDING_ACTIVITY = "hiding_activity";
     public static final String HIGH_SCORE_PAGES = "high_score_pages";
     public static final String MASTER = "master_href";
+    public static final String TRIP = "trip";
     public static final String TRANSPORTER_SMALL_CAPACITY = "transporterSmall";
     public static final String LEAVE_MIN_RESOURCES = "leave_min_resources";
 

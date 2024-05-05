@@ -1,10 +1,16 @@
 package org.enoch.snark.instance.model.to;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.gi.types.Mission;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
 public class FleetPromise {
+    private ColonyEntity source;
+    private Planet target;
+    private Mission mission;
+    private Long speed;
+
     private ShipsMap shipsMap;
     private Resources resources;
 
@@ -101,5 +107,37 @@ public class FleetPromise {
 
     public void setConditionResourcesCount(Long conditionResourcesCount) {
         this.conditionResourcesCount = conditionResourcesCount;
+    }
+
+    public ColonyEntity getSource() {
+        return source;
+    }
+
+    public void setSource(ColonyEntity source) {
+        this.source = source;
+    }
+
+    public Planet getTarget() {
+        return target;
+    }
+
+    public void setTarget(Planet target) {
+        this.target = target;
+    }
+
+    public Mission getMission() {
+        return mission;
+    }
+
+    public void setMission(Mission mission) {
+        this.mission = mission;
+    }
+
+    public Long getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(Long speed) {
+        this.speed = speed;
     }
 }

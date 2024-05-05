@@ -1,6 +1,5 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -35,24 +34,26 @@ import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 public class SendFleetCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFER = 3L;
-    public Mission mission;
     protected boolean autoComplete;
     protected FleetPromise fleetPromise = new FleetPromise();
     protected Resources resources;
 
     public FleetEntity fleet;
-    private final SendFleetGIR gir;
+    private final SendFleetGIR gir = new SendFleetGIR();
 
     public SendFleetCommand(FleetEntity fleet) {
         super();
-        this.priority = 40;
         this.fleet = fleet;
-        this.mission = fleet.mission;
-        gir = new SendFleetGIR();
+    }
+
+    public SendFleetCommand(FleetPromise fleetPromise) {
+        super();
+        this.fleetPromise = fleetPromise;
+        this.fleet = new FleetEntity(fleetPromise);
     }
 
     public boolean prepere() {
-        GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), mission);
+        GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), fleet.mission);
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
             if(fleet.code == null) {
@@ -176,7 +177,7 @@ public class SendFleetCommand extends AbstractCommand {
     }
 
     private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
-        if(mission.isComingBack()) {
+        if(fleet.mission.isComingBack()) {
             OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, fleet.source);
             long secondsToBack = durationSeconds * 2;
             if(Mission.EXPEDITION.equals(fleet.mission)) {
@@ -246,11 +247,11 @@ public class SendFleetCommand extends AbstractCommand {
 
     @Override
     public String toString() {
-        return mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
+        return fleet.mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
     }
 
     public void generateHash(String hashPrefix, String code) {
         String prefix = hashPrefix != null ? hashPrefix+"_" : "";
-        hash(prefix+fleet.source+"_"+mission+"_"+fleet.getTarget()+"_"+code);
+        hash(prefix+fleet.source+"_"+fleet.mission+"_"+fleet.getTarget()+"_"+code);
     }
 }

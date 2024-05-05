@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -23,6 +24,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
+import static org.enoch.snark.instance.si.module.ConfigMap.TRIP;
 
 public class Instance {
 
@@ -104,5 +107,18 @@ public class Instance {
 
     public static HashMap<String, ConfigMap> getPropertiesMap() {
         return propertiesMap;
+    }
+
+    public static ColonyEntity next(ColonyEntity colonyEntity) {
+        Integer galaxyCount = Instance.getMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
+        List<ColonyEntity> configTrip = Instance.getMainConfigMap().getColonies(TRIP, null);
+        if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
+        int index = configTrip.indexOf(colonyEntity);
+        if(index == -1) {
+            ColonyEntity swapColony = ColonyDAO.getInstance().get(colonyEntity.toPlanet().swapType());
+            index = configTrip.indexOf(swapColony);
+        }
+        if(index==-1) return null;
+        else return configTrip.get((index + 1) %  configTrip.size());
     }
 }
