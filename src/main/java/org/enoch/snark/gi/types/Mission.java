@@ -3,6 +3,7 @@ package org.enoch.snark.gi.types;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public enum Mission {
     EXPEDITION("id=missionButton15", 15),
@@ -65,6 +66,11 @@ public enum Mission {
         } else if(string.contains(GROUP_ATTACK.name().toLowerCase()) || string.contains("atak") || string.contains("group")) {
             return GROUP_ATTACK;
         } else return UNKNOWN;
+    }
+
+    public static List<Mission> convert(List<String> list) {
+        if(list == null) return null;
+        return list.stream().map(Mission::convert).collect(Collectors.toList());
     }
 
     public boolean isAggressive() {

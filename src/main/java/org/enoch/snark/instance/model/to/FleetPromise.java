@@ -2,6 +2,11 @@ package org.enoch.snark.instance.model.to;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
@@ -14,6 +19,7 @@ public class FleetPromise {
     private ShipsMap shipsMap;
     private Resources resources;
 
+    private final List<AbstractCondition> conditions = new ArrayList<>();
     private ShipsMap conditionShipsMap;
     private Resources conditionResources;
     private Long conditionResourcesCount;
@@ -25,6 +31,10 @@ public class FleetPromise {
     }
 
     public boolean fit(ColonyEntity colony) {
+        return conditions.stream().allMatch(condition -> condition.fit(colony));
+    }
+
+    public boolean temporaryFit(ColonyEntity colony) {
         if(!colony.hasEnoughShips(conditionShipsMap)) {
             System.err.println(colony+" no fit for "+conditionShipsMap);
             return false;
@@ -139,5 +149,13 @@ public class FleetPromise {
 
     public void setSpeed(Long speed) {
         this.speed = speed;
+    }
+
+    public void addCondition(AbstractCondition condition) {
+        addConditions(Collections.singletonList(condition));
+    }
+
+    public void addConditions(List<AbstractCondition> conditions) {
+        this.conditions.addAll(conditions);
     }
 }

@@ -2,11 +2,11 @@ package org.enoch.snark.instance.model.action;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.enoch.snark.db.entity.FleetEntity.FLEET_THREAD;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 
 public class FleetBuilder {
 
     private List<ColonyEntity> from;
     private String to;
+    private final List<AbstractCondition> conditions = new ArrayList<>();
     private ShipsMap conditionShipMap;
     private Resources conditionResource;
     private Long conditionResourceCount;
@@ -50,6 +50,13 @@ public class FleetBuilder {
 
     public FleetBuilder to(String planet) {
         to = planet;
+        return this;
+    }
+
+    public FleetBuilder condition(AbstractCondition condition) {
+        if(condition != null) {
+            conditions.add(condition);
+        }
         return this;
     }
 
@@ -148,6 +155,7 @@ public class FleetBuilder {
 
                 promise.setResources(resources);
                 promise.setLeaveResources(leaveResources);
+                promise.addConditions(conditions);
                 promise.setConditionShipsMap(conditionShipMap);
                 promise.setConditionResources(conditionResource);
                 promise.setConditionResourcesCount(conditionResourceCount);
@@ -157,7 +165,7 @@ public class FleetBuilder {
                 command.setRunType(queue);
                 command.generateHash(hashPrefix, Integer.toString(index));
 
-                results.add(command);
+                if(promise.fit(colony)) results.add(command);
             }
         }
         return results;

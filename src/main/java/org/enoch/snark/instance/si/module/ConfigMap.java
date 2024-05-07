@@ -44,6 +44,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";
     public static final String CONDITION_RESOURCES = "condition_resources";
     public static final String CONDITION_SHIPS_WAVE = "condition_ships_wave";
+    public static final String CONDITION_BLOCKING_MISSIONS = "condition_blocking_missions";
     public static final String SHIPS_WAVE = "ships_wave";
     public static final String LEAVE_SHIPS_WAVE = "leave_ships_wave";
     public static final String MISSION = "mission";
@@ -128,6 +129,11 @@ public class ConfigMap extends HashMap<String, String> {
 
     public List<String> getConfigArray(String key) {
         if(!containsKey(key)) return new ArrayList<>();
+        return Arrays.asList(get(key).split(ARRAY_SEPARATOR));
+    }
+
+    public List<String> getConfigArray(String key, List<String> defaultValue) {
+        if(!containsKey(key)) return defaultValue;
         return Arrays.asList(get(key).split(ARRAY_SEPARATOR));
     }
 
