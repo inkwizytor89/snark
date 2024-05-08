@@ -79,7 +79,7 @@ public class SendFleetCommand extends AbstractCommand {
         if(!prepere()) {
             return true;
         }
-        if(!promise().temporaryFit(fleet.source)) return true;
+        if(!promise().fit(fleet.source)) return true;
         Long durationSeconds;
         fleet.hash = this.hash();
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);

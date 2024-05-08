@@ -12,6 +12,7 @@ public class ConditionFactory {
         if (object == null) return null;
         else if(ConditionType.RESOURCE.equals(type)) return new ResourceCondition((Resources) object);
         else if(ConditionType.RESOURCES_COUNT.equals(type)) return new ResourceCountCondition((Long) object);
+        //todo should bi shipmap not only wave to avoid get 0
         else if(ConditionType.SHIPS.equals(type)) return new ShipsCondition(((ArrayList<ShipsMap>) object).get(0));
         else if(ConditionType.NO_MISSIONS.equals(type)) return new NoMissionsCondition((List<Mission>) object);
         else return null;

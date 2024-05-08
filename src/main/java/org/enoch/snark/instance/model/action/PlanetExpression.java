@@ -2,6 +2,7 @@ package org.enoch.snark.instance.model.action;
 
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 
@@ -24,7 +25,9 @@ public class PlanetExpression {
             Planet planet = new Planet(s[PLANET_INDEX]);
 
             if(action.contains(NEXT)) {
-                return Instance.next(ColonyDAO.getInstance().get(planet)).toPlanet();
+                ColonyEntity next = Instance.next(ColonyDAO.getInstance().get(planet));
+                if(next!=null) return next.toPlanet();
+                else return null;
             } else if(action.contains(SWAP)) {
                 return planet.swapType();
             } else return null;

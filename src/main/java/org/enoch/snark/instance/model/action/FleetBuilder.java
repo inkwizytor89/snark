@@ -23,9 +23,6 @@ public class FleetBuilder {
     private List<ColonyEntity> from;
     private String to;
     private final List<AbstractCondition> conditions = new ArrayList<>();
-    private ShipsMap conditionShipMap;
-    private Resources conditionResource;
-    private Long conditionResourceCount;
     private Mission mission;
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
@@ -57,24 +54,6 @@ public class FleetBuilder {
         if(condition != null) {
             conditions.add(condition);
         }
-        return this;
-    }
-
-    public FleetBuilder conditionResource(Resources conditionResource) {
-        if(conditionResource != null)
-            this.conditionResource = conditionResource;
-        return this;
-    }
-
-    public FleetBuilder conditionResourceCount(Long conditionResourceCount) {
-        if(conditionResourceCount != null)
-            this.conditionResourceCount = conditionResourceCount;
-        return this;
-    }
-
-    public FleetBuilder conditionShip(ShipsMap conditionShipMap) {
-        if(!ShipsMap.NO_SHIPS.equals(conditionShipMap))
-            this.conditionShipMap = conditionShipMap;
         return this;
     }
 
@@ -141,8 +120,6 @@ public class FleetBuilder {
         for(ShipsMap shipsWave : shipWaves) {
             index++;
             for (ColonyEntity colony : from) {
-                if(!shipConditionFit(colony)) continue;
-                if(!resourceConditionFit(colony)) continue;
 
                 FleetPromise promise = new FleetPromise();
                 promise.setSource(colony);
@@ -156,9 +133,6 @@ public class FleetBuilder {
                 promise.setResources(resources);
                 promise.setLeaveResources(leaveResources);
                 promise.addConditions(conditions);
-                promise.setConditionShipsMap(conditionShipMap);
-                promise.setConditionResources(conditionResource);
-                promise.setConditionResourcesCount(conditionResourceCount);
 
                 SendFleetCommand command = new SendFleetCommand(promise);
                 commandPromiseSetLeaveShipsMap(command, index);
@@ -182,16 +156,6 @@ public class FleetBuilder {
     private void validate() {
         //main source maybe
         if(from.isEmpty()) throw new RuntimeException("Missing source for "+this);
-    }
-
-    private boolean shipConditionFit(ColonyEntity colony) {
-        if(conditionShipMap == null) return true;
-        return colony.hasEnoughShips(conditionShipMap);
-    }
-
-    private boolean resourceConditionFit(ColonyEntity colony) {
-        if(conditionResourceCount == null) return true;
-        return colony.getResources().isCountMoreThan(conditionResourceCount.toString());
     }
 
     private Planet toExpression(ColonyEntity colony, String to) {

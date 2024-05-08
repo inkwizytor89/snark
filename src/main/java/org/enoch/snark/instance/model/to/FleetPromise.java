@@ -18,12 +18,7 @@ public class FleetPromise {
 
     private ShipsMap shipsMap;
     private Resources resources;
-
     private final List<AbstractCondition> conditions = new ArrayList<>();
-    private ShipsMap conditionShipsMap;
-    private Resources conditionResources;
-    private Long conditionResourcesCount;
-
     private ShipsMap leaveShipsMap;
     private Resources leaveResources;
 
@@ -34,24 +29,6 @@ public class FleetPromise {
         return conditions.stream().allMatch(condition -> condition.fit(colony));
     }
 
-    public boolean temporaryFit(ColonyEntity colony) {
-        if(!colony.hasEnoughShips(conditionShipsMap)) {
-            System.err.println(colony+" no fit for "+conditionShipsMap);
-            return false;
-        }
-
-        if(!colony.hasEnoughResources(conditionResources)) {
-            System.err.println(colony+" no fit for "+conditionResources);
-            return false;
-        }
-
-        if(!colony.getResources().isCountMoreThan(conditionResourcesCount)) {
-            System.err.println(colony+" not enough resource count "+conditionResources);
-            return false;
-        }
-        return true;
-    }
-
     public ShipsMap calculateShipMap(ColonyEntity colony) {
         ShipsMap sourceShipsMap = colony.getShipsMap();
         ShipsMap maxToSend = sourceShipsMap.leave(getLeaveShipsMap());
@@ -60,8 +37,6 @@ public class FleetPromise {
             shipsMap = maxToSend;
         return shipsMap.reduce(maxToSend);
     }
-
-
 
     public ShipsMap getShipsMap() {
         return shipsMap;
@@ -93,30 +68,6 @@ public class FleetPromise {
 
     public void setLeaveResources(Resources leaveResources) {
         this.leaveResources = leaveResources;
-    }
-
-    public ShipsMap getConditionShipsMap() {
-        return conditionShipsMap;
-    }
-
-    public void setConditionShipsMap(ShipsMap conditionShipsMap) {
-        this.conditionShipsMap = conditionShipsMap;
-    }
-
-    public Resources getConditionResources() {
-        return conditionResources;
-    }
-
-    public void setConditionResources(Resources conditionResources) {
-        this.conditionResources = conditionResources;
-    }
-
-    public Long getConditionResourcesCount() {
-        return conditionResourcesCount;
-    }
-
-    public void setConditionResourcesCount(Long conditionResourcesCount) {
-        this.conditionResourcesCount = conditionResourcesCount;
     }
 
     public ColonyEntity getSource() {
