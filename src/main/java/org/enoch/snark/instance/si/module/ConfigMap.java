@@ -43,7 +43,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String TARGET = "target";
     public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";
     public static final String CONDITION_RESOURCES = "condition_resources";
-    public static final String CONDITION_SHIPS_WAVE = "condition_ships_wave";
+    public static final String CONDITION_SHIPS = "condition_ships";
     public static final String CONDITION_BLOCKING_MISSIONS = "condition_blocking_missions";
     public static final String SHIPS_WAVE = "ships_wave";
     public static final String LEAVE_SHIPS_WAVE = "leave_ships_wave";
@@ -187,6 +187,11 @@ public class ConfigMap extends HashMap<String, String> {
 
     public List<ColonyEntity> getColonies(String key, String defaultValue) {
         return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
+    }
+    public ShipsMap getShips(String code, ShipsMap defaultValue) {
+        String ships = getConfig(code, null);
+        if(StringUtils.isEmpty(ships)) return defaultValue;
+        return ShipsMap.parse(ships);
     }
 
     public List<ShipsMap> getShipsWaves(List<ShipsMap> defaultList) {

@@ -13,6 +13,7 @@ public class PlanetExpression {
     public static final int PLANET_INDEX = 1;
     public static final String SWAP = "swap";
     public static final String NEXT = "next";
+    public static final String PREV = "prev";
     public static final String FLEET_DESTINATION = "fleet_destination";
     public static final String FLEET_LOCATION = "fleet_location";
     public static final String FLEET = "fleet";
@@ -27,6 +28,10 @@ public class PlanetExpression {
             if(action.contains(NEXT)) {
                 ColonyEntity next = Instance.next(ColonyDAO.getInstance().get(planet));
                 if(next!=null) return next.toPlanet();
+                else return null;
+            } else if(action.contains(PREV)) {
+                ColonyEntity prev = Instance.prev(ColonyDAO.getInstance().get(planet));
+                if(prev!=null) return prev.toPlanet();
                 else return null;
             } else if(action.contains(SWAP)) {
                 return planet.swapType();
@@ -43,6 +48,10 @@ public class PlanetExpression {
 
     public static String next(Planet planet) {
         return NEXT + EXPRESSION_SEPARATOR + planet;
+    }
+
+    public static String prev(Planet planet) {
+        return PREV + EXPRESSION_SEPARATOR + planet;
     }
 
     public static String swap(Planet planet) {

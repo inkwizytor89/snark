@@ -51,7 +51,7 @@ public class FleetThread extends AbstractThread {
 
                 .condition(ConditionFactory.create(RESOURCE, map.getConfigResources(CONDITION_RESOURCES, null)))
                 .condition(ConditionFactory.create(RESOURCES_COUNT, map.getConfigNumber(CONDITION_RESOURCES_COUNT, null)))
-                .condition(ConditionFactory.create(SHIPS, map.getShipsWaves(CONDITION_SHIPS_WAVE, null)))
+                .condition(ConditionFactory.create(SHIPS, map.getShips(CONDITION_SHIPS, null)))
                 .condition(ConditionFactory.create(NO_MISSIONS, Mission.convert(map.getConfigArray(CONDITION_BLOCKING_MISSIONS, null))))
 
                 .mission(Mission.convert(map.getConfig(MISSION, null)))

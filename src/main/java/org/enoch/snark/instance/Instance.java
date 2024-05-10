@@ -110,7 +110,6 @@ public class Instance {
     }
 
     public static ColonyEntity next(ColonyEntity colonyEntity) {
-        Integer galaxyCount = Instance.getMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
         List<ColonyEntity> configTrip = Instance.getMainConfigMap().getColonies(TRIP, null);
         if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
         int index = configTrip.indexOf(colonyEntity);
@@ -120,5 +119,17 @@ public class Instance {
         }
         if(index==-1) return null;
         else return configTrip.get((index + 1) %  configTrip.size());
+    }
+
+    public static ColonyEntity prev(ColonyEntity colonyEntity) {
+        List<ColonyEntity> configTrip = Instance.getMainConfigMap().getColonies(TRIP, null);
+        if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
+        int index = configTrip.indexOf(colonyEntity);
+        if(index == -1) {
+            ColonyEntity swapColony = ColonyDAO.getInstance().get(colonyEntity.toPlanet().swapType());
+            index = configTrip.indexOf(swapColony);
+        }
+        if(index==-1) return null;
+        else return configTrip.get((index + configTrip.size() -1) %  configTrip.size());
     }
 }

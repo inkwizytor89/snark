@@ -163,6 +163,7 @@ public class FleetBuilder {
         if(to == null && colony.cpm != null) expression = PlanetExpression.swap(colony.toPlanet());
         else if(to == null) return null;
         else if(to.contains(PlanetExpression.NEXT)) expression = PlanetExpression.next(colony.toPlanet());
+        else if(to.contains(PlanetExpression.PREV)) expression = PlanetExpression.prev(colony.toPlanet());
 
         return PlanetExpression.from(expression);
     }
