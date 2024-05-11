@@ -7,6 +7,7 @@ import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
@@ -27,6 +28,14 @@ public class FleetPromise {
 
     public boolean fit(ColonyEntity colony) {
         return conditions.stream().allMatch(condition -> condition.fit(colony));
+    }
+
+    public boolean fit() {
+        return fit(source);
+    }
+
+    public List<AbstractCondition> wontFit() {
+        return conditions.stream().filter(condition -> !condition.fit(source)).collect(Collectors.toList());
     }
 
     public ShipsMap calculateShipMap(ColonyEntity colony) {

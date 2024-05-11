@@ -34,7 +34,7 @@ public class ErrorDAO extends AbstractDAO<ErrorEntity> {
         errorEntity.value = error.getValue();
         Arrays.stream(error.getStackTrace())
                 .map(StackTraceElement::toString)
-                .collect( Collectors.joining("\n"));
+                .collect(Collectors.joining("\n"));
         saveOrUpdate(errorEntity);
     }
 }

@@ -14,4 +14,10 @@ public class ResourceCondition extends AbstractCondition {
     public boolean fit(ColonyEntity colony) {
         return colony.hasEnoughResources(resources);
     }
+
+    @Override
+    public String reason(ColonyEntity colony) {
+        if(!fit(colony)) return colony + " have " + colony.getResources() + " but needed " + resources;
+        else return MISSING_REASON;
+    }
 }

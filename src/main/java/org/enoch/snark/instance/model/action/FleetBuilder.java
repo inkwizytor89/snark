@@ -139,7 +139,7 @@ public class FleetBuilder {
                 command.setRunType(queue);
                 command.generateHash(hashPrefix, Integer.toString(index));
 
-                if(promise.fit(colony)) results.add(command);
+                results.add(command);
             }
         }
         return results;

@@ -7,6 +7,7 @@ import org.enoch.snark.gi.types.ShipEnum;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.types.Expression.ALL;
 import static org.enoch.snark.instance.model.types.Expression.NONE;
@@ -77,5 +78,15 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
     @Override
     public boolean equals(Object obj) {
         return (this == obj);
+    }
+
+    @Override
+    public String toString() {
+        if(ALL_SHIPS.equals(this)) return "{ALL_SHIPS}";
+        if(NO_SHIPS.equals(this)) return "{NO_SHIPS}";
+        return "{"+ this.entrySet().stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .collect(Collectors.joining(", ")) +
+                "}";
     }
 }

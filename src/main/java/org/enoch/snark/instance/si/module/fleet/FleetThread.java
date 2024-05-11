@@ -5,6 +5,7 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.ConditionFactory;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
@@ -64,12 +65,16 @@ public class FleetThread extends AbstractThread {
                 .hashPrefix(map.name())
                 .buildAll();
 
-        sendFleetCommands.stream()
-                .filter(this::skip)
-                .forEach(fleetCommand -> fleetCommand.push(dateToCheck()));
+        sendFleetCommands.forEach(command -> {
+            logFleetOverview(command);
+            boolean areShips = areShips(command);
+            boolean fit = command.promise().fit();
+            if(fit && areShips)
+                command.push(dateToCheck());
+        });
     }
 
-    private boolean skip(SendFleetCommand command) {
+    private boolean areShips(SendFleetCommand command) {
         ColonyEntity source = command.fleet.source;
         boolean noShips = command.promise().calculateShipMap(source).isEmpty();
         return !noShips;
@@ -79,5 +84,13 @@ public class FleetThread extends AbstractThread {
         LocalTime time = map.getLocalTime(EXPIRED_TIME, null);
         if(time == null) return LocalDateTime.now();
         return LocalDateTime.now().minusHours(time.getHour()).minusMinutes(time.getMinute());
+    }
+
+    private void logFleetOverview(SendFleetCommand command) {
+        List<AbstractCondition> wontFit = command.promise().wontFit();
+        StringBuilder errorMessage = new StringBuilder(command.hash());
+        errorMessage.append(" wontFit: ");
+        wontFit.forEach(condition -> errorMessage.append(condition.reason(command.promise().getSource())).append(" "));
+        log(errorMessage.toString());
     }
 }

@@ -39,6 +39,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String ARRAY_SEPARATOR = ";";
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
+    public static final String DEBUG = "debug";
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
     public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";

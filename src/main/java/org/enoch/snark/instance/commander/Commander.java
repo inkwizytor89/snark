@@ -162,9 +162,8 @@ public class Commander extends Thread {
     }
 
     private boolean noBlockingHashInDb(String hash, LocalDateTime date) {
-        Long aLong = FleetDAO.getInstance().hashCount(hash, date);
-        System.err.println(hash+" "+aLong);
-        return aLong < 1L;
+        Long count = FleetDAO.getInstance().hashCount(hash, date);
+        return count < 1L;
     }
 
     public boolean noCommands() {

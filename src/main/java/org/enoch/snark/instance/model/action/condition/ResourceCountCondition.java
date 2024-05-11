@@ -13,4 +13,10 @@ public class ResourceCountCondition extends AbstractCondition {
     public boolean fit(ColonyEntity colony) {
         return colony.getResources().isCountMoreThan(resourcesCount.toString());
     }
+
+    @Override
+    public String reason(ColonyEntity colony) {
+        if(!fit(colony)) return colony + " have " + colony.getResources() + " but count is needed " + resourcesCount;
+        else return MISSING_REASON;
+    }
 }

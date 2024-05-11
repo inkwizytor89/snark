@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module;
 
+import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
@@ -119,5 +120,9 @@ public abstract class AbstractThread extends Thread {
         else if(map.name().contains(TransportThread.threadName)) return new TransportThread(map);
         else if(map.name().contains(HuntingThread.threadName)) return new HuntingThread(map);
         else return new FleetThread(map);
+    }
+
+    protected void log(String message) {
+        Debug.log(map.getConfig(ConfigMap.NAME), message);
     }
 }

@@ -15,4 +15,10 @@ public class ShipsCondition extends AbstractCondition {
     public boolean fit(ColonyEntity colony) {
         return colony.hasEnoughShips(shipsMap);
     }
+
+    @Override
+    public String reason(ColonyEntity colony) {
+        if(!fit(colony)) return colony + " have " + colony.getShipsMap() + " but needed " + shipsMap;
+        else return MISSING_REASON;
+    }
 }
