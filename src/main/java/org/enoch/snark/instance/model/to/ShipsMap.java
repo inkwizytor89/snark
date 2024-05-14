@@ -75,6 +75,10 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
         return result;
     }
 
+    public Long count() {
+        return values().stream().mapToLong(value -> value).sum();
+    }
+
     @Override
     public boolean equals(Object obj) {
         return (this == obj);

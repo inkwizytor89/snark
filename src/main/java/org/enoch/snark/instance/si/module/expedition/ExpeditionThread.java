@@ -15,9 +15,11 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 // na start mogl by przeleceic swoje flypointy
@@ -126,7 +128,9 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private void refreshColoniesFromDb() {
-        expeditionSource.forEach(colonyEntity -> ColonyDAO.getInstance().refresh(colonyEntity));
+        expeditionSource = expeditionSource.stream()
+        .map(colonyEntity -> ColonyDAO.getInstance().fetch(colonyEntity))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     private boolean anyExpeditionStartPointHasEnoughShips(ShipsMap expeditionMap) {

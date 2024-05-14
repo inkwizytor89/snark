@@ -14,12 +14,13 @@ public class PlanetExpression {
     public static final String SWAP = "swap";
     public static final String NEXT = "next";
     public static final String PREV = "prev";
-    public static final String FLEET_DESTINATION = "fleet_destination";
-    public static final String FLEET_LOCATION = "fleet_location";
+    public static final String FLEET_TO = "fleet_to";
+    public static final String FLEET_ON = "fleet_on";
     public static final String FLEET = "fleet";
 
     public static Planet from(String input) {
         if(input == null) throw new IllegalStateException("PlanetExpression can not parse "+ input);
+        input = input.toLowerCase().trim();
         if (input.contains(EXPRESSION_SEPARATOR)) {
             String[] s = input.split(EXPRESSION_SEPARATOR);
             String action = s[ACTION_INDEX];
@@ -36,12 +37,8 @@ public class PlanetExpression {
             } else if(action.contains(SWAP)) {
                 return planet.swapType();
             } else return null;
-        } else if(input.contains(FLEET_DESTINATION)) {
-            return new Planet(CacheEntryDAO.getInstance().getValue(FLEET_DESTINATION));
-        } else if(input.contains(FLEET_LOCATION)) {
-            return new Planet(CacheEntryDAO.getInstance().getValue(FLEET_LOCATION));
-        } else if(input.contains(FLEET)) {
-            return new Planet(CacheEntryDAO.getInstance().getValue(FLEET));
+        } else if(CacheEntryDAO.getInstance().getCacheEntry(input) != null) {
+            return new Planet(CacheEntryDAO.getInstance().getValue(input));
         }
         return new Planet(input);
     }
