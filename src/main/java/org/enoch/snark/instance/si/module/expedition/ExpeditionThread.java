@@ -141,7 +141,7 @@ public class ExpeditionThread extends AbstractThread {
     private void loadExpeditionPoints() {
         refreshColoniesFromDb();
         expeditionSource.stream()
-                .filter(colonyEntity -> DateUtil.isExpired(colonyEntity.updated, 2L, ChronoUnit.HOURS))
+                .filter(colonyEntity -> DateUtil.isExpired2H(colonyEntity.updated))
                 .forEach(col -> {
                     new OpenPageCommand(FLEETDISPATCH, col).hash(threadName+"_"+col).push();
                 });

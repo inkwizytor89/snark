@@ -34,12 +34,11 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String STOP = "stop";
     public static final String NAME = "name";
     public static final String TYPE = "type";
-    public static final String PLANET = "planet";
-    public static final String MOON = "moon";
     public static final String ARRAY_SEPARATOR = ";";
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String DEBUG = "debug";
+    public static final String DRY_RUN = "dry_run";
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
     public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";
@@ -64,6 +63,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String TRIP = "trip";
     public static final String TRANSPORTER_SMALL_CAPACITY = "transporterSmall";
     public static final String LEAVE_MIN_RESOURCES = "leave_min_resources";
+    public static final String PROBE_SWAM_LIMIT = "probe_swam_limit";
 
     public ConfigMap() {
         super();
@@ -171,7 +171,7 @@ public class ConfigMap extends HashMap<String, String> {
     public Resources getConfigResources(String key, Resources defaultResources) {
         String config = getConfig(key, null);
         if (config == null) return defaultResources;
-        return Resources.create(config);
+        return Resources.parse(config);
     }
 
     public String name() {

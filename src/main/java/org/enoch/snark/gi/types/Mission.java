@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.instance.si.module.ConfigMap.ARRAY_SEPARATOR;
+
 public enum Mission {
     EXPEDITION("id=missionButton15", 15),
     COLONIZATION("id=missionButton7", 7),
@@ -68,8 +70,9 @@ public enum Mission {
         } else return UNKNOWN;
     }
 
-    public static List<Mission> convert(List<String> list) {
-        if(list == null) return null;
+    public static List<Mission> parse(String input) {
+        if(input == null) return null;
+        List<String> list = Arrays.asList(input.split(ARRAY_SEPARATOR));
         return list.stream().map(Mission::convert).collect(Collectors.toList());
     }
 

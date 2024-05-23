@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
@@ -170,6 +171,15 @@ public class SendFleetCommand extends AbstractCommand {
             if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
+
+        if(SPY.equals(fleet.mission)) {
+            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            if(targetEntity.isPresent()) {
+                targetEntity.get().lastSpiedOn = fleet.visited;
+                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+            }
+        }
+
         reloadColonyAfterFleetIsBack(durationSeconds);
         updateDelayForAction(durationSeconds);
         reloadColony();

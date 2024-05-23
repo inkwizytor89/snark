@@ -13,7 +13,7 @@ public class Resources {
     public Long crystal = 0L;
     public Long deuterium = 0L;
 
-    public static Resources create(String resourceExpression) {
+    public static Resources parse(String resourceExpression) {
         if (StringUtils.isEmpty(resourceExpression) ||
                 resourceExpression.contains("nothing") ||
                 resourceExpression.contains("none"))

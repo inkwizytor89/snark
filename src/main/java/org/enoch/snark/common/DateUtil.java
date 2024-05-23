@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.concurrent.TimeUnit;
 
@@ -75,6 +76,10 @@ public class DateUtil {
             multiply = multiply * 60;
         }
         return result;
+    }
+
+    public static boolean isExpired2H(LocalDateTime date) {
+        return isExpired(date, 2L, ChronoUnit.HOURS);
     }
 
     public static boolean isExpired(String cacheEntryKey, long amountToAdd, TemporalUnit unit) {

@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.action.condition.ConditionType.*;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
@@ -46,14 +47,16 @@ public class FleetThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<SendFleetCommand> sendFleetCommands = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
 
-                .condition(ConditionFactory.create(RESOURCE, map.getConfigResources(CONDITION_RESOURCES, null)))
-                .condition(ConditionFactory.create(RESOURCES_COUNT, map.getConfigNumber(CONDITION_RESOURCES_COUNT, null)))
-                .condition(ConditionFactory.create(SHIPS, map.getShips(CONDITION_SHIPS, null)))
-                .condition(ConditionFactory.create(NO_MISSIONS, Mission.convert(map.getConfigArray(CONDITION_BLOCKING_MISSIONS, null))))
+//                .condition(ConditionFactory.create(RESOURCE, map.getConfigResources(CONDITION_RESOURCES, null)))
+//                .condition(ConditionFactory.create(RESOURCES_COUNT, map.getConfigNumber(CONDITION_RESOURCES_COUNT, null)))
+//                .condition(ConditionFactory.create(SHIPS, map.getShips(CONDITION_SHIPS, null)))
+//                .condition(ConditionFactory.create(NO_MISSIONS, Mission.parse(map.getConfig(CONDITION_BLOCKING_MISSIONS, null))))
+                .condition(AbstractCondition.create(conditionsEntry))
 
                 .mission(Mission.convert(map.getConfig(MISSION, null)))
                 .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
@@ -64,13 +67,16 @@ public class FleetThread extends AbstractThread {
                 .queue(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())))
                 .hashPrefix(map.name())
                 .buildAll();
-
+// bardzo duzo tergetów niech wygeneruje flot i moze wrzucajmy jakimiś partiami
+        // kolejny iteracja by wrzuciła nastepna porcje ktora nie poleciala
         sendFleetCommands.forEach(command -> {
             logFleetOverview(command);
             boolean areShips = areShips(command);
             boolean fit = command.promise().fit();
-            if(fit && areShips)
-                command.push(dateToCheck());
+            if(fit && areShips) {
+                if (!map.getConfigBoolean(DRY_RUN, false))
+                    command.push(dateToCheck());
+            }
         });
     }
 

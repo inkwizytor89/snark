@@ -150,7 +150,8 @@ create table targets
   player_id bigint not null references players,
   updated    timestamp default now(),
   created       timestamp default now(),
-  last_attacked    timestamp default now(),
+  last_attacked    timestamp,
+  last_spied_on    timestamp,
   type        varchar(15) not null default 'PLANET',
   tags              text,
 

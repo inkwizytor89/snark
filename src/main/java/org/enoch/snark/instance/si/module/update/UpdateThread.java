@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.update;
 
 import org.enoch.snark.common.NumberUtil;
+import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
@@ -8,6 +9,7 @@ import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -24,6 +26,7 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.model.action.PlanetExpression.PROBE_SWAM;
 
 public class UpdateThread extends AbstractThread {
 
@@ -115,10 +118,14 @@ public class UpdateThread extends AbstractThread {
     }
 
     private void markSpecialFleets() {
-        markFleet();
+        CacheEntryDAO cacheEntryDAO = CacheEntryDAO.getInstance();
+//        markMainFleet();
+
+        ColonyEntity probeSwarmColony = ProbeSwarmFinder.find();
+        cacheEntryDAO.setValue(PROBE_SWAM, probeSwarmColony != null ? probeSwarmColony.toString() : null);
     }
 
-    private void markFleet() {
+    private void markMainFleet() {
         ShipsMap noProbe = new ShipsMap();
         noProbe.put(ShipEnum.espionageProbe, 0L);
 

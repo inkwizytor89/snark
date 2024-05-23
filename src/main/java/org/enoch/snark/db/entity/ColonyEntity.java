@@ -51,28 +51,6 @@ public class ColonyEntity extends PlanetEntity {
         return result;
     }
 
-    public boolean hasEnoughResources(Resources required) {
-        return getResources().isMoreThan(required);
-    }
-
-    public boolean hasEnoughShips(ShipsMap required) {
-        if(required == null || ALL_SHIPS.equals(required) || NO_SHIPS.equals(required)) return true;
-        ShipsMap located = this.getShipsMap();
-        for(Map.Entry<ShipEnum, Long> entry : required.entrySet()) {
-            Long requiredCont = required.get(entry.getKey());
-            if(requiredCont.equals(Long.MAX_VALUE)) continue;
-            Long locatedCount = located.get(entry.getKey());
-            if(locatedCount == null || locatedCount < requiredCont) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean hasEnoughTransporters() {
-        return calculateTransportByTransporterSmall() < transporterSmall + 5 * transporterLarge;
-    }
-
     public ColonyEntity save() {
         ColonyDAO.getInstance().saveOrUpdate(this);
         return this;

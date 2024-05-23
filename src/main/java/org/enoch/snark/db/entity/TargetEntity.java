@@ -31,6 +31,10 @@ public class TargetEntity extends PlanetEntity {
     public Integer spyLevel = 4;
 
     @Basic
+    @Column(name = "last_spied_on")
+    public LocalDateTime lastSpiedOn;
+
+    @Basic
     @Column(name = "last_attacked")
     public LocalDateTime lastAttacked;
 

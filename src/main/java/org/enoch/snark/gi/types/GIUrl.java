@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import static org.enoch.snark.gi.types.UrlBuilder.*;
 import static org.enoch.snark.gi.types.UrlComponent.*;
 import static org.enoch.snark.gi.types.UrlPage.HIGHSCORE;
-import static org.enoch.snark.gi.types.UrlPage.MESSAGES;
 import static org.enoch.snark.instance.si.module.ConfigMap.HIDING_ACTIVITY;
 
 public class GIUrl {

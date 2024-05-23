@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 import static org.enoch.snark.instance.si.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
 
 @MappedSuperclass
@@ -658,6 +660,28 @@ public abstract class PlanetEntity extends IdEntity{
 
     public Resources getResources() {
         return new Resources(metal, crystal, deuterium);
+    }
+
+    public boolean hasEnoughResources(Resources required) {
+        return getResources().isMoreThan(required);
+    }
+
+    public boolean hasEnoughShips(ShipsMap required) {
+        if(required == null || ALL_SHIPS.equals(required) || NO_SHIPS.equals(required)) return true;
+        ShipsMap located = this.getShipsMap();
+        for(Map.Entry<ShipEnum, Long> entry : required.entrySet()) {
+            Long requiredCont = required.get(entry.getKey());
+            if(requiredCont.equals(Long.MAX_VALUE)) continue;
+            Long locatedCount = located.get(entry.getKey());
+            if(locatedCount == null || locatedCount < requiredCont) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean hasEnoughTransporters() {
+        return calculateTransportByTransporterSmall() < transporterSmall + 5 * transporterLarge;
     }
 
     @Override

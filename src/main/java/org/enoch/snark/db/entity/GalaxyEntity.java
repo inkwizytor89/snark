@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.PLANET;
+import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")

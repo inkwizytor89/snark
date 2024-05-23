@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.model.action.condition;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.service.Navigator;
@@ -19,7 +20,7 @@ public class NoMissionsCondition extends AbstractCondition {
     }
 
     @Override
-    public boolean fit(ColonyEntity colony) {
+    public boolean fit(PlanetEntity colony) {
         if(blockingMissions == null) return true;
         blockedFleets = Navigator.getInstance().getEventFleetList().stream()
                 .filter(fleet -> inAny(fleet.mission))
@@ -34,7 +35,7 @@ public class NoMissionsCondition extends AbstractCondition {
     }
 
     @Override
-    public String reason(ColonyEntity colony) {
+    public String reason(PlanetEntity colony) {
         if(!fit(colony)) return colony + " is blocked by " + blockedFleets.stream().map(EventFleet::toString).collect(Collectors.joining(", "));
         else return MISSING_REASON;
     }

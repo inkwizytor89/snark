@@ -16,13 +16,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.enoch.snark.instance.model.action.PlanetExpression.asExpression;
+import static org.enoch.snark.instance.model.action.PlanetExpression.toPlanetList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 
 public class FleetBuilder {
 
     private List<ColonyEntity> from;
     private String to;
-    private final List<AbstractCondition> conditions = new ArrayList<>();
+    private List<AbstractCondition> conditions = new ArrayList<>();
     private Mission mission;
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
@@ -37,7 +39,7 @@ public class FleetBuilder {
     }
 
     public FleetBuilder from(String expression) {
-        return from(ColonyDAO.getInstance().getColonies(expression));
+        return from(PlanetExpression.toColonies(expression));
     }
 
     public FleetBuilder from(List<ColonyEntity> colonies) {
@@ -53,6 +55,13 @@ public class FleetBuilder {
     public FleetBuilder condition(AbstractCondition condition) {
         if(condition != null) {
             conditions.add(condition);
+        }
+        return this;
+    }
+
+    public FleetBuilder condition(List<AbstractCondition> conditionList) {
+        if(conditionList != null) {
+            conditions = conditionList;
         }
         return this;
     }
@@ -120,26 +129,28 @@ public class FleetBuilder {
         for(ShipsMap shipsWave : shipWaves) {
             index++;
             for (ColonyEntity colony : from) {
+                List<Planet> targets = toPlanetList(asExpression(colony, to));
+                if(targets==null) continue;
+                for(Planet target : targets) {
+                    if (target == null) continue;
+                    FleetPromise promise = new FleetPromise();
+                    promise.setSource(colony);
+                    promise.setTarget(target);
+                    promise.setMission(missionExpression(target, mission));
+                    promise.setShipsMap(shipsWave);
+                    promise.setSpeed(speed);
 
-                FleetPromise promise = new FleetPromise();
-                promise.setSource(colony);
-                Planet target = toExpression(colony, to);
-                if(target == null) continue;
-                promise.setTarget(target);
-                promise.setMission(missionExpression(target, mission));
-                promise.setShipsMap(shipsWave);
-                promise.setSpeed(speed);
+                    promise.setResources(resources);
+                    promise.setLeaveResources(leaveResources);
+                    promise.addConditions(conditions);
 
-                promise.setResources(resources);
-                promise.setLeaveResources(leaveResources);
-                promise.addConditions(conditions);
+                    SendFleetCommand command = new SendFleetCommand(promise);
+                    commandPromiseSetLeaveShipsMap(command, index);
+                    command.setRunType(queue);
+                    command.generateHash(hashPrefix, Integer.toString(index));
 
-                SendFleetCommand command = new SendFleetCommand(promise);
-                commandPromiseSetLeaveShipsMap(command, index);
-                command.setRunType(queue);
-                command.generateHash(hashPrefix, Integer.toString(index));
-
-                results.add(command);
+                    results.add(command);
+                }
             }
         }
         return results;
@@ -156,16 +167,6 @@ public class FleetBuilder {
     private void validate() {
         //main source maybe
         if(from.isEmpty()) throw new RuntimeException("Missing source for "+this);
-    }
-
-    private Planet toExpression(ColonyEntity colony, String to) {
-        String expression = to;
-        if(to == null && colony.cpm != null) expression = PlanetExpression.swap(colony.toPlanet());
-        else if(to == null) return null;
-        else if(to.contains(PlanetExpression.NEXT)) expression = PlanetExpression.next(colony.toPlanet());
-        else if(to.contains(PlanetExpression.PREV)) expression = PlanetExpression.prev(colony.toPlanet());
-
-        return PlanetExpression.from(expression);
     }
 
     private Mission missionExpression(Planet target, Mission mission) {

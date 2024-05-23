@@ -12,8 +12,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.MOON;
-import static org.enoch.snark.instance.si.module.ConfigMap.PLANET;
+import static org.enoch.snark.instance.model.action.PlanetExpression.MOON;
+import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 
 public class ColonyDAO extends AbstractDAO<ColonyEntity> {
 
@@ -39,6 +39,7 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
         return get(new Planet(code));
     }
     public ColonyEntity get(Planet planet) {
+        if(planet == null) return null;
         synchronized (JPAUtility.dbSynchro) {
             List<ColonyEntity> resultList = entityManager.createQuery("" +
                     "from ColonyEntity " +
