@@ -41,4 +41,14 @@ public class PlayerDAO extends AbstractDAO<PlayerEntity> {
             }
         }
     }
+
+    public Optional<PlayerEntity> findByName(String name) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery("" +
+                            "from PlayerEntity " +
+                            "where name = :name ", PlayerEntity.class)
+                    .setParameter("name", name)
+                    .getResultList().stream().findFirst();
+        }
+    }
 }

@@ -2,6 +2,7 @@ package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.gi.types.BuildingEnum;
+import org.enoch.snark.gi.types.DefenseEnum;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
@@ -21,9 +22,6 @@ import static org.enoch.snark.instance.si.module.ConfigMap.TRANSPORTER_SMALL_CAP
 
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{
-    public static final Integer GALAXY_INDEX = 1;
-    public static final Integer SYSTEM_INDEX = 2;
-    public static final Integer POSITION_INDEX = 3;
 
     @Basic
     @Column(name = "galaxy")
@@ -467,7 +465,11 @@ public abstract class PlanetEntity extends IdEntity{
 
     public PlanetEntity(String input) {
         super();
-        loadPlanetCoordinate(input);
+        Planet inputPlanet = new Planet(input);
+        galaxy = inputPlanet.galaxy;
+        system = inputPlanet.system;
+        position = inputPlanet.position;
+        type = inputPlanet.type;
     }
 
     public boolean is(ColonyType type) {
@@ -476,14 +478,6 @@ public abstract class PlanetEntity extends IdEntity{
 
     private int roundDistance(Integer x1, Integer x2, Integer max) {
         return Math.abs(x1 - x2) < max - Math.abs(x1 - x2) ?  Math.abs(x1 - x2) : max - Math.abs(x1 - x2);
-    }
-
-    @Deprecated
-    protected void loadPlanetCoordinate(String coordinateString) {
-        String[] numbersTable = coordinateString.split("\\D+");
-        galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
-        system = Integer.parseInt(numbersTable[SYSTEM_INDEX]);
-        position = Integer.parseInt(numbersTable[POSITION_INDEX]);
     }
 
     public static Long parseResource(String input) {
@@ -527,6 +521,69 @@ public abstract class PlanetEntity extends IdEntity{
         if(espionageProbe > 0) shipsMap.put(ShipEnum.espionageProbe, espionageProbe);
 
         return shipsMap;
+    }
+
+    public void put(ShipEnum ship, Long value) {
+        switch (ship) {
+            case fighterLight -> fighterLight = value;
+            case fighterHeavy -> fighterHeavy = value;
+            case cruiser -> cruiser = value;
+            case battleship -> battleship = value;
+            case interceptor -> interceptor = value;
+            case bomber -> bomber = value;
+            case destroyer -> destroyer = value;
+            case deathstar -> deathstar = value;
+            case reaper -> reaper = value;
+            case explorer -> explorer = value;
+            case transporterSmall -> transporterSmall = value;
+            case transporterLarge -> transporterLarge = value;
+            case colonyShip -> colonyShip = value;
+            case recycler -> recycler = value;
+            case espionageProbe -> espionageProbe = value;
+            case solarSatellite -> solarSatellite = value;
+            default -> System.err.println("Unknown "+ShipEnum.class.getName()+" "+ship.name()+" with value "+value);
+        }
+    }
+
+    public void put(DefenseEnum defense, Long value) {
+        switch (defense) {
+            case rocketLauncher -> rocketLauncher = value;
+            case laserCannonLight -> laserCannonLight = value;
+            case laserCannonHeavy -> laserCannonHeavy = value;
+            case gaussCannon -> gaussCannon = value;
+            case ionCannon -> ionCannon = value;
+            case plasmaCannon -> plasmaCannon = value;
+            case shieldDomeSmall -> shieldDomeSmall = value;
+            case shieldDomeLarge -> shieldDomeLarge = value;
+            case missileInterceptor -> missileInterceptor = value;
+            case missileInterplanetary -> missileInterplanetary = value;
+            default -> System.err.println("Unknown "+DefenseEnum.class.getName()+" "+defense.name()+" with value "+value);
+        }
+    }
+
+    public void put(BuildingEnum building, Long value) {
+        switch (building) {
+            case metalMine -> metalMine = value;
+            case crystalMine -> crystalMine = value;
+            case deuteriumSynthesizer -> deuteriumSynthesizer = value;
+            case solarPlant -> solarPlant = value;
+            case fusionPlant -> fusionPlant = value;
+            case solarSatellite -> solarSatellite = value;
+            case metalStorage -> metalStorage = value;
+            case crystalStorage -> crystalStorage = value;
+            case deuteriumStorage -> deuteriumStorage = value;
+
+            case roboticsFactory -> roboticsFactory = value;
+            case shipyard -> shipyard = value;
+            case researchLaboratory -> researchLaboratory = value;
+            case allianceDepot -> allianceDepot = value;
+            case missileSilo -> missileSilo = value;
+            case naniteFactory -> naniteFactory = value;
+            case terraformer -> terraformer = value;
+            case repairDock -> repairDock = value;
+
+            default -> System.err.println("Unknown "+BuildingEnum.class.getName()+" "+building.name()+" with value "+value);
+        }
     }
 
     public Long getBuildingLevel(BuildingEnum building) {

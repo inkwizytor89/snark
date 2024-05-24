@@ -6,6 +6,7 @@ import org.enoch.snark.db.entity.JPAUtility;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public abstract class AbstractDAO<T extends IdEntity> {
@@ -28,6 +29,7 @@ public abstract class AbstractDAO<T extends IdEntity> {
 
             final EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
+            entity.updated = LocalDateTime.now();
             if(entity.id == null) {
                 entityManager.persist(savedEntity);
             } else {

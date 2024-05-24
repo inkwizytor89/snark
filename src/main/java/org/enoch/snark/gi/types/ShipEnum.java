@@ -23,7 +23,8 @@ public enum ShipEnum {
     transporterLarge("transporterLarge"),
     colonyShip("colonyShip"),
     recycler("recycler"),
-    espionageProbe("espionageProbe");
+    espionageProbe("espionageProbe"),
+    solarSatellite("solarSatellite");
 
     private String id;
 

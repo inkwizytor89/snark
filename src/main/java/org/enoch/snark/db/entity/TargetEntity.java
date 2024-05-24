@@ -27,10 +27,6 @@ public class TargetEntity extends PlanetEntity {
     public Long defenseSum;
 
     @Basic
-    @Column(name = "spy_level")
-    public Integer spyLevel = 4;
-
-    @Basic
     @Column(name = "last_spied_on")
     public LocalDateTime lastSpiedOn;
 
@@ -101,8 +97,6 @@ public class TargetEntity extends PlanetEntity {
         this.shieldDomeLarge = targetEntity.shieldDomeLarge;
         this.missileInterceptor = targetEntity.missileInterceptor;
         this.missileInterplanetary = targetEntity.missileInterplanetary;
-
-        this.spyLevel = targetEntity.spyLevel;
 
         this.updated = LocalDateTime.now();
     }

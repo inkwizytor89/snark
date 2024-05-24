@@ -5,10 +5,7 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
-import org.enoch.snark.gi.command.impl.UpdateResearchCommand;
+import org.enoch.snark.gi.command.impl.*;
 import org.enoch.snark.instance.service.Cleaner;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.config.ConfigReader;
@@ -74,6 +71,7 @@ public class Instance {
 
     public void initialActionOnStart() {
         commander = Commander.getInstance();
+//        new ReadMessageCommand().hash(MessageService.class.getName()).push();
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();
@@ -81,7 +79,7 @@ public class Instance {
     }
 
     public void removePlanet(Planet target) {
-        Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(target.galaxy, target.system, target.position);
+        Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(target);
         if(targetEntity.isPresent()) {
 //            FleetDAO.getInstance().fetchAll().stream()
 //                    .filter(fleetEntity -> fleetEntity.id.equals(targetEntity.get().id))

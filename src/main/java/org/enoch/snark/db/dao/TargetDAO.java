@@ -2,6 +2,7 @@ package org.enoch.snark.db.dao;
 
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.instance.model.to.Planet;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,16 +28,18 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
         return TargetEntity.class;
     }
 
-    public Optional<TargetEntity> find(Integer galaxy, Integer system, Integer position) {
+    public Optional<TargetEntity> find(Planet planet) {
         synchronized (JPAUtility.dbSynchro) {
             final List<TargetEntity> result = entityManager.createQuery("" +
-                    "from TargetEntity " +
-                    "where galaxy = :galaxy and " +
-                    "       system = :system and " +
-                    "       position = :position ", TargetEntity.class)
-                    .setParameter("galaxy", galaxy)
-                    .setParameter("system", system)
-                    .setParameter("position", position)
+                            "from TargetEntity " +
+                            "where galaxy = :galaxy and " +
+                            "       system = :system and " +
+                            "       position = :position and " +
+                            "       type = :type", TargetEntity.class)
+                    .setParameter("galaxy", planet.galaxy)
+                    .setParameter("system", planet.system)
+                    .setParameter("position", planet.position)
+                    .setParameter("type", planet.type)
                     .getResultList();
             if (result.isEmpty()) {
                 return Optional.empty();

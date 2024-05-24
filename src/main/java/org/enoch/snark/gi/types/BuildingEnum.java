@@ -1,5 +1,9 @@
 package org.enoch.snark.gi.types;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.enoch.snark.gi.types.UrlComponent.*;
 
 public enum BuildingEnum {
@@ -81,6 +85,12 @@ public enum BuildingEnum {
     lifeformTech14110,
     lifeformTech14111,
     lifeformTech14112;
+
+    public static List<BuildingEnum> baseBuildings() {
+        return Arrays.stream(BuildingEnum.values())
+                .filter(buildingEnum -> !buildingEnum.name().contains("lifeform"))
+                .toList();
+    }
 
     public UrlComponent getPage() {
         switch (this) {

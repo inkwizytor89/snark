@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.types.Mission.ATTACK;
 import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
@@ -142,7 +143,7 @@ public class SendFleetCommand extends AbstractCommand {
         fleet.back = gir.parseFleetBack();
 
         if(webDriver.findElements(By.className("status_abbr_noob")).size() != 0) {//player is green - too weak
-            Optional<TargetEntity> target = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            Optional<TargetEntity> target = TargetDAO.getInstance().find(fleet.getTarget());
             if (target.isPresent()) {
                 PlayerEntity player = target.get().player;
                 player.type = TargetEntity.WEAK;
@@ -173,9 +174,17 @@ public class SendFleetCommand extends AbstractCommand {
         FleetDAO.getInstance().saveOrUpdate(fleet);
 
         if(SPY.equals(fleet.mission)) {
-            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(fleet.getTarget());
             if(targetEntity.isPresent()) {
                 targetEntity.get().lastSpiedOn = fleet.visited;
+                TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
+            }
+        }
+
+        if(ATTACK.equals(fleet.mission)) {
+            Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(fleet.getTarget());
+            if(targetEntity.isPresent()) {
+                targetEntity.get().lastAttacked = fleet.visited;
                 TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
             }
         }
