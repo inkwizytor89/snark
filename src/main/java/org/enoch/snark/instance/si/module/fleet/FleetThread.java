@@ -6,7 +6,6 @@ import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.ConditionFactory;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
@@ -16,7 +15,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
-import static org.enoch.snark.instance.model.action.condition.ConditionType.*;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
@@ -51,13 +49,7 @@ public class FleetThread extends AbstractThread {
         List<SendFleetCommand> sendFleetCommands = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
-
-//                .condition(ConditionFactory.create(RESOURCE, map.getConfigResources(CONDITION_RESOURCES, null)))
-//                .condition(ConditionFactory.create(RESOURCES_COUNT, map.getConfigNumber(CONDITION_RESOURCES_COUNT, null)))
-//                .condition(ConditionFactory.create(SHIPS, map.getShips(CONDITION_SHIPS, null)))
-//                .condition(ConditionFactory.create(NO_MISSIONS, Mission.parse(map.getConfig(CONDITION_BLOCKING_MISSIONS, null))))
-                .condition(AbstractCondition.create(conditionsEntry))
-
+                .conditions(AbstractCondition.create(conditionsEntry))
                 .mission(Mission.convert(map.getConfig(MISSION, null)))
                 .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
                 .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))
@@ -96,7 +88,7 @@ public class FleetThread extends AbstractThread {
         List<AbstractCondition> wontFit = command.promise().wontFit();
         StringBuilder errorMessage = new StringBuilder(command.hash());
         errorMessage.append(" wontFit: ");
-        wontFit.forEach(condition -> errorMessage.append(condition.reason(command.promise().getSource())).append(" "));
+        wontFit.forEach(condition -> errorMessage.append(condition.reason(command.promise())).append(" "));
         log(errorMessage.toString());
     }
 }

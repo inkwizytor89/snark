@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.ShipsMap;
 
 public class ShipsCondition extends AbstractCondition {
@@ -11,13 +11,13 @@ public class ShipsCondition extends AbstractCondition {
     }
 
     @Override
-    public boolean fit(PlanetEntity colony) {
-        return colony.hasEnoughShips(shipsMap);
+    public boolean fit(FleetPromise promise) {
+        return promise.getSource().hasEnoughShips(shipsMap);
     }
 
     @Override
-    public String reason(PlanetEntity colony) {
-        if(!fit(colony)) return colony + " have " + colony.getShipsMap() + " but needed " + shipsMap;
+    public String reason(FleetPromise promise) {
+        if(!fit(promise)) return promise.getSource() + " have " + promise.getSource().getShipsMap() + " but needed " + shipsMap;
         else return MISSING_REASON;
     }
 }

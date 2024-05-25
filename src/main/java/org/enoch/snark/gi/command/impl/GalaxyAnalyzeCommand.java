@@ -13,7 +13,6 @@ public class GalaxyAnalyzeCommand extends AbstractCommand {
 
     private GalaxyEntity galaxyEntity;
     private LocalDateTime lastUpdated;
-    private GalaxyDAO galaxyDAO;
     private GIUrl giUrl;
 
     public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
@@ -31,13 +30,13 @@ public class GalaxyAnalyzeCommand extends AbstractCommand {
     private void init(GalaxyEntity galaxyEntity) {
         this.galaxyEntity = galaxyEntity;
         lastUpdated = galaxyEntity.updated;
-        galaxyDAO = GalaxyDAO.getInstance();
         giUrl = new GIUrl();
 
     }
 
     @Override
     public boolean execute() {
+        System.err.println("Run command "+GalaxyAnalyzeCommand.class.getName()+" for "+galaxyEntity);
         giUrl.openGalaxy(galaxyEntity.toSystemView(), null);
         SleepUtil.sleep();
         return true;

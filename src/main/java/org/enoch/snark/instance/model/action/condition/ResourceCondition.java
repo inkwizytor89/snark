@@ -1,7 +1,6 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 
 import static org.enoch.snark.instance.model.action.condition.ConditionType.RESOURCE_IN_SOURCE;
@@ -15,13 +14,13 @@ public class ResourceCondition extends AbstractCondition {
     }
 
     @Override
-    public boolean fit(PlanetEntity colony) {
-        return colony.hasEnoughResources(resources);
+    public boolean fit(FleetPromise promise) {
+        return promise.getSource().hasEnoughResources(resources);
     }
 
     @Override
-    public String reason(PlanetEntity colony) {
-        if(!fit(colony)) return colony + " have " + colony.getResources() + " but needed " + resources;
+    public String reason(FleetPromise promise) {
+        if(!fit(promise)) return promise.getSource() + " have " + promise.getSource().getResources() + " but needed " + resources;
         else return MISSING_REASON;
     }
 }

@@ -52,14 +52,7 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder condition(AbstractCondition condition) {
-        if(condition != null) {
-            conditions.add(condition);
-        }
-        return this;
-    }
-
-    public FleetBuilder condition(List<AbstractCondition> conditionList) {
+    public FleetBuilder conditions(List<AbstractCondition> conditionList) {
         if(conditionList != null) {
             conditions = conditionList;
         }

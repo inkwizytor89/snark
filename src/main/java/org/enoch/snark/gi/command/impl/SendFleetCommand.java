@@ -13,6 +13,7 @@ import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
@@ -81,7 +82,7 @@ public class SendFleetCommand extends AbstractCommand {
         if(!prepere()) {
             return true;
         }
-        if(!promise().fit(fleet.source)) return true;
+        if(!promise().fit()) return true;
         Long durationSeconds;
         fleet.hash = this.hash();
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
@@ -161,7 +162,8 @@ public class SendFleetCommand extends AbstractCommand {
             e.printStackTrace();
             Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
             System.err.println("Can not send fleet to target " + target);
-            new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem)).push();
+            new GalaxyAnalyzeCommand(new SystemView(fleet.targetGalaxy, fleet.targetSystem))
+            .setRunType(QueueRunType.NORMAL).push();
 //            instance.removePlanet(new Planet(fleet.getCoordinate()));
             if(fleet.code != null) fleet.code = - fleet.code;
             clearNext();

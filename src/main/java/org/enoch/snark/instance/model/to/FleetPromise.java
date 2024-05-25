@@ -26,16 +26,12 @@ public class FleetPromise {
     public FleetPromise() {
     }
 
-    public boolean fit(ColonyEntity colony) {
-        return conditions.stream().allMatch(condition -> condition.fit(colony));
-    }
-
     public boolean fit() {
-        return fit(source);
+        return conditions.stream().allMatch(condition -> condition.fit(this));
     }
 
     public List<AbstractCondition> wontFit() {
-        return conditions.stream().filter(condition -> !condition.fit(source)).collect(Collectors.toList());
+        return conditions.stream().filter(condition -> !condition.fit(this)).collect(Collectors.toList());
     }
 
     public ShipsMap calculateShipMap(ColonyEntity colony) {

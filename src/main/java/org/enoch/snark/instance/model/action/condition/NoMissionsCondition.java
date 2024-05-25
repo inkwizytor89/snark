@@ -1,9 +1,8 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.service.Navigator;
 
 import java.util.ArrayList;
@@ -20,11 +19,11 @@ public class NoMissionsCondition extends AbstractCondition {
     }
 
     @Override
-    public boolean fit(PlanetEntity colony) {
+    public boolean fit(FleetPromise promise) {
         if(blockingMissions == null) return true;
         blockedFleets = Navigator.getInstance().getEventFleetList().stream()
                 .filter(fleet -> inAny(fleet.mission))
-                .filter(fleet -> colony.toPlanet().equals(fleet.getEndingPlanet()))
+                .filter(fleet -> promise.getSource().toPlanet().equals(fleet.getEndingPlanet()))
                 .toList();
         return blockedFleets.isEmpty();
     }
@@ -35,8 +34,9 @@ public class NoMissionsCondition extends AbstractCondition {
     }
 
     @Override
-    public String reason(PlanetEntity colony) {
-        if(!fit(colony)) return colony + " is blocked by " + blockedFleets.stream().map(EventFleet::toString).collect(Collectors.joining(", "));
+    public String reason(FleetPromise promise) {
+
+        if(!fit(promise)) return promise.getSource() + " is blocked by " + blockedFleets.stream().map(EventFleet::toString).collect(Collectors.joining(", "));
         else return MISSING_REASON;
     }
 }

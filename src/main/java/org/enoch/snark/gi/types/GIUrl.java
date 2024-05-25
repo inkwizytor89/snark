@@ -77,10 +77,15 @@ public class GIUrl {
     }
 
     public static void openComponent(UrlComponent component, ColonyEntity colony) {
+        openComponent(component, colony, false);
+    }
+
+    public static void openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
         if(colony == null) {
             colony = selectColony();
         }
-        new UrlBuilder(component).param(CP_PARAM, colony.cp).get();
+        String url = new UrlBuilder(component).param(CP_PARAM, colony.cp).get();
+        if(debug) System.err.println("GET URL: "+url);
         Instance.getInstance().lastVisited = colony;
 
         updateColony(colony);

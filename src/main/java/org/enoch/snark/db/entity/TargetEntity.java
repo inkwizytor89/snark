@@ -98,6 +98,8 @@ public class TargetEntity extends PlanetEntity {
         this.missileInterceptor = targetEntity.missileInterceptor;
         this.missileInterplanetary = targetEntity.missileInterplanetary;
 
+        // buildings are not set because there is no reason, maybe in future it should change
+
         this.updated = LocalDateTime.now();
     }
 

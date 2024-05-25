@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
@@ -45,6 +46,11 @@ public class Planet {
         this.system = system;
         this.position = position;
         this.type = type;
+    }
+
+    public static Planet parse(String input) {
+        if(StringUtils.isBlank(input)) return null;
+        return new Planet(input);
     }
 
     public static List<Planet> fromString(String code) {

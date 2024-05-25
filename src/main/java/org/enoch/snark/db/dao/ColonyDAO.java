@@ -53,7 +53,7 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
                     .setParameter("type", planet.type)
                     .getResultList();
             if(resultList.isEmpty()) {
-                System.err.println("Error: ColonyDAO.get missing colony "+planet);
+//                System.err.println("Error: ColonyDAO.get missing colony "+planet);
                 return null;
             }
             return resultList.get(0);

@@ -18,7 +18,7 @@ abstract class GraphicalInterfaceReader {
     public static final String SPAN_TAG = "span";
 
     public static final String HREF_ATTRIBUTE = "href";
-    public static final String TITLE_ATTRIBUTE = "title";
+    public static final String TITLE_ATTRIBUTE = "data-tooltip-title";
     public static final String ID_ATTRIBUTE = "id";
     public static final String CLASS_ATTRIBUTE = "class";
 

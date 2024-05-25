@@ -38,7 +38,7 @@ public class UrlBuilder {
         return this;
     }
 
-    void get() {
+    String get() {
         StringBuilder builder = new StringBuilder(Instance.getMainConfigMap().getConfig(URL) + "?");
 
         if (page == null) throw new RuntimeException("Missing term to build url");
@@ -51,5 +51,6 @@ public class UrlBuilder {
         });
 
         GI.getInstance().getWebDriver().get(builder.toString());
+        return builder.toString();
     }
 }

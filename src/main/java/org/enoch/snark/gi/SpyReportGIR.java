@@ -73,7 +73,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
     }
 
     private String extractCoordinateFromTitle(String input) {
-        String type = input.contains("plan") ? "p" : "m";
+        String type = input.contains("lanet") ? "p" : "m";
         final String[] inputParts = input.split("\\s+");
         return type+inputParts[inputParts.length-1];
     }

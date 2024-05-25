@@ -101,7 +101,9 @@ public class UpdateThread extends AbstractThread {
                     .filter(col -> col.getCordinate().equals(Planet.getCordinate(planet)))
                     .findAny();
             if(optionalColony.isPresent()) {
-                new OpenPageCommand(FLEETDISPATCH, optionalColony.get()).push();
+                OpenPageCommand openPageCommand = new OpenPageCommand(FLEETDISPATCH, optionalColony.get());
+                System.err.println("Update: "+openPageCommand);
+                openPageCommand.push();
             } else System.err.println("\nShould find colony "+planet.toString()+"\n");
         });
     }

@@ -79,10 +79,10 @@ public class PlanetExpression {
             } else if(action.contains(SWAP)) {
                 return singletonList(planet.swapType());
             } else if(action.contains(FARM)) {
-                return singletonList(FarmFinder.find(colony));
+                return FarmFinder.find(colony);
             } else return null;
         } else if(CacheEntryDAO.getInstance().getCacheEntry(input) != null) {
-            return singletonList(new Planet(CacheEntryDAO.getInstance().getValue(input)));
+            return singletonList(Planet.parse(CacheEntryDAO.getInstance().getValue(input)));
         }
         return singletonList(new Planet(input));
     }

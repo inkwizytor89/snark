@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FarmFinder {
-    public static Planet find(ColonyEntity colonyEntity) {
+    public static List<Planet> find(ColonyEntity colonyEntity) {
         List<TargetEntity> farms = TargetDAO.getInstance().findFarms(colonyEntity.galaxy, colonyEntity.system, 100);
         System.err.println(farms.size()+" farms: "+farms.stream().map(PlanetEntity::toPlanet).map(Planet::toString).collect(Collectors.joining(", ")));
-        return farms.isEmpty() ? null : farms.get(0).toPlanet();
+        return farms.stream().map(PlanetEntity::toPlanet).toList();
     }
 }
