@@ -3,6 +3,7 @@ package org.enoch.snark.instance.model.action;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
@@ -113,11 +114,11 @@ public class FleetBuilder {
         return this;
     }
 
-    public List<SendFleetCommand> buildAll() {
+    public List<SendFleetPromiseCommand> buildAll() {
         defaultValues();
         validate();
 
-        List<SendFleetCommand> results = new ArrayList<>();
+        List<SendFleetPromiseCommand> results = new ArrayList<>();
         int index = 0;
         for(ShipsMap shipsWave : shipWaves) {
             index++;
@@ -137,7 +138,7 @@ public class FleetBuilder {
                     promise.setLeaveResources(leaveResources);
                     promise.addConditions(conditions);
 
-                    SendFleetCommand command = new SendFleetCommand(promise);
+                    SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
                     commandPromiseSetLeaveShipsMap(command, index);
                     command.setRunType(queue);
                     command.generateHash(hashPrefix, Integer.toString(index));
@@ -149,7 +150,7 @@ public class FleetBuilder {
         return results;
     }
 
-    public SendFleetCommand buildOne() {
+    public SendFleetPromiseCommand buildOne() {
         return buildAll().get(0);
     }
 
@@ -164,12 +165,12 @@ public class FleetBuilder {
 
     private Mission missionExpression(Planet target, Mission mission) {
         if(mission != null) return mission;
-        ColonyEntity colony = ColonyDAO.getInstance().get(target);
+        ColonyEntity colony = ColonyDAO.getInstance().find(target);
         if(colony != null) return Mission.STATIONED;
         return Mission.ATTACK;
     }
 
-    public void commandPromiseSetLeaveShipsMap(SendFleetCommand command, int index) {
+    public void commandPromiseSetLeaveShipsMap(SendFleetPromiseCommand command, int index) {
         if(leaveShipWaves != null && !leaveShipWaves.isEmpty()) {
             command.promise().setLeaveShipsMap(leaveShipWaves.get(Math.min(index, leaveShipWaves.size()-1)));
         }

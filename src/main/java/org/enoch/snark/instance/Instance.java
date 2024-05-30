@@ -1,6 +1,5 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -21,8 +20,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
-import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
-import static org.enoch.snark.instance.si.module.ConfigMap.TRIP;
 
 public class Instance {
 

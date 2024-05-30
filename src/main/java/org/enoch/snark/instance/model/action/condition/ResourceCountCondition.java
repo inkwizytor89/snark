@@ -39,6 +39,6 @@ public class ResourceCountCondition extends AbstractCondition {
             if(targetEntityOptional.isPresent()) return targetEntityOptional.get();
             else throw new IllegalStateException(promise.getTarget() + " can not find in database");
         }
-        return ColonyDAO.getInstance().get(promise.getSource().toPlanet());
+        return ColonyDAO.getInstance().find(promise.getSource().toPlanet());
     }
 }

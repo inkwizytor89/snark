@@ -112,7 +112,7 @@ public class Planet {
 
 
     public ColonyEntity toColonyEntity() {
-        return ColonyDAO.getInstance().get(this);
+        return ColonyDAO.getInstance().find(this);
     }
 
     @Override

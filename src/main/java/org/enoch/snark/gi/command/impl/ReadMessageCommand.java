@@ -30,7 +30,7 @@ public class ReadMessageCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         new GIUrl().openMessages();
-        SleepUtil.secondsToSleep(5L);
+        SleepUtil.secondsToSleep(8L);
 
         List<String> spyReports = loadMessagesLinks();
         storeSpyMessage(spyReports);

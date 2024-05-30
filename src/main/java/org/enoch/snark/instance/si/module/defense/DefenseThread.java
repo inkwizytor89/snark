@@ -6,7 +6,6 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
@@ -86,7 +85,7 @@ public class DefenseThread extends AbstractThread {
 
     private void sendFleetEscape(Planet sourcePlanet) {
         System.err.println("Escape from planet "+sourcePlanet);
-        ColonyEntity sourceEntity = ColonyDAO.getInstance().get(sourcePlanet);
+        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
         System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
         ShipsMap shipsMap = sourceEntity.getShipsMap();
         if(shipsMap.isEmpty())  return;

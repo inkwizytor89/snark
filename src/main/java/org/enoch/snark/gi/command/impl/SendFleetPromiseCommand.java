@@ -2,7 +2,6 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.common.WaitingThread;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -14,10 +13,10 @@ import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.commander.QueueRunType;
-import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
+import org.enoch.snark.instance.model.to.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -26,7 +25,6 @@ import org.openqa.selenium.interactions.Actions;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.types.Mission.ATTACK;
@@ -34,104 +32,53 @@ import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 
-public class SendFleetCommand extends AbstractCommand {
+public class SendFleetPromiseCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFER = 3L;
-    protected boolean autoComplete;
-    protected FleetPromise fleetPromise = new FleetPromise();
-    protected Resources resources;
+    protected FleetPromise promise;
 
-    public FleetEntity fleet;
+//    public FleetEntity fleet;
     private final SendFleetGIR gir = new SendFleetGIR();
 
-    public SendFleetCommand(FleetEntity fleet) {
+    public SendFleetPromiseCommand(FleetPromise promise) {
         super();
-        this.fleet = fleet;
-    }
-
-    public boolean prepere() {
-        GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), fleet.mission);
-        fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
-        if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
-            if(fleet.code == null) {
-                fleet.code = 0L;
-            } else {
-                fleet.code = - fleet.code;
-            }
-            fleet.start = fleet.back = LocalDateTime.now();
-            FleetDAO.getInstance().saveOrUpdate(fleet);
-            return false;
-        }
-        autoComplete = true;
-        return true;
+        this.promise = promise;
     }
 
     @Override
     public boolean execute() {
-        if(fleet.visited != null || fleet.back != null) {
-            System.err.println("Fleet already send "+fleet);
-            return true;
-        }
+        GIUrl.openSendFleetView(promise.getSource(), promise.getTarget(), promise.getMission());
 
-        if(!prepere()) {
-            return true;
-        }
         if(!promise().fit()) return true;
         Long durationSeconds;
-        fleet.hash = this.hash();
-        fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
 
-        Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
         if(isAllShips() && (promise().getLeaveShipsMap() == null || promise().getLeaveShipsMap().isEmpty())) {
             gir.selectAllShips();
         } else if (promise().getShipsMap() != null) {
-            promise().setSource(fleet.source);
+            promise().setSource(promise.getSource());
             ShipsMap realCanToSend = promise().normalizeShipMap();
             for (Map.Entry<ShipEnum, Long> entry : realCanToSend.entrySet()) {
                 Long value = typeShip(entry.getKey(), entry.getValue());
-                fleet.setShips(ShipsMap.createSingle(entry.getKey(), value));
+                promise.setShipsMap(ShipsMap.createSingle(entry.getKey(), value));
 
-            }
-        } else { //todo: nie powinno byc wyciagania z fleetEntity statkow i wybieranie ich
-            // tylko z shipMap powinno byc wybierane. Do Fleet entity powinno byc zapisywane to co zostalo ostatecznie typowane
-            for (Map.Entry<ShipEnum, Long> entry : entries) {
-                typeShip(entry.getKey(), entry.getValue());
             }
         }
         try {
             next();
             SleepUtil.sleep();
         } catch (ShipDoNotExists e) {
-            System.err.println("fleet.id "+fleet.id+" required on planet "+fleet.source);
-            if(isAllShips()) {
-                System.err.println("allShips selected");
-            } else {
-                for (Map.Entry<ShipEnum, Long> entry : entries) {
-                    System.err.print(entry.getKey().getId() + " " + entry.getValue() + "/");
-                    System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
-                }
-            }
-            fleet.start = LocalDateTime.now();
-            fleet.code = 0L;
-            FleetDAO.getInstance().saveOrUpdate(fleet);
+            System.err.println("promise required on planet "+promise.getSource());
             throw e;
         }
 
+        gir.setSpeed(promise.getSpeed());
+        gir.setResources(promise.getResources(), promise.getSource());
 
-        if(!autoComplete) {
-            WebElement coordsElement = webDriver.findElement(By.id("target")).findElement(By.className("coords"));
-            coordsElement.findElement(By.id("galaxy")).sendKeys(fleet.targetGalaxy.toString());
-            coordsElement.findElement(By.id("system")).sendKeys(fleet.targetSystem.toString());
-            coordsElement.findElement(By.id("position")).sendKeys(fleet.targetPosition.toString());
-            SleepUtil.pause();
-            SleepUtil.sleep();
-        }
-
-        gir.setSpeed(fleet.speed);
-        gir.setResources(promise().getResources(), fleet.source);
+        FleetEntity fleet = new FleetEntity(promise);
+        fleet.hash = this.hash();
 
         durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFER;
         fleet.start = LocalDateTime.now();
@@ -146,7 +93,7 @@ public class SendFleetCommand extends AbstractCommand {
                 PlayerDAO.getInstance().saveOrUpdate(player);
             } else {
                 // look at galaxy to reload player
-                GIUrl.openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+                GIUrl.openGalaxy(new SystemView(promise.getTarget().galaxy, promise.getTarget().system), null);
             }
             return true;
         }
@@ -193,13 +140,12 @@ public class SendFleetCommand extends AbstractCommand {
     }
 
     private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
-        if(fleet.mission.isComingBack()) {
-            OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, fleet.source);
+        if(promise.getMission().isComingBack()) {
+            OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, promise.getSource());
             long secondsToBack = durationSeconds * 2;
-            if(Mission.EXPEDITION.equals(fleet.mission)) {
+            if(Mission.EXPEDITION.equals(promise.getMission())) {
                 secondsToBack+=3600;
-                System.out.println("Expedition is probably back "+LocalDateTime.now().plusSeconds(secondsToBack)+
-                        " back is "+fleet.back);
+                System.out.println("Expedition is probably back "+LocalDateTime.now().plusSeconds(secondsToBack));
             }
             new WaitingThread(new FollowingAction(command, secondsToBack)).start();
         }
@@ -207,7 +153,7 @@ public class SendFleetCommand extends AbstractCommand {
 
     private void reloadColony() {
         SleepUtil.sleep();
-        GIUrl.openComponent(FLEETDISPATCH, fleet.source);
+        GIUrl.openComponent(FLEETDISPATCH, promise().getSource());
     }
 
     private void updateDelayForAction(Long durationSeconds) {
@@ -242,28 +188,21 @@ public class SendFleetCommand extends AbstractCommand {
         actions.moveToElement(continueButton).click().perform();
     }
 
-    public Map<ShipEnum, Long> buildShipsMap() {
-        return ShipEnum.createShipsMap(fleet);
-    }
-
-    @Override
-    public void onInterrupt() {
-        super.onInterrupt();
-        fleet.code = -1L;
-        FleetDAO.getInstance().saveOrUpdate(fleet);
-    }
-
     public boolean isAllShips() {
         return ALL_SHIPS.equals(promise().getShipsMap());
     }
 
     public FleetPromise promise() {
-        return fleetPromise;
+        return promise;
     }
 
     @Override
     public String toString() {
-        return fleet.mission.name()+" "+fleet.getDestination()+" form "+fleet.source;
+        return promise.getMission().name()+" "+promise.getTarget()+" form "+promise.getSource();
     }
 
+    public void generateHash(String hashPrefix, String code) {
+        String prefix = hashPrefix != null ? hashPrefix+"_" : "";
+        hash(prefix+promise.getSource()+"_"+promise.getMission()+"_"+promise.getTarget()+"_"+code);
+    }
 }

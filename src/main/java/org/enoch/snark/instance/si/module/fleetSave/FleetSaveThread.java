@@ -112,7 +112,7 @@ public class FleetSaveThread extends AbstractThread {
         List<FleetEntity> fleetToSave = new ArrayList<>();
         for(String fleetToSaveConfig : allFleetToSaveConfig){
             String[] configValues = fleetToSaveConfig.split("-");
-            ColonyEntity source = colonyDAO.get(configValues[SOURCE_INDEX]);
+            ColonyEntity source = colonyDAO.find(configValues[SOURCE_INDEX]);
             Planet target = new Planet(configValues[DESTINATION_INDEX]);
 
             FleetEntity fleetEntity = FleetEntity.createQuickFleetSave(source, target);

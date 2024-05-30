@@ -16,6 +16,7 @@ public class ShipsMap extends HashMap<ShipEnum, Long> {
 
     public static final ShipsMap NO_SHIPS = new ShipsMap();
     public static final ShipsMap ALL_SHIPS = new ShipsMap();
+    public static final Long TRANSPORT_COUNT = -1L;
     public static final List<ShipsMap> EMPTY_SHIP_WAVE = new ArrayList<>();
 
     public static ShipsMap parse(String expression) {

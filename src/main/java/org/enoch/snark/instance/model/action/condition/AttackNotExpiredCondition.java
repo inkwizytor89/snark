@@ -4,19 +4,19 @@ import org.enoch.snark.db.entity.TargetEntity;
 
 import java.time.LocalDateTime;
 
-public class SpyNotExpiredCondition extends ExpiredCondition {
+public class AttackNotExpiredCondition extends ExpiredCondition {
 
-    protected SpyNotExpiredCondition(Long seconds, Boolean is) {
+    protected AttackNotExpiredCondition(Long seconds, Boolean is) {
         super(seconds, is);
     }
 
     @Override
     protected LocalDateTime getDate(TargetEntity targetEntity) {
-        return targetEntity.lastSpiedOn;
+        return targetEntity.lastAttacked;
     }
 
     @Override
     protected String getType() {
-        return SpyNotExpiredCondition.class.getSimpleName();
+        return AttackNotExpiredCondition.class.getSimpleName();
     }
 }

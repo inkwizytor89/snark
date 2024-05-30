@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.fleet;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
@@ -46,7 +47,7 @@ public class FleetThread extends AbstractThread {
     @Override
     protected void onStep() {
         List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
-        List<SendFleetCommand> sendFleetCommands = new FleetBuilder()
+        List<SendFleetPromiseCommand> sendFleetCommands = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
                 .conditions(AbstractCondition.create(conditionsEntry))
@@ -72,9 +73,8 @@ public class FleetThread extends AbstractThread {
         });
     }
 
-    private boolean areShips(SendFleetCommand command) {
-        ColonyEntity source = command.fleet.source;
-        boolean noShips = command.promise().calculateShipMap(source).isEmpty();
+    private boolean areShips(SendFleetPromiseCommand command) {
+        boolean noShips = command.promise().normalizeShipMap().isEmpty();
         return !noShips;
     }
 
@@ -84,7 +84,7 @@ public class FleetThread extends AbstractThread {
         return LocalDateTime.now().minusHours(time.getHour()).minusMinutes(time.getMinute());
     }
 
-    private void logFleetOverview(SendFleetCommand command) {
+    private void logFleetOverview(SendFleetPromiseCommand command) {
         List<AbstractCondition> wontFit = command.promise().wontFit();
         StringBuilder errorMessage = new StringBuilder(command.hash());
         errorMessage.append(" wontFit: ");

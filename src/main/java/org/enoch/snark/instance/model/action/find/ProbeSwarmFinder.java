@@ -3,7 +3,6 @@ package org.enoch.snark.instance.model.action.find;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class ProbeSwarmFinder {
 
         String probeSwarmPlanetCode = CacheEntryDAO.getInstance().getValue(PROBE_SWAM);
         ColonyDAO colonyDAO = ColonyDAO.getInstance();
-        ColonyEntity probeSwarmColony = probeSwarmPlanetCode != null ? colonyDAO.get(probeSwarmPlanetCode) : null;
+        ColonyEntity probeSwarmColony = probeSwarmPlanetCode != null ? colonyDAO.find(probeSwarmPlanetCode) : null;
         if(probeSwarmColony != null && probeSwarmColony.espionageProbe >= probeLimit) {
             return probeSwarmColony;
         }

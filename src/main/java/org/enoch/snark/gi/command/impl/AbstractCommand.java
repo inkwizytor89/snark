@@ -17,7 +17,7 @@ import static org.enoch.snark.instance.commander.QueueRunType.MINOR;
 public abstract class AbstractCommand {
     protected final WebDriver webDriver;
     private FollowingAction followingAction;
-    private QueueRunType runType = MINOR;
+    private QueueRunType runType = NORMAL;
     protected Instance instance;
     public int failed = 0;
     private String hash;

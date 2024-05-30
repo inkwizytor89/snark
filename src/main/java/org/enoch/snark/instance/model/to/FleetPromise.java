@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+import static org.enoch.snark.instance.model.to.ShipsMap.TRANSPORT_COUNT;
+import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
 public class FleetPromise {
     private ColonyEntity source;
@@ -34,13 +36,25 @@ public class FleetPromise {
         return conditions.stream().filter(condition -> !condition.fit(this)).collect(Collectors.toList());
     }
 
-    public ShipsMap calculateShipMap(ColonyEntity colony) {
-        ShipsMap sourceShipsMap = colony.getShipsMap();
+    public ShipsMap normalizeShipMap() {
+        ShipsMap sourceShipsMap = source.getShipsMap();
         ShipsMap maxToSend = sourceShipsMap.leave(getLeaveShipsMap());
-        ShipsMap shipsMap = getShipsMap();
-        if(ALL_SHIPS.equals(getShipsMap()))
-            shipsMap = maxToSend;
+
+
+        ShipsMap shipsMap = changeExpressionCountsToLong(getShipsMap());
+        if(ALL_SHIPS.equals(getShipsMap())) shipsMap = maxToSend;
         return shipsMap.reduce(maxToSend);
+    }
+
+    private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap) {
+        ShipsMap result = new ShipsMap();
+
+        if(shipsMap != null) shipsMap.forEach((key, value) -> {
+            if (TRANSPORT_COUNT.equals(value))
+                result.put(key, calculateShipCountForTransport(key, target));
+            else result.put(key, value);
+        });
+        return result;
     }
 
     public ShipsMap getShipsMap() {

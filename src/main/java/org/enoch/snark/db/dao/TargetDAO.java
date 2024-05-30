@@ -69,12 +69,11 @@ public class TargetDAO extends AbstractDAO<TargetEntity> {
                     "       galaxy = :galaxy and " +
                     "       abs(system - :system) <= :range and " +
                     "       energy != null and energy > 0 and " +
-                    "       player.type = 'IN_ACTIVE' and " +
-                    "       (lastSpiedOn = null or lastSpiedOn < :from)", TargetEntity.class)
+                    "       player.type = 'IN_ACTIVE' ", TargetEntity.class)
                     .setParameter("galaxy", galaxy)
                     .setParameter("system", systemTarget)
                     .setParameter("range", range)
-                    .setParameter("from", LocalDateTime.now().minusHours(1L))
+//                    .setParameter("from", LocalDateTime.now().minusHours(1L))
                     .getResultList();
         }
     }

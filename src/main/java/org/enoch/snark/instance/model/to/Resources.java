@@ -51,6 +51,10 @@ public class Resources {
         }
     }
 
+    public Long count() {
+        return metal + crystal + deuterium;
+    }
+
     @Override
     public String toString() {
         return "{" + metal + ", " + crystal + ", " + deuterium +"}";
@@ -62,7 +66,7 @@ public class Resources {
 
     public boolean isCountMoreThan(Long value) {
         if(value == null) return true;
-        return (metal + crystal + deuterium) >= value;
+        return count() >= value;
     }
 
     public boolean isMoreThan(Resources resources) {

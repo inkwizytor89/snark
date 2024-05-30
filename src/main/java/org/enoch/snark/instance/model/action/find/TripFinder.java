@@ -15,7 +15,7 @@ public class TripFinder {
         if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
         int index = configTrip.indexOf(colonyEntity);
         if(index == -1) {
-            ColonyEntity swapColony = ColonyDAO.getInstance().get(colonyEntity.toPlanet().swapType());
+            ColonyEntity swapColony = ColonyDAO.getInstance().find(colonyEntity.toPlanet().swapType());
             index = configTrip.indexOf(swapColony);
         }
         if(index==-1) return null;
@@ -27,7 +27,7 @@ public class TripFinder {
         if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
         int index = configTrip.indexOf(colonyEntity);
         if(index == -1) {
-            ColonyEntity swapColony = ColonyDAO.getInstance().get(colonyEntity.toPlanet().swapType());
+            ColonyEntity swapColony = ColonyDAO.getInstance().find(colonyEntity.toPlanet().swapType());
             index = configTrip.indexOf(swapColony);
         }
         if(index==-1) return null;

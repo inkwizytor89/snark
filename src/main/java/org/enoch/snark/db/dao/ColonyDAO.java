@@ -35,10 +35,10 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
         return ColonyEntity.class;
     }
 
-    public ColonyEntity get(String code) {
-        return get(new Planet(code));
+    public ColonyEntity find(String code) {
+        return find(Planet.parse(code));
     }
-    public ColonyEntity get(Planet planet) {
+    public ColonyEntity find(Planet planet) {
         if(planet == null) return null;
         synchronized (JPAUtility.dbSynchro) {
             List<ColonyEntity> resultList = entityManager.createQuery("" +
@@ -115,7 +115,7 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
             }
         } else {
             colonies = Planet.fromString(lowerCode).stream()
-                    .map(this::get)
+                    .map(this::find)
                     .collect(Collectors.toList());
         }
         PlanetCache.put(code,colonies);

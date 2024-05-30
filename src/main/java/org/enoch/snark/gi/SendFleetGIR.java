@@ -2,6 +2,7 @@ package org.enoch.snark.gi;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
@@ -48,13 +49,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    public void setResources(Resources resources, FleetEntity fleet) {
+    public void setResources(Resources resources, ColonyEntity source) {
         if(resources == null || nothing.equals(resources)) return;
         if(everything.equals(resources)) selectAllResources();
-        else setCustomResources(resources, fleet);
+        else setCustomResources(resources, source);
     }
 
-    private void setCustomResources(Resources resources, FleetEntity fleet) {
+    private void setCustomResources(Resources resources, ColonyEntity source) {
         if(resources.metal != null || resources.crystal != null || resources.deuterium != null) {
             WebElement resourcesArea = wd.findElement(By.id("resources"));
             WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
@@ -62,9 +63,9 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
             Resources defaultResources = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, new Resources("d4m"));
-            Long metal = rememberToLeaveSome(resources, fleet, defaultResources.metal, ResourceType.METAL);
-            Long crystal = rememberToLeaveSome(resources, fleet, defaultResources.crystal, ResourceType.CRYSTAL);
-            Long deuterium = rememberToLeaveSome(resources, fleet, defaultResources.deuterium, ResourceType.DEUTERIUM);
+            Long metal = rememberToLeaveSome(resources, source, defaultResources.metal, ResourceType.METAL);
+            Long crystal = rememberToLeaveSome(resources, source, defaultResources.crystal, ResourceType.CRYSTAL);
+            Long deuterium = rememberToLeaveSome(resources, source, defaultResources.deuterium, ResourceType.DEUTERIUM);
             for(int i=0; i<3; i++) {
                 SleepUtil.pause();
                 deuteriumAmount.sendKeys(deuterium.toString());
@@ -84,31 +85,31 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         wd.findElement(By.id("allresources")).findElement(By.tagName("img")).click();
     }
 
-    public Long rememberToLeaveSome(Resources resources, FleetEntity fleet, Long toLeave, ResourceType resource) {
+    public Long rememberToLeaveSome(Resources resources, ColonyEntity source, Long toLeave, ResourceType resource) {
         switch(resource) {
             case METAL:{
-                return Math.min(resources.metal, fleet.source.metal) - toLeave;
+                return Math.min(resources.metal, source.metal) - toLeave;
             }
             case CRYSTAL:{
-                return Math.min(resources.crystal, fleet.source.crystal) - toLeave;
+                return Math.min(resources.crystal, source.crystal) - toLeave;
             }
             case DEUTERIUM:{
                 String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
                 long consumption = toLong(consumptionInput.split("\\s")[0]);
 
                 long l = 4000000L;
-                return Math.min(resources.deuterium, fleet.source.deuterium) - consumption - toLeave;
+                return Math.min(resources.deuterium, source.deuterium) - consumption - toLeave;
             }
         }
         throw new IllegalStateException("Unknown resource "+resource.name());
     }
 
-    public void setSpeed(FleetEntity fleet) {
-        if(fleet.speed != null) {
+    public void setSpeed(Long speed) {
+        if(speed != null) {
             SleepUtil.sleep();
             WebElement element = wd.findElement(By.className("steps"));
             List<WebElement> steps = element.findElements(By.className("step"));
-            WebElement speedElement = steps.get(Integer.parseInt(fleet.speed.toString()) / 10 - 1);
+            WebElement speedElement = steps.get(Integer.parseInt(speed.toString()) / 10 - 1);
             speedElement.click();
         }
     }

@@ -23,7 +23,10 @@ public abstract class AbstractCondition {
         switch (conditionType) {
             case RESOURCE_IN_SOURCE: return new ResourceCondition(Resources.parse(value));
             case RESOURCES_COUNT_IN_SOURCE, RESOURCES_COUNT_IN_TARGET: return new ResourceCountCondition(NumberUtil.toLong(value), conditionType);
-            case SPY_NOT_EXPIRED: return new SpyNotExpiredCondition(NumberUtil.toLong(value));
+            case SPY_IS_NOT_EXPIRED: return new SpyNotExpiredCondition(NumberUtil.toLong(value),false);
+            case SPY_IS_EXPIRED: return new SpyNotExpiredCondition(NumberUtil.toLong(value),true);
+            case ATTACK_IS_NOT_EXPIRED: return new AttackNotExpiredCondition(NumberUtil.toLong(value),false);
+            case ATTACK_IS_EXPIRED: return new AttackNotExpiredCondition(NumberUtil.toLong(value),true);
             case SHIPS_IN_SOURCE: return new ShipsCondition(ShipsMap.parse(value));
             case BLOCKING_MISSIONS: return new NoMissionsCondition(Mission.parse(value));
         }

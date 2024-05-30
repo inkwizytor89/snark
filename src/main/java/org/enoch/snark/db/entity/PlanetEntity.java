@@ -676,11 +676,6 @@ public abstract class PlanetEntity extends IdEntity{
             amount = configCapacity;
         }
         long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
-//        System.err.println("planet = " + this.toString());
-//        System.err.println("amount = " + amount);
-//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
-//        System.err.println("sum = " + resources);
-//        System.err.println("ships = "+ceil);
         if(ceil < 1) {
             System.err.println("Error: amount calculation fail for TransporterSmall");
         }
@@ -700,11 +695,6 @@ public abstract class PlanetEntity extends IdEntity{
             amount = configCapacity * 5;
         }
         long ceil = (long) Math.ceil((double) (this.metal + this.crystal + this.deuterium) / amount);
-//        System.err.println("planet = " + this.toString());
-//        System.err.println("amount = " + amount);
-//        System.err.println("size = " + (this.metal + this.crystal + this.deuterium));
-//        System.err.println("sum = " + resources);
-//        System.err.println("ships = "+ceil);
         if(ceil < 1) {
             System.err.println("Error: amount calculation fail for TransporterLarge");
         }

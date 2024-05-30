@@ -56,7 +56,7 @@ public class PlanetExpression {
         if(HOSTILE.contains(code)) throw new IllegalStateException(code + "can not be mapped to ColonyEntity because ist hostile");
         List<ColonyEntity> colonies = new ArrayList<>();
         Objects.requireNonNull(toPlanetList(code)).stream()
-                .map(planet -> ColonyDAO.getInstance().get(planet))
+                .map(planet -> ColonyDAO.getInstance().find(planet))
                 .forEach(colonies::add);
         return colonies;
     }
@@ -68,7 +68,7 @@ public class PlanetExpression {
             String[] s = input.split(EXPRESSION_SEPARATOR);
             String action = s[ACTION_INDEX];
             Planet planet = new Planet(s[PLANET_INDEX]);
-            ColonyEntity colony = ColonyDAO.getInstance().get(planet);
+            ColonyEntity colony = ColonyDAO.getInstance().find(planet);
 
             if(action.contains(NEXT)) {
                 ColonyEntity next = TripFinder.next(colony);
