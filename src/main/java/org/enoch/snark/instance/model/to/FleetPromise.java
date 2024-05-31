@@ -3,6 +3,7 @@ package org.enoch.snark.instance.model.to;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.uc.ShipUC;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,24 +38,9 @@ public class FleetPromise {
     }
 
     public ShipsMap normalizeShipMap() {
-        ShipsMap sourceShipsMap = source.getShipsMap();
-        ShipsMap maxToSend = sourceShipsMap.leave(getLeaveShipsMap());
+        return ShipUC.fromExpressionToValues(shipsMap, this);
 
-
-        ShipsMap shipsMap = changeExpressionCountsToLong(getShipsMap());
-        if(ALL_SHIPS.equals(getShipsMap())) shipsMap = maxToSend;
-        return shipsMap.reduce(maxToSend);
-    }
-
-    private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap) {
-        ShipsMap result = new ShipsMap();
-
-        if(shipsMap != null) shipsMap.forEach((key, value) -> {
-            if (TRANSPORT_COUNT.equals(value))
-                result.put(key, calculateShipCountForTransport(key, target));
-            else result.put(key, value);
-        });
-        return result;
+//        return shipsMap.reduce(maxToSend);
     }
 
     public ShipsMap getShipsMap() {

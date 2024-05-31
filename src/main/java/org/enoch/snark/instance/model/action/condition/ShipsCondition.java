@@ -2,6 +2,7 @@ package org.enoch.snark.instance.model.action.condition;
 
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.model.uc.ShipUC;
 
 public class ShipsCondition extends AbstractCondition {
     private final ShipsMap shipsMap;
@@ -12,7 +13,8 @@ public class ShipsCondition extends AbstractCondition {
 
     @Override
     public boolean fit(FleetPromise promise) {
-        return promise.getSource().hasEnoughShips(shipsMap);
+        ShipsMap valuedMap = ShipUC.fromExpressionToValues(shipsMap, promise);
+        return promise.getSource().hasEnoughShips(valuedMap);
     }
 
     @Override

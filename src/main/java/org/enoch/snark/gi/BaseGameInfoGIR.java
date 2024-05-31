@@ -20,9 +20,9 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
     public List<ColonyEntity> loadPlanetList() {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
 
-        WebElement myPlanets = wd.findElement(By.id("myPlanets"));
+//        WebElement myPlanets = wd.findElement(By.id("myPlanets"));
         List<WebElement> coloniesWebElements = new WebDriverWait(wd, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(myPlanets.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
+                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(wd.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
 
         for(WebElement colonyWebElement : coloniesWebElements) {
             ColonyEntity colonyEntity = new ColonyEntity();
@@ -53,7 +53,7 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
             colonyEntities.add(colonyEntity);
         }
 
-        String countColoniesText = myPlanets.findElement(By.id("countColonies")).getText();
+        String countColoniesText = wd.findElement(By.id("countColonies")).getText();
         int expectedColoniesCount = Integer.parseInt(countColoniesText.substring(0, countColoniesText.indexOf("/")).trim());
 
         long actualColoniesCount = colonyEntities.stream().filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET)).count();

@@ -15,7 +15,7 @@ public class BuildRequirements {
 
     public boolean canBuildOn(ColonyEntity colony) {
         if(colony == null) return false;
-        return colony.metal > resources.metal && colony.crystal > resources.crystal && colony.deuterium > resources.deuterium;
+        return colony.metal >= resources.metal && colony.crystal >= resources.crystal && colony.deuterium >= resources.deuterium;
     }
 
     public boolean isResourceUnknown() {

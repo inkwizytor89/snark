@@ -69,7 +69,7 @@ public class SpaceThread extends AbstractThread {
             for (int i = 0; i < pageSize; i++) {
                 GalaxyEntity poll = notExplored.poll();
                 if(poll != null) {
-                    new GalaxyAnalyzeCommand(poll).setRunType(QueueRunType.MINOR).push();
+                    new GalaxyAnalyzeCommand(poll).setRunType(QueueRunType.SPAM).push();
                 }
             }
             return;
@@ -89,6 +89,6 @@ public class SpaceThread extends AbstractThread {
         }
 
         toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
-        toView.forEach(galaxy -> new GalaxyAnalyzeCommand(galaxy).setRunType(QueueRunType.MINOR).push());
+        toView.forEach(galaxy -> new GalaxyAnalyzeCommand(galaxy).setRunType(QueueRunType.SPAM).push());
     }
 }

@@ -23,12 +23,14 @@ public abstract class ExpiredCondition extends AbstractCondition {
         Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(promise.getTarget());
         if(targetEntityOptional.isEmpty()) throw new IllegalStateException(promise.getTarget() + " can not find in database");
         if(getDate(targetEntityOptional.get())==null) return true;
-        return is && DateUtil.isExpired(getDate(targetEntityOptional.get()), seconds, ChronoUnit.SECONDS);
+        boolean isExpired = DateUtil.isExpired(getDate(targetEntityOptional.get()), seconds, ChronoUnit.SECONDS);
+        return is == isExpired;
     }
 
     @Override
     public String reason(FleetPromise promise) {
-        if(!fit(promise)) return promise.getTarget()+" is="+ is + " have expired "+getType()+" in seconds " + seconds;
+        if(!fit(promise)) return promise.getTarget()+" should "+(!is?"not":"")+" expired "+" in seconds "+seconds
+                + " for type " +getType();
         else return MISSING_REASON;
     }
 

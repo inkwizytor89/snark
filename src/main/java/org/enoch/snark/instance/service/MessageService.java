@@ -76,7 +76,7 @@ public class MessageService {
             }
         }
 
-        return notLoadedSpyActions.size() > 0 && (waitingMap.values().size() == 0 || scannedMap.values().size() > 30L);
+        return notLoadedSpyActions.size() > 0 && (waitingMap.values().size() == 0 || scannedMap.values().size() > 20L);
     }
 
     public static MessageService getInstance() {
