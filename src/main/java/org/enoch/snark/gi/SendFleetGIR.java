@@ -72,10 +72,10 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
                 crystalAmount.sendKeys(crystal.toString());
                 metalAmount.sendKeys(metal.toString());
 
-                long remainingresources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
-                long maxresources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
+                long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
+                long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
 
-                if(remainingresources < maxresources )
+                if(remainingResources < maxResources)
                     break;
             }
         }
@@ -87,18 +87,12 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public Long rememberToLeaveSome(Resources resources, ColonyEntity source, Long toLeave, ResourceType resource) {
         switch(resource) {
-            case METAL:{
-                return Math.min(resources.metal, source.metal) - toLeave;
-            }
-            case CRYSTAL:{
-                return Math.min(resources.crystal, source.crystal) - toLeave;
-            }
+            case METAL: return Math.max(resources.skipLeaveMetal ? resources.metal : resources.metal - toLeave, 0L);
+            case CRYSTAL: return Math.max(resources.skipLeaveCrystal ? resources.crystal : resources.crystal - toLeave, 0L);
             case DEUTERIUM:{
                 String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
                 long consumption = toLong(consumptionInput.split("\\s")[0]);
-
-                long l = 4000000L;
-                return Math.min(resources.deuterium, source.deuterium) - consumption - toLeave;
+                return Math.max(resources.skipLeaveDeuterium ? resources.deuterium : resources.deuterium - toLeave - consumption, 0L);
             }
         }
         throw new IllegalStateException("Unknown resource "+resource.name());

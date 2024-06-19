@@ -5,6 +5,7 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.types.ShipEnum;
@@ -74,6 +75,8 @@ public class ExpeditionThread extends AbstractThread {
 //        if(stillWaitingForFleet()) return;
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = getSource();
+            String collect = expeditionSource.stream().map(PlanetEntity::toString).collect(Collectors.joining(", "));
+            System.err.println("lista expów: "+collect);
             if (colony == null) return;
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {

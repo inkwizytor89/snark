@@ -10,6 +10,7 @@ import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
@@ -39,9 +40,12 @@ public class ShipUC {
     }
 
     public static Long calculateShipCountForTransport(ShipEnum shipEnum, Planet planet) {
+        return calculateShipCountForTransport(shipEnum, PlanetUC.fetch(planet).getResources());
+    }
+
+    public static Long calculateShipCountForTransport(ShipEnum shipEnum, Resources resources) {
         Long capacity = ShipUC.calculateCapacity(shipEnum);
-        PlanetEntity planetEntity = PlanetUC.fetch(planet);
-        return planetEntity.getResources().count() / capacity;
+        return resources.count() / capacity;
     }
 
     public static Long calculateCapacity(ShipEnum shipEnum) {

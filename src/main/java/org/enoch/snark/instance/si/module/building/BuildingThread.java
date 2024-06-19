@@ -6,7 +6,9 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.action.FleetBuilder;
+import org.enoch.snark.instance.model.action.PlanetExpression;
 import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.instance.model.types.ResourceType.CRYSTAL;
+import static org.enoch.snark.instance.model.types.ResourceType.METAL;
 import static org.enoch.snark.instance.si.module.ConfigMap.NAME;
 import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
 
@@ -26,6 +30,7 @@ public class BuildingThread extends AbstractThread {
     public static final String threadName = "building";
     public static final int SHORT_PAUSE = 20;
     public static final String LEVEL = "level";
+    public static final String SWAP_TRANSPORT = "swap_transport";
     private Map<ColonyEntity, BuildRequirements> colonyMap = new HashMap<>();
     private int pause = SHORT_PAUSE;
     private final QueueManger queueManger;
@@ -77,27 +82,26 @@ public class BuildingThread extends AbstractThread {
                 colonyMap.put(colony, null);
             } else {
                 ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
-                if (requirements.canBuildOn(swapColony)) {
+                Boolean swapTransport = map.getConfigBoolean(SWAP_TRANSPORT, true);
+                if (swapTransport && requirements.canBuildOn(swapColony)) {
+                    Resources requieredResources = requirements.resources.skipLeave(METAL, CRYSTAL);
                     new FleetBuilder()
                             .from(swapColony)
                             .mission(Mission.TRANSPORT)
-                            .resources(requirements.resources)
+                            .addCondition(new ResourceCondition(requieredResources))
+                            .resources(requieredResources)
                             .buildOne()
                             .push(LocalDateTime.now().minusMinutes(10L));
                 }
             }
         }
-//        System.err.println("Building end step, sleep in "+pause);
     }
 
     private void updateSourceMap() {
-        List<ColonyEntity> planets = map.getColonies(SOURCE, "planet").stream()
+        List<ColonyEntity> planets = map.getColonies(SOURCE, PlanetExpression.PLANET).stream()
                 .filter(colonyEntity -> ColonyType.PLANET.equals(colonyEntity.type))
                 .collect(Collectors.toList());
         Util.updateMapKeys(colonyMap, planets, null);
-//        colonyDAO.fetchAll().stream()
-//                .filter(colony -> colony.isPlanet)
-//                .forEach(colony -> colonyMap.put(colony, null));
     }
 
     public Integer getColonyLastLevelToProcess() {

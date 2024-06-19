@@ -7,6 +7,8 @@ import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.text.Msg;
+import org.enoch.snark.instance.model.action.FleetBuilder;
+import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.Navigator;
@@ -84,11 +86,50 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
-        System.err.println("Escape from planet "+sourcePlanet);
+        if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
+            sendToAnotherMoon(sourcePlanet);
+            return;
+        }
+        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
+        if(sourceEntity.espionageProbe != null && sourceEntity.espionageProbe>0) {
+            sendOnSpy(sourceEntity);
+        } else {
+            sendOnHold(sourceEntity, Planet.parse("p[1:126:12]"));
+        }
+    }
+
+    private void sendOnHold(ColonyEntity sourceEntity, Planet target) {
+        new FleetBuilder()
+                .from(sourceEntity)
+                .to(target.toString())
+                .mission(STOP)
+                .ships(ShipsMap.ALL_SHIPS)
+                .resources(everything)
+                .queue(CRITICAL)
+                .buildOne()
+                .push();
+    }
+
+    private void sendOnSpy(ColonyEntity sourceEntity) {
+        Planet target = sourceEntity.toPlanet();
+        target.position = 16;
+        new FleetBuilder()
+                .from(sourceEntity)
+                .to(target.toString())
+                .mission(SPY)
+                .ships(ShipsMap.ALL_SHIPS)
+                .resources(everything)
+                .queue(CRITICAL)
+                .buildOne()
+                .push();
+    }
+
+    private void sendToAnotherMoon(Planet sourcePlanet) {
+        System.err.println("Escape from planet "+ sourcePlanet);
         ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
         System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
         ShipsMap shipsMap = sourceEntity.getShipsMap();
-        if(shipsMap.isEmpty())  return;
+        if(shipsMap.isEmpty()) return;
 
         FleetEntity fleetEntity = new FleetEntity();
         fleetEntity.source = sourceEntity;

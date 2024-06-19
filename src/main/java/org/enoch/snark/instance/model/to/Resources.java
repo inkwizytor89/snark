@@ -2,6 +2,11 @@ package org.enoch.snark.instance.model.to;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.NumberUtil;
+import org.enoch.snark.instance.model.types.ResourceType;
+
+import java.util.Arrays;
+
+import static org.enoch.snark.instance.model.types.ResourceType.*;
 
 public class Resources {
 
@@ -12,6 +17,10 @@ public class Resources {
     public Long metal = 0L;
     public Long crystal = 0L;
     public Long deuterium = 0L;
+
+    public boolean skipLeaveMetal;
+    public boolean skipLeaveCrystal;
+    public boolean skipLeaveDeuterium;
 
     public static Resources parse(String resourceExpression) {
         if (StringUtils.isEmpty(resourceExpression) ||
@@ -74,5 +83,14 @@ public class Resources {
         return metal >= resources.metal &&
                 crystal >= resources.crystal &&
                 deuterium >= resources.deuterium;
+    }
+
+    public Resources skipLeave(ResourceType... types) {
+        Arrays.stream(types).forEach(toSkip -> {
+            if(METAL.equals(toSkip)) skipLeaveMetal = true;
+            else if (CRYSTAL.equals(toSkip)) skipLeaveCrystal = true;
+            else if (DEUTERIUM.equals(toSkip)) skipLeaveDeuterium = true;
+        });
+        return this;
     }
 }

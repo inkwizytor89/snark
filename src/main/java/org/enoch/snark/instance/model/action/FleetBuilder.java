@@ -5,21 +5,28 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.model.uc.ShipUC;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+import static org.enoch.snark.gi.types.Mission.TRANSPORT;
+import static org.enoch.snark.gi.types.ShipEnum.transporterLarge;
 import static org.enoch.snark.instance.model.action.PlanetExpression.asExpression;
 import static org.enoch.snark.instance.model.action.PlanetExpression.toPlanetList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
 public class FleetBuilder {
 
@@ -36,7 +43,7 @@ public class FleetBuilder {
     private String hashPrefix;
 
     public FleetBuilder from(ColonyEntity colony) {
-        return from(Collections.singletonList(colony));
+        return from(singletonList(colony));
     }
 
     public FleetBuilder from(String expression) {
@@ -60,6 +67,13 @@ public class FleetBuilder {
         return this;
     }
 
+    public FleetBuilder addCondition(AbstractCondition condition) {
+        if(condition != null) {
+            conditions.add(condition);
+        }
+        return this;
+    }
+
     public FleetBuilder mission(Mission mission) {
         if(mission!= null && !Mission.UNKNOWN.equals(mission))
             this.mission = mission;
@@ -67,7 +81,7 @@ public class FleetBuilder {
     }
 
     public FleetBuilder ships(ShipsMap shipsMap) {
-        return ships(Collections.singletonList(shipsMap));
+        return ships(singletonList(shipsMap));
     }
 
     public FleetBuilder ships(List<ShipsMap> shipsMaps) {
@@ -76,7 +90,7 @@ public class FleetBuilder {
     }
 
     public FleetBuilder leaveShips(ShipsMap leaveShips) {
-        return leaveShips(Collections.singletonList(leaveShips));
+        return leaveShips(singletonList(leaveShips));
     }
 
     public FleetBuilder leaveShips(List<ShipsMap> leaveShipWaves) {
@@ -156,6 +170,13 @@ public class FleetBuilder {
 
     private void defaultValues() {
         if(from == null) from = Instance.getSources();
+        if(TRANSPORT.equals(mission) && resources != null && shipWaves == null) {
+            ShipsMap transportShipsMap = new ShipsMap();
+            transportShipsMap.put(transporterLarge, calculateShipCountForTransport(transporterLarge, resources));
+
+            addCondition(new ShipsCondition(transportShipsMap));
+            shipWaves = singletonList(transportShipsMap);
+        }
     }
 
     private void validate() {
