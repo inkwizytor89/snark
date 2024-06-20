@@ -171,6 +171,36 @@ public class FleetEntity extends IdEntity {
         }
     }
 
+    public ShipsMap getShips() {
+        ShipsMap shipsMap = new ShipsMap();
+        for(ShipEnum shipEnum : ShipEnum.values()) {
+            Long shipValue = getShipValue(shipEnum);
+            if(shipValue != null && shipValue > 0) shipsMap.put(shipEnum, shipValue);
+        }
+        return shipsMap;
+    }
+
+    public Long getShipValue(ShipEnum shipEnum) {
+        if(ShipEnum.fighterLight.equals(shipEnum)) return fighterLight;
+        else if(ShipEnum.fighterHeavy.equals(shipEnum)) return fighterHeavy;
+        else if(ShipEnum.cruiser.equals(shipEnum)) return cruiser;
+        else if(ShipEnum.battleship.equals(shipEnum)) return battleship;
+        else if(ShipEnum.interceptor.equals(shipEnum)) return interceptor;
+        else if(ShipEnum.bomber.equals(shipEnum)) return bomber;
+        else if(ShipEnum.destroyer.equals(shipEnum)) return destroyer;
+        else if(ShipEnum.deathstar.equals(shipEnum)) return deathstar;
+        else if(ShipEnum.reaper.equals(shipEnum)) return reaper;
+        else if(ShipEnum.explorer.equals(shipEnum)) return explorer;
+        else if(ShipEnum.transporterSmall.equals(shipEnum)) return transporterSmall;
+        else if(ShipEnum.transporterLarge.equals(shipEnum)) return transporterLarge;
+        else if(ShipEnum.colonyShip.equals(shipEnum)) return colonyShip;
+        else if(ShipEnum.recycler.equals(shipEnum)) return recycler;
+        else if(ShipEnum.espionageProbe.equals(shipEnum)) return espionageProbe;
+        else if(ShipEnum.solarSatellite.equals(shipEnum)) return 0L;
+        else throw new IllegalStateException("Unknown ShipEnum "+shipEnum);
+    }
+
+
     public void closeFlyPlan() {
         start = LocalDateTime.now();
         back = LocalDateTime.now();

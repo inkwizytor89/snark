@@ -124,7 +124,8 @@ public class Commander extends Thread {
             e.printStackTrace();
             return;
         } catch (Throwable e) {
-            System.err.println(command+" with error "+e.getMessage());
+//            System.err.println(command+" with error "+e.getMessage());
+            e.printStackTrace();
             success = false;
         }
 

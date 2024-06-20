@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -14,7 +15,7 @@ import static org.enoch.snark.instance.model.types.ColonyType.MOON;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
 
-
+@EqualsAndHashCode
 public class Planet {
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -91,16 +92,16 @@ public class Planet {
         position = Integer.parseInt(numbersTable[POSITION_INDEX]);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Planet)) return false;
-
-        Planet anotherPlanet = (Planet) obj;
-        return this.galaxy.equals(anotherPlanet.galaxy) &&
-                this.system.equals(anotherPlanet.system) &&
-                this.position.equals(anotherPlanet.position) &&
-                this.type.equals(anotherPlanet.type);
-    }
+//    @Override
+//    public boolean equals(Object obj) {
+//        if(!(obj instanceof Planet)) return false;
+//
+//        Planet anotherPlanet = (Planet) obj;
+//        return this.galaxy.equals(anotherPlanet.galaxy) &&
+//                this.system.equals(anotherPlanet.system) &&
+//                this.position.equals(anotherPlanet.position) &&
+//                this.type.equals(anotherPlanet.type);
+//    }
 
     public static String getCordinate(Planet planet) {
         return getCordinate(planet.galaxy, planet.system, planet.position);

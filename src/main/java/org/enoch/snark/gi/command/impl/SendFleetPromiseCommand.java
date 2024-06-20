@@ -12,11 +12,13 @@ import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.service.Navigator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -48,6 +50,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         GIUrl.openSendFleetView(promise.getSource(), promise.getTarget(), promise.getMission());
+        if(!Commander.getInstance().isFleetFreeSlot()) throw new FleetCantStart();
 
         if(!promise().fit()) return true;
         Long durationSeconds;
@@ -116,6 +119,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
             if(fleet.code != null) fleet.code = -fleet.code;
         }
         FleetDAO.getInstance().saveOrUpdate(fleet);
+        Navigator.getInstance().add(fleet);
 
         if(SPY.equals(fleet.mission)) {
             Optional<TargetEntity> targetEntity = TargetDAO.getInstance().find(fleet.getTarget());
@@ -136,6 +140,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         reloadColonyAfterFleetIsBack(durationSeconds);
         updateDelayForAction(durationSeconds);
         reloadColony();
+
         return true;
     }
 
