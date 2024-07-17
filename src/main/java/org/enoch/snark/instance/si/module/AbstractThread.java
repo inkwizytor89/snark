@@ -75,7 +75,7 @@ public abstract class AbstractThread extends Thread {
                 try {
                     onStep();
                 } catch (Exception e) {
-                    System.err.println(getThreadName() + ": " + e.getMessage());
+                    runningStatus.log("Thread " + map.name(), map);
                     e.printStackTrace();
                 }
                 SleepUtil.secondsToSleep(Long.valueOf(getPause()));

@@ -78,6 +78,7 @@ public class ExpeditionThread extends AbstractThread {
             String collect = expeditionSource.stream().map(PlanetEntity::toString).collect(Collectors.joining(", "));
             System.err.println("lista expów: "+collect);
             if (colony == null) return;
+            colony = ColonyDAO.getInstance().fetch(colony);
             FleetEntity expedition = buildExpeditionFleet(colony);
             if(expedition != null) {
                 setExpeditionReadyToStart(expedition);

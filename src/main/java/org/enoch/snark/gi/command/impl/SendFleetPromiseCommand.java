@@ -137,23 +137,10 @@ public class SendFleetPromiseCommand extends AbstractCommand {
             }
         }
 
-        reloadColonyAfterFleetIsBack(durationSeconds);
         updateDelayForAction(durationSeconds);
         reloadColony();
 
         return true;
-    }
-
-    private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
-        if(promise.getMission().isComingBack()) {
-            OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, promise.getSource());
-            long secondsToBack = durationSeconds * 2;
-            if(Mission.EXPEDITION.equals(promise.getMission())) {
-                secondsToBack+=3600;
-                System.out.println("Expedition is probably back "+LocalDateTime.now().plusSeconds(secondsToBack));
-            }
-            new WaitingThread(new FollowingAction(command, secondsToBack)).start();
-        }
     }
 
     private void reloadColony() {

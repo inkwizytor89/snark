@@ -7,6 +7,7 @@ import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.filter.AbstractFilter;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
@@ -47,10 +48,12 @@ public class FleetThread extends AbstractThread {
     @Override
     protected void onStep() {
         List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
+        List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         List<SendFleetPromiseCommand> sendFleetCommands = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
                 .conditions(AbstractCondition.create(conditionsEntry))
+                .filters(AbstractFilter.create(filtersEntry))
                 .mission(Mission.convert(map.getConfig(MISSION, null)))
                 .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
                 .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))

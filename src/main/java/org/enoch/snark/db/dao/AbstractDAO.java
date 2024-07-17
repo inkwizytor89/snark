@@ -62,6 +62,11 @@ public abstract class AbstractDAO<T extends IdEntity> {
         }
     }
 
+    @Nonnull
+    public List<T> fetchAll(List<T> list) {
+        return list.stream().map(this::fetch).toList();
+    }
+
     public void remove(T entity) {
         synchronized (JPAUtility.dbSynchro) {
             final EntityTransaction transaction = entityManager.getTransaction();
@@ -71,20 +76,4 @@ public abstract class AbstractDAO<T extends IdEntity> {
             transaction.commit();
         }
     }
-
-//    public void refresh(T entity) {
-//        synchronized (JPAUtility.dbSynchro) {
-//            final EntityTransaction transaction = entityManager.getTransaction();
-//            try {
-//                transaction.begin();
-//                entityManager.refresh(entity);
-//                transaction.commit();
-//            } catch (Exception e) {
-//                System.err.println("transaction AbstractDAO.refresh error " + e.getMessage());
-//                e.printStackTrace();
-//            } finally {
-//                if (transaction.isActive()) transaction.rollback();
-//            }
-//        }
-//    }
 }

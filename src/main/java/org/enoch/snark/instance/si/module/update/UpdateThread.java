@@ -36,7 +36,6 @@ public class UpdateThread extends AbstractThread {
 
     private Navigator navigator;
     private List<EventFleet> events;
-    private final HashMap<LocalDateTime, Planet> arrivedMap = new HashMap<>();
 
     public UpdateThread(ConfigMap map) {
         super(map);
@@ -62,49 +61,21 @@ public class UpdateThread extends AbstractThread {
     @Override
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
-        if(isNavigatorExpired() && commander.noBlockingHashInQueue(threadName)) {
+        boolean navigatorExpired = isNavigatorExpired();
+        boolean b = commander.noBlockingHashInQueue(threadName);
+        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
+        if(navigatorExpired && b) {
             updateState();
+            log(LocalDateTime.now() + " state updated");
         }
 
         events = navigator.getEventFleetList();
         if (events == null) return;
-        putIncomingInArriveMap();
-        sendCommandToCheckColonyWhenFleetArrives();
         markSpecialFleets();
     }
 
     private boolean isNavigatorExpired() {
         return navigator.isExpiredAfterMinutes(updateTimeInMinutes);
-    }
-
-    private void putIncomingInArriveMap() {
-        events.stream()
-                .filter(event -> LocalDateTime.now().isBefore(event.arrivalTime)) // remove not updated events
-                .filter(event -> LocalDateTime.now().plusMinutes(updateTimeInMinutes).isAfter(event.arrivalTime))
-                .filter(EventFleet::isFleetImpactOnColony) //is ending fly
-                .filter(event -> !arrivedMap.containsKey(event.arrivalTime)) // only not registered yet
-                .forEach(event -> arrivedMap.put(event.arrivalTime, event.getEndingPlanet()));
-    }
-
-    private void sendCommandToCheckColonyWhenFleetArrives() {
-        HashMap<LocalDateTime, Planet> toVisit = new HashMap<>();
-        arrivedMap.forEach((localDateTime, planet) -> {
-            //plus 5sek because refreshed page is not updated
-            if(LocalDateTime.now().minusSeconds(5).isAfter(localDateTime)) {
-                toVisit.put(localDateTime, planet);
-            }
-        });
-        toVisit.forEach((localDateTime, planet) -> {
-            arrivedMap.remove(localDateTime, planet);
-            Optional<ColonyEntity> optionalColony = ColonyDAO.getInstance().fetchAll().stream()
-                    .filter(col -> col.is(ColonyType.PLANET) == ColonyType.PLANET.equals(planet.type))
-                    .filter(col -> col.getCordinate().equals(Planet.getCordinate(planet)))
-                    .findAny();
-            if(optionalColony.isPresent()) {
-//                new OpenPageCommand(FLEETDISPATCH, optionalColony.get()).push();
-                new OpenPageCommand(FLEETDISPATCH, optionalColony.get());
-            } else System.err.println("\nShould find colony "+planet.toString()+"\n");
-        });
     }
 
     public static void updateState() {

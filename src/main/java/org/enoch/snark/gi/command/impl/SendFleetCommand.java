@@ -1,7 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -11,7 +10,6 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
-import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
@@ -185,24 +183,9 @@ public class SendFleetCommand extends AbstractCommand {
                 TargetDAO.getInstance().saveOrUpdate(targetEntity.get());
             }
         }
-
-        reloadColonyAfterFleetIsBack(durationSeconds);
         updateDelayForAction(durationSeconds);
         reloadColony();
         return true;
-    }
-
-    private void reloadColonyAfterFleetIsBack(Long durationSeconds) {
-        if(fleet.mission.isComingBack()) {
-            OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, fleet.source);
-            long secondsToBack = durationSeconds * 2;
-            if(Mission.EXPEDITION.equals(fleet.mission)) {
-                secondsToBack+=3600;
-                System.out.println("Expedition is probably back "+LocalDateTime.now().plusSeconds(secondsToBack)+
-                        " back is "+fleet.back);
-            }
-            new WaitingThread(new FollowingAction(command, secondsToBack)).start();
-        }
     }
 
     private void reloadColony() {

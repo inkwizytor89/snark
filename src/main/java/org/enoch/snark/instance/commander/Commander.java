@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.commander;
 
+import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningStatus;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
@@ -9,15 +10,16 @@ import org.enoch.snark.gi.command.impl.AbstractCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
+import org.enoch.snark.instance.si.module.ConfigMap;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.MODE;
-import static org.enoch.snark.instance.si.module.ConfigMap.STOP;
+import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public class Commander extends Thread {
 
@@ -54,8 +56,8 @@ public class Commander extends Thread {
     public void run() {
         waitingToOpenServerTab();
         while(true) {
-            Instance.updatePropertiesMap();
             try {
+                Instance.updatePropertiesMap();
                 RunningStatus runningStatus = createRunningStatus();
                 isRunning = createRunningStatus().shouldRunning();
                 runningStatus.log(Commander.class.getName());
@@ -72,7 +74,7 @@ public class Commander extends Thread {
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         }
@@ -119,12 +121,13 @@ public class Commander extends Thread {
             return;
         }
         try {
+
+            Debug.log(ConfigMap.MAIN, command + " start at " + LocalTime.now());
             success = command.execute();
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
             return;
         } catch (Throwable e) {
-//            System.err.println(command+" with error "+e.getMessage());
             e.printStackTrace();
             success = false;
         }
@@ -143,6 +146,7 @@ public class Commander extends Thread {
             }
         }
         actualProcessedCommand = null;
+        Debug.log(ConfigMap.MAIN, command + " start at " + LocalTime.now());
     }
 
     public void setFleetStatus(int fleetCount, int fleetMax) {

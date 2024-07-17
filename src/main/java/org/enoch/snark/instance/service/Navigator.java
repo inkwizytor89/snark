@@ -23,11 +23,12 @@ import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
 
 public class Navigator {
 
-    public static final long TIME_BUFFOR_IN_SECOUNDS = 4L;
+    public static final long TIME_DELAY_IN_SECONDS = 4L;
     private static Navigator INSTANCE;
     private List<EventFleet> eventFleetList;
     private LocalDateTime lastUpdate = LocalDateTime.now().minusDays(1L);
-    private Set<FleetMovement> movements = new HashSet<>();
+    private final Set<FleetMovement> movements = new HashSet<>();
+    private static final Object movementsLock = new Object();
 
     private Navigator() {
         start();
@@ -44,9 +45,10 @@ public class Navigator {
         Runnable task = () -> {
             while(true) try {
                 SleepUtil.sleep();
-                List<FleetMovement> pulled = pollExpired();
-                updateColonies(pulled);
-//                System.err.println("Navigator.movements.size= "+movements.size());
+                synchronized (movementsLock) {
+                    List<FleetMovement> pulled = pollExpired();
+                    updateColonies(pulled);
+                }
             } catch (Throwable e) {
                 throw new IllegalStateException(e);
             }
@@ -55,7 +57,7 @@ public class Navigator {
     }
 
     private List<FleetMovement> pollExpired() {
-        LocalDateTime relativeNow = LocalDateTime.now().minusSeconds(TIME_BUFFOR_IN_SECOUNDS);
+        LocalDateTime relativeNow = LocalDateTime.now().minusSeconds(TIME_DELAY_IN_SECONDS);
         List<FleetMovement> expiredMovements = movements.stream()
                 .filter(movement -> relativeNow.isAfter(movement.getArrivalTime()))
                 .toList();
@@ -84,18 +86,18 @@ public class Navigator {
         }
         this.eventFleetList = eventFleetList;
         this.lastUpdate = LocalDateTime.now();
-
         removeAllTemporaryMovements();
         eventFleetList.forEach(this::add);
 
     }
 
     private void removeAllTemporaryMovements() {
-        movements.stream()
-                .filter(FleetMovement::isTemporary)
-                .forEach(movement -> movements.remove(movement));
+            movements.stream()
+                    .filter(FleetMovement::isTemporary)
+                    .forEach(movements::remove);
     }
 
+    @Deprecated
     public List<EventFleet> getEventFleetList() {
         return this.eventFleetList;
     }
@@ -139,18 +141,6 @@ public class Navigator {
     }
 
     private void add(FleetMovement movement) {
-//        boolean contains = movements.contains(movement);
-//        if(!contains) {
-//            Optional<FleetMovement> any = movements.stream()
-//                    .filter(movement1 -> movement1.getFrom().equals(movement.getFrom()))
-//                    .filter(movement1 -> movement1.getTo().equals(movement.getTo()))
-//                    .filter(movement1 -> movement1.getDirection().equals(movement.getDirection()))
-//                    .findAny();
-//            if(any.isPresent()) {
-//                FleetMovement movement1 = any.get();
-//            }
-//            System.err.println("new element");
-//        }
         movements.add(movement);
     }
 

@@ -59,15 +59,10 @@ public class BuildingThread extends AbstractThread {
     @Override
     protected void onStep() {
         updateSourceMap();
-//        System.err.println(queueManger);
+        Integer lastLevel = getColonyLastLevelToProcess();
         for(ColonyEntity colony : colonyMap.keySet()) {
-            if(colony.level > getColonyLastLevelToProcess()) {
-                continue;
-            }
-            if(isColonyNotYetLoaded(colony) || isQueueBusy(colony)) {
-//                System.err.println("colony "+colony+" not ready "+ isColonyNotYetLoaded(colony) +" "+ isQueueBusy(colony));
-                continue;
-            }
+            if(colony.level > lastLevel) continue;
+            if(isColonyNotYetLoaded(colony) || isQueueBusy(colony)) continue;
 
             BuildRequirements requirements = colonyMap.get(colony);
             if(requirements == null || requirements.isResourceUnknown()) {

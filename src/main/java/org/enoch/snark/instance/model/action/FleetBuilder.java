@@ -2,22 +2,19 @@ package org.enoch.snark.instance.model.action;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.filter.AbstractFilter;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.model.uc.ShipUC;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -33,6 +30,7 @@ public class FleetBuilder {
     private List<ColonyEntity> from;
     private String to;
     private List<AbstractCondition> conditions = new ArrayList<>();
+    private List<AbstractFilter> filters = new ArrayList<>();
     private Mission mission;
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
@@ -70,6 +68,13 @@ public class FleetBuilder {
     public FleetBuilder addCondition(AbstractCondition condition) {
         if(condition != null) {
             conditions.add(condition);
+        }
+        return this;
+    }
+
+    public FleetBuilder filters(List<AbstractFilter> filterList) {
+        if(filterList != null) {
+            filters = filterList;
         }
         return this;
     }
@@ -128,7 +133,7 @@ public class FleetBuilder {
         return this;
     }
 
-    public List<SendFleetPromiseCommand> buildAll() {
+    private List<SendFleetPromiseCommand> build() {
         defaultValues();
         validate();
 
@@ -166,6 +171,14 @@ public class FleetBuilder {
 
     public SendFleetPromiseCommand buildOne() {
         return buildAll().get(0);
+    }
+
+    public List<SendFleetPromiseCommand> buildAll() {
+        List<SendFleetPromiseCommand> built = build();
+        for (AbstractFilter filter : filters) {
+            built = filter.filter(built);
+        }
+        return built;
     }
 
     private void defaultValues() {

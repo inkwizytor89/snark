@@ -29,6 +29,7 @@ public abstract class AbstractCondition {
             case ATTACK_IS_EXPIRED: return new AttackNotExpiredCondition(NumberUtil.toLong(value),true);
             case SHIPS_IN_SOURCE: return new ShipsCondition(ShipsMap.parse(value));
             case BLOCKING_MISSIONS: return new NoMissionsCondition(Mission.parse(value));
+            case EXPEDITION: return new ExpeditionCondition(Boolean.parseBoolean(value));
         }
         throw new IllegalStateException("Can not map "+key+" to "+ConditionType.class.getName());
     }

@@ -59,7 +59,6 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
             return resultList.get(0);
         }
     }
-
     public ColonyEntity find(Integer cp) {
         synchronized (JPAUtility.dbSynchro) {
             List<ColonyEntity> resultList = entityManager.createQuery("" +
@@ -118,7 +117,7 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
                     .map(this::find)
                     .collect(Collectors.toList());
         }
-        PlanetCache.put(code,colonies);
+        PlanetCache.put(code, colonies);
         return colonies;
     }
 }
