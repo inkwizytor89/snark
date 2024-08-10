@@ -587,6 +587,11 @@ public abstract class PlanetEntity extends IdEntity{
     }
 
     public Long getBuildingLevel(BuildingEnum building) {
+        Long level = buildingLevel(building);
+        return level == null ? 0 : level;
+    }
+
+    private Long buildingLevel(BuildingEnum building) {
         switch (building) {
             case metalMine: return metalMine;
             case crystalMine: return crystalMine;

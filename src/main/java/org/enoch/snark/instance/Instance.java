@@ -87,9 +87,9 @@ public class Instance {
         }
     }
 
-    public static ConfigMap getConfigMap(String tag) {
-        if(!propertiesMap.containsKey(tag)) return new ConfigMap();
-        return propertiesMap.get(tag);
+    public static ConfigMap getConfigMap(String name) {
+        if(!propertiesMap.containsKey(name)) return new ConfigMap();
+        return propertiesMap.get(name);
     }
 
     public static ConfigMap getMainConfigMap() {

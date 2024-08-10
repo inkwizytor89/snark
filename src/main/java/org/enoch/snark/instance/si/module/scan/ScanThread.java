@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class ScanThread extends AbstractThread {
 
     protected static final Logger LOG = Logger.getLogger(ScanThread.class.getName());
-    public static final String threadName = "scan";
+    public static final String threadType = "scan";
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
@@ -21,8 +21,8 @@ public class ScanThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ScanThread extends AbstractThread {
     }
 
     private void setWaitingScan() {
-        LOG.info(threadName + " still to scan " + notScanned.size());
+        LOG.info(threadType + " still to scan " + notScanned.size());
         for (int i = 0; i < 10; i++) {
             if (!notScanned.isEmpty()) {
                 FleetEntity fleet = FleetEntity.createSpyFleet(notScanned.poll());

@@ -32,15 +32,6 @@ import static org.enoch.snark.instance.si.module.ConfigMap.WEBDRIVER_PATH;
 public class GI {
     private static GI INSTANCE;
 
-    public static final String A_TAG = "a";
-    public static final String DIV_TAG = "div";
-    public static final String TR_TAG = "tr";
-    public static final String SPAN_TAG = "span";
-
-    public static final String HREF_ATTRIBUTE = "href";
-    public static final String TITLE_ATTRIBUTE = "title";
-    public static final String ID_ATTRIBUTE = "id";
-    public static final String CLASS_ATTRIBUTE = "class";
     public static final String TECHNOLOGIES = "technologies";
     public static WebDriver webDriver;
     private final PlayerDAO playerDAO;
@@ -74,16 +65,9 @@ public class GI {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("start-maximized"); // open Browser in maximized mode
         options.addArguments("disable-infobars"); // disabling infobars
-        options.addArguments("--disable-extensions"); // disabling extensions
-        options.addArguments("--disable-gpu"); // applicable to Windows os only
-        options.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
-        options.addArguments("--no-sandbox"); // Bypass OS security model
-        options.addArguments("--disable-in-process-stack-traces");
-        options.addArguments("--disable-logging");
-        options.addArguments("--log-level=3");
-        options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--disable-search-engine-choice-screen");
 
-        webDriver = new ChromeDriver();
+        webDriver = new ChromeDriver(options);
     }
 
     private static void closeWebDriver() {
@@ -344,7 +328,6 @@ public class GI {
         WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.name()));
         Long buildingLevel = getLevel(technologies, requirements.request.building.name());
         if(buildingLevel >= requirements.request.level) {
-            System.err.println(requirements + " already achieved");
             return true;
         }
         List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
@@ -352,7 +335,6 @@ public class GI {
             return false;
         }
         upgrades.get(0).click();
-        System.err.println(requirements + " upgrade");
         return true;
     }
 

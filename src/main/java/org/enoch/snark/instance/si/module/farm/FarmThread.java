@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class FarmThread extends AbstractThread {
 
-    public static final String threadName = "farm";
+    public static final String threadType = "farm";
     public static final String INDEX_COUNT_CONFIG = "index_count";
     public static final String SLOT_CONFIG = "slot";
     public static final String EXPLORATION_AREA_CONFIG = "exploration_area";
@@ -43,8 +43,8 @@ public class FarmThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -207,7 +207,7 @@ public class FarmThread extends AbstractThread {
         if(farms.size()-1 < endIndex) {
             endIndex = farms.size() - 1;
             farmIndex = indexCount - 1;
-            System.err.println("Error: "+threadName+"."+INDEX_COUNT_CONFIG+" is too high i result "+FARM_INDEX_CACHE+" is set to 0");
+            System.err.println("Error: "+ threadType +"."+INDEX_COUNT_CONFIG+" is too high i result "+FARM_INDEX_CACHE+" is set to 0");
         }
         cacheEntryDAO.setValue(FARM_INDEX_CACHE, Integer.toString((farmIndex + 1) % indexCount));
         return farms.subList(startIndex, Math.min(farms.size()-1, endIndex));
@@ -300,7 +300,7 @@ public class FarmThread extends AbstractThread {
     private boolean isSlotsToUseValid() {
         propertiesSlotToUse = map.getConfigInteger(SLOT_CONFIG, -1);
         if(propertiesSlotToUse < 0) {
-            int availableFleetCount = BaseSI.getInstance().getAvailableFleetCount(threadName);
+            int availableFleetCount = BaseSI.getInstance().getAvailableFleetCount(threadType);
             propertiesSlotToUse = availableFleetCount + propertiesSlotToUse;
         }
         return propertiesSlotToUse > 0;

@@ -5,7 +5,6 @@ import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.types.ShipEnum;
@@ -15,10 +14,7 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
@@ -29,7 +25,7 @@ import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class ExpeditionThread extends AbstractThread {
 
-    public static final String threadName = "expedition";
+    public static final String threadType = "expedition";
     public static final String BATTLE_EXTENSION = "battle_extension";
     public static final String MAX_DT = "max_dt";
 
@@ -41,8 +37,8 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -75,8 +71,8 @@ public class ExpeditionThread extends AbstractThread {
 //        if(stillWaitingForFleet()) return;
         if (areFreeSlotsForExpedition() && noWaitingExpedition()) {
             ColonyEntity colony = getSource();
-            String collect = expeditionSource.stream().map(PlanetEntity::toString).collect(Collectors.joining(", "));
-            System.err.println("lista expów: "+collect);
+//            String collect = expeditionSource.stream().map(PlanetEntity::toString).collect(Collectors.joining(", "));
+//            System.err.println("lista expów: "+collect);
             if (colony == null) return;
             colony = ColonyDAO.getInstance().fetch(colony);
             FleetEntity expedition = buildExpeditionFleet(colony);
@@ -100,7 +96,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        return commander.noBlockingHashInQueue(threadName);
+        return commander.noBlockingHashInQueue(threadType);
     }
 
     private boolean areFreeSlotsForExpedition() {
@@ -147,7 +143,7 @@ public class ExpeditionThread extends AbstractThread {
         expeditionSource.stream()
                 .filter(colonyEntity -> DateUtil.isExpired2H(colonyEntity.updated))
                 .forEach(col -> {
-                    new OpenPageCommand(FLEETDISPATCH, col).hash(threadName+"_"+col).push();
+                    new OpenPageCommand(FLEETDISPATCH, col).hash(threadType +"_"+col).push();
                 });
         System.err.println("reloading expedition points");
         SleepUtil.secondsToSleep(expeditionSource.size() * 5L);
@@ -191,7 +187,7 @@ public class ExpeditionThread extends AbstractThread {
     private void setExpeditionReadyToStart(FleetEntity expedition) {
         boolean battleExtension = map.getConfigBoolean(BATTLE_EXTENSION, true);
         ExpeditionFleetCommand expeditionFleetCommand = new ExpeditionFleetCommand(expedition, battleExtension);
-        expeditionFleetCommand.hash(threadName);
+        expeditionFleetCommand.hash(threadType);
         expeditionFleetCommand.push();
     }
 }

@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class CollectorThread extends AbstractThread {
 
-    public static final String threadName = "collector";
+    public static final String threadType = "collector";
     public static final String COLLECTION_DESTINATION = "coll_dest";
     public static final String FLEET_SIZE = "fleet_size";
 
@@ -31,8 +31,8 @@ public class CollectorThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class CollectorThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(notEnoughReadyPlanets()) { System.out.println(threadName+": not enough ready planets - sleep");SleepUtil.secondsToSleep(600L); return;}
+        if(notEnoughReadyPlanets()) { System.out.println(threadType +": not enough ready planets - sleep");SleepUtil.secondsToSleep(600L); return;}
         if(isCollectingOngoing()) return;
 
         ColonyEntity destination = getCollectionDestinationFromConfig();
@@ -70,7 +70,7 @@ public class CollectorThread extends AbstractThread {
 
         SendFleetCommand collecting = new SendFleetCommand(fleet);
         collecting.promise().setResources(resources);
-        collecting.hash(threadName);
+        collecting.hash(threadType);
         collecting.push();
     }
 
@@ -109,7 +109,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean isCollectingOngoing() {
-        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHashInQueue(threadName) && noActiveCollectingInDB());
+        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHashInQueue(threadType) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {

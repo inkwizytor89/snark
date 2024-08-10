@@ -5,7 +5,6 @@ import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.gi.types.ShipEnum;
 import org.enoch.snark.instance.commander.QueueRunType;
@@ -13,24 +12,19 @@ import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
-import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PROBE_SWAM;
 
 public class UpdateThread extends AbstractThread {
 
-    public static final String threadName = "update";
+    public static final String threadType = "update";
     public static final String REFRESH = "refresh";
     public int updateTimeInMinutes = 12;
 
@@ -49,8 +43,8 @@ public class UpdateThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -62,7 +56,7 @@ public class UpdateThread extends AbstractThread {
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
         boolean navigatorExpired = isNavigatorExpired();
-        boolean b = commander.noBlockingHashInQueue(threadName);
+        boolean b = commander.noBlockingHashInQueue(threadType);
         log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
         if(navigatorExpired && b) {
             updateState();
@@ -80,11 +74,11 @@ public class UpdateThread extends AbstractThread {
 
     public static void updateState() {
         new LoadColoniesCommand()
-                .hash(threadName+"_LoadColoniesCommand")
+                .hash(threadType +"_LoadColoniesCommand")
                 .setRunType(QueueRunType.MAJOR)
                 .push();
         new UpdateFleetEventsCommand()
-                .hash(threadName+"_UpdateFleetEventsCommand")
+                .hash(threadType +"_UpdateFleetEventsCommand")
                 .setRunType(QueueRunType.MAJOR)
                 .push();
     }

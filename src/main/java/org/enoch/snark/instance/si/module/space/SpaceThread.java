@@ -21,7 +21,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public class SpaceThread extends AbstractThread {
 
-    public static final String threadName = "space";
+    public static final String threadType = "space";
     protected static final Logger LOG = Logger.getLogger( SpaceThread.class.getName());
     public static final int DATA_COUNT = 10;
 
@@ -34,8 +34,8 @@ public class SpaceThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override

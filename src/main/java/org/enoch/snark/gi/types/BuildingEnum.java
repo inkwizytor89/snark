@@ -2,7 +2,6 @@ package org.enoch.snark.gi.types;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.enoch.snark.gi.types.UrlComponent.*;
 
@@ -29,7 +28,11 @@ public enum BuildingEnum {
     terraformer,
     repairDock,
 
-    // Lifeform
+    moonbase,
+    sensorPhalanx,
+    jumpGate,
+
+// Lifeform
 
     // Humans
     lifeformTech11101,
@@ -72,6 +75,7 @@ public enum BuildingEnum {
     lifeformTech13110,
     lifeformTech13111,
     lifeformTech13112,
+
     //Kaelesh
     lifeformTech14101,
     lifeformTech14102,
@@ -88,8 +92,12 @@ public enum BuildingEnum {
 
     public static List<BuildingEnum> baseBuildings() {
         return Arrays.stream(BuildingEnum.values())
-                .filter(buildingEnum -> !buildingEnum.name().contains("lifeform"))
+                .filter(buildingEnum -> !buildingEnum.isLifeform())
                 .toList();
+    }
+
+    public boolean isLifeform() {
+        return name().contains("lifeform");
     }
 
     public UrlComponent getPage() {

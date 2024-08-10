@@ -141,7 +141,7 @@ public class ConfigMap extends HashMap<String, String> {
 
     public boolean isOn() {
         List<String> configArray = getConfigArray(TIME);
-        if(configArray == null || configArray.size() == 0)  return true;
+        if(configArray == null || configArray.size() == 0)  return false;
         if(configArray.size() == 1 && configArray.get(0).contains(ON))  return true;
         if(configArray.size() == 1 && configArray.get(0).contains(OFF))  return false;
         if(configArray.size() == 1 && configArray.get(0).equals(StringUtils.EMPTY))  return false;

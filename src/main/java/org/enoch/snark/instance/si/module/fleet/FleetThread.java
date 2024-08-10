@@ -1,7 +1,5 @@
 package org.enoch.snark.instance.si.module.fleet;
 
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
@@ -30,7 +28,7 @@ public class FleetThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
+    protected String getThreadType() {
         return threadName;
     }
 

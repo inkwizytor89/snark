@@ -21,7 +21,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
 
 public class FleetSaveThread extends AbstractThread {
 
-    public static final String threadName = "fleetSave";
+    public static final String threadType = "fleetSave";
     public static final int SOURCE_INDEX = 0;
     public static final int SPEED_INDEX = 1;
     public static final int DESTINATION_INDEX = 2;
@@ -33,8 +33,8 @@ public class FleetSaveThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class FleetSaveThread extends AbstractThread {
 //    }
 
     private String getColonizationCode(FleetEntity fleet) {
-        return threadName+fleet.getDestination();
+        return threadType +fleet.getDestination();
     }
 
     private boolean isColonyStillBlocked(ColonyEntity source) {

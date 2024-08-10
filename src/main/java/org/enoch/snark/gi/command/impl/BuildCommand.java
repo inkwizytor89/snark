@@ -31,6 +31,7 @@ public class BuildCommand extends AbstractCommand {
         this.requirements = requirements;
         queueManger = QueueManger.getInstance();
         this.gi = GI.getInstance();
+        hash("build_"+colony+"_"+requirements);
     }
 
     @Override

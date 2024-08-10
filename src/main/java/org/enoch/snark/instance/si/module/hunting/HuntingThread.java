@@ -16,7 +16,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.HIGH_SCORE_PAGES;
 
 public class HuntingThread extends AbstractThread {
 
-    public static final String threadName = "hunting";
+    public static final String threadType = "hunting";
     public static final int UPDATE_TIME_IN_SECONDS = 10;
 
     private List<PlayerEntity> targets = new ArrayList<>();
@@ -26,8 +26,8 @@ public class HuntingThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override

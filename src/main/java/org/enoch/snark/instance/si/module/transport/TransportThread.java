@@ -21,15 +21,15 @@ import static org.enoch.snark.instance.model.to.Resources.everything;
 
 public class TransportThread extends AbstractThread {
 
-    public static final String threadName = "transport";
+    public static final String threadType = "transport";
 
     public TransportThread(ConfigMap map) {
         super(map);
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TransportThread extends AbstractThread {
             if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {
                 OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, colony);
                 command.hash(command.toString()).push();
-                System.out.println(threadName+" first check "+command.toString());
+                System.out.println(threadType +" first check "+command.toString());
                 continue;
             }
 
@@ -65,7 +65,7 @@ public class TransportThread extends AbstractThread {
             if(resources.isCountMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
                 FleetEntity fleetEntity = creteFleetToTransport(colony);
                 SendFleetCommand command = new SendFleetCommand(fleetEntity);
-                command.hash(threadName);
+                command.hash(threadType);
                 command.promise().setResources(everything);
                 command.push();
             }

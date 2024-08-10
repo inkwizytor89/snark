@@ -4,9 +4,17 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.BaseGameInfoGIR;
+import org.enoch.snark.gi.GI;
 import org.enoch.snark.instance.model.action.DiffLists;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.v122.network.Network;
+import org.openqa.selenium.devtools.v122.network.model.RequestId;
+import org.openqa.selenium.devtools.v122.network.model.Response;
 
 import javax.transaction.Transactional;
+
+import java.util.Optional;
 
 import static org.enoch.snark.gi.types.UrlComponent.*;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;

@@ -8,7 +8,6 @@ import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.model.action.FleetBuilder;
-import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.Navigator;
@@ -30,8 +29,8 @@ import static org.enoch.snark.instance.model.to.Resources.everything;
 
 public class DefenseThread extends AbstractThread {
 
+    public static final String threadType = "defense";
     public static final String ALARM = "alarm";
-    public static final String threadName = "defense";
     public static final int UPDATE_TIME_IN_SECONDS = 10;
     public static final String LIMIT = "limit";
 
@@ -43,8 +42,8 @@ public class DefenseThread extends AbstractThread {
     }
 
     @Override
-    public String getThreadName() {
-        return threadName;
+    protected String getThreadType() {
+        return threadType;
     }
 
     @Override
@@ -75,7 +74,7 @@ public class DefenseThread extends AbstractThread {
         System.err.println("incomingAction "+ incomingAction.size());
 
 
-        if(!incomingAction.isEmpty() && commander.noBlockingHashInQueue(threadName)) {
+        if(!incomingAction.isEmpty() && commander.noBlockingHashInQueue(threadType)) {
             incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
             Set<Planet> attackedPlanets = incomingAction.stream()
                     .map(EventFleet::getTo)
@@ -143,7 +142,7 @@ public class DefenseThread extends AbstractThread {
         fleetEntity.code = DEFENCE_CODE;
 
         SendFleetCommand command = new SendFleetCommand(fleetEntity);
-        command.hash(threadName+sourceEntity);
+        command.hash(threadType +sourceEntity);
         command.promise().setResources(everything);
         command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
         command.setRunType(CRITICAL);

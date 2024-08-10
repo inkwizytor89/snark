@@ -1,7 +1,8 @@
 package org.enoch.snark.instance.commander;
 
 import org.enoch.snark.common.Debug;
-import org.enoch.snark.common.RunningStatus;
+import org.enoch.snark.common.RunningProcessor;
+import org.enoch.snark.common.RunningState;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.gi.GI;
@@ -25,6 +26,7 @@ public class Commander extends Thread {
 
     private static Commander INSTANCE;
     private final CommandDeque commandDeque = new CommandDeque();
+    private final RunningProcessor runningProcessor = new RunningProcessor();
 
     private final GISession session;
     private boolean isRunning = true;
@@ -58,10 +60,8 @@ public class Commander extends Thread {
         while(true) {
             try {
                 Instance.updatePropertiesMap();
-                RunningStatus runningStatus = createRunningStatus();
-                isRunning = createRunningStatus().shouldRunning();
-                runningStatus.log(Commander.class.getName());
-                if(!runningStatus.shouldRunning()) continue;
+                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
+                if(!isRunning) continue;
 
                 session.reopenServerIfSessionIsOver();
 
@@ -86,10 +86,11 @@ public class Commander extends Thread {
         }
     }
 
-    public RunningStatus createRunningStatus() {
-        boolean stopRunning = Instance.getMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
-        boolean runningStatus = !stopRunning && Instance.getMainConfigMap().isOn();
-        return new RunningStatus(isRunning, runningStatus);
+    public RunningProcessor updateRunningStatus() {
+        boolean isOn = Instance.getMainConfigMap().isOn();
+        boolean shouldStop = Instance.getMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
+        return runningProcessor.update(isOn, shouldStop)
+                .logChangedStatus(Commander.class.getName());
     }
 
     private boolean isSomethingAttacking() {
