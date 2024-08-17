@@ -72,7 +72,7 @@ public class Instance {
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();
-        getSources().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).push());
+        getSources().forEach(colony -> new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push());
     }
 
     public void removePlanet(Planet target) {

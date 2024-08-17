@@ -68,7 +68,7 @@ public class BuildCommand extends AbstractCommand {
         Long seconds = GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
         if(seconds != null) {
             System.out.println(colony+" build "+ requirements.request + ", refresh after "+ seconds);
-            setNext(new OpenPageCommand(requirements.request.building.getPage(), colony), seconds);
+            setNext(new OpenPageCommand(requirements.request.building.getPage(), colony).sourceHash(this.getClass().getSimpleName()), seconds);
         }
     }
 

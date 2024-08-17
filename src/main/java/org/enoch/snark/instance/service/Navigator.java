@@ -71,7 +71,7 @@ public class Navigator {
                 .forEach(movement -> {
             Planet toUpdate = THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom();
             ColonyEntity colony = ColonyDAO.getInstance().find(toUpdate);
-            if(colony != null) new OpenPageCommand(FLEETDISPATCH, colony).push();
+            if(colony != null) new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
         });
     }
 

@@ -72,7 +72,7 @@ public abstract class AbstractThread extends Thread {
         if(map.containsKey(SOURCE)) {
             ColonyDAO.getInstance().getColonies(map.getConfig(SOURCE)).forEach(colony -> {
                 if(DateUtil.isExpired2H(colony.updated))
-                    new OpenPageCommand(FLEETDISPATCH, colony).push();
+                    new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
             });
         }
     }

@@ -58,11 +58,11 @@ public class LoadColoniesCommand extends AbstractCommand {
     }
 
     public void updateColony(ColonyEntity colony) {
-        new OpenPageCommand(SUPPLIES, colony).push();
-        new OpenPageCommand(FACILITIES, colony).push();
-        if(colony.is(PLANET)) new OpenPageCommand(LFBUILDINGS, colony).push();
-        new OpenPageCommand(FLEETDISPATCH, colony).push();
-        new OpenPageCommand(DEFENSES, colony).push();
+        new OpenPageCommand(SUPPLIES, colony).sourceHash(this.getClass().getSimpleName()).push();
+        new OpenPageCommand(FACILITIES, colony).sourceHash(this.getClass().getSimpleName()).push();
+        if(colony.is(PLANET)) new OpenPageCommand(LFBUILDINGS, colony).sourceHash(this.getClass().getSimpleName()).push();
+        new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
+        new OpenPageCommand(DEFENSES, colony).sourceHash(this.getClass().getSimpleName()).push();
     }
 
     @Override

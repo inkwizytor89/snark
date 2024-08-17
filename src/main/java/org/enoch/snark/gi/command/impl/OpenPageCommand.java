@@ -17,8 +17,13 @@ public class OpenPageCommand extends AbstractCommand {
 
     @Override
     public boolean execute() {
+//        System.err.println(hash()+": Open "+component+" on "+ colony);
             GIUrl.openComponent(component, colony);
         return true;
+    }
+
+    public AbstractCommand sourceHash(String sourceHash) {
+        return super.hash(sourceHash+"_"+component+"_"+colony);
     }
 
     @Override
