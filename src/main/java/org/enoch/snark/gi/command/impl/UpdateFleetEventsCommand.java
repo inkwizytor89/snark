@@ -1,6 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
-import org.enoch.snark.gi.GeneralGIR;
+import org.enoch.snark.gi.EventContentGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.service.Navigator;
@@ -18,7 +18,7 @@ public class UpdateFleetEventsCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         GIUrl.openComponent(FLEETDISPATCH, null);
-        List<EventFleet> eventFleetList = new GeneralGIR().readEventFleet();
+        List<EventFleet> eventFleetList = new EventContentGIR().readEventFleet();
         Navigator.getInstance().informAboutEventFleets(eventFleetList);
         return true;
     }

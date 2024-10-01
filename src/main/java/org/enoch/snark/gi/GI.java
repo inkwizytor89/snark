@@ -144,7 +144,8 @@ public class GI {
     }
 
     public void updateFleet(ColonyEntity colony) {
-        if (webDriver.findElements(By.id("warning")).size() == 0) {
+        List<WebElement> warnings = webDriver.findElements(By.id("warning"));
+        if (warnings.size() == 0) {
             WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
             colony.fighterLight = getAmount(technologies,"fighterLight");
             colony.fighterHeavy = getAmount(technologies,"fighterHeavy");
@@ -162,6 +163,10 @@ public class GI {
             colony.recycler = getAmount(technologies,"recycler");
             colony.espionageProbe = getAmount(technologies,"espionageProbe");
         } else {
+            String warningInfo = warnings.get(0).findElement(By.tagName("p")).getText();
+            if(warningInfo.contains(".")) //Obecnie flota toczy walkę.
+                throw new RuntimeException(colony+": The fleet is currently in combat.");
+            //Na tej planecie nie ma żadnych statków!
             colony.fighterLight = 0L;
             colony.fighterHeavy = 0L;
             colony.cruiser = 0L;

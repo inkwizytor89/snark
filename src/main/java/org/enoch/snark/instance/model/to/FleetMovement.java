@@ -27,4 +27,16 @@ public class FleetMovement {
         if(Mission.SPY.equals(mission)) return false;
         return FleetDirectionType.BACK == direction || Mission.STATIONED.equals(mission) || Mission.TRANSPORT.equals(mission);
     }
+
+    @Override
+    public String toString() {
+        return "FleetMovement{" +
+                "temporary=" + temporary +
+                ", from=" + from +
+                ", to=" + to +
+                ", arrivalTime=" + arrivalTime +
+                ", mission=" + mission +
+                ", direction=" + direction +
+                '}';
+    }
 }

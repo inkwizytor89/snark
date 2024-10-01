@@ -4,10 +4,7 @@ import org.enoch.snark.gi.types.BuildingEnum;
 import org.enoch.snark.instance.si.module.building.BuildingRequest;
 import org.enoch.snark.instance.si.module.building.list.lf.*;
 import org.enoch.snark.instance.si.module.building.list.moon.FastTeleport;
-import org.enoch.snark.instance.si.module.building.list.planet.Base;
-import org.enoch.snark.instance.si.module.building.list.planet.Custom;
-import org.enoch.snark.instance.si.module.building.list.planet.Mines;
-import org.enoch.snark.instance.si.module.building.list.planet.Small;
+import org.enoch.snark.instance.si.module.building.list.planet.*;
 
 import java.util.*;
 
@@ -18,15 +15,15 @@ public abstract class AbstractBuildingList {
 
     public static List<BuildingRequest> convert(List<String> listNames) {
         List<BuildingRequest> buildList = new ArrayList<>();
-        listNames.forEach(name -> buildList.addAll(convert(name.toLowerCase())));
+        listNames.forEach(name -> buildList.addAll(convert(name)));
         return buildList;
     }
 
     public static List<BuildingRequest> convert(String name) {
+        if(name.startsWith(DirectiveIV.code)) return new DirectiveIV(name).create();
         if(name.startsWith(Small.code)) return new Small(name).create();
         if(name.startsWith(Base.code)) return new Base(name).create();
         if(name.startsWith(Mines.code)) return new Mines(name).create();
-        if(name.startsWith(Custom.code)) return new Custom(name).create();
 
         if(name.startsWith(FastTeleport.code)) return new FastTeleport(name).create();
 
@@ -43,7 +40,7 @@ public abstract class AbstractBuildingList {
         if(name.startsWith(RocktalT1.code)) return new RocktalT1(name).create();
         if(name.startsWith(RocktalT2.code)) return new RocktalT2(name).create();
 
-        throw new IllegalStateException("Unknown building list "+name);
+        else return new Custom(name).create();
     }
 
     protected AbstractBuildingList(String code) {

@@ -24,7 +24,7 @@ public class MechaT3 extends AbstractBuildingList {
         ));
         buildingRequests.addAll(Arrays.asList(
                 new BuildingRequest(BuildingEnum.lifeformTech13108, 23),
-                new BuildingRequest(BuildingEnum.lifeformTech13109, 15)
+                new BuildingRequest(BuildingEnum.lifeformTech13109, 14)
         ));
 
         buildingRequests.addAll(Arrays.asList(

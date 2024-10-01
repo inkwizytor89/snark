@@ -16,10 +16,13 @@ import java.util.stream.Collectors;
 
 public class ConfigMap extends HashMap<String, String> {
 
+    public static final String MODULE = "module";
+    public static final String GLOBAL = "global";
     public static final String MAIN = "main";
 
     public static final String SERVER = "server";
     public static final String URL = "url";
+    public static final String HASH = "hash";
     public static final String LOGIN = "login";
     public static final String PASSWORD = "password";
     public static final String MODE = "mode";

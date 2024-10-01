@@ -1,10 +1,12 @@
 package org.enoch.snark.gi.types;
 
+import org.enoch.snark.common.HashDecoder;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.instance.Instance;
 
 import java.util.HashMap;
 
+import static org.enoch.snark.instance.si.module.ConfigMap.HASH;
 import static org.enoch.snark.instance.si.module.ConfigMap.URL;
 
 public class UrlBuilder {
@@ -39,7 +41,7 @@ public class UrlBuilder {
     }
 
     String get() {
-        StringBuilder builder = new StringBuilder(Instance.getMainConfigMap().getConfig(URL) + "?");
+        StringBuilder builder = new StringBuilder(getLink());
 
         if (page == null) throw new RuntimeException("Missing term to build url");
         builder.append(PAGE_TERM).append(page.name().toLowerCase());
@@ -53,4 +55,14 @@ public class UrlBuilder {
         GI.getInstance().getWebDriver().get(builder.toString());
         return builder.toString();
     }
+
+    private static String getLink() {
+        String config = Instance.getMainConfigMap().getConfig(URL, null);
+        if(config == null ) {
+            String hash = Instance.getMainConfigMap().getConfig(HASH);
+            config = HashDecoder.parseLink(hash);
+        }
+        return config + "?";
+    }
+
 }

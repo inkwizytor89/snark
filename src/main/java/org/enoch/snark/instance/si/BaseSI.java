@@ -4,15 +4,21 @@ import org.enoch.snark.common.RunningState;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.AbstractModule;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.PropertiesMap;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
 
 public class BaseSI extends Thread{
     private static BaseSI INSTANCE;
 
-    private final Map<String, AbstractThread> threadsMap= new HashMap<>();
+    private final Map<String, AbstractModule> modules= new HashMap<>();
 
     private BaseSI() {
         waitForEndOfInitialActions();
@@ -33,19 +39,17 @@ public class BaseSI extends Thread{
     @Override
     public void run() {
         while(true) {
-            HashMap<String, ConfigMap> globalMap = Instance.getPropertiesMap();
-            globalMap.forEach((name, map) -> {
-                if("main".equals(name)) return;
-                if(threadsMap.containsKey(name)) {
-                    threadsMap.get(name).updateMap(map);
+            PropertiesMap propertiesMap = Instance.getPropertiesMap();
+            propertiesMap.forEach((moduleName, moduleMap) -> {
+                if(modules.containsKey(moduleName)) {
+                    modules.get(moduleName).updateMap(moduleMap);
                 } else {
-                    AbstractThread thread = AbstractThread.create(map);
-                    threadsMap.put(name, thread);
-                    thread.start();
+                    AbstractModule module = AbstractModule.create(moduleName, moduleMap);
+                    modules.put(moduleName, module);
                 }
             });
-            threadsMap.entrySet().stream()
-                    .filter(entry -> !globalMap.containsKey(entry.getKey()))
+            modules.entrySet().stream()
+                    .filter(entry -> !propertiesMap.containsKey(entry.getKey()))
                     .forEach(thread -> thread.getValue().destroy());
             SleepUtil.secondsToSleep(10L);
         }
@@ -56,7 +60,9 @@ public class BaseSI extends Thread{
         if(fleetMax == 0) return 0;
 
         int fleetInUse = 0;
-        for(AbstractThread thread : threadsMap.values()) {
+        List<AbstractThread> threads = modules.values().stream()
+                .flatMap(abstractModule -> abstractModule.getThreadsMap().values().stream()).toList();
+        for(AbstractThread thread : threads) {
             if(RunningState.isRunning(thread.getActualState()) && !thread.getName().equals(withOutThreadName)) {
                 fleetInUse += thread.getRequestedFleetCount();
             }

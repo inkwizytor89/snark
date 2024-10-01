@@ -3,13 +3,17 @@ package org.enoch.snark.instance.si.module.defense;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.command.impl.RecallCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.gi.text.Msg;
 import org.enoch.snark.instance.model.action.FleetBuilder;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -18,6 +22,7 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,9 @@ public class DefenseThread extends AbstractThread {
     public static final String ALARM = "alarm";
     public static final int UPDATE_TIME_IN_SECONDS = 10;
     public static final String LIMIT = "limit";
+    public static final String EXAMPLE_TIME = "example_time";
+    public static final String EXAMPLE_COORDINATE = "example_coordinate";
+    public static final String RECALL = "recall";
 
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
@@ -85,50 +93,65 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
+        Long recallInSeconds = map.getConfigLong(RECALL, null);
         if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
-            sendToAnotherMoon(sourcePlanet);
+            SendFleetCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
+            if(sendFleetCommand == null) return;
+            if(recallInSeconds != null) {
+                FleetPromise promise = new FleetPromise();
+                promise.setMission(sendFleetCommand.fleet.mission);
+                promise.setSource(sendFleetCommand.fleet.source);
+                promise.setTarget(sendFleetCommand.fleet.getTarget());
+
+                sendFleetCommand.setNext(new RecallCommand(promise), recallInSeconds);
+            }
+            sendFleetCommand.push();
             return;
         }
         ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
-        if(sourceEntity.espionageProbe != null && sourceEntity.espionageProbe>0) {
-            sendOnSpy(sourceEntity);
+        SendFleetPromiseCommand sendFleetPromiseCommand = null;
+        if (sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0) {
+            sendFleetPromiseCommand = sendOnSpy(sourceEntity);
         } else {
-            sendOnHold(sourceEntity, Planet.parse("p[1:126:12]"));
+            // zle powinien leciec na agresora i zawrócić
+            sendFleetPromiseCommand = sendOnHold(sourceEntity, Planet.parse("p[1:1:8]"));
         }
+        if(recallInSeconds != null) {
+            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recallInSeconds);
+        }
+        sendFleetPromiseCommand.push();
     }
 
-    private void sendOnHold(ColonyEntity sourceEntity, Planet target) {
-        new FleetBuilder()
+    private SendFleetPromiseCommand sendOnHold(ColonyEntity sourceEntity, Planet target) {
+        return new FleetBuilder()
                 .from(sourceEntity)
                 .to(target.toString())
                 .mission(STOP)
                 .ships(ShipsMap.ALL_SHIPS)
                 .resources(everything)
                 .queue(CRITICAL)
-                .buildOne()
-                .push();
+                .buildOne();
     }
 
-    private void sendOnSpy(ColonyEntity sourceEntity) {
+    private SendFleetPromiseCommand sendOnSpy(ColonyEntity sourceEntity) {
         Planet target = sourceEntity.toPlanet();
         target.position = 16;
-        new FleetBuilder()
+        return new FleetBuilder()
                 .from(sourceEntity)
                 .to(target.toString())
                 .mission(SPY)
                 .ships(ShipsMap.ALL_SHIPS)
                 .resources(everything)
                 .queue(CRITICAL)
-                .buildOne()
-                .push();
+                .buildOne();
     }
 
-    private void sendToAnotherMoon(Planet sourcePlanet) {
+    private SendFleetCommand sendToAnotherMoon(Planet sourcePlanet) {
         System.err.println("Escape from planet "+ sourcePlanet);
         ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
         System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
         ShipsMap shipsMap = sourceEntity.getShipsMap();
-        if(shipsMap.isEmpty()) return;
+        if(shipsMap.isEmpty()) return null;
 
         FleetEntity fleetEntity = new FleetEntity();
         fleetEntity.source = sourceEntity;
@@ -146,7 +169,8 @@ public class DefenseThread extends AbstractThread {
         command.promise().setResources(everything);
         command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
         command.setRunType(CRITICAL);
-        command.push();
+
+        return command;
     }
 
     private ColonyEntity chooseDestination(Planet source) {
@@ -172,6 +196,30 @@ public class DefenseThread extends AbstractThread {
         )
         .filter(eventFleet -> Long.parseLong(eventFleet.detailsFleet) > limit || DESTROY.equals(eventFleet.mission))
         .collect(Collectors.toList());
+
+        putExampleFromConfig(limit);
+    }
+
+    private void putExampleFromConfig(Long limit) {
+        LocalTime exampleTime = map.getLocalTime(EXAMPLE_TIME, null);
+        if(exampleTime == null) return;
+
+        EventFleet exampleFleet = new EventFleet();
+        exampleFleet.isHostile = true;
+        exampleFleet.iconMovement = FleetDirectionType.THERE;
+        exampleFleet.detailsFleet = limit.toString();
+
+        LocalDateTime time = LocalDateTime.now();
+        time.withHour(exampleTime.getHour());
+        time.withMinute(exampleTime.getMinute());
+        exampleFleet.arrivalTime = time;
+
+        Planet destOrigin = map.getConfigPlanet(EXAMPLE_COORDINATE);
+        exampleFleet.destCoords = destOrigin.toString().substring(1);
+        exampleFleet.destFleet = destOrigin.type;
+
+        aggressorsEvents.add(exampleFleet);
+
     }
 
     private List<EventFleet> incomingAction(long aggressiveActionCount) {

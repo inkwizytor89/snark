@@ -1,5 +1,6 @@
 package org.enoch.snark.instance;
 
+import lombok.Getter;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
@@ -12,14 +13,17 @@ import org.enoch.snark.instance.si.BaseSI;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.PropertiesMap;
+import org.enoch.snark.instance.si.module.ModuleMap;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
+import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
 
 public class Instance {
 
@@ -27,7 +31,8 @@ public class Instance {
 
     private static Instance INSTANCE;
 
-    private static HashMap<String, ConfigMap> propertiesMap = new HashMap<>();
+    @Getter
+    private static PropertiesMap propertiesMap = new PropertiesMap();
     public static Commander commander;
     public static GISession session;
     public static Integer level = 1;
@@ -87,20 +92,17 @@ public class Instance {
         }
     }
 
-    public static ConfigMap getConfigMap(String name) {
-        if(!propertiesMap.containsKey(name)) return new ConfigMap();
-        return propertiesMap.get(name);
+    public static ConfigMap getMainConfigMap() {
+        return getMainConfigMap(MAIN);
     }
 
-    public static ConfigMap getMainConfigMap() {
-        return propertiesMap.get(ConfigMap.MAIN);
+    public static ConfigMap getMainConfigMap(String name) {
+        ModuleMap moduleMap = propertiesMap.get(GLOBAL);
+        if(!moduleMap.containsKey(name)) return new ConfigMap();
+        return moduleMap.get(name);
     }
 
     public static List<ColonyEntity> getSources() {
         return getMainConfigMap().getSources();
-    }
-
-    public static HashMap<String, ConfigMap> getPropertiesMap() {
-        return propertiesMap;
     }
 }

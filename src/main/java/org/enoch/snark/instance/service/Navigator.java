@@ -47,6 +47,7 @@ public class Navigator {
                 SleepUtil.sleep();
                 synchronized (movementsLock) {
                     List<FleetMovement> pulled = pollExpired();
+//                    pulled.forEach(System.err::println);
                     updateColonies(pulled);
                 }
             } catch (Throwable e) {
@@ -71,7 +72,9 @@ public class Navigator {
                 .forEach(movement -> {
             Planet toUpdate = THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom();
             ColonyEntity colony = ColonyDAO.getInstance().find(toUpdate);
-            if(colony != null) new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
+            if(colony != null) {
+                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
+            }
         });
     }
 
@@ -122,7 +125,7 @@ public class Navigator {
                 .temporary(true)
                 .from(sourcePlanet)
                 .to(targetPlanet)
-                .arrivalTime(fleet.visited)
+                .arrivalTime(fleet.visited.plusSeconds(8))
                 .mission(fleet.mission)
                 .direction(THERE)
                 .count(shipsCount)
@@ -130,9 +133,9 @@ public class Navigator {
         add(movementThere);
         if(fleet.mission.isComingBack()) {
             FleetMovement movementBack = movementThere.toBuilder()
-                    .from(targetPlanet)
-                    .to(sourcePlanet)
-                    .arrivalTime(fleet.back)
+                    .from(sourcePlanet)
+                    .to(targetPlanet)
+                    .arrivalTime(fleet.back.plusSeconds(8))
                     .direction(FleetDirectionType.BACK)
                     .count(shipsCount)
                     .build();

@@ -26,20 +26,30 @@ public class GISession {
 
     private void start() {
         isRunning = false;
-        boolean failAction = false;
+        long waitingSecounds = 30L;
+        long nexRound = 50L;
         while(!isRunning) {
-            if(failAction) SleepUtil.secondsToSleep(600L);
-            failAction = true;
+            try {
+                if (waitingSecounds > 30L) {
+                    System.err.println("Next attempt in "+nexRound);
+                    SleepUtil.secondsToSleep(nexRound);
+                }
+                long tmp = nexRound;
+                nexRound = nexRound + waitingSecounds;
+                waitingSecounds = tmp;
 
-            GI.reopenWebDriver();
-            gir = new SessionGIR();
-            gir.manageDriver();
-            if(!gir.applyCookies()) continue;
-            if(!gir.isCurrentUrlLobbyAccount()) {
-                if(!gir.signInWithRetry()) continue;
+                GI.reopenWebDriver();
+                gir = new SessionGIR();
+                gir.manageDriver();
+                if (!gir.applyCookies()) continue;
+                if (!gir.isCurrentUrlLobbyAccount()) {
+                    if (!gir.signInWithRetry()) continue;
+                }
+                if (!gir.openServer()) continue;
+                isRunning = true;
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
-            if(!gir.openServer()) continue;
-            isRunning = true;
         }
     }
 

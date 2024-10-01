@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
 import org.enoch.snark.common.*;
+import org.enoch.snark.common.time.GameRangeTime;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
@@ -22,8 +23,7 @@ import org.enoch.snark.instance.si.module.transport.TransportThread;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
-import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
-import static org.enoch.snark.instance.si.module.ConfigMap.TYPE;
+import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public abstract class AbstractThread extends Thread {
 
@@ -36,25 +36,28 @@ public abstract class AbstractThread extends Thread {
 
     protected int pause = 1;
     protected ConfigMap map;
+    private GameRangeTime rangeTime;
     private boolean isLive = true;
     protected Boolean debug;
 
     public static AbstractThread create(ConfigMap map) {
-        if(map.name().contains(UpdateThread.threadType)) return new UpdateThread(map);
-        else if(map.name().contains(DefenseThread.threadType)) return new DefenseThread(map);
-        else if(map.name().contains(FleetSaveThread.threadType)) return new FleetSaveThread(map);
-        else if(map.name().contains(ExpeditionThread.threadType)) return new ExpeditionThread(map);
-        else if(map.name().contains(BuildingThread.threadType)) return new BuildingThread(map);
-        else if(map.name().contains(SpaceThread.threadType)) return new SpaceThread(map);
-        else if(map.name().contains(ScanThread.threadType)) return new ScanThread(map);
-        else if(map.name().contains(FarmThread.threadType)) return new FarmThread(map);
-        else if(map.name().contains(CollectorThread.threadType)) return new CollectorThread(map);
-        else if(map.name().contains(TransportThread.threadType)) return new TransportThread(map);
-        else if(map.name().contains(HuntingThread.threadType)) return new HuntingThread(map);
+        String name = map.name();
+        if(name.contains(UpdateThread.threadType)) return new UpdateThread(map);
+        else if(name.contains(DefenseThread.threadType)) return new DefenseThread(map);
+        else if(name.contains(FleetSaveThread.threadType)) return new FleetSaveThread(map);
+        else if(name.contains(ExpeditionThread.threadType)) return new ExpeditionThread(map);
+        else if(name.contains(BuildingThread.threadType)) return new BuildingThread(map);
+        else if(name.contains(SpaceThread.threadType)) return new SpaceThread(map);
+        else if(name.contains(ScanThread.threadType)) return new ScanThread(map);
+        else if(name.contains(FarmThread.threadType)) return new FarmThread(map);
+        else if(name.contains(CollectorThread.threadType)) return new CollectorThread(map);
+        else if(name.contains(TransportThread.threadType)) return new TransportThread(map);
+        else if(name.contains(HuntingThread.threadType)) return new HuntingThread(map);
         else return new FleetThread(map);
     }
 
     public AbstractThread(ConfigMap map) {
+        rangeTime = new GameRangeTime(OFF);
         updateMap(map);
         instance = Instance.getInstance();
         commander = Commander.getInstance();
@@ -83,8 +86,8 @@ public abstract class AbstractThread extends Thread {
     public void run() {
         super.run();
         while(isLive) {
-            RunningState actualState = runningProcessor.update(map.isOn(), pauseProcessing())
-                    .logChangedStatus("Thread " + map.name(), map)
+            RunningState actualState = runningProcessor.update(rangeTime.isOn(), pauseProcessing())
+                    .logChangedStatus("Thread " + map.name(),rangeTime, " ", map)
                     .getActualState();
             if(RunningState.STARTING.equals(actualState)) onStart();
 
@@ -114,6 +117,7 @@ public abstract class AbstractThread extends Thread {
     public void updateMap(ConfigMap map) {
         map.put(TYPE, getThreadType());
         this.map = map;
+        rangeTime.update(map.getConfig(TIME, OFF));
     }
 
     public RunningState getActualState() {
