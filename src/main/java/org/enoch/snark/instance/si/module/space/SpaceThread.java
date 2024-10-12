@@ -24,13 +24,14 @@ public class SpaceThread extends AbstractThread {
     public static final String threadType = "space";
     protected static final Logger LOG = Logger.getLogger( SpaceThread.class.getName());
     public static final int DATA_COUNT = 10;
+    private int threadPause = 300;
 
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
     private List<GalaxyEntity> galaxyToView = new ArrayList<>();
 
     public SpaceThread(ConfigMap map) {
         super(map);
-        pause = 300;
+        threadPause = 300;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return threadPause;
     }
 
     @Override

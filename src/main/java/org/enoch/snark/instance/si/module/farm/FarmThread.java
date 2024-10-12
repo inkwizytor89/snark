@@ -37,6 +37,7 @@ public class FarmThread extends AbstractThread {
     private Integer propertiesSlotToUse;
     private Integer explorationArea;
     private ColonyPlaner planer;
+    private Integer threadPause = SHORT_PAUSE;
 
     public FarmThread(ConfigMap map) {
         super(map);
@@ -49,7 +50,7 @@ public class FarmThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return threadPause;
     }
 
     @Override
@@ -80,7 +81,7 @@ public class FarmThread extends AbstractThread {
 
     @Override
     public void onStep() {
-        pause = SHORT_PAUSE;
+        threadPause = SHORT_PAUSE;
         if(!isSlotsToUseValid()) return;
 
         spyCacheEntry = cacheEntryDAO.getCacheEntryNotNull(SPY_CACHE_CODE);
@@ -92,7 +93,7 @@ public class FarmThread extends AbstractThread {
             planer = new ColonyPlaner(typeReadyColony());
             if(!createSpyWave()) {
                 System.out.println("Farm thread has empty spy wave than waiting 5 min and try again");
-                pause = LONG_PAUSE;
+                threadPause = LONG_PAUSE;
                 return;
             }
         }

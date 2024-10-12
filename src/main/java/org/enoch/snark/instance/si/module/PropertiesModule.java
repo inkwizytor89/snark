@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 import static org.enoch.snark.instance.si.module.ConfigMap.TIME;
@@ -75,6 +76,10 @@ public abstract class PropertiesModule extends AbstractModule{
     }
 
     private static Collection<String> extractKeysFromMainConfigMaps(ModuleMap moduleMap) {
-        return moduleMap.containsKey(MAIN) ? moduleMap.get(MAIN).keySet() : new ArrayList<>();
+        Collection<String> keys = moduleMap.containsKey(MAIN) ? moduleMap.get(MAIN).keySet() : new ArrayList<>();
+        return keys.stream()
+                .filter(key -> !NAME.equals(key))
+                .filter(key -> !TIME.equals(key))
+                .toList();
     }
 }

@@ -13,6 +13,7 @@ public class ScanThread extends AbstractThread {
 
     protected static final Logger LOG = Logger.getLogger(ScanThread.class.getName());
     public static final String threadType = "scan";
+    private int threadPause = 150;
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
@@ -27,7 +28,7 @@ public class ScanThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return threadPause;
     }
 
     @Override
@@ -44,7 +45,7 @@ public class ScanThread extends AbstractThread {
     @Override
     protected void onStep() {
         if(!loadNotScannedTargets()) {
-            pause = 600;
+            threadPause = 600;
             return;
         }
         if(commander.notingToPool()) {
@@ -53,7 +54,7 @@ public class ScanThread extends AbstractThread {
     }
 
     private boolean loadNotScannedTargets() {
-        pause = 150;
+        threadPause = 150;
         if(notScanned.isEmpty()) {
             notScanned = new LinkedList<>(targetDAO.findNotScanned());
         }

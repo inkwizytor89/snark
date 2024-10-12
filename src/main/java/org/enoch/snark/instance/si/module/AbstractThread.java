@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
 import org.enoch.snark.common.*;
+import org.enoch.snark.common.time.GameDuration;
 import org.enoch.snark.common.time.GameRangeTime;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -34,9 +35,10 @@ public abstract class AbstractThread extends Thread {
     protected final FleetDAO fleetDAO;
     protected final TargetDAO targetDAO;
 
-    protected int pause = 1;
     protected ConfigMap map;
-    private GameRangeTime rangeTime;
+    private GameRangeTime threadTime;
+    private GameRangeTime moduleTime;
+    protected GameDuration pause = new GameDuration("1S");
     private boolean isLive = true;
     protected Boolean debug;
 
@@ -57,7 +59,8 @@ public abstract class AbstractThread extends Thread {
     }
 
     public AbstractThread(ConfigMap map) {
-        rangeTime = new GameRangeTime(OFF);
+        moduleTime = new GameRangeTime(OFF);
+        threadTime = new GameRangeTime(OFF);
         updateMap(map);
         instance = Instance.getInstance();
         commander = Commander.getInstance();
@@ -86,8 +89,8 @@ public abstract class AbstractThread extends Thread {
     public void run() {
         super.run();
         while(isLive) {
-            RunningState actualState = runningProcessor.update(rangeTime.isOn(), pauseProcessing())
-                    .logChangedStatus("Thread " + map.name(),rangeTime, " ", map)
+            RunningState actualState = runningProcessor.update(isOn(), pauseProcessing())
+                    .logChangedStatus("Thread " + map.name(), threadTime, " ", threadTime, " ", map)
                     .getActualState();
             if(RunningState.STARTING.equals(actualState)) onStart();
 
@@ -99,25 +102,32 @@ public abstract class AbstractThread extends Thread {
                     runningProcessor.logChangedStatus("Thread " + map.name(), map);
                     e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(Long.valueOf(getPause()));
+                SleepUtil.secondsToSleep(getPause());
             }
             else SleepUtil.secondsToSleep(60L);
         }
         System.err.println("Destroy "+map.name());
     }
 
+    private boolean isOn() {
+        return threadTime.isOn() && moduleTime.isOn();
+    }
+
     protected boolean pauseProcessing() {
         return !commander.isRunning();
     }
 
-    private int getPause() {
-        return map.getConfigInteger(ConfigMap.PAUSE, getPauseInSeconds());
+    private long getPause() {
+        String pauseInSecondsInput = getPauseInSeconds()+"S";
+        pause.update(map.getConfig(ConfigMap.PAUSE, pauseInSecondsInput));
+        return pause.getSeconds();
     }
 
     public void updateMap(ConfigMap map) {
         map.put(TYPE, getThreadType());
+        moduleTime.update(map.getConfig(MODULE_TIME, OFF));
+        threadTime.update(map.getConfig(TIME, OFF));
         this.map = map;
-        rangeTime.update(map.getConfig(TIME, OFF));
     }
 
     public RunningState getActualState() {

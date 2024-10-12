@@ -27,6 +27,7 @@ public class UpdateThread extends AbstractThread {
     public static final String threadType = "update";
     public static final String REFRESH = "refresh";
     public int updateTimeInMinutes = 12;
+    private int threadPause = 10;
 
     private Navigator navigator;
     private List<EventFleet> events;
@@ -39,7 +40,7 @@ public class UpdateThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         navigator = Navigator.getInstance();
-        pause = 10;
+        threadPause = 10;
     }
 
     @Override
@@ -49,7 +50,7 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return threadPause;
     }
 
     @Override

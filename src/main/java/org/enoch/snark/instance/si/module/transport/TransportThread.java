@@ -22,6 +22,7 @@ import static org.enoch.snark.instance.model.to.Resources.everything;
 public class TransportThread extends AbstractThread {
 
     public static final String threadType = "transport";
+    private int threadPause = 60;
 
     public TransportThread(ConfigMap map) {
         super(map);
@@ -34,7 +35,7 @@ public class TransportThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return threadPause;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class TransportThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        pause = 60;
+        threadPause = 60;
         List<ColonyEntity> sources = map.getSources();
         for(ColonyEntity colony : sources) {
 

@@ -1,12 +1,15 @@
 package org.enoch.snark.instance.si.module;
 
 import lombok.Getter;
+import org.enoch.snark.instance.si.module.template.BuildModule;
+import org.enoch.snark.instance.si.module.template.CleanPlanetsModule;
+import org.enoch.snark.instance.si.module.template.SleepModule;
+import org.enoch.snark.instance.si.module.template.TestModule;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
-import static org.enoch.snark.instance.si.module.ConfigMap.TIME;
 
 @Getter
 public abstract class AbstractModule {
@@ -18,6 +21,12 @@ public abstract class AbstractModule {
         if(moduleName.equals(GLOBAL)) return new Module(map);
         else if (moduleName.equals(CleanPlanetsModule.NAME))
             return new CleanPlanetsModule(map);
+        else if (moduleName.equals(SleepModule.NAME))
+            return new CleanPlanetsModule(map);
+        else if (moduleName.equals(BuildModule.NAME))
+            return new CleanPlanetsModule(map);
+        else if (moduleName.equals(TestModule.NAME))
+            return new TestModule(map);
         else return null;
     }
 
@@ -30,6 +39,7 @@ public abstract class AbstractModule {
         ModuleMap actualMap = overrideBaseMap(moduleMap);
         actualMap.forEach((name, configMap) -> {
             if(MAIN.equals(name)) return;
+            configMap.put("module_time", actualMap.get(MAIN).get(TIME));
             if(threadsMap.containsKey(name)) {
                 threadsMap.get(name).updateMap(configMap);
             } else {

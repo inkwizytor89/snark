@@ -43,7 +43,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     protected int getPauseInSeconds() {
-        return pause;
+        return 8;
     }
 
     @Override
@@ -54,7 +54,6 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        pause = 8;
     }
 
     private void chooseColoniesForExpeditionsStart() {

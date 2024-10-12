@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.NumberUtil;
+import org.enoch.snark.common.time.GameDuration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
@@ -29,6 +30,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_PATH = "driver";
 
+    public static final String MODULE_TIME = "module_time";
     public static final String TIME = "time";
     public static final String TAG = "tag";
     public static final String PAUSE = "pause";
@@ -183,7 +185,9 @@ public class ConfigMap extends HashMap<String, String> {
             System.err.println("Missing name in ConfigMap");
             put(NAME, "Missing name in ConfigMap");
         }
-        return this.get(NAME);
+        String moduleName = this.get(MODULE);
+        if(GLOBAL.equals(moduleName)) return this.get(NAME);
+        else return moduleName + "."+this.get(NAME);
     }
 
     public List<ColonyEntity> getSources() {
