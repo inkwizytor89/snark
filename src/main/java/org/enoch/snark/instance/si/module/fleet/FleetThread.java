@@ -58,6 +58,7 @@ public class FleetThread extends AbstractThread {
                 .resources(map.getConfigResources(RESOURCES, nothing))
                 .leaveResources(map.getConfigResources(LEAVE_RESOURCES, nothing))
                 .speed(map.getConfigLong(SPEED, null))
+                .recall(map.getDuration(RECALL, null))
                 .queue(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())))
                 .hashPrefix(map.name())
                 .buildAll();

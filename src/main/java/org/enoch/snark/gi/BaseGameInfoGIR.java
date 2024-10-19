@@ -21,8 +21,7 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
 
 //        WebElement myPlanets = wd.findElement(By.id("myPlanets"));
-        List<WebElement> coloniesWebElements = new WebDriverWait(wd, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(wd.findElement(By.id("planetList")), By.tagName(DIV_TAG)));
+        List<WebElement> coloniesWebElements = wd.findElement(By.id("planetList")).findElements(By.xpath("*"));
 
         for(WebElement colonyWebElement : coloniesWebElements) {
             ColonyEntity colonyEntity = new ColonyEntity();

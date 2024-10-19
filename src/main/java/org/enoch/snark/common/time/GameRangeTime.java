@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
-public class GameRangeTime extends InputUpdater {
+public class GameRangeTime extends InputUpdater<Boolean> {
     private List<RangeTime> activationTimes = new ArrayList<>();
 
     public GameRangeTime(String input) {
@@ -27,18 +27,19 @@ public class GameRangeTime extends InputUpdater {
             timeList.forEach(singleRangeInput -> {
                 String[] vars = singleRangeInput.split("-");
                 if (vars.length == 2) {
-                    LocalTime start = new GameTime(vars[0]).getTime();
-                    LocalTime end = new GameTime(vars[1]).getTime();
+                    LocalTime start = new GameTime(vars[0]).getValue();
+                    LocalTime end = new GameTime(vars[1]).getValue();
                     activationTimes.add(new RangeTime(start, end));
                 }
             });
         }
+        if(activationTimes == null) value = true;
+        else if(activationTimes.isEmpty()) value = false;
+        else value = activationTimes.stream().anyMatch(RangeTime::isOn);
     }
 
     public boolean isOn() {
-        if(activationTimes == null) return true;
-        if(activationTimes.isEmpty()) return false;
-        return activationTimes.stream().anyMatch(RangeTime::isOn);
+        return getValue();
     }
 
     @Override

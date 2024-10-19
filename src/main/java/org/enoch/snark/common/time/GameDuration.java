@@ -3,10 +3,9 @@ package org.enoch.snark.common.time;
 import java.time.Duration;
 import java.util.Random;
 
-public class GameDuration extends InputUpdater {
+public class GameDuration extends ParsedByInput<Duration> {
 
     public static final String PT = "PT";
-    private Duration duration;
 
     public GameDuration(String input) {
         super(input);
@@ -19,11 +18,11 @@ public class GameDuration extends InputUpdater {
     @Override
     public void setUp() {
         String[] durationParts = input.split("\\?");
-        if(durationParts.length == 1) duration = Duration.parse(PT+input);
+        if(durationParts.length == 1) value = Duration.parse(PT+input);
         else if (input.startsWith("?")) {
-            duration = calculateRandom(0L, Duration.parse(PT +durationParts[1]).getSeconds());
+            value = calculateRandom(0L, Duration.parse(PT +durationParts[1]).getSeconds());
         } else {
-            duration = calculateRandom(Duration.parse(PT+durationParts[0]).getSeconds(),
+            value = calculateRandom(Duration.parse(PT+durationParts[0]).getSeconds(),
                     Duration.parse(PT+durationParts[1]).getSeconds());
         }
     }
@@ -31,9 +30,5 @@ public class GameDuration extends InputUpdater {
     private Duration calculateRandom(long from, long to) {
         Random random = new Random();
         return Duration.ofSeconds(random.nextLong(to - from) + from);
-    }
-
-    public long getSeconds() {
-        return duration.getSeconds();
     }
 }

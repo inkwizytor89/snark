@@ -70,7 +70,7 @@ public class Commander extends Thread {
                 }
 
                 resolve(commandDeque.pool());
-                SleepUtil.sleep();
+                SleepUtil.pause();
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);

@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.defense;
 
+import org.enoch.snark.common.time.GameDuration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -31,6 +32,7 @@ import static org.enoch.snark.gi.types.Mission.*;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
 import static org.enoch.snark.instance.commander.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
+import static org.enoch.snark.instance.si.module.ConfigMap.RECALL;
 
 public class DefenseThread extends AbstractThread {
 
@@ -40,7 +42,6 @@ public class DefenseThread extends AbstractThread {
     public static final String LIMIT = "limit";
     public static final String EXAMPLE_TIME = "example_time";
     public static final String EXAMPLE_COORDINATE = "example_coordinate";
-    public static final String RECALL = "recall";
 
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
@@ -93,17 +94,17 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
-        Long recallInSeconds = map.getConfigLong(RECALL, null);
+        GameDuration recall = map.getDuration(RECALL, null);
         if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
             SendFleetCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
             if(sendFleetCommand == null) return;
-            if(recallInSeconds != null) {
+            if(recall != null) {
                 FleetPromise promise = new FleetPromise();
                 promise.setMission(sendFleetCommand.fleet.mission);
                 promise.setSource(sendFleetCommand.fleet.source);
                 promise.setTarget(sendFleetCommand.fleet.getTarget());
 
-                sendFleetCommand.setNext(new RecallCommand(promise), recallInSeconds);
+                sendFleetCommand.setNext(new RecallCommand(promise), recall.getValue().getSeconds());
             }
             sendFleetCommand.push();
             return;
@@ -116,8 +117,8 @@ public class DefenseThread extends AbstractThread {
             // zle powinien leciec na agresora i zawrócić
             sendFleetPromiseCommand = sendOnHold(sourceEntity, Planet.parse("p[1:1:8]"));
         }
-        if(recallInSeconds != null) {
-            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recallInSeconds);
+        if(recall != null) {
+            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recall.getValue().getSeconds());
         }
         sendFleetPromiseCommand.push();
     }

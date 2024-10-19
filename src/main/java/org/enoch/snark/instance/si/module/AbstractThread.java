@@ -120,7 +120,7 @@ public abstract class AbstractThread extends Thread {
     private long getPause() {
         String pauseInSecondsInput = getPauseInSeconds()+"S";
         pause.update(map.getConfig(ConfigMap.PAUSE, pauseInSecondsInput));
-        return pause.getSeconds();
+        return pause.getValue().getSeconds();
     }
 
     public void updateMap(ConfigMap map) {

@@ -4,29 +4,35 @@ import org.enoch.snark.common.DateUtil;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
-abstract class InputUpdater {
+abstract class InputUpdater<V> {
 
     protected String input;
     private LocalDateTime lastUpdated;
+    protected V value;
 
-    protected InputUpdater(String input) {
+    public InputUpdater(String input) {
         init(input);
-        setUp();
     }
 
     private void init(String input){
         this.input = input;
-        lastUpdated = LocalDateTime.now();
     }
 
     public void update(String input) {
-        if(!input.equals(this.input) || DateUtil.isExpired(lastUpdated, 1L, ChronoUnit.DAYS)) {
+        if(!input.equals(this.input)) {
             init(input);
-            setUp();
+            value = null;
         }
     }
 
     protected abstract void setUp();
+
+    protected V getValue() {
+        if(value == null || DateUtil.isExpired(lastUpdated, 1L, ChronoUnit.DAYS)) {
+            lastUpdated = LocalDateTime.now();
+            setUp();
+        }
+        return value;
+    }
 }

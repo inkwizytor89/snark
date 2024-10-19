@@ -57,7 +57,7 @@ public class Main {
     }
 
     private static void migratePostgresDatabase() {
-        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.getMainConfigMap().getConfig(SERVER), "postgres", "").load();
+        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.getMainConfigMap().getConfig(SERVER), "postgres", "postgres").load();
         flyway.migrate();
     }
 }

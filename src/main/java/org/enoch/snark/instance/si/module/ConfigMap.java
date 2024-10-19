@@ -56,6 +56,7 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String RESOURCES = "resources";
     public static final String LEAVE_RESOURCES = "leave_resources";
     public static final String SPEED = "speed";
+    public static final String RECALL = "recall";
     public static final String QUEUE = "queue";
     public static final String EXPIRED_TIME = "expired_time";
     public static final String EXPLORATION_AREA = "exploration_area";
@@ -115,6 +116,11 @@ public class ConfigMap extends HashMap<String, String> {
     public LocalTime getLocalTime(String key, LocalTime defaultValue) {
         if(!containsKey(key)) return defaultValue;
         return LocalTime.parse(getConfig(key), dtf);
+    }
+
+    public GameDuration getDuration(String key, GameDuration defaultValue) {
+        if(!containsKey(key)) return defaultValue;
+        return new GameDuration(getConfig(key));
     }
 
     public Long getConfigLong(String key, Long defaultValue) {
