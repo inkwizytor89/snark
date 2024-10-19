@@ -28,7 +28,7 @@ abstract class Parsable<V> {
 
     protected abstract void setUp();
 
-    protected V getValue() {
+    public V getValue() {
         if(value == null || DateUtil.isExpired(lastUpdated, 1L, ChronoUnit.DAYS)) {
             lastUpdated = LocalDateTime.now();
             setUp();
