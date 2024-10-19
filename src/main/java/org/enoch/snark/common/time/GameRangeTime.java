@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
-public class GameRangeTime extends InputUpdater<Boolean> {
+public class GameRangeTime extends Parsable<Boolean> {
     private List<RangeTime> activationTimes = new ArrayList<>();
 
     public GameRangeTime(String input) {

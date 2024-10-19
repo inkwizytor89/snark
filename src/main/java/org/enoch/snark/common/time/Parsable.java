@@ -5,13 +5,13 @@ import org.enoch.snark.common.DateUtil;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-abstract class InputUpdater<V> {
+abstract class Parsable<V> {
 
     protected String input;
     private LocalDateTime lastUpdated;
     protected V value;
 
-    public InputUpdater(String input) {
+    public Parsable(String input) {
         init(input);
     }
 

@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.si.module.defense;
 
-import org.enoch.snark.common.time.GameDuration;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -94,7 +94,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
-        GameDuration recall = map.getDuration(RECALL, null);
+        Duration recall = map.getDuration(RECALL, null);
         if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
             SendFleetCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
             if(sendFleetCommand == null) return;

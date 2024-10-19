@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action;
 
-import org.enoch.snark.common.time.GameDuration;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
@@ -36,7 +36,7 @@ public class FleetBuilder {
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
     private Long speed;
-    private GameDuration gameDuration;
+    private Duration duration;
     private Resources resources;
     private Resources leaveResources;
     private QueueRunType queue;
@@ -123,8 +123,8 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder recall(GameDuration duration) {
-        this.gameDuration = duration;
+    public FleetBuilder recall(Duration duration) {
+        this.duration = duration;
         return this;
     }
 

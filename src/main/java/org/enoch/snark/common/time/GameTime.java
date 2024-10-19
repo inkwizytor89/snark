@@ -3,7 +3,7 @@ package org.enoch.snark.common.time;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public class GameTime extends InputUpdater<LocalTime>{
+public class GameTime extends Parsable<LocalTime> {
 
     public static final int DURATION_PART_INDEX = 1;
     private static final int TIME_PART_INDEX = 0;
@@ -17,9 +17,9 @@ public class GameTime extends InputUpdater<LocalTime>{
     @Override
     protected void setUp() {
         String[] timeParts = input.split("\\?");
-        GameDuration duration = new GameDuration();
+        Duration duration = new Duration();
         if(timeParts.length > 1)
-            duration = new GameDuration("?"+timeParts[DURATION_PART_INDEX]);
+            duration = new Duration("?"+timeParts[DURATION_PART_INDEX]);
 
         LocalTime baseTime = LocalTime.parse(timeParts[TIME_PART_INDEX], dtf);
         value = baseTime.plusSeconds(duration.getValue().getSeconds());

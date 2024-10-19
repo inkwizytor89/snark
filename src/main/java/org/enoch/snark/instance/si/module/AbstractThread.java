@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
 import org.enoch.snark.common.*;
-import org.enoch.snark.common.time.GameDuration;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.GameRangeTime;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -38,7 +38,7 @@ public abstract class AbstractThread extends Thread {
     protected ConfigMap map;
     private GameRangeTime threadTime;
     private GameRangeTime moduleTime;
-    protected GameDuration pause = new GameDuration("1S");
+    protected Duration pause = new Duration("1S");
     private boolean isLive = true;
     protected Boolean debug;
 

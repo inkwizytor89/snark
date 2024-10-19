@@ -2,7 +2,7 @@ package org.enoch.snark.instance.si.module;
 
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.NumberUtil;
-import org.enoch.snark.common.time.GameDuration;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.Instance;
@@ -118,9 +118,9 @@ public class ConfigMap extends HashMap<String, String> {
         return LocalTime.parse(getConfig(key), dtf);
     }
 
-    public GameDuration getDuration(String key, GameDuration defaultValue) {
+    public Duration getDuration(String key, Duration defaultValue) {
         if(!containsKey(key)) return defaultValue;
-        return new GameDuration(getConfig(key));
+        return new Duration(getConfig(key));
     }
 
     public Long getConfigLong(String key, Long defaultValue) {
