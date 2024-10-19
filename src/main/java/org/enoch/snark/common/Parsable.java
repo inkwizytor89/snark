@@ -1,11 +1,9 @@
-package org.enoch.snark.common.time;
-
-import org.enoch.snark.common.DateUtil;
+package org.enoch.snark.common;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-abstract class Parsable<V> {
+public abstract class Parsable<V> {
 
     protected String input;
     private LocalDateTime lastUpdated;
@@ -30,8 +28,8 @@ abstract class Parsable<V> {
 
     public V getValue() {
         if(value == null || DateUtil.isExpired(lastUpdated, 1L, ChronoUnit.DAYS)) {
-            lastUpdated = LocalDateTime.now();
             setUp();
+            lastUpdated = LocalDateTime.now();
         }
         return value;
     }

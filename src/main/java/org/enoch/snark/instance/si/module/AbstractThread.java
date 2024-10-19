@@ -2,7 +2,7 @@ package org.enoch.snark.instance.si.module;
 
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.common.time.GameRangeTime;
+import org.enoch.snark.common.time.TimeScheduler;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
@@ -36,8 +36,8 @@ public abstract class AbstractThread extends Thread {
     protected final TargetDAO targetDAO;
 
     protected ConfigMap map;
-    private GameRangeTime threadTime;
-    private GameRangeTime moduleTime;
+    private final TimeScheduler threadTime;
+    private final TimeScheduler moduleTime;
     protected Duration pause = new Duration("1S");
     private boolean isLive = true;
     protected Boolean debug;
@@ -59,8 +59,8 @@ public abstract class AbstractThread extends Thread {
     }
 
     public AbstractThread(ConfigMap map) {
-        moduleTime = new GameRangeTime(OFF);
-        threadTime = new GameRangeTime(OFF);
+        moduleTime = new TimeScheduler(OFF);
+        threadTime = new TimeScheduler(OFF);
         updateMap(map);
         instance = Instance.getInstance();
         commander = Commander.getInstance();

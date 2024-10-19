@@ -1,16 +1,18 @@
 package org.enoch.snark.common.time;
 
+import org.enoch.snark.common.Parsable;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public class GameTime extends Parsable<LocalTime> {
+public class Time extends Parsable<LocalTime> {
 
     public static final int DURATION_PART_INDEX = 1;
     private static final int TIME_PART_INDEX = 0;
 
     public static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
-    public GameTime(String input) {
+    public Time(String input) {
         super(input);
     }
 

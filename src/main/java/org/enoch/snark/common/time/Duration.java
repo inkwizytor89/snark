@@ -1,5 +1,7 @@
 package org.enoch.snark.common.time;
 
+import org.enoch.snark.common.Parsable;
+
 import java.util.Random;
 
 public class Duration extends Parsable<java.time.Duration> {
