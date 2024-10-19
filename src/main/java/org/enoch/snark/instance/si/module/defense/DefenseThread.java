@@ -104,7 +104,7 @@ public class DefenseThread extends AbstractThread {
                 promise.setSource(sendFleetCommand.fleet.source);
                 promise.setTarget(sendFleetCommand.fleet.getTarget());
 
-                sendFleetCommand.setNext(new RecallCommand(promise), recall.getValue().getSeconds());
+                sendFleetCommand.setNext(new RecallCommand(promise), recall.getSeconds());
             }
             sendFleetCommand.push();
             return;

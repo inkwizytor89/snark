@@ -3,6 +3,7 @@ package org.enoch.snark.instance.model.action;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.gi.command.impl.RecallCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
@@ -36,7 +37,7 @@ public class FleetBuilder {
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
     private Long speed;
-    private Duration duration;
+    private Duration recall;
     private Resources resources;
     private Resources leaveResources;
     private QueueRunType queue;
@@ -123,8 +124,8 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder recall(Duration duration) {
-        this.duration = duration;
+    public FleetBuilder recall(Duration recall) {
+        this.recall = recall;
         return this;
     }
 
@@ -168,6 +169,7 @@ public class FleetBuilder {
                     commandPromiseSetLeaveShipsMap(command, index);
                     command.setRunType(queue);
                     command.generateHash(hashPrefix, Integer.toString(index));
+                    if(recall != null) command.setNext(new RecallCommand(promise), recall.getSeconds());
 
                     results.add(command);
                 }

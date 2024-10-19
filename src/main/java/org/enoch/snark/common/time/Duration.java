@@ -30,4 +30,8 @@ public class Duration extends Parsable<java.time.Duration> {
         Random random = new Random();
         return java.time.Duration.ofSeconds(random.nextLong(to - from) + from);
     }
+
+    public long getSeconds() {
+        return getValue().getSeconds();
+    }
 }
