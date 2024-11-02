@@ -8,12 +8,14 @@ public class SleepModule extends PropertiesModule {
     public static final String NAME = "sleep_module";
     private static final String PROPERTIES =
             """
+                    sleep.time=on
                     sleep.source=moon
                     sleep.target=next
-                    sleep.condition_ships_in_source=colonyShip:1
+                    sleep.condition_ships_in_source=deathstar:1
                     sleep.condition_blocking_missions=TRANSPORT;ATTACK;EXPEDITION
                     sleep.resources=all
-                    sleep.speed=20
+                    sleep.leave_resources=nothing
+                    sleep.speed=30
             """;
 
     public SleepModule(ModuleMap moduleMap) {

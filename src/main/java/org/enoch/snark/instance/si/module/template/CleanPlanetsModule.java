@@ -19,6 +19,7 @@ public class CleanPlanetsModule extends PropertiesModule {
                     move_resources_to_moon.resources=all
              
                     move_ships_to_planet.time=09:00?8M-09:19;10:00?8M-10:19;14:00?8M-14:19;17:00?8M-17:19;18:00?8M-18:19
+                    move_ships_to_planet.condition_ships_in_source=transporterLarge:100,explorer:1
                     move_ships_to_planet.ships_wave=transporterLarge:1000,explorer:2
                     move_ships_to_planet.expired_time=20:00
              """;

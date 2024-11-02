@@ -23,6 +23,6 @@ public class HumansT2 extends AbstractBuildingList {
                 new BuildingRequest(BuildingEnum.lifeformTech11102, 43),
                 new BuildingRequest(BuildingEnum.lifeformTech11104, 1)
         ));
-        return buildingRequests;
+        return create(buildingRequests);
     }
 }

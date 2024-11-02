@@ -62,7 +62,7 @@ public class PlanetExpression {
     }
 
     public static List<Planet> toPlanetList(String input) {
-        if(input == null) throw new IllegalStateException("PlanetExpression can not parse "+ input);
+        if(input == null) return null;
         input = input.toLowerCase().trim();
         if (input.contains(EXPRESSION_SEPARATOR)) {
             String[] s = input.split(EXPRESSION_SEPARATOR);

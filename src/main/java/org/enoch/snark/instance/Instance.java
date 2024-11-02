@@ -1,11 +1,13 @@
 package org.enoch.snark.instance;
 
 import lombok.Getter;
+import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.*;
+import org.enoch.snark.instance.model.action.QueueManger;
 import org.enoch.snark.instance.service.Cleaner;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.config.ConfigReader;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.gi.types.UrlComponent.*;
 import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
 import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
 
@@ -74,6 +76,8 @@ public class Instance {
     public void initialActionOnStart() {
         commander = Commander.getInstance();
 //        new ReadMessageCommand().hash(MessageService.class.getName()).push();
+        //QueueManger.BUILDING
+        new OpenPageCommand(LFBUILDINGS, ColonyDAO.getInstance().find("p[3:122:8]")).push();
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();

@@ -23,6 +23,6 @@ public class RocktalT2 extends AbstractBuildingList {
                 new BuildingRequest(BuildingEnum.lifeformTech12102, 43),
                 new BuildingRequest(BuildingEnum.lifeformTech12104, 1)
         ));
-        return buildingRequests;
+        return create(buildingRequests);
     }
 }

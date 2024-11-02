@@ -1,6 +1,5 @@
 package org.enoch.snark.instance.model.action;
 
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 
 import java.time.LocalDateTime;
@@ -15,14 +14,12 @@ public class QueueManger {
     public static final String LIFEFORM_BUILDINGS = "productionboxlfbuildingcomponent";
     public static final String LIFEFORM_RESEARCH = "productionboxlfresearchcomponent";
     private static QueueManger INSTANCE;
-    private final ColonyDAO colonyDAO;
 
     private Map<ColonyEntity,Map<String, QueueMonitor>> queueMap;
     private final QueueMonitor researchMonitor;
 
 
     private QueueManger() {
-        colonyDAO = ColonyDAO.getInstance();
         queueMap = new HashMap<>();
         researchMonitor = new QueueMonitor();
 

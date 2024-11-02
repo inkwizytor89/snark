@@ -26,6 +26,8 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.WEBDRIVER_PATH;
 
@@ -354,9 +356,24 @@ public class GI {
             queueManger.clean(colony, queueType);
         } else {
             String timeString = queueElement.findElement(By.className("timer")).getText();
+//            String textWithBuildingEnum = dataDetails.get(0).findElement(By.tagName("a")).getAttribute("onclick");
+//            Long buildingEnumId = extractBuildingEnumId(textWithBuildingEnum);
+//            if(buildingEnumId != null) {
+//                System.err.println(buildingEnumId);
+//            }
             Long second = DateUtil.parseCountDownToSec(timeString)+0L;
             queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
             return second;
+        }
+        return null;
+    }
+
+    private Long extractBuildingEnumId(String input) {
+        Pattern firstNumberPattern = Pattern.compile("\\D+(\\d+).+");
+        Matcher m = firstNumberPattern.matcher(input);
+        if (m.find()) {
+            long id = Long.parseLong(m.group(1));
+            return id;
         }
         return null;
     }

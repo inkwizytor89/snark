@@ -78,7 +78,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         }
 
         gir.setSpeed(promise.getSpeed());
-        gir.setResources(promise.getResources(), promise.getSource());
+        gir.setNewResources(promise.getSource().getResources(), promise.getResources(), promise.getLeaveResources());
 
         FleetEntity fleet = new FleetEntity(promise);
         fleet.hash = this.hash();

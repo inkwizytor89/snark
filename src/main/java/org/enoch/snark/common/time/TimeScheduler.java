@@ -16,4 +16,9 @@ public class TimeScheduler extends Parsable<TimePlan> {
     public boolean isOn() {
         return getValue().isOn();
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }

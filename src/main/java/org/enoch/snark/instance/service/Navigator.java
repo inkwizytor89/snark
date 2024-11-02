@@ -97,6 +97,7 @@ public class Navigator {
     private void removeAllTemporaryMovements() {
             movements.stream()
                     .filter(FleetMovement::isTemporary)
+                    .collect(Collectors.toSet())
                     .forEach(movements::remove);
     }
 

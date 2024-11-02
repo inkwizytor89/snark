@@ -35,6 +35,6 @@ public class MechaT2 extends AbstractBuildingList {
         ));
         buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13104, 7));
         buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13105, 1));
-        return buildingRequests;
+        return create(buildingRequests);
     }
 }

@@ -23,6 +23,6 @@ public class KaeleshT2 extends AbstractBuildingList {
                 new BuildingRequest(BuildingEnum.lifeformTech14102, 43),
                 new BuildingRequest(BuildingEnum.lifeformTech14104, 1)
         ));
-        return buildingRequests;
+        return create(buildingRequests);
     }
 }

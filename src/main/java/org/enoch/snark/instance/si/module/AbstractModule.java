@@ -1,10 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
 import lombok.Getter;
-import org.enoch.snark.instance.si.module.template.BuildModule;
-import org.enoch.snark.instance.si.module.template.CleanPlanetsModule;
-import org.enoch.snark.instance.si.module.template.SleepModule;
-import org.enoch.snark.instance.si.module.template.TestModule;
+import org.enoch.snark.instance.si.module.template.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,9 +19,11 @@ public abstract class AbstractModule {
         else if (moduleName.equals(CleanPlanetsModule.NAME))
             return new CleanPlanetsModule(map);
         else if (moduleName.equals(SleepModule.NAME))
-            return new CleanPlanetsModule(map);
+            return new SleepModule(map);
         else if (moduleName.equals(BuildModule.NAME))
-            return new CleanPlanetsModule(map);
+            return new BuildModule(map);
+        else if (moduleName.equals(DutyModule.NAME))
+            return new BuildModule(map);
         else if (moduleName.equals(TestModule.NAME))
             return new TestModule(map);
         else return null;

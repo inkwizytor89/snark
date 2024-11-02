@@ -65,7 +65,10 @@ public class BuildingThread extends AbstractThread {
             if (requests.isEmpty()) continue; //nothing to build
 
             BuildingRequest buildingRequest = requests.peek();
-            if(isColonyNotYetLoaded(colony) || isQueueBusy(colony, buildingRequest)) continue;
+            if(isColonyNotYetLoaded(colony) ||
+                    isQueueBusy(colony, buildingRequest) ||
+                    isUpgradeBlocked(colony, buildingRequest))
+                continue;
 
             Resources resources = buildingCost.getCosts(buildingRequest);
             BuildRequirements buildRequirements = new BuildRequirements(buildingRequest, resources);
@@ -86,6 +89,11 @@ public class BuildingThread extends AbstractThread {
                 }
             }
         }
+    }
+
+    private boolean isUpgradeBlocked(ColonyEntity colony, BuildingRequest buildingRequest) {
+//        buildingRequest.building.isLifeform()
+        return false;
     }
 
     private boolean skipAlreadyBuild(ColonyEntity colony, BuildingRequest request) {

@@ -60,6 +60,20 @@ public class Resources {
         }
     }
 
+    public static Resources calculate(Resources actual, Resources wantToMove, Resources leave) {
+        if(everything.equals(actual)) throw new IllegalStateException("Actual can not be everything");
+        if(everything.equals(wantToMove)) wantToMove = actual;
+        if(nothing.equals(leave)) return everything;
+        if(everything.equals(leave)) return nothing;
+        if(wantToMove == null || nothing.equals(wantToMove)) return nothing;
+
+        Resources calculated = new Resources();
+        calculated.metal = Math.max(actual.metal >= wantToMove.metal + leave.metal ? wantToMove.metal : actual.metal - leave.metal , 0L);
+        calculated.crystal = Math.max(actual.crystal >= wantToMove.crystal + leave.crystal ? wantToMove.crystal : actual.crystal - leave.crystal , 0L);
+        calculated.deuterium = Math.max(actual.deuterium >= wantToMove.deuterium + leave.deuterium ? wantToMove.deuterium : actual.deuterium - leave.deuterium , 0L);
+        return calculated;
+    }
+
     public Long count() {
         return metal + crystal + deuterium;
     }
@@ -92,5 +106,15 @@ public class Resources {
             else if (DEUTERIUM.equals(toSkip)) skipLeaveDeuterium = true;
         });
         return this;
+    }
+
+    public void plus(ResourceType resourceType, long value) {
+        if(METAL.equals(resourceType)) {
+            metal = metal == Long.MAX_VALUE ? metal : metal + value;
+        } else if (CRYSTAL.equals(resourceType)) {
+            crystal = crystal == Long.MAX_VALUE ? crystal : crystal + value;
+        } else if (DEUTERIUM.equals(resourceType)) {
+            deuterium = deuterium == Long.MAX_VALUE ? deuterium : deuterium + value;
+        }
     }
 }

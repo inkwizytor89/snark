@@ -20,7 +20,9 @@ public class RecallCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         GIUrl.openComponent(FLEETDISPATCH, null);
-        return new EventContentGIR().recall(promise);
+        boolean recall = new EventContentGIR().recall(promise);
+        new UpdateFleetEventsCommand().execute();
+        return recall;
     }
 
     @Override

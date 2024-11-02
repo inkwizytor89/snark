@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.model.types.ResourceType.DEUTERIUM;
 import static org.enoch.snark.instance.si.module.ConfigMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
@@ -55,6 +56,16 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         else setCustomResources(resources, source);
     }
 
+    public void setNewResources(Resources actual, Resources resources, Resources leave) {
+        // leave should be determinate upper, but that after removing SendFleetCommand and leave only
+        // SendPromiseFleetCommand - maybe should be different global leaves for moon and for planet
+        if(leave == null) leave = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, nothing);
+
+        if(resources == null || nothing.equals(resources)) return;
+        if(everything.equals(resources) && (leave == null || nothing.equals(leave))) selectAllResources();
+        else setNewCustomResources(actual, resources, leave);
+    }
+
     private void setCustomResources(Resources resources, ColonyEntity source) {
         if(resources.metal != null || resources.crystal != null || resources.deuterium != null) {
             WebElement resourcesArea = wd.findElement(By.id("resources"));
@@ -65,12 +76,38 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             Resources defaultResources = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, new Resources("d4m"));
             Long metal = rememberToLeaveSome(resources, source, defaultResources.metal, ResourceType.METAL);
             Long crystal = rememberToLeaveSome(resources, source, defaultResources.crystal, ResourceType.CRYSTAL);
-            Long deuterium = rememberToLeaveSome(resources, source, defaultResources.deuterium, ResourceType.DEUTERIUM);
+            Long deuterium = rememberToLeaveSome(resources, source, defaultResources.deuterium, DEUTERIUM);
             for(int i=0; i<3; i++) {
                 SleepUtil.pause();
                 deuteriumAmount.sendKeys(deuterium.toString());
                 crystalAmount.sendKeys(crystal.toString());
                 metalAmount.sendKeys(metal.toString());
+
+                long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
+                long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
+
+                if(remainingResources < maxResources)
+                    break;
+            }
+        }
+    }
+
+    private void setNewCustomResources(Resources actual, Resources toTransport, Resources leave) {
+        if(toTransport.metal != null || toTransport.crystal != null || toTransport.deuterium != null) {
+            WebElement resourcesArea = wd.findElement(By.id("resources"));
+            WebElement metalInput = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
+            WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
+            WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
+
+            leave.plus(DEUTERIUM, readTransportDeuteriumConsumption());
+            Resources possibleResources = Resources.calculate(actual, toTransport, leave);
+            if(nothing.equals(possibleResources)) return;
+
+            for(int i=0; i<3; i++) {
+                SleepUtil.pause();
+                deuteriumInput.sendKeys(possibleResources.deuterium.toString());
+                crystalInput.sendKeys(possibleResources.crystal.toString());
+                metalInput.sendKeys(possibleResources.metal.toString());
 
                 long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
                 long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
@@ -90,12 +127,16 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             case METAL: return Math.max(resources.skipLeaveMetal ? resources.metal : resources.metal - toLeave, 0L);
             case CRYSTAL: return Math.max(resources.skipLeaveCrystal ? resources.crystal : resources.crystal - toLeave, 0L);
             case DEUTERIUM:{
-                String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
-                long consumption = toLong(consumptionInput.split("\\s")[0]);
+                long consumption = readTransportDeuteriumConsumption();
                 return Math.max(resources.skipLeaveDeuterium ? resources.deuterium : resources.deuterium - toLeave - consumption, 0L);
             }
         }
         throw new IllegalStateException("Unknown resource "+resource.name());
+    }
+
+    private long readTransportDeuteriumConsumption() {
+        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+        return toLong(consumptionInput.split("\\s")[0]);
     }
 
     public void setSpeed(Long speed) {

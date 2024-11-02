@@ -31,6 +31,6 @@ public class MechaT3 extends AbstractBuildingList {
                 new BuildingRequest(BuildingEnum.lifeformTech13104, 13),
                 new BuildingRequest(BuildingEnum.lifeformTech13105, 9)
         ));
-        return buildingRequests;
+        return create(buildingRequests);
     }
 }

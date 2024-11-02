@@ -16,32 +16,39 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
+
 public class EventContentGIR extends GraphicalInterfaceReader {
 
     public boolean recall(FleetPromise promise) {
+        List<WebElement> toRecall = new ArrayList<>();
         try {
             List<WebElement> tableRows = activateEventTable();
             for(WebElement row : tableRows) {
                 EventFleet event = createEventFleet(row);
                 if (event == null) continue;
                 if(isSimilar(event, promise)) {
+                    toRecall.add(row);
                     System.err.println("Recall fleet "+event);
-                    row.findElement(By.className("recallFleet")).click();
-                    SleepUtil.sleep();
-                    wd.findElement(By.id("errorBoxDecisionYes")).click();
-
                 }
+            }
+            for(WebElement row : toRecall) {
+                row.findElement(By.className("recallFleet")).click();
+                SleepUtil.sleep();
+                wd.findElement(By.id("errorBoxDecisionYes")).click();
             }
             wd.findElement(By.className("event_list")).click();
         } catch (Exception e) {
             System.err.println("Can not load EventFleet "+e.getClass().getName()+" cause:" +e.getMessage());
+            e.printStackTrace();
             return false;
         }
         return true;
     }
 
     private boolean isSimilar(EventFleet row, FleetPromise promise) {
-        return row.mission.equals(promise.getMission()) &&
+        return THERE.equals(row.iconMovement) &&
+                row.mission.equals(promise.getMission()) &&
                 row.getFrom().equals(promise.getSource().toPlanet()) &&
                 row.getTo().equals(promise.getTarget());
     }
@@ -109,7 +116,7 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         else event.originFleet = ColonyType.UNKNOWN;
         event.coordsOrigin =  we.findElement(By.className("coordsOrigin")).getText();
         event.detailsFleet =  we.findElement(By.className("detailsFleet")).getText();
-        event.iconMovement =  missionText.contains("(R)") ? FleetDirectionType.BACK : FleetDirectionType.THERE;
+        event.iconMovement =  missionText.contains("(R)") ? FleetDirectionType.BACK : THERE;
         List<WebElement> destFigure = we.findElement(By.className("destFleet")).findElements(By.tagName("figure"));
         if(!destFigure.isEmpty())
             event.destFleet =  destFigure.get(0).getAttribute(CLASS_ATTRIBUTE).contains("moon") ? ColonyType.MOON : ColonyType.PLANET;

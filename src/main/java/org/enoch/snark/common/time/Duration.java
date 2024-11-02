@@ -28,9 +28,9 @@ public class Duration extends Parsable<java.time.Duration> {
         }
     }
 
-    private java.time.Duration calculateRandom(long from, long to) {
+    private java.time.Duration calculateRandom(long constantValue, long randomValue) {
         Random random = new Random();
-        return java.time.Duration.ofSeconds(random.nextLong(to - from) + from);
+        return java.time.Duration.ofSeconds(random.nextLong(randomValue) + constantValue);
     }
 
     public long getSeconds() {
