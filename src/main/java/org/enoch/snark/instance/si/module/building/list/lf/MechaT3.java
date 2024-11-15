@@ -1,8 +1,9 @@
 package org.enoch.snark.instance.si.module.building.list.lf;
 
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.LFBuilding;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.ArrayList;
@@ -16,21 +17,21 @@ public class MechaT3 extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> buildingRequests = new ArrayList<>(new MechaT2(StringUtils.EMPTY).create());
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech13101, 73),
-                new BuildingRequest(BuildingEnum.lifeformTech13102, 85)
+    public List<BuildRequest> create() {
+        List<BuildRequest> buildRequests = new ArrayList<>(new MechaT2(StringUtils.EMPTY).create());
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13101, 73),
+                new BuildRequest(LFBuilding.lifeformTech13102, 85)
         ));
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech13108, 23),
-                new BuildingRequest(BuildingEnum.lifeformTech13109, 14)
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13108, 23),
+                new BuildRequest(LFBuilding.lifeformTech13109, 14)
         ));
 
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech13104, 13),
-                new BuildingRequest(BuildingEnum.lifeformTech13105, 9)
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13104, 13),
+                new BuildRequest(LFBuilding.lifeformTech13105, 9)
         ));
-        return create(buildingRequests);
+        return create(buildRequests);
     }
 }

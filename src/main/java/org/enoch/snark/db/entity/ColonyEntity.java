@@ -1,9 +1,6 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.gi.types.ShipEnum;
-import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.to.SystemView;
 
 import javax.persistence.Basic;
@@ -11,9 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.*;
-
-import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
-import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 
 @Entity
 @Table(name = "colonies", schema = "public", catalog = "snark")

@@ -9,6 +9,7 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.model.types.ColonyType;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -55,6 +56,8 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String MISSION = "mission";
     public static final String RESOURCES = "resources";
     public static final String LEAVE_RESOURCES = "leave_resources";
+    public static final String LEAVE_MOON_RESOURCES = "leave_moon_resources";
+    public static final String LEAVE_PLANET_RESOURCES = "leave_planet_resources";
     public static final String SPEED = "speed";
     public static final String RECALL = "recall";
     public static final String QUEUE = "queue";
@@ -95,7 +98,7 @@ public class ConfigMap extends HashMap<String, String> {
 
     public String getNearestConfig(String key, String defaultValue) {
         if(this.containsKey(key)) return this.get(key);
-        if(Instance.getMainConfigMap().containsKey(key)) return Instance.getMainConfigMap().get(key);
+        if(Instance.getGlobalMainConfigMap().containsKey(key)) return Instance.getGlobalMainConfigMap().get(key);
         return defaultValue;
     }
 
@@ -184,6 +187,13 @@ public class ConfigMap extends HashMap<String, String> {
         String config = getConfig(key, null);
         if (config == null) return defaultResources;
         return Resources.parse(config);
+    }
+
+    public Resources getNearestLeaveResources(ColonyType type, Resources defaultResources) {
+        String key = ColonyType.PLANET.equals(type) ? LEAVE_PLANET_RESOURCES : LEAVE_MOON_RESOURCES;
+        String nearestConfig = getNearestConfig(key, null);
+        if (nearestConfig == null) return defaultResources;
+        return Resources.parse(nearestConfig);
     }
 
     public String name() {

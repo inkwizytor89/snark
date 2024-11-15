@@ -53,6 +53,16 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
         }
     }
 
+    public List<FleetEntity> findWithHash(String hash) {
+        synchronized (JPAUtility.dbSynchro) {
+            return entityManager.createQuery(
+                    "from FleetEntity " +
+                            "where hash = :hash", FleetEntity.class)
+                    .setParameter("hash", hash)
+                    .getResultList();
+        }
+    }
+
     public List<FleetEntity> findToProcess() {
         synchronized (JPAUtility.dbSynchro) {
             return entityManager.createQuery("" +

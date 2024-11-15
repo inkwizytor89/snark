@@ -1,40 +1,32 @@
-package org.enoch.snark.gi.types;
+package org.enoch.snark.instance.model.technology;
 
-import org.apache.commons.lang3.EnumUtils;
-import org.enoch.snark.common.NumberUtil;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.gi.types.UrlComponent;
 import org.enoch.snark.instance.model.to.ShipsMap;
 
-import java.util.HashMap;
-import java.util.Map;
+@Getter
+@AllArgsConstructor
+public enum Ship implements Technology {
+    fighterLight(204L),
+    fighterHeavy(205L),
+    cruiser(206L),
+    battleship(207L),
+    interceptor(215L),
+    bomber(211L),
+    destroyer(213L),
+    deathstar(214L),
+    reaper(218L),
+    explorer(219L),
+    transporterSmall(202L),
+    transporterLarge(203L),
+    colonyShip(208L),
+    recycler(209L),
+    espionageProbe(210L),
+    solarSatellite(212L);
 
-public enum ShipEnum {
-    fighterLight("fighterLight"),
-    fighterHeavy("fighterHeavy"),
-    cruiser("cruiser"),
-    battleship("battleship"),
-    interceptor("interceptor"),
-    bomber("bomber"),
-    destroyer("destroyer"),
-    deathstar("deathstar"),
-    reaper("reaper"),
-    explorer("explorer"),
-    transporterSmall("transporterSmall"),
-    transporterLarge("transporterLarge"),
-    colonyShip("colonyShip"),
-    recycler("recycler"),
-    espionageProbe("espionageProbe"),
-    solarSatellite("solarSatellite");
-
-    private String id;
-
-    ShipEnum(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
+    private Long id;
 
     public static ShipsMap createShipsMap(FleetEntity fleet) {
         ShipsMap shipsMap = new ShipsMap();
@@ -59,9 +51,14 @@ public enum ShipEnum {
 
     public static ShipsMap createExpeditionShipMap(Long tl, Long ts, Long ex) {
         ShipsMap shipsMap = new ShipsMap();
-        shipsMap.put(ShipEnum.transporterLarge, tl);
-        shipsMap.put(ShipEnum.transporterSmall, ts);
-        shipsMap.put(ShipEnum.explorer, ex);
+        shipsMap.put(Ship.transporterLarge, tl);
+        shipsMap.put(Ship.transporterSmall, ts);
+        shipsMap.put(Ship.explorer, ex);
         return shipsMap;
+    }
+
+    @Override
+    public UrlComponent getPage() {
+        return null;
     }
 }

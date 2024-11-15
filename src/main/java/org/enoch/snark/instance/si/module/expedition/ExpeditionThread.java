@@ -7,7 +7,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -106,7 +106,7 @@ public class ExpeditionThread extends AbstractThread {
         maxTL = calculateMaxExpeditionSize();
         FleetEntity expeditionToSend = FleetEntity.createExpeditionDirection(colony);
 
-        ShipsMap requestedExpeditionShipMap = ShipEnum.createExpeditionShipMap(maxTL, 0L, 1L);
+        ShipsMap requestedExpeditionShipMap = Ship.createExpeditionShipMap(maxTL, 0L, 1L);
         if(colony.hasEnoughShips(requestedExpeditionShipMap)) {
 
             expeditionToSend.setShips(requestedExpeditionShipMap);

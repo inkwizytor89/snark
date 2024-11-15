@@ -2,7 +2,6 @@ package org.enoch.snark.gi;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -12,7 +11,7 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.building.BuildRequirements;
@@ -23,11 +22,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.enoch.snark.instance.si.module.ConfigMap.WEBDRIVER_PATH;
 
@@ -40,14 +36,14 @@ public class GI {
     private final Instance instance;
     private final GalaxyDAO galaxyDAO;
     private final TargetDAO targetDAO;
-    private final QueueManger queueManger;
+    private final TechnologyService technologyService;
 
     private GI() {
-        String pathToDriver = Instance.getMainConfigMap().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
+        String pathToDriver = Instance.getGlobalMainConfigMap().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
         if(!new File(pathToDriver).exists()) System.err.println("Missing file for driver "+pathToDriver);
         System.setProperty("webdriver.chrome.driver", pathToDriver);
 
-        queueManger = QueueManger.getInstance();
+        technologyService = TechnologyService.getInstance();
         instance = Instance.getInstance();
         playerDAO = PlayerDAO.getInstance();
         galaxyDAO = GalaxyDAO.getInstance();
@@ -332,8 +328,8 @@ public class GI {
 
     public boolean upgradeBuilding(BuildRequirements requirements) {
         WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        WebElement buildingElement = technologies.findElement(By.className(requirements.request.building.name()));
-        Long buildingLevel = getLevel(technologies, requirements.request.building.name());
+        WebElement buildingElement = technologies.findElement(By.className(requirements.request.technology.name()));
+        Long buildingLevel = getLevel(technologies, requirements.request.technology.name());
         if(buildingLevel >= requirements.request.level) {
             return true;
         }
@@ -343,39 +339,6 @@ public class GI {
         }
         upgrades.get(0).click();
         return true;
-    }
-
-    public Long updateQueue(ColonyEntity colony, String queueType) {
-        List<WebElement> elements = webDriver.findElements(By.id(queueType));
-        if(elements.isEmpty()) {
-            return null;
-        }
-        WebElement queueElement = elements.get(0);
-        List<WebElement> dataDetails = queueElement.findElements(By.className("data"));
-        if (dataDetails.isEmpty()) {
-            queueManger.clean(colony, queueType);
-        } else {
-            String timeString = queueElement.findElement(By.className("timer")).getText();
-//            String textWithBuildingEnum = dataDetails.get(0).findElement(By.tagName("a")).getAttribute("onclick");
-//            Long buildingEnumId = extractBuildingEnumId(textWithBuildingEnum);
-//            if(buildingEnumId != null) {
-//                System.err.println(buildingEnumId);
-//            }
-            Long second = DateUtil.parseCountDownToSec(timeString)+0L;
-            queueManger.set(colony, queueType, LocalDateTime.now().plusSeconds(second));
-            return second;
-        }
-        return null;
-    }
-
-    private Long extractBuildingEnumId(String input) {
-        Pattern firstNumberPattern = Pattern.compile("\\D+(\\d+).+");
-        Matcher m = firstNumberPattern.matcher(input);
-        if (m.find()) {
-            long id = Long.parseLong(m.group(1));
-            return id;
-        }
-        return null;
     }
 
     public void updateGalaxy(SystemView systemView) {

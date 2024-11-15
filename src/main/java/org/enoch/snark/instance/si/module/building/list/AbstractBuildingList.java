@@ -1,7 +1,8 @@
 package org.enoch.snark.instance.si.module.building.list;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.Technology;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.lf.*;
 import org.enoch.snark.instance.si.module.building.list.moon.FastTeleport;
 import org.enoch.snark.instance.si.module.building.list.planet.*;
@@ -13,13 +14,13 @@ public abstract class AbstractBuildingList {
     protected final String type;
     private final String[] split;
 
-    public static List<BuildingRequest> convert(List<String> listNames) {
-        List<BuildingRequest> buildList = new ArrayList<>();
+    public static List<BuildRequest> convert(List<String> listNames) {
+        List<BuildRequest> buildList = new ArrayList<>();
         listNames.forEach(name -> buildList.addAll(convert(name)));
         return buildList;
     }
 
-    public static List<BuildingRequest> convert(String name) {
+    public static List<BuildRequest> convert(String name) {
         if(name.startsWith(DirectiveIV.code)) return new DirectiveIV(name).create();
         if(name.startsWith(Small.code)) return new Small(name).create();
         if(name.startsWith(Base.code)) return new Base(name).create();
@@ -59,21 +60,21 @@ public abstract class AbstractBuildingList {
         return Long.parseLong(value);
     }
 
-    protected List<BuildingRequest> create(List<BuildingRequest> sourceBuildings) {
-        Map<BuildingEnum, Long> currentProgress = new HashMap<>();
-        sourceBuildings.forEach(buildingRequest -> currentProgress.put(buildingRequest.building, 0L));
+    protected List<BuildRequest> create(List<BuildRequest> sourceBuildings) {
+        Map<Technology, Long> currentProgress = new HashMap<>();
+        sourceBuildings.forEach(buildingRequest -> currentProgress.put(buildingRequest.technology, 0L));
 
         // max iteration as max level of source buildings
         long maxIt = sourceBuildings.stream().map(request -> request.level).max(Long::compareTo).get();
-        List<BuildingRequest> list = new ArrayList<>();
+        List<BuildRequest> list = new ArrayList<>();
         for(long i=1; i<=maxIt; i++) {
-            for(BuildingRequest  request: sourceBuildings) {
+            for(BuildRequest request: sourceBuildings) {
                 // i / maxIt - means percent of progress
                 long newLevel = request.level * i / maxIt;
                 // for new entry: add to list and mark in progress
-                if(currentProgress.get(request.building) < newLevel) {
-                    list.add(new BuildingRequest(request.building, newLevel));
-                    currentProgress.put(request.building, newLevel);
+                if(currentProgress.get(request.technology) < newLevel) {
+                    list.add(new BuildRequest(request.technology, newLevel));
+                    currentProgress.put(request.technology, newLevel);
                 }
             }
         }

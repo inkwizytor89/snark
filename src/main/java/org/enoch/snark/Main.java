@@ -19,7 +19,7 @@ public class Main {
     public static void main(String[] args) {
         setConfigPath(args);
         Instance instance = Instance.getInstance();
-        if(Instance.getMainConfigMap().getConfigBoolean(DATABASE, false))
+        if(Instance.getGlobalMainConfigMap().getConfigBoolean(DATABASE, false))
             migratePostgresDatabase();
         else {
             JPAUtility.buildDefaultEntityManager(H2_PERSISTENCE);
@@ -57,7 +57,7 @@ public class Main {
     }
 
     private static void migratePostgresDatabase() {
-        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.getMainConfigMap().getConfig(SERVER), "postgres", "postgres").load();
+        Flyway flyway = Flyway.configure().dataSource("jdbc:postgresql://localhost/"+Instance.getGlobalMainConfigMap().getConfig(SERVER), "postgres", "postgres").load();
         flyway.migrate();
     }
 }

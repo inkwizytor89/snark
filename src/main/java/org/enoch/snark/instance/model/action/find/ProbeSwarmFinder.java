@@ -14,7 +14,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.PROBE_SWAM_LIMIT;
 public class ProbeSwarmFinder {
 
     public static ColonyEntity find() {
-        long probeLimit = Instance.getMainConfigMap().getConfigNumber(PROBE_SWAM_LIMIT, "100k");
+        long probeLimit = Instance.getGlobalMainConfigMap().getConfigNumber(PROBE_SWAM_LIMIT, "100k");
 
         String probeSwarmPlanetCode = CacheEntryDAO.getInstance().getValue(PROBE_SWAM);
         ColonyDAO colonyDAO = ColonyDAO.getInstance();

@@ -47,8 +47,8 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
-        int galaxyMax = Instance.getMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
-        int systemMax = Instance.getMainConfigMap().getConfigInteger(SYSTEM_MAX, 499);
+        int galaxyMax = Instance.getGlobalMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
+        int systemMax = Instance.getGlobalMainConfigMap().getConfigInteger(SYSTEM_MAX, 499);
         for(int i = 1 ; i <= galaxyMax; i++) {
             if(isNecessaryGalaxyPersist(i))
                 GalaxyDAO.getInstance().persistGalaxyMap(i, systemMax);

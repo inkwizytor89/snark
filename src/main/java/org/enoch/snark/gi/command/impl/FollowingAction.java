@@ -3,9 +3,13 @@ package org.enoch.snark.gi.command.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static org.enoch.snark.instance.model.types.FleetDirectionType.BACK;
+import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
+
 public class FollowingAction extends ArrayList<String> {
 
-    public static final String DELAY_TO_FLEET_BACK = "delayToFleetBack";
+    public static final String DELAY_TO_FLEET_BACK = BACK.name().toLowerCase();
+    public static final String DELAY_TO_FLEET_THERE = THERE.name().toLowerCase();
 
     private final AbstractCommand command;
     public long secondsToDelay = 0;

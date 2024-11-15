@@ -59,7 +59,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     public void setNewResources(Resources actual, Resources resources, Resources leave) {
         // leave should be determinate upper, but that after removing SendFleetCommand and leave only
         // SendPromiseFleetCommand - maybe should be different global leaves for moon and for planet
-        if(leave == null) leave = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, nothing);
+        if(leave == null) leave = Instance.getGlobalMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, nothing);
 
         if(resources == null || nothing.equals(resources)) return;
         if(everything.equals(resources) && (leave == null || nothing.equals(leave))) selectAllResources();
@@ -73,7 +73,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
-            Resources defaultResources = Instance.getMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, new Resources("d4m"));
+            Resources defaultResources = Instance.getGlobalMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, new Resources("d4m"));
             Long metal = rememberToLeaveSome(resources, source, defaultResources.metal, ResourceType.METAL);
             Long crystal = rememberToLeaveSome(resources, source, defaultResources.crystal, ResourceType.CRYSTAL);
             Long deuterium = rememberToLeaveSome(resources, source, defaultResources.deuterium, DEUTERIUM);
@@ -99,6 +99,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
+            if(leave == null) leave = new Resources();
             leave.plus(DEUTERIUM, readTransportDeuteriumConsumption());
             Resources possibleResources = Resources.calculate(actual, toTransport, leave);
             if(nothing.equals(possibleResources)) return;

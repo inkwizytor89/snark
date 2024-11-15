@@ -5,10 +5,10 @@ import org.enoch.snark.instance.model.to.Resources;
 
 public class BuildRequirements {
 
-    public BuildingRequest request;
+    public BuildRequest request;
     public Resources resources;
 
-    BuildRequirements(BuildingRequest request, Resources resources) {
+    BuildRequirements(BuildRequest request, Resources resources) {
         this.request = request;
         this.resources = resources;
     }

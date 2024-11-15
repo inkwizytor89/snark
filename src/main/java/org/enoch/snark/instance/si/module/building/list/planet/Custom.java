@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.planet;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.List;
@@ -15,8 +15,8 @@ public class Custom extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        BuildingEnum buildingEnum = BuildingEnum.valueOf(type);
-        return singletonList(new BuildingRequest(buildingEnum, argLong(1)));
+    public List<BuildRequest> create() {
+        Building building = Building.valueOf(type);
+        return singletonList(new BuildRequest(building, argLong(1)));
     }
 }

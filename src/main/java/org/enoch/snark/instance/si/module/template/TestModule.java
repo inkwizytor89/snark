@@ -13,7 +13,7 @@ public class TestModule extends PropertiesModule {
                     move.mission=transport
                     move.ships_wave=colonyShip:1
                     move.resources=m1
-                    move.expired_time=02:00
+                    move.expired_time=2M
                     
             """;
 

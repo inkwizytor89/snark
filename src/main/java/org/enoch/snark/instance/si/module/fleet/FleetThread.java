@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.fleet;
 
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.commander.QueueRunType;
@@ -14,6 +15,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
@@ -56,7 +59,7 @@ public class FleetThread extends AbstractThread {
                 .ships(map.getShipsWaves(singletonList(ALL_SHIPS)))
                 .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))
                 .resources(map.getConfigResources(RESOURCES, nothing))
-                .leaveResources(map.getConfigResources(LEAVE_RESOURCES, nothing))
+                .leaveResources(map.getConfigResources(LEAVE_RESOURCES, null))
                 .speed(map.getConfigLong(SPEED, null))
                 .recall(map.getDuration(RECALL, null))
                 .queue(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())))
@@ -70,7 +73,7 @@ public class FleetThread extends AbstractThread {
             boolean fit = command.promise().fit();
             if(fit && areShips) {
                 if (!map.getConfigBoolean(DRY_RUN, false))
-                    command.push(dateToCheck());
+                    push(command);
             }
         });
     }
@@ -80,10 +83,12 @@ public class FleetThread extends AbstractThread {
         return !noShips;
     }
 
-    private LocalDateTime dateToCheck() {
-        LocalTime time = map.getLocalTime(EXPIRED_TIME, null);
-        if(time == null) return LocalDateTime.now();
-        return LocalDateTime.now().minusHours(time.getHour()).minusMinutes(time.getMinute());
+    private void push(SendFleetPromiseCommand command) {
+        String expiredConfig = map.getConfig(EXPIRED_TIME, null);
+        if(expiredConfig == null) command.push();
+        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) command.push(DELAY_TO_FLEET_THERE);
+        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) command.push(DELAY_TO_FLEET_BACK);
+        else command.push(LocalDateTime.now().minusSeconds(new Duration(expiredConfig).getSeconds()));
     }
 
     private void logFleetOverview(SendFleetPromiseCommand command) {

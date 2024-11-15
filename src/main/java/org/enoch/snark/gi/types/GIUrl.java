@@ -5,9 +5,10 @@ import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.GI;
+import org.enoch.snark.gi.TechnologyGIR;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
@@ -71,7 +72,7 @@ public class GIUrl {
 
         PlayerEntity player = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
         GI.getInstance().updateResearch(player);
-        GI.getInstance().updateQueue(null, QueueManger.RESEARCH);
+        new TechnologyGIR().updateQueue(null, TechnologyService.RESEARCH);
         player.updated = LocalDateTime.now();
         PlayerDAO.getInstance().saveOrUpdate(player);
     }
@@ -91,20 +92,20 @@ public class GIUrl {
         updateColony(colony);
         if (SUPPLIES.equals(component)) {
             GI.getInstance().updateResourcesProducers(colony);
-            GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
-            GI.getInstance().updateQueue(colony, QueueManger.SHIPYARD);
+            new TechnologyGIR().updateQueue(colony, TechnologyService.BUILDING);
+            new TechnologyGIR().updateQueue(colony, TechnologyService.SHIPYARD);
         } else if (FACILITIES.equals(component)) {
             GI.getInstance().updateFacilities(colony);
-            GI.getInstance().updateQueue(colony, QueueManger.BUILDING);
+            new TechnologyGIR().updateQueue(colony, TechnologyService.BUILDING);
         } else if (LFBUILDINGS.equals(component)) {
             GI.getInstance().updateLifeform(colony);
-            GI.getInstance().updateQueue(colony, QueueManger.LIFEFORM_BUILDINGS);
+            new TechnologyGIR().updateQueue(colony, TechnologyService.LIFE_FORM_BUILDINGS);
         } else if (FLEETDISPATCH.equals(component)) {
             loadFleetStatus();
             GI.getInstance().updateFleet(colony);
         } else if (DEFENSES.equals(component)) {
             GI.getInstance().updateDefence(colony);
-            GI.getInstance().updateQueue(colony, QueueManger.SHIPYARD);
+            new TechnologyGIR().updateQueue(colony, TechnologyService.SHIPYARD);
         }
     }
 
@@ -133,7 +134,7 @@ public class GIUrl {
     }
 
     private static ColonyEntity selectColony() {
-        Boolean isHidingActivity = Instance.getMainConfigMap().getConfigBoolean(HIDING_ACTIVITY, false);
+        Boolean isHidingActivity = Instance.getGlobalMainConfigMap().getConfigBoolean(HIDING_ACTIVITY, false);
         if(isHidingActivity) {
             Optional<ColonyEntity> temporaryPlanet = ColonyDAO.getInstance().fetchAll().stream()
                     .filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET))

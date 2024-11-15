@@ -1,9 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.gi.types.DefenseEnum;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.*;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
@@ -13,7 +11,6 @@ import org.enoch.snark.instance.model.types.ColonyType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
@@ -503,27 +500,27 @@ public abstract class PlanetEntity extends IdEntity{
 
     public ShipsMap getShipsMap() {
         ShipsMap shipsMap = new ShipsMap();
-        if(fighterLight > 0) shipsMap.put(ShipEnum.fighterLight, fighterLight);
-        if(fighterHeavy > 0) shipsMap.put(ShipEnum.fighterHeavy, fighterHeavy);
-        if(cruiser > 0) shipsMap.put(ShipEnum.cruiser, cruiser);
-        if(battleship > 0) shipsMap.put(ShipEnum.battleship, battleship);
-        if(interceptor > 0) shipsMap.put(ShipEnum.interceptor, interceptor);
-        if(bomber > 0) shipsMap.put(ShipEnum.bomber, bomber);
-        if(destroyer > 0) shipsMap.put(ShipEnum.destroyer, destroyer);
-        if(deathstar > 0) shipsMap.put(ShipEnum.deathstar, deathstar);
-        if(reaper > 0) shipsMap.put(ShipEnum.reaper, reaper);
-        if(explorer > 0) shipsMap.put(ShipEnum.explorer, explorer);
+        if(fighterLight > 0) shipsMap.put(Ship.fighterLight, fighterLight);
+        if(fighterHeavy > 0) shipsMap.put(Ship.fighterHeavy, fighterHeavy);
+        if(cruiser > 0) shipsMap.put(Ship.cruiser, cruiser);
+        if(battleship > 0) shipsMap.put(Ship.battleship, battleship);
+        if(interceptor > 0) shipsMap.put(Ship.interceptor, interceptor);
+        if(bomber > 0) shipsMap.put(Ship.bomber, bomber);
+        if(destroyer > 0) shipsMap.put(Ship.destroyer, destroyer);
+        if(deathstar > 0) shipsMap.put(Ship.deathstar, deathstar);
+        if(reaper > 0) shipsMap.put(Ship.reaper, reaper);
+        if(explorer > 0) shipsMap.put(Ship.explorer, explorer);
 
-        if(transporterSmall > 0) shipsMap.put(ShipEnum.transporterSmall, transporterSmall);
-        if(transporterLarge > 0) shipsMap.put(ShipEnum.transporterLarge, transporterLarge);
-        if(colonyShip > 0) shipsMap.put(ShipEnum.colonyShip, colonyShip);
-        if(recycler > 0) shipsMap.put(ShipEnum.recycler, recycler);
-        if(espionageProbe > 0) shipsMap.put(ShipEnum.espionageProbe, espionageProbe);
+        if(transporterSmall > 0) shipsMap.put(Ship.transporterSmall, transporterSmall);
+        if(transporterLarge > 0) shipsMap.put(Ship.transporterLarge, transporterLarge);
+        if(colonyShip > 0) shipsMap.put(Ship.colonyShip, colonyShip);
+        if(recycler > 0) shipsMap.put(Ship.recycler, recycler);
+        if(espionageProbe > 0) shipsMap.put(Ship.espionageProbe, espionageProbe);
 
         return shipsMap;
     }
 
-    public void put(ShipEnum ship, Long value) {
+    public void put(Ship ship, Long value) {
         switch (ship) {
             case fighterLight -> fighterLight = value;
             case fighterHeavy -> fighterHeavy = value;
@@ -541,11 +538,11 @@ public abstract class PlanetEntity extends IdEntity{
             case recycler -> recycler = value;
             case espionageProbe -> espionageProbe = value;
             case solarSatellite -> solarSatellite = value;
-            default -> System.err.println("Unknown "+ShipEnum.class.getName()+" "+ship.name()+" with value "+value);
+            default -> System.err.println("Unknown "+ Ship.class.getName()+" "+ship.name()+" with value "+value);
         }
     }
 
-    public void put(DefenseEnum defense, Long value) {
+    public void put(Defense defense, Long value) {
         switch (defense) {
             case rocketLauncher -> rocketLauncher = value;
             case laserCannonLight -> laserCannonLight = value;
@@ -557,11 +554,11 @@ public abstract class PlanetEntity extends IdEntity{
             case shieldDomeLarge -> shieldDomeLarge = value;
             case missileInterceptor -> missileInterceptor = value;
             case missileInterplanetary -> missileInterplanetary = value;
-            default -> System.err.println("Unknown "+DefenseEnum.class.getName()+" "+defense.name()+" with value "+value);
+            default -> System.err.println("Unknown "+ Defense.class.getName()+" "+defense.name()+" with value "+value);
         }
     }
 
-    public void put(BuildingEnum building, Long value) {
+    public void put(Building building, Long value) {
         switch (building) {
             case metalMine -> metalMine = value;
             case crystalMine -> crystalMine = value;
@@ -582,97 +579,94 @@ public abstract class PlanetEntity extends IdEntity{
             case terraformer -> terraformer = value;
             case repairDock -> repairDock = value;
 
-            default -> System.err.println("Unknown "+BuildingEnum.class.getName()+" "+building.name()+" with value "+value);
+            default -> System.err.println("Unknown "+ Building.class.getName()+" "+building.name()+" with value "+value);
         }
     }
 
-    public Long getBuildingLevel(BuildingEnum building) {
+    public Long getBuildingLevel(Technology building) {
         Long level = buildingLevel(building);
         return level == null ? 0 : level;
     }
 
-    private Long buildingLevel(BuildingEnum building) {
-        switch (building) {
-            case metalMine: return metalMine;
-            case crystalMine: return crystalMine;
-            case deuteriumSynthesizer: return deuteriumSynthesizer;
-            case solarPlant: return solarPlant;
-            case fusionPlant: return fusionPlant;
-            case solarSatellite: return solarSatellite;
-            case metalStorage: return metalStorage;
-            case crystalStorage: return crystalStorage;
-            case deuteriumStorage: return deuteriumStorage;
+    private Long buildingLevel(Technology building) {
+        return switch (building) {
+            case Building.metalMine -> metalMine;
+            case Building.crystalMine -> crystalMine;
+            case Building.deuteriumSynthesizer -> deuteriumSynthesizer;
+            case Building.solarPlant -> solarPlant;
+            case Building.fusionPlant -> fusionPlant;
+            case Building.solarSatellite -> solarSatellite;
+            case Building.metalStorage -> metalStorage;
+            case Building.crystalStorage -> crystalStorage;
+            case Building.deuteriumStorage -> deuteriumStorage;
+            case Building.roboticsFactory -> roboticsFactory;
+            case Building.shipyard -> shipyard;
+            case Building.researchLaboratory -> researchLaboratory;
+            case Building.allianceDepot -> allianceDepot;
+            case Building.missileSilo -> missileSilo;
+            case Building.naniteFactory -> naniteFactory;
+            case Building.terraformer -> terraformer;
+            case Building.repairDock -> repairDock;
+            case LFBuilding.lifeformTech11101 -> lifeformTech11101;
+            case LFBuilding.lifeformTech11102 -> lifeformTech11102;
+            case LFBuilding.lifeformTech11103 -> lifeformTech11103;
+            case LFBuilding.lifeformTech11104 -> lifeformTech11104;
+            case LFBuilding.lifeformTech11105 -> lifeformTech11105;
+            case LFBuilding.lifeformTech11106 -> lifeformTech11106;
+            case LFBuilding.lifeformTech11107 -> lifeformTech11107;
+            case LFBuilding.lifeformTech11108 -> lifeformTech11108;
+            case LFBuilding.lifeformTech11109 -> lifeformTech11109;
+            case LFBuilding.lifeformTech11110 -> lifeformTech11110;
+            case LFBuilding.lifeformTech11111 -> lifeformTech11111;
+            case LFBuilding.lifeformTech11112 -> lifeformTech11112;
+            case LFBuilding.lifeformTech12101 -> lifeformTech12101;
+            case LFBuilding.lifeformTech12102 -> lifeformTech12102;
+            case LFBuilding.lifeformTech12103 -> lifeformTech12103;
+            case LFBuilding.lifeformTech12104 -> lifeformTech12104;
+            case LFBuilding.lifeformTech12105 -> lifeformTech12105;
+            case LFBuilding.lifeformTech12106 -> lifeformTech12106;
+            case LFBuilding.lifeformTech12107 -> lifeformTech12107;
+            case LFBuilding.lifeformTech12108 -> lifeformTech12108;
+            case LFBuilding.lifeformTech12109 -> lifeformTech12109;
+            case LFBuilding.lifeformTech12110 -> lifeformTech12110;
+            case LFBuilding.lifeformTech12111 -> lifeformTech12111;
+            case LFBuilding.lifeformTech12112 -> lifeformTech12112;
+            case LFBuilding.lifeformTech13101 -> lifeformTech13101;
+            case LFBuilding.lifeformTech13102 -> lifeformTech13102;
+            case LFBuilding.lifeformTech13103 -> lifeformTech13103;
+            case LFBuilding.lifeformTech13104 -> lifeformTech13104;
+            case LFBuilding.lifeformTech13105 -> lifeformTech13105;
+            case LFBuilding.lifeformTech13106 -> lifeformTech13106;
+            case LFBuilding.lifeformTech13107 -> lifeformTech13107;
+            case LFBuilding.lifeformTech13108 -> lifeformTech13108;
+            case LFBuilding.lifeformTech13109 -> lifeformTech13109;
+            case LFBuilding.lifeformTech13110 -> lifeformTech13110;
+            case LFBuilding.lifeformTech13111 -> lifeformTech13111;
+            case LFBuilding.lifeformTech13112 -> lifeformTech13112;
+            case LFBuilding.lifeformTech14101 -> lifeformTech14101;
+            case LFBuilding.lifeformTech14102 -> lifeformTech14102;
+            case LFBuilding.lifeformTech14103 -> lifeformTech14103;
+            case LFBuilding.lifeformTech14104 -> lifeformTech14104;
+            case LFBuilding.lifeformTech14105 -> lifeformTech14105;
+            case LFBuilding.lifeformTech14106 -> lifeformTech14106;
+            case LFBuilding.lifeformTech14107 -> lifeformTech14107;
+            case LFBuilding.lifeformTech14108 -> lifeformTech14108;
+            case LFBuilding.lifeformTech14109 -> lifeformTech14109;
+            case LFBuilding.lifeformTech14110 -> lifeformTech14110;
+            case LFBuilding.lifeformTech14111 -> lifeformTech14111;
+            case LFBuilding.lifeformTech14112 -> lifeformTech14112;
 
-            case roboticsFactory: return roboticsFactory;
-            case shipyard: return shipyard;
-            case researchLaboratory: return researchLaboratory;
-            case allianceDepot: return allianceDepot;
-            case missileSilo: return missileSilo;
-            case naniteFactory: return naniteFactory;
-            case terraformer: return terraformer;
-            case repairDock: return repairDock;
+//            case Research.energyTechnology -> energyTechnology;
 
-            case lifeformTech11101: return lifeformTech11101;
-            case lifeformTech11102: return lifeformTech11102;
-            case lifeformTech11103: return lifeformTech11103;
-            case lifeformTech11104: return lifeformTech11104;
-            case lifeformTech11105: return lifeformTech11105;
-            case lifeformTech11106: return lifeformTech11106;
-            case lifeformTech11107: return lifeformTech11107;
-            case lifeformTech11108: return lifeformTech11108;
-            case lifeformTech11109: return lifeformTech11109;
-            case lifeformTech11110: return lifeformTech11110;
-            case lifeformTech11111: return lifeformTech11111;
-            case lifeformTech11112: return lifeformTech11112;
-
-            case lifeformTech12101: return lifeformTech12101;
-            case lifeformTech12102: return lifeformTech12102;
-            case lifeformTech12103: return lifeformTech12103;
-            case lifeformTech12104: return lifeformTech12104;
-            case lifeformTech12105: return lifeformTech12105;
-            case lifeformTech12106: return lifeformTech12106;
-            case lifeformTech12107: return lifeformTech12107;
-            case lifeformTech12108: return lifeformTech12108;
-            case lifeformTech12109: return lifeformTech12109;
-            case lifeformTech12110: return lifeformTech12110;
-            case lifeformTech12111: return lifeformTech12111;
-            case lifeformTech12112: return lifeformTech12112;
-
-            case lifeformTech13101: return lifeformTech13101;
-            case lifeformTech13102: return lifeformTech13102;
-            case lifeformTech13103: return lifeformTech13103;
-            case lifeformTech13104: return lifeformTech13104;
-            case lifeformTech13105: return lifeformTech13105;
-            case lifeformTech13106: return lifeformTech13106;
-            case lifeformTech13107: return lifeformTech13107;
-            case lifeformTech13108: return lifeformTech13108;
-            case lifeformTech13109: return lifeformTech13109;
-            case lifeformTech13110: return lifeformTech13110;
-            case lifeformTech13111: return lifeformTech13111;
-            case lifeformTech13112: return lifeformTech13112;
-
-            case lifeformTech14101: return lifeformTech14101;
-            case lifeformTech14102: return lifeformTech14102;
-            case lifeformTech14103: return lifeformTech14103;
-            case lifeformTech14104: return lifeformTech14104;
-            case lifeformTech14105: return lifeformTech14105;
-            case lifeformTech14106: return lifeformTech14106;
-            case lifeformTech14107: return lifeformTech14107;
-            case lifeformTech14108: return lifeformTech14108;
-            case lifeformTech14109: return lifeformTech14109;
-            case lifeformTech14110: return lifeformTech14110;
-            case lifeformTech14111: return lifeformTech14111;
-            case lifeformTech14112: return lifeformTech14112;
-
-            default: throw new RuntimeException("Unknown Building");
-        }
+            default -> throw new RuntimeException("Unknown Building");
+        };
     }
 
     public Long calculateTransportByTransporterSmall() {
         if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }
-        Long configCapacity = Instance.getMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
+        Long configCapacity = Instance.getGlobalMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
         long amount;
         if(configCapacity == -1L) {
             Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
@@ -691,7 +685,7 @@ public abstract class PlanetEntity extends IdEntity{
         if (this.metal == null || this.crystal == null || this.deuterium == null) {
             throw new TargetMissingResourceInfoException();
         }
-        Long configCapacity = Instance.getMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
+        Long configCapacity = Instance.getGlobalMainConfigMap().getConfigLong(TRANSPORTER_SMALL_CAPACITY, -1L);
         long amount;
         if(configCapacity == -1L) {
             Long hyperspaceTechnology = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer()).hyperspaceTechnology;
@@ -715,13 +709,17 @@ public abstract class PlanetEntity extends IdEntity{
     }
 
     public boolean hasEnoughResources(Resources required) {
-        return getResources().isMoreThan(required);
+        return getResources().isEnough(required);
+    }
+
+    public boolean hasEnoughResources(Resources required, Resources leave) {
+        return hasEnoughResources(required.plus(leave));
     }
 
     public boolean hasEnoughShips(ShipsMap required) {
         if(required == null || ALL_SHIPS.equals(required) || NO_SHIPS.equals(required)) return true;
         ShipsMap located = this.getShipsMap();
-        for(Map.Entry<ShipEnum, Long> entry : required.entrySet()) {
+        for(Map.Entry<Ship, Long> entry : required.entrySet()) {
             Long requiredCont = required.get(entry.getKey());
             if(requiredCont.equals(Long.MAX_VALUE)) continue;
             Long locatedCount = located.get(entry.getKey());

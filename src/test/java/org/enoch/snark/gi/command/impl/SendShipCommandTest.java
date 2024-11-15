@@ -3,7 +3,7 @@ package org.enoch.snark.gi.command.impl;
 import org.enoch.snark.gi.AbstractSeleniumTest;
 import org.junit.Test;
 
-public class SendShipEnumCommandTest extends AbstractSeleniumTest {
+public class SendShipCommandTest extends AbstractSeleniumTest {
 
     @Test
     public void execute() {

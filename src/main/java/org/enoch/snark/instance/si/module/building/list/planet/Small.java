@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.planet;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.Arrays;
@@ -14,78 +14,78 @@ public class Small extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
+    public List<BuildRequest> create() {
         return Arrays.asList(
-                new BuildingRequest(BuildingEnum.solarPlant, 1),
-                new BuildingRequest(BuildingEnum.metalMine, 2),
-                new BuildingRequest(BuildingEnum.solarPlant, 2),
-                new BuildingRequest(BuildingEnum.metalMine, 3),
-                new BuildingRequest(BuildingEnum.crystalMine, 1),
-                new BuildingRequest(BuildingEnum.solarPlant, 3),
-                new BuildingRequest(BuildingEnum.metalMine, 4),
-                new BuildingRequest(BuildingEnum.crystalMine, 2),
-                new BuildingRequest(BuildingEnum.solarPlant, 4),
-                new BuildingRequest(BuildingEnum.metalMine, 5),
-                new BuildingRequest(BuildingEnum.crystalMine, 3),
-                new BuildingRequest(BuildingEnum.solarPlant, 5),
-                new BuildingRequest(BuildingEnum.metalMine, 6),
-                new BuildingRequest(BuildingEnum.crystalMine, 4),
-                new BuildingRequest(BuildingEnum.solarPlant, 6),
-                new BuildingRequest(BuildingEnum.metalMine, 7),
-                new BuildingRequest(BuildingEnum.crystalMine, 5),
-                new BuildingRequest(BuildingEnum.solarPlant, 7),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 3),
-                new BuildingRequest(BuildingEnum.solarPlant, 8),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 5),
-                new BuildingRequest(BuildingEnum.solarPlant, 9),
+                new BuildRequest(Building.solarPlant, 1),
+                new BuildRequest(Building.metalMine, 2),
+                new BuildRequest(Building.solarPlant, 2),
+                new BuildRequest(Building.metalMine, 3),
+                new BuildRequest(Building.crystalMine, 1),
+                new BuildRequest(Building.solarPlant, 3),
+                new BuildRequest(Building.metalMine, 4),
+                new BuildRequest(Building.crystalMine, 2),
+                new BuildRequest(Building.solarPlant, 4),
+                new BuildRequest(Building.metalMine, 5),
+                new BuildRequest(Building.crystalMine, 3),
+                new BuildRequest(Building.solarPlant, 5),
+                new BuildRequest(Building.metalMine, 6),
+                new BuildRequest(Building.crystalMine, 4),
+                new BuildRequest(Building.solarPlant, 6),
+                new BuildRequest(Building.metalMine, 7),
+                new BuildRequest(Building.crystalMine, 5),
+                new BuildRequest(Building.solarPlant, 7),
+                new BuildRequest(Building.deuteriumSynthesizer, 3),
+                new BuildRequest(Building.solarPlant, 8),
+                new BuildRequest(Building.deuteriumSynthesizer, 5),
+                new BuildRequest(Building.solarPlant, 9),
 
 
-                new BuildingRequest(BuildingEnum.metalStorage, 1),
-                new BuildingRequest(BuildingEnum.crystalStorage, 1),
-                new BuildingRequest(BuildingEnum.deuteriumStorage, 1),
+                new BuildRequest(Building.metalStorage, 1),
+                new BuildRequest(Building.crystalStorage, 1),
+                new BuildRequest(Building.deuteriumStorage, 1),
 
-                new BuildingRequest(BuildingEnum.roboticsFactory, 2),
+                new BuildRequest(Building.roboticsFactory, 2),
 //                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
-                new BuildingRequest(BuildingEnum.shipyard, 2),
+                new BuildRequest(Building.shipyard, 2),
 
-                new BuildingRequest(BuildingEnum.metalMine, 8),
-                new BuildingRequest(BuildingEnum.crystalMine, 6),
-                new BuildingRequest(BuildingEnum.metalMine, 9),
-                new BuildingRequest(BuildingEnum.solarPlant, 10),
-                new BuildingRequest(BuildingEnum.crystalMine, 7),
-                new BuildingRequest(BuildingEnum.metalMine, 10),
-                new BuildingRequest(BuildingEnum.crystalMine, 8),
-                new BuildingRequest(BuildingEnum.solarPlant, 11),
+                new BuildRequest(Building.metalMine, 8),
+                new BuildRequest(Building.crystalMine, 6),
+                new BuildRequest(Building.metalMine, 9),
+                new BuildRequest(Building.solarPlant, 10),
+                new BuildRequest(Building.crystalMine, 7),
+                new BuildRequest(Building.metalMine, 10),
+                new BuildRequest(Building.crystalMine, 8),
+                new BuildRequest(Building.solarPlant, 11),
 
-                new BuildingRequest(BuildingEnum.metalMine, 11),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 7),
-                new BuildingRequest(BuildingEnum.solarPlant, 12),
-                new BuildingRequest(BuildingEnum.metalMine, 12),
-                new BuildingRequest(BuildingEnum.crystalMine, 10),
-                new BuildingRequest(BuildingEnum.solarPlant, 13),
+                new BuildRequest(Building.metalMine, 11),
+                new BuildRequest(Building.deuteriumSynthesizer, 7),
+                new BuildRequest(Building.solarPlant, 12),
+                new BuildRequest(Building.metalMine, 12),
+                new BuildRequest(Building.crystalMine, 10),
+                new BuildRequest(Building.solarPlant, 13),
 
-                new BuildingRequest(BuildingEnum.metalMine, 13),
-                new BuildingRequest(BuildingEnum.crystalMine, 11),
-                new BuildingRequest(BuildingEnum.solarPlant, 14),
+                new BuildRequest(Building.metalMine, 13),
+                new BuildRequest(Building.crystalMine, 11),
+                new BuildRequest(Building.solarPlant, 14),
 
-                new BuildingRequest(BuildingEnum.metalMine, 14),
-                new BuildingRequest(BuildingEnum.crystalMine, 12),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 10),
+                new BuildRequest(Building.metalMine, 14),
+                new BuildRequest(Building.crystalMine, 12),
+                new BuildRequest(Building.deuteriumSynthesizer, 10),
 
-                new BuildingRequest(BuildingEnum.metalStorage, 2),
-                new BuildingRequest(BuildingEnum.solarPlant, 15),
+                new BuildRequest(Building.metalStorage, 2),
+                new BuildRequest(Building.solarPlant, 15),
 
-                new BuildingRequest(BuildingEnum.metalStorage, 3),
-                new BuildingRequest(BuildingEnum.deuteriumStorage, 2),
-                new BuildingRequest(BuildingEnum.crystalStorage, 2),
-                new BuildingRequest(BuildingEnum.solarPlant, 16),
+                new BuildRequest(Building.metalStorage, 3),
+                new BuildRequest(Building.deuteriumStorage, 2),
+                new BuildRequest(Building.crystalStorage, 2),
+                new BuildRequest(Building.solarPlant, 16),
 
-                new BuildingRequest(BuildingEnum.metalStorage, 4),
-                new BuildingRequest(BuildingEnum.crystalStorage, 3),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 12),
-                new BuildingRequest(BuildingEnum.crystalMine, 13),
-                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
-                new BuildingRequest(BuildingEnum.shipyard, 4)
+                new BuildRequest(Building.metalStorage, 4),
+                new BuildRequest(Building.crystalStorage, 3),
+                new BuildRequest(Building.deuteriumSynthesizer, 12),
+                new BuildRequest(Building.crystalMine, 13),
+                new BuildRequest(Building.roboticsFactory, 4),
+                new BuildRequest(Building.shipyard, 4)
         );
     }
 }

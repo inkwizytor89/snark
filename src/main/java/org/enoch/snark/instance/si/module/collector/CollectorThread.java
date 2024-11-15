@@ -147,7 +147,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private ColonyEntity anyColony() {
-        long oneBeforeLast = Instance.getMainConfigMap().getConfigLong(ConfigMap.GALAXY_MAX, 6L)-1;
+        long oneBeforeLast = Instance.getGlobalMainConfigMap().getConfigLong(ConfigMap.GALAXY_MAX, 6L)-1;
         ColonyEntity similarColony = new Planet("[" + oneBeforeLast + ":325:8]").getSimilarColony();
         System.out.println("Collector has no destination and selected " + similarColony.toString());
         return similarColony;

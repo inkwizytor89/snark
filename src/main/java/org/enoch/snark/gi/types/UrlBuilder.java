@@ -57,9 +57,9 @@ public class UrlBuilder {
     }
 
     private static String getLink() {
-        String config = Instance.getMainConfigMap().getConfig(URL, null);
+        String config = Instance.getGlobalMainConfigMap().getConfig(URL, null);
         if(config == null ) {
-            String hash = Instance.getMainConfigMap().getConfig(HASH);
+            String hash = Instance.getGlobalMainConfigMap().getConfig(HASH);
             config = HashDecoder.parseLink(hash);
         }
         return config + "?";

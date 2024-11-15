@@ -8,9 +8,9 @@ import static org.enoch.snark.instance.si.module.ConfigMap.ARRAY_SEPARATOR;
 
 
 public class BuildingManager {
-    private static final Map<String, List<BuildingRequest>> cachedLists = new HashMap<>();
+    private static final Map<String, List<BuildRequest>> cachedLists = new HashMap<>();
 
-    public static Queue<BuildingRequest> getBuildRequests(String names, boolean debug) {
+    public static Queue<BuildRequest> getBuildRequests(String names, boolean debug) {
         if(!cachedLists.containsKey(names)) {
             List<String> listNames = Arrays.asList(names.split(ARRAY_SEPARATOR));
             cachedLists.put(names, AbstractBuildingList.convert(listNames));

@@ -1,8 +1,9 @@
 package org.enoch.snark.instance.si.module.building.list.lf;
 
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.LFBuilding;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.ArrayList;
@@ -16,25 +17,25 @@ public class MechaT2 extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> buildingRequests = new ArrayList<>(new MechaT1(StringUtils.EMPTY).create());
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech13101, 47),
-                new BuildingRequest(BuildingEnum.lifeformTech13102, 56)
+    public List<BuildRequest> create() {
+        List<BuildRequest> buildRequests = new ArrayList<>(new MechaT1(StringUtils.EMPTY).create());
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13101, 47),
+                new BuildRequest(LFBuilding.lifeformTech13102, 56)
         ));
 //        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13103, 5));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13106, 3));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13104, 1));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13108, 2));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13109, 6));
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13106, 3));
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13104, 1));
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13108, 2));
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13109, 6));
 
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech13107, 6),
-                new BuildingRequest(BuildingEnum.lifeformTech13111, 5),
-                new BuildingRequest(BuildingEnum.lifeformTech13110, 4)
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13107, 6),
+                new BuildRequest(LFBuilding.lifeformTech13111, 5),
+                new BuildRequest(LFBuilding.lifeformTech13110, 4)
         ));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13104, 7));
-        buildingRequests.add(new BuildingRequest(BuildingEnum.lifeformTech13105, 1));
-        return create(buildingRequests);
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13104, 7));
+        buildRequests.add(new BuildRequest(LFBuilding.lifeformTech13105, 1));
+        return create(buildRequests);
     }
 }

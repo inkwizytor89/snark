@@ -1,13 +1,11 @@
 package org.enoch.snark.instance;
 
 import lombok.Getter;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.*;
-import org.enoch.snark.instance.model.action.QueueManger;
 import org.enoch.snark.instance.service.Cleaner;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.config.ConfigReader;
@@ -77,7 +75,7 @@ public class Instance {
         commander = Commander.getInstance();
 //        new ReadMessageCommand().hash(MessageService.class.getName()).push();
         //QueueManger.BUILDING
-        new OpenPageCommand(LFBUILDINGS, ColonyDAO.getInstance().find("p[3:122:8]")).push();
+//        new OpenPageCommand(LFBUILDINGS, ColonyDAO.getInstance().find("p[2:447:8]")).push();
         new LoadColoniesCommand().push();
         new UpdateFleetEventsCommand().push();
         new UpdateResearchCommand().push();
@@ -96,17 +94,17 @@ public class Instance {
         }
     }
 
-    public static ConfigMap getMainConfigMap() {
-        return getMainConfigMap(MAIN);
+    public static ConfigMap getGlobalMainConfigMap() {
+        return getGlobalMainConfigMap(MAIN);
     }
 
-    public static ConfigMap getMainConfigMap(String name) {
+    public static ConfigMap getGlobalMainConfigMap(String name) {
         ModuleMap moduleMap = propertiesMap.get(GLOBAL);
         if(!moduleMap.containsKey(name)) return new ConfigMap();
         return moduleMap.get(name);
     }
 
     public static List<ColonyEntity> getSources() {
-        return getMainConfigMap().getSources();
+        return getGlobalMainConfigMap().getSources();
     }
 }

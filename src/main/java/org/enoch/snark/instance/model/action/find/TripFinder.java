@@ -11,7 +11,7 @@ import static org.enoch.snark.instance.si.module.ConfigMap.TRIP;
 public class TripFinder {
 
     public static ColonyEntity next(ColonyEntity colonyEntity) {
-        List<ColonyEntity> configTrip = Instance.getMainConfigMap().getColonies(TRIP, null);
+        List<ColonyEntity> configTrip = Instance.getGlobalMainConfigMap().getColonies(TRIP, null);
         if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
         int index = configTrip.indexOf(colonyEntity);
         if(index == -1) {
@@ -23,7 +23,7 @@ public class TripFinder {
     }
 
     public static ColonyEntity prev(ColonyEntity colonyEntity) {
-        List<ColonyEntity> configTrip = Instance.getMainConfigMap().getColonies(TRIP, null);
+        List<ColonyEntity> configTrip = Instance.getGlobalMainConfigMap().getColonies(TRIP, null);
         if(configTrip == null) throw new IllegalStateException("Missing config: "+TRIP);
         int index = configTrip.indexOf(colonyEntity);
         if(index == -1) {

@@ -1,9 +1,9 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.gi.types.DefenseEnum;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.Defense;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -36,7 +36,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
             System.err.println("Potential error: spy and planet with no metal "+target.toPlanet());
 
         List<WebElement> fleetPositions = fetchPositionsInSection("fleetSection");
-        if (!fleetPositions.isEmpty()) for(ShipEnum ship : ShipEnum.values()) {
+        if (!fleetPositions.isEmpty()) for(Ship ship : Ship.values()) {
             String key = ship.name().toLowerCase();
             Optional<WebElement> element = fleetPositions.stream().filter(value -> value.getAttribute(key)!= null).findFirst();
             element.ifPresent(webElement -> target.put(ship, extractLongFromAriaDescription(webElement)));
@@ -44,7 +44,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
         target.calculateShips();
 
         List<WebElement> defensePositions = fetchPositionsInSection("defenseSection");
-        if (!defensePositions.isEmpty()) for(DefenseEnum defense : DefenseEnum.values()) {
+        if (!defensePositions.isEmpty()) for(Defense defense : Defense.values()) {
             String key = defense.name().toLowerCase();
             Optional<WebElement> element = defensePositions.stream().filter(value -> value.getAttribute(key)!= null).findFirst();
             element.ifPresent(webElement -> target.put(defense, extractLongFromAriaDescription(webElement)));
@@ -52,7 +52,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
         target.calculateDefense();
 
         List<WebElement> buildingsPositions = fetchPositionsInSection("buildingsSection");
-        if (!buildingsPositions.isEmpty()) for(BuildingEnum building : BuildingEnum.baseBuildings()) {
+        if (!buildingsPositions.isEmpty()) for(Building building : Building.baseBuildings()) {
             String key = building.name().toLowerCase();
             Optional<WebElement> element = buildingsPositions.stream().filter(value -> value.getAttribute(key)!= null).findFirst();
             element.ifPresent(webElement -> target.put(building, extractLongFromAriaDescription(webElement)));

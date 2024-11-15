@@ -10,7 +10,7 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
@@ -50,7 +50,7 @@ public class SendFleetCommand extends AbstractCommand {
     public boolean prepere() {
         GIUrl.openSendFleetView(fleet.source, fleet.getDestination(), fleet.mission);
         fleet.source = ColonyDAO.getInstance().fetch(fleet.source);
-        if(!fleet.source.hasEnoughShips(ShipEnum.createShipsMap(fleet))) {
+        if(!fleet.source.hasEnoughShips(Ship.createShipsMap(fleet))) {
             if(fleet.code == null) {
                 fleet.code = 0L;
             } else {
@@ -82,20 +82,20 @@ public class SendFleetCommand extends AbstractCommand {
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
 
-        Set<Map.Entry<ShipEnum, Long>> entries = buildShipsMap().entrySet();
+        Set<Map.Entry<Ship, Long>> entries = buildShipsMap().entrySet();
         if(isAllShips() && (promise().getLeaveShipsMap() == null || promise().getLeaveShipsMap().isEmpty())) {
             gir.selectAllShips();
         } else if (promise().getShipsMap() != null) {
             promise().setSource(fleet.source);
             ShipsMap realCanToSend = promise().normalizeShipMap();
-            for (Map.Entry<ShipEnum, Long> entry : realCanToSend.entrySet()) {
+            for (Map.Entry<Ship, Long> entry : realCanToSend.entrySet()) {
                 Long value = typeShip(entry.getKey(), entry.getValue());
                 fleet.setShips(ShipsMap.createSingle(entry.getKey(), value));
 
             }
         } else { //todo: nie powinno byc wyciagania z fleetEntity statkow i wybieranie ich
             // tylko z shipMap powinno byc wybierane. Do Fleet entity powinno byc zapisywane to co zostalo ostatecznie typowane
-            for (Map.Entry<ShipEnum, Long> entry : entries) {
+            for (Map.Entry<Ship, Long> entry : entries) {
                 typeShip(entry.getKey(), entry.getValue());
             }
         }
@@ -107,8 +107,8 @@ public class SendFleetCommand extends AbstractCommand {
             if(isAllShips()) {
                 System.err.println("allShips selected");
             } else {
-                for (Map.Entry<ShipEnum, Long> entry : entries) {
-                    System.err.print(entry.getKey().getId() + " " + entry.getValue() + "/");
+                for (Map.Entry<Ship, Long> entry : entries) {
+                    System.err.print(entry.getKey().name() + " " + entry.getValue() + "/");
                     System.err.println(fleet.source.getShipsMap().get(entry.getKey()));
                 }
             }
@@ -199,10 +199,10 @@ public class SendFleetCommand extends AbstractCommand {
         }
     }
 
-    public Long typeShip(ShipEnum shipEnum, Long count) {
-        WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
+    public Long typeShip(Ship ship, Long count) {
+        WebElement element = webDriver.findElement(By.name(ship.name()));
         if(!element.isEnabled()) {
-            throw new ShipDoNotExists("Missing ships " + shipEnum.getId());
+            throw new ShipDoNotExists("Missing ships " + ship.name());
         }
         element.sendKeys(count.toString());
         return count;
@@ -225,8 +225,8 @@ public class SendFleetCommand extends AbstractCommand {
         actions.moveToElement(continueButton).click().perform();
     }
 
-    public Map<ShipEnum, Long> buildShipsMap() {
-        return ShipEnum.createShipsMap(fleet);
+    public Map<Ship, Long> buildShipsMap() {
+        return Ship.createShipsMap(fleet);
     }
 
     @Override

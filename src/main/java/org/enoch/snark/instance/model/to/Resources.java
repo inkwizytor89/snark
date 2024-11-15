@@ -6,6 +6,7 @@ import org.enoch.snark.instance.model.types.ResourceType;
 
 import java.util.Arrays;
 
+import static java.lang.Long.max;
 import static org.enoch.snark.instance.model.types.ResourceType.*;
 
 public class Resources {
@@ -63,8 +64,6 @@ public class Resources {
     public static Resources calculate(Resources actual, Resources wantToMove, Resources leave) {
         if(everything.equals(actual)) throw new IllegalStateException("Actual can not be everything");
         if(everything.equals(wantToMove)) wantToMove = actual;
-        if(nothing.equals(leave)) return everything;
-        if(everything.equals(leave)) return nothing;
         if(wantToMove == null || nothing.equals(wantToMove)) return nothing;
 
         Resources calculated = new Resources();
@@ -92,7 +91,7 @@ public class Resources {
         return count() >= value;
     }
 
-    public boolean isMoreThan(Resources resources) {
+    public boolean isEnough(Resources resources) {
         if(resources == null || everything.equals(resources) || nothing.equals(resources)) return true;
         return metal >= resources.metal &&
                 crystal >= resources.crystal &&
@@ -116,5 +115,32 @@ public class Resources {
         } else if (DEUTERIUM.equals(resourceType)) {
             deuterium = deuterium == Long.MAX_VALUE ? deuterium : deuterium + value;
         }
+    }
+
+    public Resources plus(Resources resources) {
+        if(resources == null) return this;
+        if(!isNormalise(this) || !isNormalise(resources)) throw new IllegalStateException("Resources can cot be abstract");
+        Resources result = new Resources();
+        result.metal = metal + resources.metal;
+        result.crystal = crystal + resources.crystal;
+        result.deuterium = deuterium + resources.deuterium;
+        if(!isNormalise(result))  throw new IllegalStateException("Result resources can cot be abstract");
+        return result;
+    }
+
+    public Resources missing(Resources resources) {
+        if(!isNormalise(this) || !isNormalise(resources)) throw new IllegalStateException("Resources can cot be abstract");
+        Resources result = new Resources();
+        result.metal = max(metal - resources.metal, 0L);
+        result.crystal = max(crystal - resources.crystal, 0L);
+        result.deuterium = max(deuterium - resources.deuterium, 0L);
+        if(!isNormalise(result))
+            throw new IllegalStateException("Result resources can cot be abstract");
+        return result;
+    }
+
+    public static boolean isNormalise(Resources resources) {
+        return !everything.equals(resources) && !unknown.equals(resources) &&
+                resources.metal>=0 && resources.crystal >=0 && resources.deuterium>=0;
     }
 }

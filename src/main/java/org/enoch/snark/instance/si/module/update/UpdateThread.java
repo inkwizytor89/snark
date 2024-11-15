@@ -6,7 +6,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -94,7 +94,7 @@ public class UpdateThread extends AbstractThread {
 
     private void markMainFleet() {
         ShipsMap noProbe = new ShipsMap();
-        noProbe.put(ShipEnum.espionageProbe, 0L);
+        noProbe.put(Ship.espionageProbe, 0L);
 
         List<Long> fleetCounts = ColonyDAO.getInstance().fetchAll().stream()
                 .map(colony -> colony.getShipsMap().reduce(noProbe).count())

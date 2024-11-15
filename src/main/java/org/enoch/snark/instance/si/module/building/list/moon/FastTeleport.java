@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.moon;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.Arrays;
@@ -14,15 +14,15 @@ public class FastTeleport extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
+    public List<BuildRequest> create() {
         return Arrays.asList(
-                new BuildingRequest(BuildingEnum.moonbase, 1),
-                new BuildingRequest(BuildingEnum.roboticsFactory, 2),
-                new BuildingRequest(BuildingEnum.moonbase, 2),
-                new BuildingRequest(BuildingEnum.roboticsFactory, 4),
-                new BuildingRequest(BuildingEnum.moonbase, 3),
-                new BuildingRequest(BuildingEnum.roboticsFactory, 6),
-                new BuildingRequest(BuildingEnum.jumpGate, 1)
+                new BuildRequest(Building.moonbase, 1),
+                new BuildRequest(Building.roboticsFactory, 2),
+                new BuildRequest(Building.moonbase, 2),
+                new BuildRequest(Building.roboticsFactory, 4),
+                new BuildRequest(Building.moonbase, 3),
+                new BuildRequest(Building.roboticsFactory, 6),
+                new BuildRequest(Building.jumpGate, 1)
         );
     }
 }

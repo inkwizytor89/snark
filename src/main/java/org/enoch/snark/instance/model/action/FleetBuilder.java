@@ -21,7 +21,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.enoch.snark.gi.types.Mission.TRANSPORT;
-import static org.enoch.snark.gi.types.ShipEnum.transporterLarge;
+import static org.enoch.snark.instance.model.technology.Ship.transporterLarge;
 import static org.enoch.snark.instance.model.action.PlanetExpression.asExpression;
 import static org.enoch.snark.instance.model.action.PlanetExpression.toPlanetList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
@@ -114,7 +114,7 @@ public class FleetBuilder {
     }
 
     public FleetBuilder leaveResources(Resources leaveResources) {
-        if(!nothing.equals(resources))
+        if(leaveResources != null)
             this.leaveResources = leaveResources;
         return this;
     }

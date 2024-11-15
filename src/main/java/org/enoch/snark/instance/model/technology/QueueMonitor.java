@@ -1,9 +1,13 @@
-package org.enoch.snark.instance.model.action;
+package org.enoch.snark.instance.model.technology;
+
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class QueueMonitor {
     private LocalDateTime date;
+    private Technology technology;
 
     public QueueMonitor() {
         clean();
@@ -17,7 +21,8 @@ public class QueueMonitor {
         date = LocalDateTime.now();
     }
 
-    public void setDate(LocalDateTime date) {
+    public void update(Technology technology, LocalDateTime date) {
+        this.technology = technology;
         this.date = date;
     }
 

@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.planet;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.Arrays;
@@ -14,13 +14,13 @@ public class Mines extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> sourceList = Arrays.asList(
-                new BuildingRequest(BuildingEnum.metalMine, this.argLong(1)),
-                new BuildingRequest(BuildingEnum.crystalMine, this.argLong(2)),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, this.argLong(3)),
-                new BuildingRequest(BuildingEnum.solarPlant, this.argLong(4)),
-                new BuildingRequest(BuildingEnum.fusionPlant, this.argLong(5))
+    public List<BuildRequest> create() {
+        List<BuildRequest> sourceList = Arrays.asList(
+                new BuildRequest(Building.metalMine, this.argLong(1)),
+                new BuildRequest(Building.crystalMine, this.argLong(2)),
+                new BuildRequest(Building.deuteriumSynthesizer, this.argLong(3)),
+                new BuildRequest(Building.solarPlant, this.argLong(4)),
+                new BuildRequest(Building.fusionPlant, this.argLong(5))
         );
         return create(sourceList);
     }

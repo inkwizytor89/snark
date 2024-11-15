@@ -1,7 +1,8 @@
 package org.enoch.snark.instance.si.module.building.list.lf;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.LFBuilding;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.Arrays;
@@ -14,11 +15,11 @@ public class RocktalT1 extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> sourceList = Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech12101, 21),
-                new BuildingRequest(BuildingEnum.lifeformTech12102, 22),
-                new BuildingRequest(BuildingEnum.lifeformTech12103, 1)
+    public List<BuildRequest> create() {
+        List<BuildRequest> sourceList = Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech12101, 21),
+                new BuildRequest(LFBuilding.lifeformTech12102, 22),
+                new BuildRequest(LFBuilding.lifeformTech12103, 1)
         );
         return create(sourceList);
     }

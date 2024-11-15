@@ -5,6 +5,7 @@ import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.RunningState;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
@@ -20,6 +21,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.si.module.ConfigMap.*;
 
 public class Commander extends Thread {
@@ -87,8 +90,8 @@ public class Commander extends Thread {
     }
 
     public RunningProcessor updateRunningStatus() {
-        boolean isOn = Instance.getMainConfigMap().isOn();
-        boolean shouldStop = Instance.getMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
+        boolean isOn = Instance.getGlobalMainConfigMap().isOn();
+        boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
         return runningProcessor.update(isOn, shouldStop)
                 .logChangedStatus(Commander.class.getName());
     }
@@ -180,13 +183,23 @@ public class Commander extends Thread {
         return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
     }
 
-    public synchronized void push(AbstractCommand command, LocalDateTime from) {
-        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
-            commandDeque.push(command);
+    public synchronized void push(AbstractCommand command, String action) {
+        String hash = command.hash();
+        LocalDateTime now = LocalDateTime.now();
+        List<FleetEntity> withHash = FleetDAO.getInstance().findWithHash(hash);
+        withHash.sort(Comparator.comparing(o -> o.updated));
+        if(withHash.isEmpty()) push(command);
+        else if(DELAY_TO_FLEET_THERE.equals(action) && now.isAfter(withHash.getLast().visited)) push(command);
+        else if(DELAY_TO_FLEET_BACK.equals(action) && now.isAfter(withHash.getLast().back)) push(command);
     }
 
     public synchronized void push(AbstractCommand command) {
         if(noBlockingHashInQueue(command.hash()))
+            commandDeque.push(command);
+    }
+
+    public synchronized void push(AbstractCommand command, LocalDateTime from) {
+        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
             commandDeque.push(command);
     }
 

@@ -32,6 +32,10 @@ public abstract class AbstractCommand {
 
     public abstract boolean execute();
 
+    public void push(String action) {
+        Commander.getInstance().push(this, action);
+    }
+
     public void push(LocalDateTime from) {
         Commander.getInstance().push(this, from);
     }

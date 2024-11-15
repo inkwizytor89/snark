@@ -1,8 +1,9 @@
 package org.enoch.snark.instance.si.module.building.list.lf;
 
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.LFBuilding;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ public class KaeleshT2 extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> buildingRequests = new ArrayList<>(new KaeleshT1(StringUtils.EMPTY).create());
-        buildingRequests.addAll(Arrays.asList(
-                new BuildingRequest(BuildingEnum.lifeformTech14101, 41),
-                new BuildingRequest(BuildingEnum.lifeformTech14102, 43),
-                new BuildingRequest(BuildingEnum.lifeformTech14104, 1)
+    public List<BuildRequest> create() {
+        List<BuildRequest> buildRequests = new ArrayList<>(new KaeleshT1(StringUtils.EMPTY).create());
+        buildRequests.addAll(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech14101, 41),
+                new BuildRequest(LFBuilding.lifeformTech14102, 43),
+                new BuildRequest(LFBuilding.lifeformTech14104, 1)
         ));
-        return create(buildingRequests);
+        return create(buildRequests);
     }
 }

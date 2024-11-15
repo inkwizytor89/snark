@@ -224,7 +224,7 @@ public class FarmThread extends AbstractThread {
     private Integer typeExplorationArea() {
         Integer explorationArea = map.getConfigInteger(EXPLORATION_AREA_CONFIG, -1);
         if(explorationArea>=0) return explorationArea;
-        return Instance.getMainConfigMap().getConfigInteger(EXPLORATION_AREA_CONFIG, -1);
+        return Instance.getGlobalMainConfigMap().getConfigInteger(EXPLORATION_AREA_CONFIG, -1);
     }
 
     private List<ColonyEntity> typeReadyColony() {

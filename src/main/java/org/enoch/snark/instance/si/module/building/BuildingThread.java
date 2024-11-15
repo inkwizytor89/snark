@@ -4,22 +4,22 @@ import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
+import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.PlanetExpression;
-import org.enoch.snark.instance.model.action.QueueManger;
+import org.enoch.snark.instance.model.uc.ResourceUC;
+import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.model.types.ResourceType.CRYSTAL;
-import static org.enoch.snark.instance.model.types.ResourceType.METAL;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
+import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
 
 public class BuildingThread extends AbstractThread {
@@ -31,15 +31,15 @@ public class BuildingThread extends AbstractThread {
     public static final String DEFAULT_LIST = "small";
     public static final int SHORT_PAUSE = 20;
 
-    private Map<ColonyEntity, Queue<BuildingRequest>> colonyMap;
-    private final QueueManger queueManger;
+    private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
+    private final TechnologyService technologyService;
     private final BuildingCost buildingCost;
     private String buildingList;
 
     public BuildingThread(ConfigMap map) {
         super(map);
         buildingCost = BuildingCost.getInstance();
-        queueManger = QueueManger.getInstance();
+        technologyService = TechnologyService.getInstance();
     }
 
     @Override
@@ -56,49 +56,77 @@ public class BuildingThread extends AbstractThread {
     protected void onStep() {
         updateSourceMap();
         for(ColonyEntity colony : colonyMap.keySet()) {
-            Queue<BuildingRequest> requests = colonyMap.get(colony);
-            if(requests == null) {
-                requests = BuildingManager.getBuildRequests(buildingList, debug);
-                colonyMap.put(colony, requests);
-            }
-            while(skipAlreadyBuild(colony, requests.peek())) requests.poll();
-            if (requests.isEmpty()) continue; //nothing to build
 
-            BuildingRequest buildingRequest = requests.peek();
-            if(isColonyNotYetLoaded(colony) ||
-                    isQueueBusy(colony, buildingRequest) ||
-                    isUpgradeBlocked(colony, buildingRequest))
-                continue;
+            BuildRequest buildRequest = getNextRequest(colony);
+            if (isNothingToBuild(buildRequest)) continue;
+            if (isBuildQueueBlockedForBuildRequest(colony, buildRequest)) continue;
 
-            Resources resources = buildingCost.getCosts(buildingRequest);
-            BuildRequirements buildRequirements = new BuildRequirements(buildingRequest, resources);
-            if(buildRequirements.isResourceUnknown() || buildRequirements.canBuildOn(colony)) {
-               new BuildCommand(colony, buildRequirements).push();
-            } else {
-                ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
-                Boolean swapTransport = map.getConfigBoolean(SWAP_TRANSPORT, true);
-                if (swapTransport && buildRequirements.canBuildOn(swapColony)) {
-                    Resources requieredResources = buildRequirements.resources.skipLeave(METAL, CRYSTAL);
-                    new FleetBuilder()
-                            .from(swapColony)
-                            .mission(Mission.TRANSPORT)
-                            .addCondition(new ResourceCondition(requieredResources))
-                            .resources(requieredResources)
-                            .buildOne()
-                            .push(LocalDateTime.now().minusMinutes(10L));
-                }
+            BuildRequirements requirements = new BuildRequirements(buildRequest, buildingCost.getCosts(buildRequest));
+            Resources leave = map.getNearestLeaveResources(colony.type, nothing);
+//            if(requirements.isResourceUnknown() || colony.hasEnoughResources(requirements.resources, leave)) {
+            if(requirements.isResourceUnknown() || ResourceUC.calculate(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
+                log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
+                new BuildCommand(colony, requirements).push();
+               continue;
             }
+
+            SendFleetPromiseCommand pushedCommand = null;
+            if (map.getConfigBoolean(SWAP_TRANSPORT, true))
+                pushedCommand = transportNearResourcesAndBuild(colony, requirements);
+            if(pushedCommand != null) log("Move "+pushedCommand.hash()+" missing resource and push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
+            else log("On "+colony+" "+colony.getResources()+" is not enough to start requirements:"+requirements);
         }
     }
 
-    private boolean isUpgradeBlocked(ColonyEntity colony, BuildingRequest buildingRequest) {
-//        buildingRequest.building.isLifeform()
-        return false;
+    private boolean isBuildQueueBlockedForBuildRequest(ColonyEntity colony, BuildRequest buildRequest) {
+        // uwspolnic z Build command i bulging thread
+        return !technologyService.canStartOnQueue(colony, buildRequest.technology);
     }
 
-    private boolean skipAlreadyBuild(ColonyEntity colony, BuildingRequest request) {
-        if(request == null) return false;
-        Long buildingLevel = colony.getBuildingLevel(request.building);
+    private SendFleetPromiseCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
+        // moze nie swap tyylko support colony, w jakims fleetUc tak zeby support planet byla dowolna nie koniecznie swap
+        ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
+        if(swapColony == null ) return null;
+        Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
+//        Resources missing = requirements.resources.missing(colony.getResources());
+        Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
+//        Resources leaveSwap = map.getNearestLeaveResources(colony.type, null);
+        Resources leaveSwap = map.getNearestLeaveResources(swapColony.type, nothing);
+        Resources needed = ResourceUC.calculate(swapColony, missing, leaveSwap);
+//        if (swapColony.hasEnoughResources(missing, leaveSwap)) {
+        if (needed != null) {
+            SendFleetPromiseCommand command = new FleetBuilder()
+                    .from(swapColony)
+                    .mission(Mission.TRANSPORT)
+                    .addCondition(new ResourceCondition(missing.plus(leaveSwap)))
+                    .leaveResources(leaveSwap)
+                    .resources(needed)
+                    .buildOne();
+            command.setNext(new BuildCommand(colony, requirements),DELAY_TO_FLEET_THERE);
+            command.push(DELAY_TO_FLEET_BACK);
+
+            return command;
+        }
+        return null;
+    }
+
+    private static boolean isNothingToBuild(BuildRequest buildRequest) {
+        return buildRequest == null;
+    }
+
+    private BuildRequest getNextRequest(ColonyEntity colony) {
+        Queue<BuildRequest> requests = colonyMap.get(colony);
+        if(requests == null) {
+            requests = BuildingManager.getBuildRequests(buildingList, debug);
+            colonyMap.put(colony, requests);
+        }
+        while(skipAlreadyBuild(colony, requests.peek())) requests.poll();
+        return requests.peek();
+    }
+
+    private boolean skipAlreadyBuild(ColonyEntity colony, BuildRequest request) {
+        if(isNothingToBuild(request)) return false;
+        Long buildingLevel = colony.getBuildingLevel(request.technology);
         return request.level <= buildingLevel;
     }
 
@@ -110,14 +138,5 @@ public class BuildingThread extends AbstractThread {
         }
         List<ColonyEntity> planets = new ArrayList<>(map.getColonies(SOURCE, PlanetExpression.PLANET));
         Util.updateMapKeys(colonyMap, planets, null);
-    }
-
-    private boolean isColonyNotYetLoaded(ColonyEntity colony) {
-        return colony.level == null;
-    }
-
-    private boolean isQueueBusy(ColonyEntity colony, BuildingRequest buildingRequest) {
-        String queue = buildingRequest.building.isLifeform() ? QueueManger.LIFEFORM_BUILDINGS : QueueManger.BUILDING;
-        return !queueManger.isFree(colony, queue);
     }
 }

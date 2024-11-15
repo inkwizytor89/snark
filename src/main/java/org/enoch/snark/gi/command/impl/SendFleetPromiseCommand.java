@@ -1,7 +1,6 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
@@ -10,8 +9,8 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
-import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.commander.QueueRunType;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
@@ -25,10 +24,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.gi.types.Mission.ATTACK;
 import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
@@ -39,7 +40,6 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     public static final Long TIME_BUFFER = 3L;
     protected FleetPromise promise;
 
-//    public FleetEntity fleet;
     private final SendFleetGIR gir = new SendFleetGIR();
 
     public SendFleetPromiseCommand(FleetPromise promise) {
@@ -50,10 +50,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     @Override
     public boolean execute() {
         GIUrl.openSendFleetView(promise.getSource(), promise.getTarget(), promise.getMission());
-        if(!Commander.getInstance().isFleetFreeSlot()) throw new FleetCantStart();
-
-        if(!promise().fit()) return true;
-        Long durationSeconds;
+        validate();
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
@@ -63,7 +60,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         } else if (promise().getShipsMap() != null) {
             promise().setSource(promise.getSource());
             ShipsMap realCanToSend = promise().normalizeShipMap();
-            for (Map.Entry<ShipEnum, Long> entry : realCanToSend.entrySet()) {
+            for (Map.Entry<Ship, Long> entry : realCanToSend.entrySet()) {
                 Long value = typeShip(entry.getKey(), entry.getValue());
                 promise.setShipsMap(ShipsMap.createSingle(entry.getKey(), value));
 
@@ -83,7 +80,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         FleetEntity fleet = new FleetEntity(promise);
         fleet.hash = this.hash();
 
-        durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFER;
+        long durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFER;
         fleet.start = LocalDateTime.now();
         fleet.visited = gir.parseFleetVisited();
         fleet.back = gir.parseFleetBack();
@@ -137,10 +134,24 @@ public class SendFleetPromiseCommand extends AbstractCommand {
             }
         }
 
-        updateDelayForAction(durationSeconds);
+        updateDelayForAction(DELAY_TO_FLEET_THERE, durationSeconds);
+        updateDelayForAction(DELAY_TO_FLEET_BACK, durationSeconds*2);
         reloadColony();
 
         return true;
+    }
+
+    private void validate() {
+        if(!Commander.getInstance().isFleetFreeSlot()) throw new FleetCantStart();
+
+        List<AbstractCondition> wontedFit = promise().wontFit();
+        if(!wontedFit.isEmpty()) throw new RuntimeException(wontedFit.getFirst().reason(promise));
+
+        validateResources();
+    }
+
+    private void validateResources() {
+        
     }
 
     private void reloadColony() {
@@ -148,16 +159,16 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         GIUrl.openComponent(FLEETDISPATCH, promise().getSource());
     }
 
-    private void updateDelayForAction(Long durationSeconds) {
-        if(isRequiredAction(DELAY_TO_FLEET_BACK)) {
-            getFollowingAction().setSecondsToDelay(durationSeconds*2);
+    private void updateDelayForAction(String action, Long durationSeconds) {
+        if(isRequiredAction(action)) {
+            getFollowingAction().setSecondsToDelay(durationSeconds);
         }
     }
 
-    public Long typeShip(ShipEnum shipEnum, Long count) {
-        WebElement element = webDriver.findElement(By.name(shipEnum.getId()));
+    public Long typeShip(Ship ship, Long count) {
+        WebElement element = webDriver.findElement(By.name(ship.name()));
         if(!element.isEnabled()) {
-            throw new ShipDoNotExists("Missing ships " + shipEnum.getId());
+            throw new ShipDoNotExists("Missing ships " + ship.name());
         }
         element.sendKeys(count.toString());
         return count;

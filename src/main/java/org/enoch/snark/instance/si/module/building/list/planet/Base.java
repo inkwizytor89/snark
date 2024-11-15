@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.planet;
 
-import org.enoch.snark.gi.types.BuildingEnum;
-import org.enoch.snark.instance.si.module.building.BuildingRequest;
+import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.Arrays;
@@ -14,16 +14,16 @@ public class Base extends AbstractBuildingList {
         super(code);
     }
 
-    public List<BuildingRequest> create() {
-        List<BuildingRequest> sourceList = Arrays.asList(
-                new BuildingRequest(BuildingEnum.metalMine, 27),
-                new BuildingRequest(BuildingEnum.crystalMine, 23),
-                new BuildingRequest(BuildingEnum.deuteriumSynthesizer, 24),
-                new BuildingRequest(BuildingEnum.solarPlant, 32),
-                new BuildingRequest(BuildingEnum.metalStorage, 12),
-                new BuildingRequest(BuildingEnum.crystalStorage, 11),
-                new BuildingRequest(BuildingEnum.deuteriumStorage, 10),
-                new BuildingRequest(BuildingEnum.metalStorage, -1)
+    public List<BuildRequest> create() {
+        List<BuildRequest> sourceList = Arrays.asList(
+                new BuildRequest(Building.metalMine, 27),
+                new BuildRequest(Building.crystalMine, 23),
+                new BuildRequest(Building.deuteriumSynthesizer, 24),
+                new BuildRequest(Building.solarPlant, 32),
+                new BuildRequest(Building.metalStorage, 12),
+                new BuildRequest(Building.crystalStorage, 11),
+                new BuildRequest(Building.deuteriumStorage, 10),
+                new BuildRequest(Building.metalStorage, -1)
         );
         return create(sourceList);
     }

@@ -2,7 +2,7 @@ package org.enoch.snark.db.entity;
 
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
@@ -151,53 +151,53 @@ public class FleetEntity extends IdEntity {
     }
 
     public void setShips(ShipsMap toApply) {
-        for(Map.Entry<ShipEnum, Long> entry : toApply.entrySet()) {
-            if(entry.getKey() == ShipEnum.fighterLight) fighterLight = entry.getValue();
-            else if(entry.getKey() == ShipEnum.fighterHeavy) fighterHeavy = entry.getValue();
-            else if(entry.getKey() == ShipEnum.cruiser) cruiser = entry.getValue();
-            else if(entry.getKey() == ShipEnum.battleship) battleship = entry.getValue();
-            else if(entry.getKey() == ShipEnum.interceptor) interceptor = entry.getValue();
-            else if(entry.getKey() == ShipEnum.bomber) bomber = entry.getValue();
-            else if(entry.getKey() == ShipEnum.destroyer) destroyer = entry.getValue();
-            else if(entry.getKey() == ShipEnum.deathstar) deathstar = entry.getValue();
-            else if(entry.getKey() == ShipEnum.reaper) reaper = entry.getValue();
-            else if(entry.getKey() == ShipEnum.explorer) explorer = entry.getValue();
+        for(Map.Entry<Ship, Long> entry : toApply.entrySet()) {
+            if(entry.getKey() == Ship.fighterLight) fighterLight = entry.getValue();
+            else if(entry.getKey() == Ship.fighterHeavy) fighterHeavy = entry.getValue();
+            else if(entry.getKey() == Ship.cruiser) cruiser = entry.getValue();
+            else if(entry.getKey() == Ship.battleship) battleship = entry.getValue();
+            else if(entry.getKey() == Ship.interceptor) interceptor = entry.getValue();
+            else if(entry.getKey() == Ship.bomber) bomber = entry.getValue();
+            else if(entry.getKey() == Ship.destroyer) destroyer = entry.getValue();
+            else if(entry.getKey() == Ship.deathstar) deathstar = entry.getValue();
+            else if(entry.getKey() == Ship.reaper) reaper = entry.getValue();
+            else if(entry.getKey() == Ship.explorer) explorer = entry.getValue();
 
-            else if(entry.getKey() == ShipEnum.transporterSmall) transporterSmall = entry.getValue();
-            else if(entry.getKey() == ShipEnum.transporterLarge) transporterLarge = entry.getValue();
-            else if(entry.getKey() == ShipEnum.colonyShip) colonyShip = entry.getValue();
-            else if(entry.getKey() == ShipEnum.recycler) recycler = entry.getValue();
-            else if(entry.getKey() == ShipEnum.espionageProbe) espionageProbe = entry.getValue();
+            else if(entry.getKey() == Ship.transporterSmall) transporterSmall = entry.getValue();
+            else if(entry.getKey() == Ship.transporterLarge) transporterLarge = entry.getValue();
+            else if(entry.getKey() == Ship.colonyShip) colonyShip = entry.getValue();
+            else if(entry.getKey() == Ship.recycler) recycler = entry.getValue();
+            else if(entry.getKey() == Ship.espionageProbe) espionageProbe = entry.getValue();
         }
     }
 
     public ShipsMap getShips() {
         ShipsMap shipsMap = new ShipsMap();
-        for(ShipEnum shipEnum : ShipEnum.values()) {
-            Long shipValue = getShipValue(shipEnum);
-            if(shipValue != null && shipValue > 0) shipsMap.put(shipEnum, shipValue);
+        for(Ship ship : Ship.values()) {
+            Long shipValue = getShipValue(ship);
+            if(shipValue != null && shipValue > 0) shipsMap.put(ship, shipValue);
         }
         return shipsMap;
     }
 
-    public Long getShipValue(ShipEnum shipEnum) {
-        if(ShipEnum.fighterLight.equals(shipEnum)) return fighterLight;
-        else if(ShipEnum.fighterHeavy.equals(shipEnum)) return fighterHeavy;
-        else if(ShipEnum.cruiser.equals(shipEnum)) return cruiser;
-        else if(ShipEnum.battleship.equals(shipEnum)) return battleship;
-        else if(ShipEnum.interceptor.equals(shipEnum)) return interceptor;
-        else if(ShipEnum.bomber.equals(shipEnum)) return bomber;
-        else if(ShipEnum.destroyer.equals(shipEnum)) return destroyer;
-        else if(ShipEnum.deathstar.equals(shipEnum)) return deathstar;
-        else if(ShipEnum.reaper.equals(shipEnum)) return reaper;
-        else if(ShipEnum.explorer.equals(shipEnum)) return explorer;
-        else if(ShipEnum.transporterSmall.equals(shipEnum)) return transporterSmall;
-        else if(ShipEnum.transporterLarge.equals(shipEnum)) return transporterLarge;
-        else if(ShipEnum.colonyShip.equals(shipEnum)) return colonyShip;
-        else if(ShipEnum.recycler.equals(shipEnum)) return recycler;
-        else if(ShipEnum.espionageProbe.equals(shipEnum)) return espionageProbe;
-        else if(ShipEnum.solarSatellite.equals(shipEnum)) return 0L;
-        else throw new IllegalStateException("Unknown ShipEnum "+shipEnum);
+    public Long getShipValue(Ship ship) {
+        if(Ship.fighterLight.equals(ship)) return fighterLight;
+        else if(Ship.fighterHeavy.equals(ship)) return fighterHeavy;
+        else if(Ship.cruiser.equals(ship)) return cruiser;
+        else if(Ship.battleship.equals(ship)) return battleship;
+        else if(Ship.interceptor.equals(ship)) return interceptor;
+        else if(Ship.bomber.equals(ship)) return bomber;
+        else if(Ship.destroyer.equals(ship)) return destroyer;
+        else if(Ship.deathstar.equals(ship)) return deathstar;
+        else if(Ship.reaper.equals(ship)) return reaper;
+        else if(Ship.explorer.equals(ship)) return explorer;
+        else if(Ship.transporterSmall.equals(ship)) return transporterSmall;
+        else if(Ship.transporterLarge.equals(ship)) return transporterLarge;
+        else if(Ship.colonyShip.equals(ship)) return colonyShip;
+        else if(Ship.recycler.equals(ship)) return recycler;
+        else if(Ship.espionageProbe.equals(ship)) return espionageProbe;
+        else if(Ship.solarSatellite.equals(ship)) return 0L;
+        else throw new IllegalStateException("Unknown Ship "+ ship);
     }
 
 

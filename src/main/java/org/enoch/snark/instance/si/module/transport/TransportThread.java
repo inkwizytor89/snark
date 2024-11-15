@@ -6,7 +6,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
-import org.enoch.snark.gi.types.ShipEnum;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -79,8 +79,8 @@ public class TransportThread extends AbstractThread {
 
     private FleetEntity creteFleetToTransport(ColonyEntity colony) {
         ShipsMap shipsMap = new ShipsMap();
-        shipsMap.put(ShipEnum.transporterSmall, colony.transporterSmall);
-        shipsMap.put(ShipEnum.transporterLarge, colony.transporterLarge);
+        shipsMap.put(Ship.transporterSmall, colony.transporterSmall);
+        shipsMap.put(Ship.transporterLarge, colony.transporterLarge);
 
         FleetEntity fleetEntity = new FleetEntity();
         fleetEntity.source = colony;

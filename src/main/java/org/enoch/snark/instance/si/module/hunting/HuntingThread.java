@@ -54,7 +54,7 @@ public class HuntingThread extends AbstractThread {
 //        if(DateUtil.isExpired(HIGH_SCORE, 23, ChronoUnit.HOURS) && noWaitingElementsByTag(HIGH_SCORE)) {
         if(DateUtil.isExpired(HIGH_SCORE, 5, ChronoUnit.MINUTES)) {
             if (commander.noBlockingHashInQueue(HIGH_SCORE)) {
-                Integer highScorePages = Instance.getMainConfigMap().getConfigInteger(HIGH_SCORE_PAGES, 2);
+                Integer highScorePages = Instance.getGlobalMainConfigMap().getConfigInteger(HIGH_SCORE_PAGES, 2);
                 new UpdateHighScoreCommand(highScorePages).push();
             }
             return false;
