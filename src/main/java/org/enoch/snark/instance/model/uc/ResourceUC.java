@@ -24,9 +24,9 @@ public class ResourceUC {
         if(leave == null) leave = Instance.getGlobalMainConfigMap().getNearestLeaveResources(colonyType, nothing);
         if(everything.equals(requested) && nothing.equals(leave)) return everything;
         if(everything.equals(requested) && !nothing.equals(leave)) return current.missing(leave);
-        Resources needed = requested.plus(leave);
+        Resources needed = sum(requested, leave);
         // ten warunek jest zbedny bo redukuje sie do baseDeficit 0 i needDeficit 0
-        if(current.isEnough(needed)) return requested;
+//        if(current.isEnough(needed)) return requested;
         // colony is in deficit before the transfer of resources, if we transfer them the deficit will not increase
         if(isDeficitNotIncrease(current, needed, leave)) return requested;
         // we do not allow the deficit to increase

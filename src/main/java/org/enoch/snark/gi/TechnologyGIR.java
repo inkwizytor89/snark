@@ -1,10 +1,13 @@
 package org.enoch.snark.gi;
 
 
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.technology.Technology;
+import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.uc.TechnologyUC;
 import org.enoch.snark.instance.service.TechnologyService;
+import org.enoch.snark.instance.si.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.enoch.snark.gi.GI.TECHNOLOGIES;
 
 public class TechnologyGIR extends GraphicalInterfaceReader {
 
@@ -47,6 +52,42 @@ public class TechnologyGIR extends GraphicalInterfaceReader {
             return id;
         }
         return null;
+    }
+
+    public boolean upgradeBuilding(BuildRequirements requirements) {
+        WebElement technologies = wd.findElement(By.id(TECHNOLOGIES));
+        WebElement buildingElement = technologies.findElement(By.className(requirements.request.technology.name()));
+        Long buildingLevel = getLevel(technologies, requirements.request.technology.name());
+        if(buildingLevel >= requirements.request.level) {
+            return true;
+        }
+        List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
+        if(upgrades.isEmpty()) {
+            return false;
+        }
+        upgrades.get(0).click();
+        return true;
+    }
+
+    public Resources findTechnologyCosts(String technologyName) {
+        WebElement technologies = wd.findElement(By.id(TECHNOLOGIES));
+        WebElement buildingIcon = technologies.findElement(By.className(technologyName));
+        buildingIcon.click();
+        SleepUtil.sleep();
+        WebElement costsWe = wd.findElement(By.className("costs"));
+        return new Resources(
+                getCost(costsWe, "metal"),
+                getCost(costsWe, "crystal"),
+                getCost(costsWe, "deuterium"));
+    }
+
+    private Long getCost(WebElement costsElement, String resourceName) {
+        List<WebElement>resourceList = costsElement.findElements(By.className(resourceName));
+        if(resourceList.isEmpty()) {
+            return 0L;
+        }
+        WebElement resourceElement = resourceList.get(0);
+        return Long.parseLong(resourceElement.getAttribute("data-value"));
     }
 
 }

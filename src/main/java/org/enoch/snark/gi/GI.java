@@ -326,23 +326,6 @@ public class GI {
         return Long.parseLong(resultString);
     }
 
-    public boolean upgradeBuilding(BuildRequirements requirements) {
-        WebElement technologies = webDriver.findElement(By.id(TECHNOLOGIES));
-        WebElement buildingElement = technologies.findElement(By.className(requirements.request.technology.name()));
-        Long buildingLevel = getLevel(technologies, requirements.request.technology.name());
-        if(buildingLevel >= requirements.request.level) {
-            return true;
-        }
-        List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
-        if(upgrades.isEmpty()) {
-//            System.err.println("upgrade is not available for "+requirements);
-            return false;
-        }
-        upgrades.get(0).click();
-//        System.err.println("upgrade activated for "+requirements);
-        return true;
-    }
-
     public void updateGalaxy(SystemView systemView) {
         List<TargetEntity> targets = TargetDAO.getInstance().find(systemView.galaxy, systemView.system);
         for(WebElement row : webDriver.findElements(By.className("galaxyRow"))) {

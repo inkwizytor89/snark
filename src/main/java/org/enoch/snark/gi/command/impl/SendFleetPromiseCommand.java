@@ -10,13 +10,10 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.exception.NotEnoughResources;
+import org.enoch.snark.instance.model.exception.*;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.commander.QueueRunType;
-import org.enoch.snark.instance.model.exception.FleetCantStart;
-import org.enoch.snark.instance.model.exception.ShipDoNotExists;
-import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.Navigator;
@@ -146,7 +143,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     }
 
     private void validate() {
-        if(!Commander.getInstance().isFleetFreeSlot()) throw new FleetCantStart();
+        if(!Commander.getInstance().isFleetFreeSlot()) throw new NoAvailableFleetSlots();
 
         List<AbstractCondition> wontedFit = promise().wontFit();
         if(!wontedFit.isEmpty()) throw new RuntimeException(wontedFit.getFirst().reason(promise));
