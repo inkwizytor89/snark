@@ -6,6 +6,8 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.model.exception.NotEnoughResources;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
@@ -24,6 +26,7 @@ import java.util.List;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.types.ResourceType.DEUTERIUM;
+import static org.enoch.snark.instance.model.uc.ResourceUC.*;
 import static org.enoch.snark.instance.si.module.ConfigMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
@@ -56,14 +59,10 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         else setCustomResources(resources, source);
     }
 
-    public void setNewResources(Resources actual, Resources resources, Resources leave) {
-        // leave should be determinate upper, but that after removing SendFleetCommand and leave only
-        // SendPromiseFleetCommand - maybe should be different global leaves for moon and for planet
-        if(leave == null) leave = Instance.getGlobalMainConfigMap().getConfigResources(LEAVE_MIN_RESOURCES, nothing);
-
-        if(resources == null || nothing.equals(resources)) return;
-        if(everything.equals(resources) && (leave == null || nothing.equals(leave))) selectAllResources();
-        else setNewCustomResources(actual, resources, leave);
+    public void setNewResources(FleetPromise promise) {
+        if(isNothingOrNull(promise.getResources())) return;
+        if(isEverything(promise.getResources()) && isNothingOrNull(promise.getLeaveResources())) selectAllResources();
+        else setNewCustomResources(promise);
     }
 
     private void setCustomResources(Resources resources, ColonyEntity source) {
@@ -92,30 +91,28 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    private void setNewCustomResources(Resources actual, Resources toTransport, Resources leave) {
-        if(toTransport.metal != null || toTransport.crystal != null || toTransport.deuterium != null) {
-            WebElement resourcesArea = wd.findElement(By.id("resources"));
-            WebElement metalInput = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
-            WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
-            WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
+    private void setNewCustomResources(FleetPromise promise) {
+        WebElement resourcesArea = wd.findElement(By.id("resources"));
+        WebElement metalInput = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
+        WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
+        WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
-            if(leave == null) leave = new Resources();
-            leave.plus(DEUTERIUM, readTransportDeuteriumConsumption());
-            Resources possibleResources = Resources.calculate(actual, toTransport, leave);
-            if(nothing.equals(possibleResources)) return;
+//        Resources finalLeave = readTransportConsumption().plus(promise.getLeaveResources());
+        Resources transport = toTransport(promise);
+        // tu sie zaczyna problem bo jak akcja zostanie powrórzona po błedzie to dalej bedzie problem bo dalej warunek jest spełniony, a przy konsumpci juz nie bedzie
+//        if(transport == null) throw new NotEnoughResources("SendFleet.validateResources not fit for promise "+promise);
 
-            for(int i=0; i<3; i++) {
-                SleepUtil.pause();
-                deuteriumInput.sendKeys(possibleResources.deuterium.toString());
-                crystalInput.sendKeys(possibleResources.crystal.toString());
-                metalInput.sendKeys(possibleResources.metal.toString());
+        for(int i=0; i<3; i++) {
+            SleepUtil.pause();
+            deuteriumInput.sendKeys(transport.deuterium.toString());
+            crystalInput.sendKeys(transport.crystal.toString());
+            metalInput.sendKeys(transport.metal.toString());
 
-                long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
-                long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
+            long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
+            long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
 
-                if(remainingResources < maxResources)
-                    break;
-            }
+            if(remainingResources < maxResources)
+                break;
         }
     }
 
@@ -138,6 +135,11 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     private long readTransportDeuteriumConsumption() {
         String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
         return toLong(consumptionInput.split("\\s")[0]);
+    }
+
+    private Resources readTransportConsumption() {
+        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+        return new Resources(0L, 0L, toLong(consumptionInput.split("\\s")[0]));
     }
 
     public void setSpeed(Long speed) {

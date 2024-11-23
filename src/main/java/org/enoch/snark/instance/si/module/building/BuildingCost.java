@@ -35,9 +35,7 @@ public class BuildingCost {
         if(!costs.containsKey(request.technology)) costs.put(request.technology, new HashMap<>());
 
         Map<Long, Resources> technologyCosts = costs.get(request.technology);
-        if(!technologyCosts.containsKey(request.level)) {
-            System.err.println("Putted costs "+resources+" for "+request);
+        if(!technologyCosts.containsKey(request.level))
             technologyCosts.put(request.level, resources);
-        }
     }
 }

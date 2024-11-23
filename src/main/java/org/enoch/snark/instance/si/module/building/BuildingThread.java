@@ -5,12 +5,9 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.BuildCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
-import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.PlanetExpression;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.TechnologyService;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ConfigMap;
@@ -20,6 +17,7 @@ import java.util.*;
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
 import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
 
 public class BuildingThread extends AbstractThread {
@@ -63,8 +61,7 @@ public class BuildingThread extends AbstractThread {
 
             BuildRequirements requirements = new BuildRequirements(buildRequest, buildingCost.getCosts(buildRequest));
             Resources leave = map.getNearestLeaveResources(colony.type, nothing);
-//            if(requirements.isResourceUnknown() || colony.hasEnoughResources(requirements.resources, leave)) {
-            if(requirements.isResourceUnknown() || ResourceUC.calculate(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
+            if(requirements.isResourceUnknown() || ResourceUC.toTransport(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
                 log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
                 new BuildCommand(colony, requirements).push();
                continue;
@@ -79,35 +76,21 @@ public class BuildingThread extends AbstractThread {
     }
 
     private boolean isBuildQueueBlockedForBuildRequest(ColonyEntity colony, BuildRequest buildRequest) {
-        // uwspolnic z Build command i bulging thread
-        return !technologyService.canStartOnQueue(colony, buildRequest.technology);
+        return technologyService.isBlocked(colony, buildRequest.technology);
     }
 
     private SendFleetPromiseCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
-        // moze nie swap tyylko support colony, w jakims fleetUc tak zeby support planet byla dowolna nie koniecznie swap
         ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
         if(swapColony == null ) return null;
         Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
-//        Resources missing = requirements.resources.missing(colony.getResources());
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
-//        Resources leaveSwap = map.getNearestLeaveResources(colony.type, null);
         Resources leaveSwap = map.getNearestLeaveResources(swapColony.type, nothing);
-        Resources needed = ResourceUC.calculate(swapColony, missing, leaveSwap);
-//        if (swapColony.hasEnoughResources(missing, leaveSwap)) {
-        if (needed != null) {
-            SendFleetPromiseCommand command = new FleetBuilder()
-                    .from(swapColony)
-                    .mission(Mission.TRANSPORT)
-                    .addCondition(new ResourceCondition(missing.plus(leaveSwap)))
-                    .leaveResources(leaveSwap)
-                    .resources(needed)
-                    .buildOne();
+        SendFleetPromiseCommand command = transportFleet(swapColony, colony, missing, leaveSwap);
+        if(command != null) {
             command.setNext(new BuildCommand(colony, requirements),DELAY_TO_FLEET_THERE);
             command.push(DELAY_TO_FLEET_BACK);
-
-            return command;
         }
-        return null;
+        return command;
     }
 
     private static boolean isNothingToBuild(BuildRequest buildRequest) {

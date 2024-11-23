@@ -1,6 +1,5 @@
 package org.enoch.snark.instance.si.module.building;
 
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.to.Resources;
 
 public class BuildRequirements {
@@ -11,11 +10,6 @@ public class BuildRequirements {
     BuildRequirements(BuildRequest request, Resources resources) {
         this.request = request;
         this.resources = resources;
-    }
-
-    public boolean canBuildOn(ColonyEntity colony) {
-        if(colony == null) return false;
-        return colony.hasEnoughResources(resources);
     }
 
     public boolean isResourceUnknown() {

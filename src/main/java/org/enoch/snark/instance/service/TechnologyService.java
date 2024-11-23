@@ -2,12 +2,15 @@ package org.enoch.snark.instance.service;
 
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.technology.*;
+import org.enoch.snark.instance.model.uc.TechnologyUC;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.enoch.snark.instance.model.uc.TechnologyUC.*;
 
 public class TechnologyService {
 
@@ -51,12 +54,11 @@ public class TechnologyService {
         return INSTANCE;
     }
 
-    public boolean canStartOnQueue(ColonyEntity colony, Technology technology) {
+    public boolean isBlocked(ColonyEntity colony, Technology technology) {
         updateQueueMap(colony);
-        boolean isQueueEmpty = queueMap.get(colony).get(findQueueName(technology)).isFree();
-        if(!isQueueEmpty) return false;
-
-        return !isTechnologyBlocked(colony, technology);
+        QueueMonitor queueMonitor = queueMap.get(colony).get(findQueueName(technology));
+        if(!queueMonitor.isFree()) return true;
+        return isTechnologyBlockedFromOtherReasons(colony, technology);
     }
 
     public void clean(ColonyEntity colony, String name) {
@@ -79,26 +81,25 @@ public class TechnologyService {
         throw new IllegalStateException("TechnologyService can not find queue name "+technology.name());
     }
 
-    private boolean isTechnologyBlocked(ColonyEntity colony, Technology technology) {
+    private boolean isTechnologyBlockedFromOtherReasons(ColonyEntity colony, Technology technology) {
         if(technology instanceof Research) {
             return getMonitorsFromAllColonies(BUILDING).stream()
                     .map(QueueMonitor::getTechnology)
-                    .anyMatch(fromColonies -> Building.researchLaboratory.name().equals(fromColonies.name()));
+                    .anyMatch(TechnologyUC::isLaboratory);
         }
+        if(isLaboratory(technology)) return !queueMap.get(colony).get(RESEARCH).isFree();
+
         if(technology instanceof LFResearch) {
             Technology buldingTechnology = queueMap.get(colony).get(LIFE_FORM_BUILDINGS).getTechnology();
-            if(buldingTechnology == null) return false;
-            return LFBuilding.lifeformTech11103.name().equals(buldingTechnology.name()) ||
-                    LFBuilding.lifeformTech12103.name().equals(buldingTechnology.name()) ||
-                    LFBuilding.lifeformTech13103.name().equals(buldingTechnology.name()) ||
-                    LFBuilding.lifeformTech14103.name().equals(buldingTechnology.name());
+            return isLFLaboratory(buldingTechnology);
         }
+        if(isLFLaboratory(technology)) return !queueMap.get(colony).get(LIFE_FORM_RESEARCH).isFree();
+
         if(technology instanceof LFBuilding) {
             Technology buldingTechnology = queueMap.get(colony).get(BUILDING).getTechnology();
-            if(buldingTechnology == null) return false;
-            return Building.roboticsFactory.name().equals(buldingTechnology.name()) ||
-                    Building.naniteFactory.name().equals(buldingTechnology.name());
+            return isFactory(buldingTechnology);
         }
+        if(isFactory(technology)) return !queueMap.get(colony).get(LIFE_FORM_BUILDINGS).isFree();
         return false;
     }
 
@@ -112,7 +113,7 @@ public class TechnologyService {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder("QueueManger"+queueMap.keySet().size()+" :\n");
+        StringBuilder result = new StringBuilder("QueueManger "+queueMap.keySet().size()+" :\n");
         for(ColonyEntity colony : queueMap.keySet()) {
             result.append(colony).append(" BUILDING queue is free ").append(queueMap.get(colony).get(BUILDING).isFree());
             result.append("\n");

@@ -18,7 +18,7 @@ public class QueueMonitor {
     }
 
     public void clean() {
-        date = LocalDateTime.now();
+        date = LocalDateTime.MIN;
     }
 
     public void update(Technology technology, LocalDateTime date) {
@@ -26,4 +26,8 @@ public class QueueMonitor {
         this.date = date;
     }
 
+    @Override
+    public String toString() {
+        return "technology: " + technology + " time: " +date;
+    }
 }

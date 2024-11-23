@@ -25,4 +25,23 @@ public class TechnologyUC {
         technologies.addAll(Arrays.asList(Defense.values()));
         return technologies;
     }
+
+    public static boolean isFactory(Technology technology) {
+        return technology != null && technology.name() != null && (
+                Building.roboticsFactory.name().equals(technology.name()) ||
+                Building.naniteFactory.name().equals(technology.name()));
+    }
+
+    public static boolean isLFLaboratory(Technology technology) {
+        return technology != null && technology.name() != null && (
+                LFBuilding.lifeformTech11103.name().equals(technology.name()) ||
+                        LFBuilding.lifeformTech12103.name().equals(technology.name()) ||
+                        LFBuilding.lifeformTech13103.name().equals(technology.name()) ||
+                        LFBuilding.lifeformTech14103.name().equals(technology.name()));
+    }
+
+    public static boolean isLaboratory(Technology technology) {
+        return technology != null && technology.name() != null && (
+                Building.researchLaboratory.name().equals(technology.name()));
+    }
 }

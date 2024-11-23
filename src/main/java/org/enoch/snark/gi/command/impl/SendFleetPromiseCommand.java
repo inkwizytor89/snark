@@ -10,6 +10,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.exception.NotEnoughResources;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.commander.Commander;
 import org.enoch.snark.instance.commander.QueueRunType;
@@ -17,6 +18,7 @@ import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.Navigator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -33,7 +35,9 @@ import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THE
 import static org.enoch.snark.gi.types.Mission.ATTACK;
 import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+import static org.enoch.snark.instance.model.uc.ResourceUC.isNothingOrNull;
 
 public class SendFleetPromiseCommand extends AbstractCommand {
 
@@ -75,7 +79,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
         }
 
         gir.setSpeed(promise.getSpeed());
-        gir.setNewResources(promise.getSource().getResources(), promise.getResources(), promise.getLeaveResources());
+        gir.setNewResources(promise);
 
         FleetEntity fleet = new FleetEntity(promise);
         fleet.hash = this.hash();
@@ -151,7 +155,8 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     }
 
     private void validateResources() {
-        
+        if(!isNothingOrNull(promise.getResources()) && ResourceUC.toTransport(promise) == null)
+            throw new NotEnoughResources("SendFleet.validateResources not fit for promise "+promise);
     }
 
     private void reloadColony() {

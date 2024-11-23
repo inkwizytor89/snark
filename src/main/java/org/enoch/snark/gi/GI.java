@@ -335,9 +335,11 @@ public class GI {
         }
         List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
         if(upgrades.isEmpty()) {
+//            System.err.println("upgrade is not available for "+requirements);
             return false;
         }
         upgrades.get(0).click();
+//        System.err.println("upgrade activated for "+requirements);
         return true;
     }
 

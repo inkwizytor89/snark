@@ -61,18 +61,6 @@ public class Resources {
         }
     }
 
-    public static Resources calculate(Resources actual, Resources wantToMove, Resources leave) {
-        if(everything.equals(actual)) throw new IllegalStateException("Actual can not be everything");
-        if(everything.equals(wantToMove)) wantToMove = actual;
-        if(wantToMove == null || nothing.equals(wantToMove)) return nothing;
-
-        Resources calculated = new Resources();
-        calculated.metal = Math.max(actual.metal >= wantToMove.metal + leave.metal ? wantToMove.metal : actual.metal - leave.metal , 0L);
-        calculated.crystal = Math.max(actual.crystal >= wantToMove.crystal + leave.crystal ? wantToMove.crystal : actual.crystal - leave.crystal , 0L);
-        calculated.deuterium = Math.max(actual.deuterium >= wantToMove.deuterium + leave.deuterium ? wantToMove.deuterium : actual.deuterium - leave.deuterium , 0L);
-        return calculated;
-    }
-
     public Long count() {
         return metal + crystal + deuterium;
     }
@@ -117,6 +105,7 @@ public class Resources {
         }
     }
 
+    @Deprecated
     public Resources plus(Resources resources) {
         if(resources == null) return this;
         if(!isNormalise(this) || !isNormalise(resources)) throw new IllegalStateException("Resources can cot be abstract");
@@ -137,6 +126,11 @@ public class Resources {
         if(!isNormalise(result))
             throw new IllegalStateException("Result resources can cot be abstract");
         return result;
+    }
+
+    public Resources deficit(Resources resources) {
+        if(!isNormalise(this) || !isNormalise(resources)) throw new IllegalStateException("Resources can cot be abstract");
+        return resources.missing(this);
     }
 
     public static boolean isNormalise(Resources resources) {

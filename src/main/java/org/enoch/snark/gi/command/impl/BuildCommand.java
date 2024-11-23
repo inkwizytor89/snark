@@ -23,9 +23,9 @@ import static org.enoch.snark.instance.si.module.ConfigMap.MASTER;
 public class BuildCommand extends AbstractCommand {
 
     private final TechnologyService technologyService;
-    private ColonyEntity colony;
-    private BuildRequirements requirements;
-    private GI gi;
+    private final ColonyEntity colony;
+    private final BuildRequirements requirements;
+    private final GI gi;
 
     public BuildCommand(ColonyEntity colony, BuildRequirements requirements) {
         super();
@@ -40,16 +40,14 @@ public class BuildCommand extends AbstractCommand {
     public boolean execute() {
         GIUrl.openComponent(requirements.request.technology.getPage(), colony);
 
-        //ale jak zasoby nie sa znane to moze koszta wrzucic do listy
-        // jakos mimo ze sie buduje to on dalej przesyla zasoby mimo ze jeszcze nie moze budowac
-        // moze musi lepiej reagować na wczytanie danych z koloni gdzie sie buduje a nie jest wczytywane na starcie
-        // na dzien dobry mimo ze sie buduje cos to wczytuje koszta, a nie powinien bo chyba koszta nie te wczytuje - lepiej jak by poczekal az bedzie zbudowane
-//        if(!requirements.isResourceUnknown() && !canStartOnQueue(colony, requirements.request)) return true;
+        if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return true;
 
         boolean isUpgraded = gi.upgradeBuilding(requirements);
         if(isUpgraded) {
             refreshColonyWhenBuildingIsDone();
-        } else {
+            return true;
+        }
+        if(requirements.isResourceUnknown()) {
             WebElement technologies = gi.webDriver.findElement(By.id(TECHNOLOGIES));
             WebElement buildingIcon = technologies.findElement(By.className(requirements.request.technology.name()));
             buildingIcon.click();
@@ -60,16 +58,13 @@ public class BuildCommand extends AbstractCommand {
                     getCost(costsWe, "crystal"),
                     getCost(costsWe, "deuterium"));
             BuildingCost.getInstance().put(requirements.request, costs);
+
             String masterHref = Instance.getGlobalMainConfigMap().getConfig(MASTER, StringUtils.EMPTY);
-            if(masterHref != null && !masterHref.isEmpty()) {
-                new SendMessageToPlayerCommand(masterHref, "Master poprosze "+costs+ " na "+colony).push();
+            if (masterHref != null && !masterHref.isEmpty()) {
+                new SendMessageToPlayerCommand(masterHref, "Master poprosze " + costs + " na " + colony).push();
             }
         }
         return true;
-    }
-
-    private boolean noDuplication() {
-        return false;
     }
 
     private void refreshColonyWhenBuildingIsDone() {
@@ -90,9 +85,8 @@ public class BuildCommand extends AbstractCommand {
         return Long.parseLong(resourceElement.getAttribute("data-value"));
     }
 
-    private boolean canStartOnQueue(ColonyEntity colony, BuildRequest buildRequest) {
-        // uwspolnic z Build command i bulging thread
-        return technologyService.canStartOnQueue(colony, buildRequest.technology);
+    private boolean isBuildQueueBlockedForBuildRequest(ColonyEntity colony, BuildRequest buildRequest) {
+        return technologyService.isBlocked(colony, buildRequest.technology);
     }
 
     @Override
