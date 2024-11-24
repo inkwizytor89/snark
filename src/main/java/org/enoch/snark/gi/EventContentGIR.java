@@ -58,7 +58,10 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         try {
             List<WebElement> tableRows = activateEventTable();
             eventFleets = readTableRows(tableRows);
-            wd.findElement(By.className("event_list")).click();
+            List<WebElement> eventList = wd.findElements(By.className("event_list"));
+            if (!eventList.isEmpty()) {
+                eventList.getFirst().click();
+            }
         } catch (Exception e) {
             System.err.println("Can not load EventFleet "+e.getClass().getName()+" cause:" +e.getMessage());
             return null;
