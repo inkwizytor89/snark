@@ -3,7 +3,6 @@ package org.enoch.snark.db.dao;
 import org.enoch.snark.db.entity.IdEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.time.LocalDateTime;
@@ -19,8 +18,7 @@ public abstract class AbstractDAO<T extends IdEntity> {
 
     protected abstract Class<T> getEntityClass();
 
-    @Nonnull
-    public T saveOrUpdate(@Nonnull final T entity) {
+    public T saveOrUpdate(final T entity) {
         T savedEntity = entity;
         synchronized (JPAUtility.dbSynchro) {
 
@@ -42,7 +40,6 @@ public abstract class AbstractDAO<T extends IdEntity> {
         return savedEntity;
     }
 
-    @Nonnull
     @SuppressWarnings("unchecked")
     public List<T> fetchAll() {
         synchronized (JPAUtility.dbSynchro) {
@@ -51,7 +48,6 @@ public abstract class AbstractDAO<T extends IdEntity> {
         }
     }
 
-    @Nonnull
     public T fetch(T entity) {
         synchronized (JPAUtility.dbSynchro) {
             T t = entityManager.find(getEntityClass(), entity.id);
@@ -62,7 +58,6 @@ public abstract class AbstractDAO<T extends IdEntity> {
         }
     }
 
-    @Nonnull
     public List<T> fetchAll(List<T> list) {
         return list.stream().map(this::fetch).toList();
     }

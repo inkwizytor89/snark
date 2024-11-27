@@ -41,8 +41,15 @@ dependencies {
 //}
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
     doFirst {
         from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+    configurations {
+        all*.exclude group: 'javassist', module: 'javassist' // get rid of hibernate-incompatible javassist
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }

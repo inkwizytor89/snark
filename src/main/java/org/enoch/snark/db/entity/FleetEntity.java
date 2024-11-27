@@ -9,7 +9,6 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 
-import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -207,15 +206,15 @@ public class FleetEntity extends IdEntity {
         code = 0L;
     }
 
-    public static FleetEntity createSpyFleet(@Nonnull TargetEntity target) {
+    public static FleetEntity createSpyFleet(TargetEntity target) {
         Long spyLevel = target.player.spyLevel;
         Long espionageProbeCount = spyLevel == null ? 4 : spyLevel;
 //        System.err.println("player "+ target.player.name + " spy level "+ spyLevel+" but count "+espionageProbeCount);
         return createSpyFleet(target, espionageProbeCount);
     }
 
-    public static FleetEntity createSpyFleet(@Nonnull TargetEntity target,
-                                             @Nonnull Long count) {
+    public static FleetEntity createSpyFleet(TargetEntity target,
+                                             Long count) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = target.galaxy;
         fleet.targetSystem = target.system;
@@ -248,7 +247,7 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createExpeditionDirection(@Nonnull ColonyEntity colony) {
+    public static FleetEntity createExpeditionDirection(ColonyEntity colony) {
         FleetEntity fleet = new FleetEntity();
         fleet.targetGalaxy = colony.galaxy;
         fleet.targetSystem = colony.system;
@@ -259,7 +258,7 @@ public class FleetEntity extends IdEntity {
         return fleet;
     }
 
-    public static FleetEntity createQuickFleetSave(@Nonnull ColonyEntity colony, Planet target) {
+    public static FleetEntity createQuickFleetSave(ColonyEntity colony, Planet target) {
         FleetEntity fleetEntity = new FleetEntity();
         ColonyEntity source = ColonyDAO.getInstance().fetch(colony);
         fleetEntity.source = source;

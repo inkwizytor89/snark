@@ -1,6 +1,5 @@
 package org.enoch.snark.gi.types;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public enum Mission {
         return value;
     }
 
-    public static Mission convertFromString(@Nonnull String name) {
+    public static Mission convertFromString(String name) {
         for (Mission mission : allMissions()) {
             if(mission.name().equals(name)) {
                 return mission;

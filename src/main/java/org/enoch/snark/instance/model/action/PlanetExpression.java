@@ -3,6 +3,7 @@ package org.enoch.snark.instance.model.action;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.instance.model.action.find.CustomFinder;
 import org.enoch.snark.instance.model.action.find.FarmFinder;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.to.Planet;
@@ -23,6 +24,7 @@ public class PlanetExpression {
 
     public static final String SWAP = "swap";
     public static final String NEXT = "next";
+    public static final String FIND = "find";
     public static final String PREV = "prev";
     public static final String MAIN_FLEET_TO = "main_fleet_to";
     public static final String MAIN_FLEET_ON = "main_fleet_on";
@@ -70,7 +72,10 @@ public class PlanetExpression {
             Planet planet = new Planet(s[PLANET_INDEX]);
             ColonyEntity colony = ColonyDAO.getInstance().find(planet);
 
-            if(action.contains(NEXT)) {
+
+            if(action.contains(FIND)) {
+                return CustomFinder.find(action, colony);
+            } else if(action.contains(NEXT)) {
                 ColonyEntity next = TripFinder.next(colony);
                 return next!=null ? singletonList(next.toPlanet()) : null;
             } else if(action.contains(PREV)) {
