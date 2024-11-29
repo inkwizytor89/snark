@@ -1,6 +1,6 @@
 package org.enoch.snark.db.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

@@ -74,7 +74,7 @@ public class GIUrl {
         GI.getInstance().updateResearch(player);
         new TechnologyGIR().updateQueue(null, TechnologyService.RESEARCH);
         player.updated = LocalDateTime.now();
-        PlayerDAO.getInstance().saveOrUpdate(player);
+//        PlayerDAO.getInstance().saveOrUpdate(player);
     }
 
     public static void openComponent(UrlComponent component, ColonyEntity colony) {

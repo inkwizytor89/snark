@@ -2,8 +2,8 @@ package org.enoch.snark.db.converter;
 
 import org.enoch.snark.instance.model.types.ColonyType;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
 public class ColonyTypeConverter implements AttributeConverter<ColonyType, String> {

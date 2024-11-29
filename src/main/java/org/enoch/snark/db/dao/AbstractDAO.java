@@ -3,8 +3,8 @@ package org.enoch.snark.db.dao;
 import org.enoch.snark.db.entity.IdEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 import java.util.List;
 

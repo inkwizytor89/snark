@@ -12,7 +12,7 @@ import org.openqa.selenium.devtools.v122.network.Network;
 import org.openqa.selenium.devtools.v122.network.model.RequestId;
 import org.openqa.selenium.devtools.v122.network.model.Response;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.util.Optional;
 

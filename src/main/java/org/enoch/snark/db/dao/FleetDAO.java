@@ -7,7 +7,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.model.types.ColonyType;
 
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 import java.util.List;
 

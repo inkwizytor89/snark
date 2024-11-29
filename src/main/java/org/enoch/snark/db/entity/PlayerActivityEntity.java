@@ -1,6 +1,6 @@
 package org.enoch.snark.db.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "players_activity", schema = "public", catalog = "snark")

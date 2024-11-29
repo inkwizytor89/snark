@@ -302,7 +302,7 @@ public class GI {
         player.weaponsTechnology = getLevel(technologies,"weaponsTechnology");
         player.shieldingTechnology = getLevel(technologies,"shieldingTechnology");
         player.armorTechnology = getLevel(technologies,"armorTechnology");
-        PlayerDAO.getInstance().saveOrUpdate(player);
+//        PlayerDAO.getInstance().saveOrUpdate(player);
     }
 
     private Long getLevel(WebElement element, String name) {

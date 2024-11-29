@@ -3,9 +3,9 @@ package org.enoch.snark.db.entity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.module.ConfigMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 

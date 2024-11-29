@@ -2,8 +2,8 @@ package org.enoch.snark.db.converter;
 
 import org.enoch.snark.gi.types.Mission;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
 public class MissionConverter implements AttributeConverter<Mission, String> {

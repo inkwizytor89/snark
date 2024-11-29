@@ -3,7 +3,7 @@ package org.enoch.snark.db.dao;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.MessageEntity;
 
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 
 public class MessageDAO extends AbstractDAO<MessageEntity> {

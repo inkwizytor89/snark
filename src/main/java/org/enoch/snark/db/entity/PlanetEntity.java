@@ -9,7 +9,7 @@ import org.enoch.snark.instance.model.exception.TargetMissingResourceInfoExcepti
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
 

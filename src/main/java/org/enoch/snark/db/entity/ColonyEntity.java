@@ -3,10 +3,10 @@ package org.enoch.snark.db.entity;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.instance.model.to.SystemView;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.*;
 
 @Entity
