@@ -114,4 +114,19 @@ public class FleetPromise {
     public void addConditions(List<AbstractCondition> conditions) {
         this.conditions.addAll(conditions);
     }
+
+    @Override
+    public String toString() {
+        return "FleetPromise{" +
+                "source=" + source +
+                ", target=" + target +
+                ", mission=" + mission +
+                ", speed=" + speed +
+                ", shipsMap=" + shipsMap +
+                ", resources=" + resources +
+                ", conditions=" + conditions +
+                ", leaveShipsMap=" + leaveShipsMap +
+                ", leaveResources=" + leaveResources +
+                '}';
+    }
 }

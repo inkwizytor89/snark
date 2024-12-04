@@ -183,7 +183,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
 
         final WebElement continueButton = webDriver.findElement(By.id("continueToFleet2"));
         if(continueButton.getAttribute("class").equals("continue off")) {
-            throw new ShipDoNotExists();
+            throw new ShipDoNotExists("Promise "+promise);
         }
 //        continueButton.click();
 
