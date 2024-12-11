@@ -13,7 +13,8 @@ public abstract class AbstractDAO<T extends IdEntity> {
     final EntityManager entityManager;
 
     AbstractDAO() {
-        this.entityManager = JPAUtility.getEntityManager();
+//        this.entityManager = JPAUtility.getEntityManager();
+        this.entityManager = null;
     }
 
     protected abstract Class<T> getEntityClass();

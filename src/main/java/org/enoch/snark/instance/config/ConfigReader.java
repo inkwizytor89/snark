@@ -11,6 +11,7 @@ import java.util.Properties;
 import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
 import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
 
+@Deprecated
 public class ConfigReader {
 
     public static String configPath = "server.properties";
