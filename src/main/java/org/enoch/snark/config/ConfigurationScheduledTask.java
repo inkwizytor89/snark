@@ -1,8 +1,8 @@
 package org.enoch.snark.config;
 
-import org.enoch.snark.instance.Core;
-import org.enoch.snark.instance.DynamicTaskManager;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import lombok.RequiredArgsConstructor;
+import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.ModuleMap;
 import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,22 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
+import static org.enoch.snark.instance.si.module.ThreadMap.GLOBAL;
 
 @Component
+@RequiredArgsConstructor
 public class ConfigurationScheduledTask {
 
     public static final String TEMPLATE = "template";
     private static List<ConfigTerm> configs = new ArrayList<>();
 
-    private final DynamicTaskManager core;
+//    private final DynamicTaskManager core;
+    private final Core core;
 
     @Value("${properties:server.properties}")
     private String propertiesPath;
 
-    public ConfigurationScheduledTask(DynamicTaskManager core) {
-        this.core = core;
-    }
+//    public ConfigurationScheduledTask(DynamicTaskManager core) {
+//        this.core = core;
+//    }
 
     @Scheduled(fixedDelay = 10000)
     public void loadConfig() throws IOException {
@@ -45,7 +47,8 @@ public class ConfigurationScheduledTask {
             result.forEach(System.err::println);
             configs = result;
             System.err.println("-----------------------------------------------");
-            core.configurationUpdate(buildPropertiesMap());
+            PropertiesMap propertiesMap = buildPropertiesMap();
+            core.configurationUpdate(propertiesMap);
         }
     }
 
@@ -60,14 +63,14 @@ public class ConfigurationScheduledTask {
     public static PropertiesMap buildPropertiesMap() {
         PropertiesMap propertiesMap = new PropertiesMap();
         for(ConfigTerm term : configs) {
-            propertiesMap.putIfAbsent(term.getModule(), new ModuleMap());
+            propertiesMap.putIfAbsent(term.getModule(), new ModuleMap(term.getModule()));
             ModuleMap moduleMap = propertiesMap.get(term.getModule());
 
-            moduleMap.putIfAbsent(term.getThread(), new ConfigMap());
-            ConfigMap threadMap = moduleMap.get(term.getThread());
+            moduleMap.putIfAbsent(term.getThread(), new ThreadMap());
+            ThreadMap threadMap = moduleMap.get(term.getThread());
 
-            threadMap.putIfAbsent(ConfigMap.NAME, term.getThread());
-            threadMap.putIfAbsent(ConfigMap.MODULE, term.getModule());
+            threadMap.putIfAbsent(ThreadMap.NAME, term.getThread());
+            threadMap.putIfAbsent(ThreadMap.MODULE, term.getModule());
             threadMap.putIfAbsent(term.getKey(), term.getValue());
         }
         return propertiesMap;

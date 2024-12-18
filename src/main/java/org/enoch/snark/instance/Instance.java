@@ -7,12 +7,12 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.*;
 import org.enoch.snark.instance.service.Cleaner;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.config.ConfigReader;
-import org.enoch.snark.instance.si.BaseSI;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.MessageService;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.enoch.snark.instance.si.module.ModuleMap;
 
@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.enoch.snark.gi.types.UrlComponent.*;
-import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
-import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
+import static org.enoch.snark.instance.si.module.ThreadMap.GLOBAL;
+import static org.enoch.snark.instance.si.module.ThreadMap.MAIN;
 
 public class Instance {
 
@@ -33,7 +33,7 @@ public class Instance {
 
     @Getter
     private static PropertiesMap propertiesMap = new PropertiesMap();
-    public static Commander commander;
+    public static Consumer consumer;
     public static GISession session;
     public static Integer level = 1;
 
@@ -67,12 +67,12 @@ public class Instance {
 
         startBrowser();
         initialActionOnStart();
-        BaseSI.getInstance();
+        Core.getInstance();
         Cleaner.getInstance();
     }
 
     public void initialActionOnStart() {
-        commander = Commander.getInstance();
+        consumer = Consumer.getInstance();
 //        new ReadMessageCommand().hash(MessageService.class.getName()).push();
         //QueueManger.BUILDING
 //        new OpenPageCommand(LFBUILDINGS, ColonyDAO.getInstance().find("p[2:447:8]")).push();
@@ -94,13 +94,13 @@ public class Instance {
         }
     }
 
-    public static ConfigMap getGlobalMainConfigMap() {
+    public static ThreadMap getGlobalMainConfigMap() {
         return getGlobalMainConfigMap(MAIN);
     }
 
-    public static ConfigMap getGlobalMainConfigMap(String name) {
+    public static ThreadMap getGlobalMainConfigMap(String name) {
         ModuleMap moduleMap = propertiesMap.get(GLOBAL);
-        if(!moduleMap.containsKey(name)) return new ConfigMap();
+        if(!moduleMap.containsKey(name)) return new ThreadMap();
         return moduleMap.get(name);
     }
 

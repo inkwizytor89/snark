@@ -6,7 +6,6 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.model.exception.NotEnoughResources;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
@@ -27,7 +26,7 @@ import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.types.ResourceType.DEUTERIUM;
 import static org.enoch.snark.instance.model.uc.ResourceUC.*;
-import static org.enoch.snark.instance.si.module.ConfigMap.LEAVE_MIN_RESOURCES;
+import static org.enoch.snark.instance.si.module.ThreadMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
 

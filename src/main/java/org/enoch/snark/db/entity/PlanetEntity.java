@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
-import static org.enoch.snark.instance.si.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
+import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAPACITY;
 
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{

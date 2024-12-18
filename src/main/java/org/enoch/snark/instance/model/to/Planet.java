@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.enoch.snark.instance.model.types.ColonyType.MOON;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
-import static org.enoch.snark.instance.si.module.ConfigMap.GALAXY_MAX;
+import static org.enoch.snark.instance.si.module.ThreadMap.GALAXY_MAX;
 
 @EqualsAndHashCode
 public class Planet {

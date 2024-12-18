@@ -1,7 +1,5 @@
 package org.enoch.snark.instance;
 
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-
 public class TaskBean implements Runnable {
 
     private final String name;
@@ -15,7 +13,6 @@ public class TaskBean implements Runnable {
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-//            System.out.println("Task [" + name + "] is running at " + System.currentTimeMillis());
             System.out.println("Task: " + name+"("+interval+")" + ", Current Time: " + System.currentTimeMillis());
             try {
                 Thread.sleep(interval); // Symuluje cykliczne działanie

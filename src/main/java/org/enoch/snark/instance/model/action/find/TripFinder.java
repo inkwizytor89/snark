@@ -6,7 +6,7 @@ import org.enoch.snark.instance.Instance;
 
 import java.util.List;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.TRIP;
+import static org.enoch.snark.instance.si.module.ThreadMap.TRIP;
 
 public class TripFinder {
 

@@ -12,8 +12,8 @@ import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.exception.*;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.commander.Commander;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.Navigator;
@@ -32,7 +32,6 @@ import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THE
 import static org.enoch.snark.gi.types.Mission.ATTACK;
 import static org.enoch.snark.gi.types.Mission.SPY;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
-import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.uc.ResourceUC.isNothingOrNull;
 
@@ -143,7 +142,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     }
 
     private void validate() {
-        if(!Commander.getInstance().isFleetFreeSlot()) throw new NoAvailableFleetSlots();
+        if(!Consumer.getInstance().isFleetFreeSlot()) throw new NoAvailableFleetSlots();
 
         List<AbstractCondition> wontedFit = promise().wontFit();
         if(!wontedFit.isEmpty()) throw new RuntimeException(wontedFit.getFirst().reason(promise));

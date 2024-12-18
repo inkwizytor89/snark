@@ -5,10 +5,10 @@ import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.*;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 public class SpaceThread extends AbstractThread {
 
@@ -29,7 +29,7 @@ public class SpaceThread extends AbstractThread {
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
     private List<GalaxyEntity> galaxyToView = new ArrayList<>();
 
-    public SpaceThread(ConfigMap map) {
+    public SpaceThread(ThreadMap map) {
         super(map);
         threadPause = 300;
     }
@@ -64,7 +64,7 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStep() {
         Integer pageSize = map.getConfigInteger(PAGE_SIZE, DATA_COUNT);
-        if (!commander.notingToPool()) return;
+        if (!consumer.notingToPool()) return;
         if(!notExplored.isEmpty()) {
             log("Never checked galaxy: "+notExplored.size()+" page="+pageSize);
             for (int i = 0; i < pageSize; i++) {

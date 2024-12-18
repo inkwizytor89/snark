@@ -2,17 +2,16 @@ package org.enoch.snark.gi.command.impl;
 
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.openqa.selenium.WebDriver;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.enoch.snark.instance.commander.QueueRunType.NORMAL;
-import static org.enoch.snark.instance.commander.QueueRunType.MINOR;
+import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 
 public abstract class AbstractCommand {
     protected final WebDriver webDriver;
@@ -33,15 +32,15 @@ public abstract class AbstractCommand {
     public abstract boolean execute();
 
     public void push(String action) {
-        Commander.getInstance().push(this, action);
+        Consumer.getInstance().push(this, action);
     }
 
     public void push(LocalDateTime from) {
-        Commander.getInstance().push(this, from);
+        Consumer.getInstance().push(this, from);
     }
 
     public void push() {
-        Commander.getInstance().push(this);
+        Consumer.getInstance().push(this);
     }
 
     public void doFallowing() {

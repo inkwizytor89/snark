@@ -7,13 +7,13 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.command.impl.LoadColoniesCommand;
 import org.enoch.snark.gi.command.impl.UpdateFleetEventsCommand;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +32,7 @@ public class UpdateThread extends AbstractThread {
     private Navigator navigator;
     private List<EventFleet> events;
 
-    public UpdateThread(ConfigMap map) {
+    public UpdateThread(ThreadMap map) {
         super(map);
     }
 
@@ -57,7 +57,7 @@ public class UpdateThread extends AbstractThread {
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
         boolean navigatorExpired = isNavigatorExpired();
-        boolean b = commander.noBlockingHashInQueue(threadType);
+        boolean b = consumer.noBlockingHashInQueue(threadType);
         log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
         if(navigatorExpired && b) {
             updateState();

@@ -5,14 +5,14 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.command.impl.UpdateHighScoreCommand;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
-import static org.enoch.snark.instance.si.module.ConfigMap.HIGH_SCORE_PAGES;
+import static org.enoch.snark.instance.si.module.ThreadMap.HIGH_SCORE_PAGES;
 
 public class HuntingThread extends AbstractThread {
 
@@ -21,7 +21,7 @@ public class HuntingThread extends AbstractThread {
 
     private List<PlayerEntity> targets = new ArrayList<>();
 
-    public HuntingThread(ConfigMap map) {
+    public HuntingThread(ThreadMap map) {
         super(map);
     }
 
@@ -53,7 +53,7 @@ public class HuntingThread extends AbstractThread {
     private boolean updateHighScore() {
 //        if(DateUtil.isExpired(HIGH_SCORE, 23, ChronoUnit.HOURS) && noWaitingElementsByTag(HIGH_SCORE)) {
         if(DateUtil.isExpired(HIGH_SCORE, 5, ChronoUnit.MINUTES)) {
-            if (commander.noBlockingHashInQueue(HIGH_SCORE)) {
+            if (consumer.noBlockingHashInQueue(HIGH_SCORE)) {
                 Integer highScorePages = Instance.getGlobalMainConfigMap().getConfigInteger(HIGH_SCORE_PAGES, 2);
                 new UpdateHighScoreCommand(highScorePages).push();
             }

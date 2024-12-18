@@ -1,9 +1,7 @@
 package org.enoch.snark.gi.command.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.TechnologyGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.Instance;
@@ -12,13 +10,8 @@ import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.BuildRequirements;
 import org.enoch.snark.instance.si.module.building.BuildingCost;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import java.util.List;
-
-import static org.enoch.snark.gi.GI.TECHNOLOGIES;
-import static org.enoch.snark.instance.si.module.ConfigMap.MASTER;
+import static org.enoch.snark.instance.si.module.ThreadMap.MASTER;
 
 public class BuildCommand extends AbstractCommand {
 

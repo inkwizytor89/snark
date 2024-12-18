@@ -14,7 +14,6 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.si.module.building.BuildRequirements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,7 +24,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.WEBDRIVER_PATH;
+import static org.enoch.snark.instance.si.module.ThreadMap.WEBDRIVER_PATH;
 
 public class GI {
     private static GI INSTANCE;

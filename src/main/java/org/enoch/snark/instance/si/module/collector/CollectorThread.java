@@ -8,13 +8,13 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +26,7 @@ public class CollectorThread extends AbstractThread {
     public static final String COLLECTION_DESTINATION = "coll_dest";
     public static final String FLEET_SIZE = "fleet_size";
 
-    public CollectorThread(ConfigMap map) {
+    public CollectorThread(ThreadMap map) {
         super(map);
     }
 
@@ -109,7 +109,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean isCollectingOngoing() {
-        return !(noCollectingByNavigator() && Commander.getInstance().noBlockingHashInQueue(threadType) && noActiveCollectingInDB());
+        return !(noCollectingByNavigator() && Consumer.getInstance().noBlockingHashInQueue(threadType) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {
@@ -147,7 +147,7 @@ public class CollectorThread extends AbstractThread {
     }
 
     private ColonyEntity anyColony() {
-        long oneBeforeLast = Instance.getGlobalMainConfigMap().getConfigLong(ConfigMap.GALAXY_MAX, 6L)-1;
+        long oneBeforeLast = Instance.getGlobalMainConfigMap().getConfigLong(ThreadMap.GALAXY_MAX, 6L)-1;
         ColonyEntity similarColony = new Planet("[" + oneBeforeLast + ":325:8]").getSimilarColony();
         System.out.println("Collector has no destination and selected " + similarColony.toString());
         return similarColony;

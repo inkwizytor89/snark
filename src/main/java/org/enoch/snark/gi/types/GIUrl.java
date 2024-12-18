@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import static org.enoch.snark.gi.types.UrlBuilder.*;
 import static org.enoch.snark.gi.types.UrlComponent.*;
 import static org.enoch.snark.gi.types.UrlPage.HIGHSCORE;
-import static org.enoch.snark.instance.si.module.ConfigMap.HIDING_ACTIVITY;
+import static org.enoch.snark.instance.si.module.ThreadMap.HIDING_ACTIVITY;
 
 public class GIUrl {
 
@@ -123,9 +123,9 @@ public class GIUrl {
             final WebElement slotsLabel = GI.getInstance().getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
-                Instance.commander.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+                Instance.consumer.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
                 int expeditionCount = Integer.parseInt(m.group(3));
-                Instance.commander.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+                Instance.consumer.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
             }
         } catch (Exception e) {
             System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");

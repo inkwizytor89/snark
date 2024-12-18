@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.config;
 
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.enoch.snark.instance.si.module.ModuleMap;
 
@@ -8,8 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.GLOBAL;
-import static org.enoch.snark.instance.si.module.ConfigMap.MAIN;
+import static org.enoch.snark.instance.si.module.ThreadMap.GLOBAL;
 
 @Deprecated
 public class ConfigReader {
@@ -44,11 +43,11 @@ public class ConfigReader {
             ModuleMap moduleMap = propertiesMap.get(module);
 
 
-            moduleMap.putIfAbsent(name, new ConfigMap());
-            ConfigMap threadMap = moduleMap.get(name);
+            moduleMap.putIfAbsent(name, new ThreadMap());
+            ThreadMap threadMap = moduleMap.get(name);
 
-            threadMap.putIfAbsent(ConfigMap.NAME, name);
-            threadMap.putIfAbsent(ConfigMap.MODULE, module);
+            threadMap.putIfAbsent(ThreadMap.NAME, name);
+            threadMap.putIfAbsent(ThreadMap.MODULE, module);
             threadMap.put(key, value);
         }
         return propertiesMap;

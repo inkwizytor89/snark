@@ -4,12 +4,12 @@ import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.*;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.si.BaseSI;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -39,7 +39,7 @@ public class FarmThread extends AbstractThread {
     private ColonyPlaner planer;
     private Integer threadPause = SHORT_PAUSE;
 
-    public FarmThread(ConfigMap map) {
+    public FarmThread(ThreadMap map) {
         super(map);
     }
 
@@ -301,7 +301,7 @@ public class FarmThread extends AbstractThread {
     private boolean isSlotsToUseValid() {
         propertiesSlotToUse = map.getConfigInteger(SLOT_CONFIG, -1);
         if(propertiesSlotToUse < 0) {
-            int availableFleetCount = BaseSI.getInstance().getAvailableFleetCount(threadType);
+            int availableFleetCount = Core.getInstance().getAvailableFleetCount(threadType);
             propertiesSlotToUse = availableFleetCount + propertiesSlotToUse;
         }
         return propertiesSlotToUse > 0;

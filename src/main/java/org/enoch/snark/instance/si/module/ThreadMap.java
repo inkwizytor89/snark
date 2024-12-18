@@ -10,14 +10,28 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.si.module.building.BuildingThread;
+import org.enoch.snark.instance.si.module.collector.CollectorThread;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
+import org.enoch.snark.instance.si.module.defense.DefenseThread;
+import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
+import org.enoch.snark.instance.si.module.farm.FarmThread;
+import org.enoch.snark.instance.si.module.fleet.FleetThread;
+import org.enoch.snark.instance.si.module.fleetSave.FleetSaveThread;
+import org.enoch.snark.instance.si.module.hunting.HuntingThread;
+import org.enoch.snark.instance.si.module.scan.ScanThread;
+import org.enoch.snark.instance.si.module.space.SpaceThread;
+import org.enoch.snark.instance.si.module.transport.TransportThread;
+import org.enoch.snark.instance.si.module.update.UpdateThread;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ConfigMap extends HashMap<String, String> {
+public class ThreadMap extends HashMap<String, String> {
 
+    // todo move to properties map
     public static final String MODULE = "module";
     public static final String GLOBAL = "global";
     public static final String MAIN = "main";
@@ -75,12 +89,44 @@ public class ConfigMap extends HashMap<String, String> {
     public static final String LEAVE_MIN_RESOURCES = "leave_min_resources";
     public static final String PROBE_SWAM_LIMIT = "probe_swam_limit";
 
-    public ConfigMap() {
+    public ThreadMap() {
         super();
     }
 
-    public ConfigMap(Map map) {
+    public ThreadMap(Map map) {
         super(map);
+    }
+
+    public Class<? extends AbstractThread> getTypeClass() {
+        String name = name();
+
+        if (name.contains(Consumer.threadType)) {
+            return Consumer.class;
+        } else if (name.contains(UpdateThread.threadType)) {
+            return UpdateThread.class;
+        } else if (name.contains(DefenseThread.threadType)) {
+            return DefenseThread.class;
+        } else if (name.contains(FleetSaveThread.threadType)) {
+            return FleetSaveThread.class;
+        } else if (name.contains(ExpeditionThread.threadType)) {
+            return ExpeditionThread.class;
+        } else if (name.contains(BuildingThread.threadType)) {
+            return BuildingThread.class;
+        } else if (name.contains(SpaceThread.threadType)) {
+            return SpaceThread.class;
+        } else if (name.contains(ScanThread.threadType)) {
+            return ScanThread.class;
+        } else if (name.contains(FarmThread.threadType)) {
+            return FarmThread.class;
+        } else if (name.contains(CollectorThread.threadType)) {
+            return CollectorThread.class;
+        } else if (name.contains(TransportThread.threadType)) {
+            return TransportThread.class;
+        } else if (name.contains(HuntingThread.threadType)) {
+            return HuntingThread.class;
+        } else {
+            return FleetThread.class;
+        }
     }
 
     public String getConfig(String key) {

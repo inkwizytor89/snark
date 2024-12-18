@@ -1,21 +1,25 @@
 package org.enoch.snark.instance.si.module;
 
+import lombok.Data;
 import lombok.Getter;
 import org.enoch.snark.instance.si.module.template.*;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.*;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
-@Getter
-public abstract class AbstractModule {
+@Data
+public class AbstractModule {
 
-    Map<String, AbstractThread> threadsMap = new HashMap<>();
-    private final ModuleMap baseMap;
+    @Getter
+    private Map<String, AbstractThread> threadsMap = new ConcurrentHashMap<>();
+    private ModuleMap baseMap;
+    private ModuleMap moduleMap;
 
+    @Deprecated
     public static AbstractModule create(String moduleName, ModuleMap map) {
-        if(moduleName.equals(GLOBAL)) return new Module(map);
+        if(moduleName.equals(GLOBAL)) return new Module();
         else if (moduleName.equals(CleanPlanetsModule.NAME))
             return new CleanPlanetsModule(map);
         else if (moduleName.equals(SleepModule.NAME))
@@ -29,33 +33,20 @@ public abstract class AbstractModule {
         else return null;
     }
 
-    public AbstractModule(ModuleMap moduleMap) {
-        baseMap = createBaseMap();
-        updateMap(moduleMap);
-    }
-
     public void updateMap(ModuleMap moduleMap) {
-        ModuleMap actualMap = overrideBaseMap(moduleMap);
-        actualMap.forEach((name, configMap) -> {
-            if(MAIN.equals(name)) return;
-            configMap.put("module_time", actualMap.get(MAIN).get(TIME));
-            if(threadsMap.containsKey(name)) {
-                threadsMap.get(name).updateMap(configMap);
-            } else {
-                AbstractThread thread = AbstractThread.create(configMap);
-                threadsMap.put(name, thread);
-                thread.start();
-            }
-        });
+        // mysle ze niszczeni obiektów jest kompletnie nie tak i beany trzba też niszcyc
         threadsMap.entrySet().stream()
-                .filter(entry -> !actualMap.containsKey(entry.getKey()))
-                .forEach(thread -> thread.getValue().destroy());
-    }
-
-    protected abstract ModuleMap createBaseMap();
-
-    protected ModuleMap overrideBaseMap(ModuleMap moduleMap) {
-        return new ModuleMap(baseMap).override(moduleMap);
+                .filter(entry -> !moduleMap.containsKey(entry.getKey()))
+                .forEach(entry -> {
+                    try {
+                        // Wywołanie metody destroy
+                        entry.getValue().destroy();
+                    } finally {
+                        // Usunięcie wątku z mapy
+                        threadsMap.remove(entry.getKey());
+                    }
+                });
+        this.moduleMap = moduleMap;
     }
 
     public void destroy() {

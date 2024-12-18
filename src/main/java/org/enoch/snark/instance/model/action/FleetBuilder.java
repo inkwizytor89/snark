@@ -7,7 +7,7 @@ import org.enoch.snark.gi.command.impl.RecallCommand;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.action.filter.AbstractFilter;

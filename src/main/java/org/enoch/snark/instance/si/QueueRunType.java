@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.commander;
+package org.enoch.snark.instance.si;
 
 public enum QueueRunType {
     CRITICAL, // action for fleet escape

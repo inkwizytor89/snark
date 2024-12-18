@@ -10,7 +10,7 @@ import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -24,7 +24,7 @@ public class TransportThread extends AbstractThread {
     public static final String threadType = "transport";
     private int threadPause = 60;
 
-    public TransportThread(ConfigMap map) {
+    public TransportThread(ThreadMap map) {
         super(map);
     }
 

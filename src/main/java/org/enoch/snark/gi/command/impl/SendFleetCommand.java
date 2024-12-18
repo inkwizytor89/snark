@@ -11,7 +11,7 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.SendFleetGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.commander.QueueRunType;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;

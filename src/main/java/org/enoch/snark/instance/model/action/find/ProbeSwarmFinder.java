@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.enoch.snark.instance.model.action.PlanetExpression.PROBE_SWAM;
-import static org.enoch.snark.instance.si.module.ConfigMap.PROBE_SWAM_LIMIT;
+import static org.enoch.snark.instance.si.module.ThreadMap.PROBE_SWAM_LIMIT;
 
 public class ProbeSwarmFinder {
 

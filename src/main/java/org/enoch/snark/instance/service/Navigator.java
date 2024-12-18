@@ -6,7 +6,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.FleetMovement;
 import org.enoch.snark.instance.model.to.Planet;
@@ -83,7 +83,7 @@ public class Navigator {
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
-        int fleetCount = Commander.getInstance().getFleetCount();
+        int fleetCount = Consumer.getInstance().getFleetCount();
         if(eventFleetList == null || eventFleetList.size() < fleetCount) {
             return;
         }

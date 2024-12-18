@@ -8,11 +8,11 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -32,7 +32,7 @@ public class ExpeditionThread extends AbstractThread {
     private Queue<ColonyEntity> expeditionSource = new LinkedList<>();
     private Long maxTL;
 
-    public ExpeditionThread(ConfigMap map) {
+    public ExpeditionThread(ThreadMap map) {
         super(map);
     }
 
@@ -48,7 +48,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return Instance.commander.getExpeditionMax();
+        return Instance.consumer.getExpeditionMax();
     }
 
     @Override
@@ -95,11 +95,11 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        return commander.noBlockingHashInQueue(threadType);
+        return consumer.noBlockingHashInQueue(threadType);
     }
 
     private boolean areFreeSlotsForExpedition() {
-        return Commander.getInstance().getExpeditionFreeSlots() > 0;
+        return Consumer.getInstance().getExpeditionFreeSlots() > 0;
     }
 
     private FleetEntity buildExpeditionFleet(ColonyEntity colony) {

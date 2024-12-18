@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.ARRAY_SEPARATOR;
+import static org.enoch.snark.instance.si.module.ThreadMap.ARRAY_SEPARATOR;
 
 public enum Mission {
     EXPEDITION("id=missionButton15", 15),

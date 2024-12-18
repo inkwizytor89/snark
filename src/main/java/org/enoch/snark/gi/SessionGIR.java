@@ -6,7 +6,7 @@ import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ErrorDAO;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 
@@ -74,11 +74,11 @@ public class SessionGIR extends GraphicalInterfaceReader {
                 GI gi = GI.getInstance();
                 wd.get(SIGN_IN_PAGE);
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(Instance.getGlobalMainConfigMap().getConfig(ConfigMap.LOGIN));
+                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(Instance.getGlobalMainConfigMap().getConfig(ThreadMap.LOGIN));
                 gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, LOGIN_BUTTON).click();
                 SleepUtil.sleep();
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(Instance.getGlobalMainConfigMap().getConfig(ConfigMap.PASSWORD));
+                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(Instance.getGlobalMainConfigMap().getConfig(ThreadMap.PASSWORD));
                 gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, PASSWORD_BUTTON).click();
                 SleepUtil.secondsToSleep(6L);
 
@@ -111,7 +111,7 @@ public class SessionGIR extends GraphicalInterfaceReader {
             try {
                 SleepUtil.secondsToSleep(3L);
 
-                String serverName = Instance.getGlobalMainConfigMap().getConfig(ConfigMap.SERVER);
+                String serverName = Instance.getGlobalMainConfigMap().getConfig(ThreadMap.SERVER);
                 wd.findElements(By.xpath("//div[@role='row']")).stream()
                         .filter(webElement -> webElement.getText().contains(serverName))
                         .findFirst()

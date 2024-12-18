@@ -1,6 +1,5 @@
 package org.enoch.snark;
 
-import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.config.ConfigReader;
 import org.flywaydb.core.Flyway;
@@ -11,8 +10,7 @@ import java.io.FilenameFilter;
 //import static org.enoch.snark.db.entity.JPAUtility.H2_PERSISTENCE;
 //import static org.enoch.snark.db.entity.JPAUtility.H2_URL;
 import static org.enoch.snark.instance.config.ConfigReader.configPath;
-import static org.enoch.snark.instance.si.module.ConfigMap.DATABASE;
-import static org.enoch.snark.instance.si.module.ConfigMap.SERVER;
+import static org.enoch.snark.instance.si.module.ThreadMap.SERVER;
 
 public class Main {
 

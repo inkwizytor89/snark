@@ -1,15 +1,32 @@
 package org.enoch.snark.instance.si.module;
 
+import lombok.Data;
+
+import java.util.Collection;
 import java.util.HashMap;
 
-public class ModuleMap extends HashMap<String, ConfigMap> {
-    public ModuleMap(){
+@Data
+public class ModuleMap extends HashMap<String, ThreadMap> {
+
+    private String name;
+
+    public ModuleMap(String name){
         super();
+        this.name = name;
     }
 
-    public ModuleMap(ModuleMap newMap) {
-        super(newMap);
+    public Collection<ThreadMap> threads() {
+        return this.values();
     }
+
+    public Class<? extends AbstractModule> getTypeClass() {
+        return Module.class;
+    }
+
+
+//    public ModuleMap(ModuleMap newMap) {
+//        super(newMap);
+//    }
 
     public ModuleMap override(ModuleMap moduleMap) {
         moduleMap.forEach((name, configMap) -> {

@@ -10,7 +10,7 @@ import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BAC
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
-import static org.enoch.snark.instance.si.module.ConfigMap.SOURCE;
+import static org.enoch.snark.instance.si.module.ThreadMap.SOURCE;
 
 public class BuildingThread extends AbstractThread {
 
@@ -34,7 +34,7 @@ public class BuildingThread extends AbstractThread {
     private final BuildingCost buildingCost;
     private String buildingList;
 
-    public BuildingThread(ConfigMap map) {
+    public BuildingThread(ThreadMap map) {
         super(map);
         buildingCost = BuildingCost.getInstance();
         technologyService = TechnologyService.getInstance();

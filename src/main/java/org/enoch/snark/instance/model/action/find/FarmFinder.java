@@ -9,7 +9,7 @@ import org.enoch.snark.instance.model.to.Planet;
 
 import java.util.List;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.EXPLORATION_AREA;
+import static org.enoch.snark.instance.si.module.ThreadMap.EXPLORATION_AREA;
 
 public class FarmFinder {
     public static List<Planet> find(ColonyEntity colonyEntity) {

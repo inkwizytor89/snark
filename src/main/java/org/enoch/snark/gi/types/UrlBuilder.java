@@ -6,8 +6,8 @@ import org.enoch.snark.instance.Instance;
 
 import java.util.HashMap;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.HASH;
-import static org.enoch.snark.instance.si.module.ConfigMap.URL;
+import static org.enoch.snark.instance.si.module.ThreadMap.HASH;
+import static org.enoch.snark.instance.si.module.ThreadMap.URL;
 
 public class UrlBuilder {
 

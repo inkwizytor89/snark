@@ -12,7 +12,7 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.to.ShipsMap.TRANSPORT_COUNT;
-import static org.enoch.snark.instance.si.module.ConfigMap.TRANSPORTER_SMALL_CAPACITY;
+import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAPACITY;
 
 public class ShipUC {
 

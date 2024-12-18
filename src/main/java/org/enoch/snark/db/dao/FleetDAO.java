@@ -84,8 +84,8 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
 //            at org.hibernate.query.internal.AbstractProducedQuery.list(AbstractProducedQuery.java:1529)
 //            at org.hibernate.query.Query.getResultList(Query.java:168)
 //            at org.enoch.snark.db.dao.FleetDAO.findToProcess(FleetDAO.java:61)
-//            at org.enoch.snark.instance.commander.CommandDeque.pool(CommandDeque.java:53)
-//            at org.enoch.snark.instance.commander.Commander.run(Commander.java:69)
+//            at org.enoch.snark.instance.si.CommandDeque.pool(CommandDeque.java:53)
+//            at org.enoch.snark.instance.si.module.consumer.Commander.run(Commander.java:69)
         }
     }
 

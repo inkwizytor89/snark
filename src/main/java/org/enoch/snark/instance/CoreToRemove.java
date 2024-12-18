@@ -4,14 +4,13 @@ import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 
-@Service
-public class Core {
+//@Service
+public class CoreToRemove {
 
     private final DefaultListableBeanFactory beanFactory;
 
-    public Core(ApplicationContext context) {
+    public CoreToRemove(ApplicationContext context) {
         this.beanFactory = (DefaultListableBeanFactory) context.getAutowireCapableBeanFactory();
     }
 

@@ -1,5 +1,6 @@
-package org.enoch.snark.instance.commander;
+package org.enoch.snark.instance.si.module.consumer;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.RunningState;
@@ -8,11 +9,14 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.GI;
 import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.AbstractCommand;
+import org.enoch.snark.gi.command.impl.*;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.CommandDeque;
+import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -23,12 +27,15 @@ import java.util.*;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
-import static org.enoch.snark.instance.si.module.ConfigMap.*;
+import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
-public class Commander extends Thread {
+@RequiredArgsConstructor
+public class Consumer extends AbstractThread {
 
-    private static Commander INSTANCE;
-    private final CommandDeque commandDeque = new CommandDeque();
+    public static final String threadType = Consumer.class.getName().toLowerCase();
+
+    private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
 
     private final GISession session;
@@ -41,16 +48,13 @@ public class Commander extends Thread {
 
     private AbstractCommand actualProcessedCommand = null;
 
-    public Commander() {
-        this.session = Instance.session;
-        start();
-    }
+//    public Consumer(ThreadMap map) {
+//        super(map);
+//    }
 
-    public static Commander getInstance() {
-        if(INSTANCE == null) {
-            INSTANCE = new Commander();
-        }
-        return INSTANCE;
+    @Override
+    protected boolean shouldWaitForDeque() {
+        return false;
     }
 
     public synchronized boolean isRunning() {
@@ -58,13 +62,13 @@ public class Commander extends Thread {
     }
 
     @Override
-    public void run() {
+    public void onStep() {
+        registerDequeIfNeeded();
         waitingToOpenServerTab();
-        while(true) {
+//        while(true) {
             try {
-                Instance.updatePropertiesMap();
-                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
-                if(!isRunning) continue;
+//                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
+//                if(!isRunning) continue;
 
                 session.reopenServerIfSessionIsOver();
 
@@ -73,14 +77,25 @@ public class Commander extends Thread {
                 }
 
                 resolve(commandDeque.pool());
-                SleepUtil.pause();
+//                SleepUtil.pause();
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-        }
+//        }
+    }
+
+    private void registerDequeIfNeeded() {
+        if(commandDeque != null) return;
+        commandDeque = new CommandDeque();
+        commandDeque.push(new LoadColoniesCommand());
+        commandDeque.push(new UpdateFleetEventsCommand());
+        commandDeque.push(new UpdateResearchCommand());
+        getSources().forEach(colony -> commandDeque.push(
+                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
+        core.register(commandDeque);
     }
 
     private void waitingToOpenServerTab() {
@@ -93,7 +108,7 @@ public class Commander extends Thread {
         boolean isOn = Instance.getGlobalMainConfigMap().isOn();
         boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
         return runningProcessor.update(isOn, shouldStop)
-                .logChangedStatus(Commander.class.getName());
+                .logChangedStatus(Consumer.class.getName());
     }
 
     private boolean isSomethingAttacking() {
@@ -126,7 +141,7 @@ public class Commander extends Thread {
         }
         try {
 
-            Debug.log(ConfigMap.MAIN, command + " start at " + LocalTime.now());
+            Debug.log(ThreadMap.MAIN, command + " start at " + LocalTime.now());
             success = command.execute();
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
@@ -150,7 +165,7 @@ public class Commander extends Thread {
             }
         }
         actualProcessedCommand = null;
-        Debug.log(ConfigMap.MAIN, command + " start at " + LocalTime.now());
+        Debug.log(ThreadMap.MAIN, command + " start at " + LocalTime.now());
     }
 
     public void setFleetStatus(int fleetCount, int fleetMax) {

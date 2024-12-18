@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.*;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 public class TimePlan  {
     private final List<TimeInterval> activationTimes;

@@ -1,19 +1,16 @@
 package org.enoch.snark.instance;
 
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Service
+//@Service
 public class DynamicTaskManager {
 
     private final Map<String, ExecutorService> taskExecutors = new ConcurrentHashMap<>();
@@ -51,7 +48,7 @@ public class DynamicTaskManager {
     public void configurationUpdate(PropertiesMap propertiesMap) {
         propertiesMap.forEach((s, moduleMap) -> {
             moduleMap.forEach((s1, configMap) -> {
-                Integer pause = configMap.getConfigInteger(ConfigMap.PAUSE, 10);
+                Integer pause = configMap.getConfigInteger(ThreadMap.PAUSE, 10);
                 String name = configMap.name();
                 if(taskExists(name)) {
                     removeTask(name);

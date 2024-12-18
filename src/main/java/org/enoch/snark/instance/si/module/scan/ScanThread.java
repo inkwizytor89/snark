@@ -3,7 +3,7 @@ package org.enoch.snark.instance.si.module.scan;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -17,7 +17,7 @@ public class ScanThread extends AbstractThread {
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
-    public ScanThread(ConfigMap map) {
+    public ScanThread(ThreadMap map) {
         super(map);
     }
 
@@ -48,7 +48,7 @@ public class ScanThread extends AbstractThread {
             threadPause = 600;
             return;
         }
-        if(commander.notingToPool()) {
+        if(consumer.notingToPool()) {
             setWaitingScan();
         }
     }

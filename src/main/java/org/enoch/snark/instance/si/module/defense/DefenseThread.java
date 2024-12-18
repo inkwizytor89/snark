@@ -20,7 +20,7 @@ import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ConfigMap;
+import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 import static org.enoch.snark.db.entity.FleetEntity.DEFENCE_CODE;
 import static org.enoch.snark.gi.types.Mission.*;
 import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
-import static org.enoch.snark.instance.commander.QueueRunType.CRITICAL;
+import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
-import static org.enoch.snark.instance.si.module.ConfigMap.RECALL;
+import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
 
 public class DefenseThread extends AbstractThread {
 
@@ -46,7 +46,7 @@ public class DefenseThread extends AbstractThread {
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
 
-    public DefenseThread(ConfigMap map) {
+    public DefenseThread(ThreadMap map) {
         super(map);
     }
 
@@ -83,7 +83,7 @@ public class DefenseThread extends AbstractThread {
         System.err.println("incomingAction "+ incomingAction.size());
 
 
-        if(!incomingAction.isEmpty() && commander.noBlockingHashInQueue(threadType)) {
+        if(!incomingAction.isEmpty() && consumer.noBlockingHashInQueue(threadType)) {
             incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
             Set<Planet> attackedPlanets = incomingAction.stream()
                     .map(EventFleet::getTo)

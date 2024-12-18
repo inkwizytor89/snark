@@ -15,7 +15,7 @@ import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.enoch.snark.instance.si.module.ConfigMap.ARRAY_SEPARATOR;
+import static org.enoch.snark.instance.si.module.ThreadMap.ARRAY_SEPARATOR;
 
 public class PlanetExpression {
 

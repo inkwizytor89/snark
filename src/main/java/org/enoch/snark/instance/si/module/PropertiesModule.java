@@ -8,15 +8,14 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.*;
-import static org.enoch.snark.instance.si.module.ConfigMap.TIME;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
+import static org.enoch.snark.instance.si.module.ThreadMap.TIME;
 
 public abstract class PropertiesModule extends AbstractModule{
 
     public PropertiesModule(ModuleMap moduleMap) {
-        super(moduleMap);
+//        super(moduleMap);
     }
 
     protected ModuleMap createBaseMap() {
@@ -36,29 +35,29 @@ public abstract class PropertiesModule extends AbstractModule{
 
     @Override
     public void updateMap(ModuleMap moduleMap) {
-        overrideFromMain(moduleMap);
+//        overrideFromMain(moduleMap);
 //        overrideThreadsTimeFromMainTime(moduleMap);
         super.updateMap(moduleMap);
     }
 
-    protected void overrideThreadsTimeFromMainTime(ModuleMap moduleMap) {
-        if(moduleMap.containsKey(MAIN)) {
-            ConfigMap mainConfigMap = moduleMap.get(MAIN);
-            if(mainConfigMap.containsKey(TIME)) {
-                String time = mainConfigMap.get(TIME);
-                if(time.contains(ON) || time.contains(OFF)) {
-                    threadsMap.keySet().forEach(name -> {
-                        if(moduleMap.containsKey(name)) moduleMap.get(name).put(TIME, time);
-                        else {
-                            ConfigMap configMap = new ConfigMap();
-                            configMap.put(TIME, time);
-                            moduleMap.put(name, configMap);
-                        }
-                    });
-                }
-            }
-        }
-    }
+//    protected void overrideThreadsTimeFromMainTime(ModuleMap moduleMap) {
+//        if(moduleMap.containsKey(MAIN)) {
+//            ThreadMap mainThreadMap = moduleMap.get(MAIN);
+//            if(mainThreadMap.containsKey(TIME)) {
+//                String time = mainThreadMap.get(TIME);
+//                if(time.contains(ON) || time.contains(OFF)) {
+//                    threadsMap.keySet().forEach(name -> {
+//                        if(moduleMap.containsKey(name)) moduleMap.get(name).put(TIME, time);
+//                        else {
+//                            ThreadMap threadMap = new ThreadMap();
+//                            threadMap.put(TIME, time);
+//                            moduleMap.put(name, threadMap);
+//                        }
+//                    });
+//                }
+//            }
+//        }
+//    }
 
     protected void overrideFromMain(ModuleMap moduleMap) {
         Collection<String> keySet = extractKeysFromMainConfigMaps(moduleMap);
@@ -67,9 +66,9 @@ public abstract class PropertiesModule extends AbstractModule{
             threadsMap.keySet().forEach(name -> {
                 if(moduleMap.containsKey(name)) moduleMap.get(name).put(key, value);
                 else {
-                    ConfigMap configMap = new ConfigMap();
-                    configMap.put(key, value);
-                    moduleMap.put(name, configMap);
+                    ThreadMap threadMap = new ThreadMap();
+                    threadMap.put(key, value);
+                    moduleMap.put(name, threadMap);
                 }
             });
         });

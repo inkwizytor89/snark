@@ -4,7 +4,7 @@ import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
 import java.util.*;
 
-import static org.enoch.snark.instance.si.module.ConfigMap.ARRAY_SEPARATOR;
+import static org.enoch.snark.instance.si.module.ThreadMap.ARRAY_SEPARATOR;
 
 
 public class BuildingManager {

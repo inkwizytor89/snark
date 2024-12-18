@@ -1,7 +1,7 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.commander.Commander;
+import org.enoch.snark.instance.si.module.consumer.Consumer;
 
 public class GISession {
 
@@ -60,13 +60,13 @@ public class GISession {
     }
 
     private void makeRestart(long secondsToSleep) {
-        Commander commander = Commander.getInstance();
+        Consumer consumer = Consumer.getInstance();
         isRunning = false;
-        commander.stopCommander();
+        consumer.stopCommander();
         System.err.println("before restart sleep " + secondsToSleep);
         SleepUtil.secondsToSleep(secondsToSleep);
         start();
-        commander.startCommander();
+        consumer.startCommander();
     }
 
     public boolean isRunning() {
