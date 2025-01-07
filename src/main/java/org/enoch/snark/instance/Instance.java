@@ -67,12 +67,12 @@ public class Instance {
 
         startBrowser();
         initialActionOnStart();
-        Core.getInstance();
+//        Core.getInstance();
         Cleaner.getInstance();
     }
 
     public void initialActionOnStart() {
-        consumer = Consumer.getInstance();
+//        consumer = Consumer.getInstance();
 //        new ReadMessageCommand().hash(MessageService.class.getName()).push();
         //QueueManger.BUILDING
 //        new OpenPageCommand(LFBUILDINGS, ColonyDAO.getInstance().find("p[2:447:8]")).push();

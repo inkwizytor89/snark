@@ -37,7 +37,7 @@ public class CommandDeque {
         deque.offer(command);
     }
 
-    protected synchronized List<AbstractCommand> peek() {
+    public synchronized List<AbstractCommand> peek() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         actionsMap.values().forEach(commandsToView::addAll);
         return commandsToView;
@@ -47,28 +47,28 @@ public class CommandDeque {
         return peek().isEmpty();
     }
 
-    protected synchronized AbstractCommand pool(){
+    public synchronized AbstractCommand pool(){
         for (QueueRunType type : runTypes) {
             Deque<AbstractCommand> deque = actionsMap.get(type);
-            if (canPoll(deque)) {
+//            if (canPoll(deque)) {
                 return deque.poll();
-            }
+//            }
         }
 
-        List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
-        if (canPoll(toProcess)) {
-            return new SendFleetCommand(toProcess.get(0));
-        }
+//        List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
+//        if (canPoll(toProcess)) {
+//            return new SendFleetCommand(toProcess.get(0));
+//        }
         return null;
     }
 
-    private boolean canPoll(Deque<AbstractCommand> deque) {
-        boolean isFleetFreeSlot = Consumer.getInstance().isFleetFreeSlot();
-        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendFleetCommand));
-    }
+//    private boolean canPoll(Deque<AbstractCommand> deque) {
+//        boolean isFleetFreeSlot = Consumer.getInstance().isFleetFreeSlot();
+//        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendFleetCommand));
+//    }
 
-    private boolean canPoll(List<FleetEntity> toProcess) {
-        boolean atLeast2Slots = Consumer.getInstance().getFleetMax() - Consumer.getInstance().getFleetCount() > 1;
-        return !toProcess.isEmpty() && atLeast2Slots;
-    }
+//    private boolean canPoll(List<FleetEntity> toProcess) {
+//        boolean atLeast2Slots = Consumer.getInstance().getFleetMax() - Consumer.getInstance().getFleetCount() > 1;
+//        return !toProcess.isEmpty() && atLeast2Slots;
+//    }
 }

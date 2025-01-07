@@ -6,8 +6,8 @@ import org.enoch.snark.gi.types.UrlComponent;
 
 public class OpenPageCommand extends AbstractCommand {
 
-    private final UrlComponent component;
-    private final ColonyEntity colony;
+    public final UrlComponent component;
+    public final ColonyEntity colony;
 
     public OpenPageCommand(UrlComponent component, ColonyEntity colony) {
         super();

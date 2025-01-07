@@ -60,13 +60,13 @@ public class GISession {
     }
 
     private void makeRestart(long secondsToSleep) {
-        Consumer consumer = Consumer.getInstance();
+//        Consumer consumer = Consumer.getInstance();
         isRunning = false;
-        consumer.stopCommander();
+//        consumer.stopCommander();
         System.err.println("before restart sleep " + secondsToSleep);
         SleepUtil.secondsToSleep(secondsToSleep);
         start();
-        consumer.startCommander();
+//        consumer.startCommander();
     }
 
     public boolean isRunning() {

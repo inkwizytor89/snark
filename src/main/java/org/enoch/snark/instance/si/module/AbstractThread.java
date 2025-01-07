@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.enoch.snark.common.*;
@@ -31,52 +33,53 @@ import java.util.concurrent.ExecutorService;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
-@RequiredArgsConstructor
-public abstract class AbstractThread implements Runnable, ExecutorService {
+@NoArgsConstructor(force = true)
+public abstract class AbstractThread extends ExecutorImpl {
 
-    private final Core core;
-    protected final Instance instance;
+    protected final Core core;
+//    protected final Instance instance;
     private final RunningProcessor runningProcessor = new RunningProcessor();
-    protected final Consumer consumer;
-    protected final CacheEntryDAO cacheEntryDAO;
-    protected final FleetDAO fleetDAO;
-    protected final TargetDAO targetDAO;
+//    protected final Consumer consumer;
+    protected  CacheEntryDAO cacheEntryDAO;
+    protected  FleetDAO fleetDAO;
+    protected  TargetDAO targetDAO;
 
     @Setter
     protected ThreadMap map;
-    private final TimeScheduler threadTime;
-    private final TimeScheduler moduleTime;
+    private  TimeScheduler threadTime;
+    private  TimeScheduler moduleTime;
     protected Duration pause = new Duration("1S");
     private boolean isLive = true;
     protected Boolean debug;
 
-    public static AbstractThread create(ThreadMap map) {
-        String name = map.name();
-        if(name.contains(Consumer.threadType)) return new Consumer(map);
-        else if(name.contains(UpdateThread.threadType)) return new UpdateThread(map);
-        else if(name.contains(DefenseThread.threadType)) return new DefenseThread(map);
-        else if(name.contains(FleetSaveThread.threadType)) return new FleetSaveThread(map);
-        else if(name.contains(ExpeditionThread.threadType)) return new ExpeditionThread(map);
-        else if(name.contains(BuildingThread.threadType)) return new BuildingThread(map);
-        else if(name.contains(SpaceThread.threadType)) return new SpaceThread(map);
-        else if(name.contains(ScanThread.threadType)) return new ScanThread(map);
-        else if(name.contains(FarmThread.threadType)) return new FarmThread(map);
-        else if(name.contains(CollectorThread.threadType)) return new CollectorThread(map);
-        else if(name.contains(TransportThread.threadType)) return new TransportThread(map);
-        else if(name.contains(HuntingThread.threadType)) return new HuntingThread(map);
-        else return new FleetThread(map);
-    }
+//    public static AbstractThread create(ThreadMap map) {
+//        String name = map.name();
+//        if(name.contains(Consumer.threadType)) return new Consumer(map);
+//        else if(name.contains(UpdateThread.threadType)) return new UpdateThread(map);
+//        else if(name.contains(DefenseThread.threadType)) return new DefenseThread(map);
+//        else if(name.contains(FleetSaveThread.threadType)) return new FleetSaveThread(map);
+//        else if(name.contains(ExpeditionThread.threadType)) return new ExpeditionThread(map);
+//        else if(name.contains(BuildingThread.threadType)) return new BuildingThread(map);
+//        else if(name.contains(SpaceThread.threadType)) return new SpaceThread(map);
+//        else if(name.contains(ScanThread.threadType)) return new ScanThread(map);
+//        else if(name.contains(FarmThread.threadType)) return new FarmThread(map);
+//        else if(name.contains(CollectorThread.threadType)) return new CollectorThread(map);
+//        else if(name.contains(TransportThread.threadType)) return new TransportThread(map);
+//        else if(name.contains(HuntingThread.threadType)) return new HuntingThread(map);
+//        else return new FleetThread(map);
+//    }
 
-    public AbstractThread(ThreadMap map) {
-        moduleTime = new TimeScheduler(OFF);
-        threadTime = new TimeScheduler(OFF);
-        updateMap(map);
-        instance = Instance.getInstance();
-        consumer = Consumer.getInstance();
-        fleetDAO = FleetDAO.getInstance();
-        targetDAO = TargetDAO.getInstance();
-        cacheEntryDAO = CacheEntryDAO.getInstance();
-    }
+
+//    public AbstractThread(ThreadMap map) {
+//        moduleTime = new TimeScheduler(OFF);
+//        threadTime = new TimeScheduler(OFF);
+//        updateMap(map);
+//        instance = Instance.getInstance();
+////        consumer = Consumer.getInstance();
+//        fleetDAO = FleetDAO.getInstance();
+//        targetDAO = TargetDAO.getInstance();
+//        cacheEntryDAO = CacheEntryDAO.getInstance();
+//    }
 
     protected String getThreadType() {return "";}
 
@@ -97,7 +100,7 @@ public abstract class AbstractThread implements Runnable, ExecutorService {
     public void run() {
         while(isLive) {
             if(shouldWaitForDeque()) continue;
-            RunningState actualState = runningProcessor.update(isOn(), pauseProcessing())
+            RunningState actualState = runningProcessor.update(isOn(), true/*pauseProcessing()*/)
                     .logChangedStatus("Thread " + map.name(), threadTime, " ", threadTime, " ", map)
                     .getActualState();
             if(RunningState.STARTING.equals(actualState)) onStart();
@@ -125,9 +128,9 @@ public abstract class AbstractThread implements Runnable, ExecutorService {
         return threadTime.isOn() && moduleTime.isOn();
     }
 
-    protected boolean pauseProcessing() {
-        return !consumer.isRunning();
-    }
+//    protected boolean pauseProcessing() {
+//        return !consumer.isRunning();
+//    }
 
     private long getPause() {
         String pauseInSecondsInput = getPauseInSeconds()+"S";

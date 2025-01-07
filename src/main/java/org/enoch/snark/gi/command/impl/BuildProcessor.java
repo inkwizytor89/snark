@@ -1,42 +1,37 @@
 package org.enoch.snark.gi.command.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.gi.TechnologyGIR;
 import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.BuildRequirements;
 import org.enoch.snark.instance.si.module.building.BuildingCost;
+import org.springframework.stereotype.Service;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.MASTER;
 
-public class BuildCommand extends AbstractCommand {
+@Service
+@RequiredArgsConstructor
+public class BuildProcessor {
 
-    public final TechnologyService technologyService;
-    public final ColonyEntity colony;
-    public final BuildRequirements requirements;
-    public final TechnologyGIR gir = new TechnologyGIR();
+    public TechnologyGIR gir = new TechnologyGIR();
 
-    public BuildCommand(ColonyEntity colony, BuildRequirements requirements) {
-        super();
-        this.colony = colony;
-        this.requirements = requirements;
-        technologyService = TechnologyService.getInstance();
-        hash("build_"+colony+"_"+requirements);
-    }
+    public boolean execute(BuildCommand command) {
+        ColonyEntity colony = command.colony;
+        BuildRequirements requirements = command.requirements;
 
-    @Override
-    public boolean execute() {
-        GIUrl.openComponent(requirements.request.technology.getPage(), colony);
+        GIUrl.openComponent(command.requirements.request.technology.getPage(), colony);
 
         if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return true;
 
         boolean isUpgraded = gir.upgradeBuilding(requirements);
         if(isUpgraded) {
-            refreshColonyWhenBuildingIsDone();
+            refreshColonyWhenBuildingIsDone(colony, requirements);
             return true;
         }
         if(requirements.isResourceUnknown()) {
@@ -51,7 +46,7 @@ public class BuildCommand extends AbstractCommand {
         return true;
     }
 
-    private void refreshColonyWhenBuildingIsDone() {
+    private void refreshColonyWhenBuildingIsDone(ColonyEntity colony, BuildRequirements requirements) {
         GIUrl.openComponent(requirements.request.technology.getPage(), colony);
         Long seconds = gir.updateQueue(colony, TechnologyService.BUILDING);
         if(seconds != null) {
@@ -61,11 +56,6 @@ public class BuildCommand extends AbstractCommand {
     }
 
     private boolean isBuildQueueBlockedForBuildRequest(ColonyEntity colony, BuildRequest buildRequest) {
-        return technologyService.isBlocked(colony, buildRequest.technology);
-    }
-
-    @Override
-    public String toString() {
-        return "build " + requirements + " on " + colony;
+        return TechnologyService.getInstance().isBlocked(colony, buildRequest.technology);
     }
 }

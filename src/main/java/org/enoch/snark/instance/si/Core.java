@@ -30,9 +30,9 @@ public class Core {
 //        start();
 //    }
 
-    private void waitForEndOfInitialActions() {
-        while(!Consumer.getInstance().peekQueues().isEmpty()) SleepUtil.pause();
-    }
+//    private void waitForEndOfInitialActions() {
+//        while(!Consumer.getInstance().peekQueues().isEmpty()) SleepUtil.pause();
+//    }
 
 //    public void configurationUpdate(PropertiesMap propertiesMap) {
 //        propertiesMap.forEach((s, moduleMap) -> {
@@ -87,20 +87,20 @@ public class Core {
         return bean;
     }
 
-    public int getAvailableFleetCount(String withOutThreadName) {
-        int fleetMax = Instance.consumer.getFleetMax();
-        if(fleetMax == 0) return 0;
-
-        int fleetInUse = 0;
-        List<AbstractThread> threads = modules.values().stream()
-                .flatMap(abstractModule -> abstractModule.getThreadsMap().values().stream()).toList();
-        for(AbstractThread thread : threads) {
-            if(RunningState.isRunning(thread.getActualState()) && !thread.getName().equals(withOutThreadName)) {
-                fleetInUse += thread.getRequestedFleetCount();
-            }
-        }
-        return fleetMax - fleetInUse;
-    }
+//    public int getAvailableFleetCount(String withOutThreadName) {
+//        int fleetMax = Instance.consumer.getFleetMax();
+//        if(fleetMax == 0) return 0;
+//
+//        int fleetInUse = 0;
+//        List<AbstractThread> threads = modules.values().stream()
+//                .flatMap(abstractModule -> abstractModule.getThreadsMap().values().stream()).toList();
+//        for(AbstractThread thread : threads) {
+//            if(RunningState.isRunning(thread.getActualState()) && !thread.getName().equals(withOutThreadName)) {
+//                fleetInUse += thread.getRequestedFleetCount();
+//            }
+//        }
+//        return fleetMax - fleetInUse;
+//    }
 
     public void register(CommandDeque commandDeque) {
         this.commandDeque = commandDeque;

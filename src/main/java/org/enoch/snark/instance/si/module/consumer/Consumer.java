@@ -38,7 +38,7 @@ public class Consumer extends AbstractThread {
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
 
-    private final GISession session;
+    private GISession session;
     private boolean isRunning = true;
 
     private int fleetCount = 0;
@@ -47,6 +47,7 @@ public class Consumer extends AbstractThread {
     private int expeditionMax = 0;
 
     private AbstractCommand actualProcessedCommand = null;
+
 
 //    public Consumer(ThreadMap map) {
 //        super(map);
@@ -63,10 +64,12 @@ public class Consumer extends AbstractThread {
 
     @Override
     public void onStep() {
+
+        try {
         registerDequeIfNeeded();
-        waitingToOpenServerTab();
+        session = GISession.getInstance();
+//        waitingToOpenServerTab();
 //        while(true) {
-            try {
 //                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
 //                if(!isRunning) continue;
 
@@ -77,7 +80,6 @@ public class Consumer extends AbstractThread {
                 }
 
                 resolve(commandDeque.pool());
-//                SleepUtil.pause();
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
@@ -93,8 +95,8 @@ public class Consumer extends AbstractThread {
         commandDeque.push(new LoadColoniesCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
-        getSources().forEach(colony -> commandDeque.push(
-                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
+//        getSources().forEach(colony -> commandDeque.push(
+//                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);
     }
 
