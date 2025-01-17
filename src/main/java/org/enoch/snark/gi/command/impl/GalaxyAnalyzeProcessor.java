@@ -1,24 +1,25 @@
 package org.enoch.snark.gi.command.impl;
 
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.gi.types.GIUrl;
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.model.to.SystemView;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+@Service
+@RequiredArgsConstructor
+public class GalaxyAnalyzeProcessor{
 
-public class GalaxyAnalyzeCommand extends AbstractCommand {
+    private GalaxyEntity galaxyEntity;
 
-    public GalaxyEntity galaxyEntity;
-
-    public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
+    public GalaxyAnalyzeProcessor(GalaxyEntity galaxyEntity) {
         super();
         init(galaxyEntity);
     }
 
-    public GalaxyAnalyzeCommand(SystemView systemView) {
+    public GalaxyAnalyzeProcessor(SystemView systemView) {
         super();
         Optional<GalaxyEntity> galaxyOptional = GalaxyDAO.getInstance().find(systemView);
         galaxyOptional.ifPresent(this::init);
@@ -29,9 +30,8 @@ public class GalaxyAnalyzeCommand extends AbstractCommand {
         this.galaxyEntity = galaxyEntity;
     }
 
-    @Override
-    public boolean execute() {
-        GIUrl.openGalaxy(galaxyEntity.toSystemView(), null);
+    public boolean execute(GalaxyAnalyzeCommand command) {
+        GIUrl.openGalaxy(command.galaxyEntity.toSystemView(), null);
         return true;
     }
 

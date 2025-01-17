@@ -9,7 +9,7 @@ import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class RecallCommand extends AbstractCommand {
 
-    private final FleetPromise promise;
+    public final FleetPromise promise;
 
     public RecallCommand(FleetPromise promise) {
         super();

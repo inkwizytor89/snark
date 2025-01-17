@@ -80,4 +80,8 @@ abstract class GraphicalInterfaceReader {
             return 0L;
         }
     }
+
+    public ChromeDriver getWd() {
+        return wd;
+    }
 }
