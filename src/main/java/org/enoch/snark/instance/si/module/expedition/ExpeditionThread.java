@@ -1,5 +1,8 @@
 package org.enoch.snark.instance.si.module.expedition;
 
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -8,11 +11,9 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.ExpeditionFleetCommand;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -23,6 +24,8 @@ import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 // jak sa starsze niz 4h to powinien go sobie zaktualizowac flypoint
 // z tych co zostały znajdz najlepszego ?
 
+@RequiredArgsConstructor
+//@NoArgsConstructor
 public class ExpeditionThread extends AbstractThread {
 
     public static final String threadType = "expedition";
@@ -32,9 +35,10 @@ public class ExpeditionThread extends AbstractThread {
     private Queue<ColonyEntity> expeditionSource = new LinkedList<>();
     private Long maxTL;
 
-    public ExpeditionThread(ThreadMap map) {
-        super(map);
-    }
+
+//    public ExpeditionThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -48,7 +52,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return Instance.consumer.getExpeditionMax();
+        return Instance.consumerThread.getExpeditionMax();
     }
 
     @Override
@@ -95,11 +99,13 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private boolean noWaitingExpedition() {
-        return consumer.noBlockingHashInQueue(threadType);
+        throw new NotImplementedException("To fix in spring version");
+//        return consumer.noBlockingHashInQueue(threadType);
     }
 
     private boolean areFreeSlotsForExpedition() {
-        return Consumer.getInstance().getExpeditionFreeSlots() > 0;
+        throw new NotImplementedException("To fix in spring version");
+//        return Consumer.getInstance().getExpeditionFreeSlots() > 0;
     }
 
     private FleetEntity buildExpeditionFleet(ColonyEntity colony) {

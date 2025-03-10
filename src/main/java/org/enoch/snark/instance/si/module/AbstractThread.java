@@ -1,9 +1,7 @@
 package org.enoch.snark.instance.si.module;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import jakarta.annotation.PostConstruct;
+import lombok.*;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
@@ -13,44 +11,40 @@ import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
-import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.module.building.BuildingThread;
-import org.enoch.snark.instance.si.module.collector.CollectorThread;
-import org.enoch.snark.instance.si.module.defense.DefenseThread;
-import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
-import org.enoch.snark.instance.si.module.farm.FarmThread;
-import org.enoch.snark.instance.si.module.fleet.FleetThread;
-import org.enoch.snark.instance.si.module.fleetSave.FleetSaveThread;
-import org.enoch.snark.instance.si.module.hunting.HuntingThread;
-import org.enoch.snark.instance.si.module.scan.ScanThread;
-import org.enoch.snark.instance.si.module.space.SpaceThread;
-import org.enoch.snark.instance.si.module.transport.TransportThread;
-import org.enoch.snark.instance.si.module.update.UpdateThread;
-
-import java.util.concurrent.ExecutorService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
+//@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor(force = true)
+//@AllArgsConstructor
+//@RequiredArgsConstructor
 public abstract class AbstractThread extends ExecutorImpl {
 
+    @Autowired
     protected final Core core;
-//    protected final Instance instance;
-    private final RunningProcessor runningProcessor = new RunningProcessor();
-//    protected final Consumer consumer;
+
+    private RunningProcessor runningProcessor = new RunningProcessor();
     protected  CacheEntryDAO cacheEntryDAO;
     protected  FleetDAO fleetDAO;
     protected  TargetDAO targetDAO;
 
     @Setter
+    protected AbstractModule module;
+
+    @Setter
     protected ThreadMap map;
-    private  TimeScheduler threadTime;
-    private  TimeScheduler moduleTime;
+    private TimeScheduler timeScheduler;
     protected Duration pause = new Duration("1S");
     private boolean isLive = true;
     protected Boolean debug;
+
+    @PostConstruct
+    public void init() {
+        runningProcessor = new RunningProcessor();
+        timeScheduler = new TimeScheduler(OFF);
+    }
 
 //    public static AbstractThread create(ThreadMap map) {
 //        String name = map.name();
@@ -98,10 +92,14 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     @Override
     public void run() {
+        System.err.println(this.map.get("name")+" runns");
+        if(this.map.get("name").equals("consumer")) {
+            System.err.println("Consumer live");
+        }
         while(isLive) {
             if(shouldWaitForDeque()) continue;
-            RunningState actualState = runningProcessor.update(isOn(), true/*pauseProcessing()*/)
-                    .logChangedStatus("Thread " + map.name(), threadTime, " ", threadTime, " ", map)
+            RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
+                    .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
                     .getActualState();
             if(RunningState.STARTING.equals(actualState)) onStart();
 
@@ -125,7 +123,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     private boolean isOn() {
-        return threadTime.isOn() && moduleTime.isOn();
+        return timeScheduler.isOn() && module.getTimeScheduler().isOn();
     }
 
 //    protected boolean pauseProcessing() {
@@ -139,9 +137,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     public void updateMap(ThreadMap map) {
-        map.put(TYPE, getThreadType());
-        moduleTime.update(map.getConfig(MODULE_TIME, OFF));
-        threadTime.update(map.getConfig(TIME, OFF));
+        timeScheduler.update(map.getConfig(TIME, OFF));
         this.map = map;
     }
 

@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.hunting;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.gi.command.impl.UpdateHighScoreCommand;
@@ -14,6 +15,7 @@ import java.util.List;
 import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
 import static org.enoch.snark.instance.si.module.ThreadMap.HIGH_SCORE_PAGES;
 
+@RequiredArgsConstructor
 public class HuntingThread extends AbstractThread {
 
     public static final String threadType = "hunting";
@@ -21,9 +23,9 @@ public class HuntingThread extends AbstractThread {
 
     private List<PlayerEntity> targets = new ArrayList<>();
 
-    public HuntingThread(ThreadMap map) {
-        super(map);
-    }
+//    public HuntingThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -51,15 +53,16 @@ public class HuntingThread extends AbstractThread {
     }
 
     private boolean updateHighScore() {
+        return false;
 //        if(DateUtil.isExpired(HIGH_SCORE, 23, ChronoUnit.HOURS) && noWaitingElementsByTag(HIGH_SCORE)) {
-        if(DateUtil.isExpired(HIGH_SCORE, 5, ChronoUnit.MINUTES)) {
-            if (consumer.noBlockingHashInQueue(HIGH_SCORE)) {
-                Integer highScorePages = Instance.getGlobalMainConfigMap().getConfigInteger(HIGH_SCORE_PAGES, 2);
-                new UpdateHighScoreCommand(highScorePages).push();
-            }
-            return false;
-        }
-        return true;
+//        if(DateUtil.isExpired(HIGH_SCORE, 5, ChronoUnit.MINUTES)) {
+//            if (consumer.noBlockingHashInQueue(HIGH_SCORE)) {
+//                Integer highScorePages = Instance.getGlobalMainConfigMap().getConfigInteger(HIGH_SCORE_PAGES, 2);
+//                new UpdateHighScoreCommand(highScorePages).push();
+//            }
+//            return false;
+//        }
+//        return true;
     }
 
 }

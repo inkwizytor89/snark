@@ -10,9 +10,9 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.si.module.building.BuildingThread;
+import org.enoch.snark.instance.si.module.building.BuildThread;
 import org.enoch.snark.instance.si.module.collector.CollectorThread;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
+import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.defense.DefenseThread;
 import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
 import org.enoch.snark.instance.si.module.farm.FarmThread;
@@ -100,8 +100,8 @@ public class ThreadMap extends HashMap<String, String> {
     public Class<? extends AbstractThread> getTypeClass() {
         String name = name();
 
-        if (name.contains(Consumer.threadType)) {
-            return Consumer.class;
+        if (name.contains(ConsumerThread.threadType)) {
+            return ConsumerThread.class;
         } else if (name.contains(UpdateThread.threadType)) {
             return UpdateThread.class;
         } else if (name.contains(DefenseThread.threadType)) {
@@ -110,8 +110,8 @@ public class ThreadMap extends HashMap<String, String> {
             return FleetSaveThread.class;
         } else if (name.contains(ExpeditionThread.threadType)) {
             return ExpeditionThread.class;
-        } else if (name.contains(BuildingThread.threadType)) {
-            return BuildingThread.class;
+        } else if (name.contains(BuildThread.threadType)) {
+            return BuildThread.class;
         } else if (name.contains(SpaceThread.threadType)) {
             return SpaceThread.class;
         } else if (name.contains(ScanThread.threadType)) {
@@ -248,8 +248,7 @@ public class ThreadMap extends HashMap<String, String> {
             put(NAME, "Missing name in ConfigMap");
         }
         String moduleName = this.get(MODULE);
-        if(GLOBAL.equals(moduleName)) return this.get(NAME);
-        else return moduleName + "."+this.get(NAME);
+        return moduleName + "."+this.get(NAME);
     }
 
     public List<ColonyEntity> getSources() {

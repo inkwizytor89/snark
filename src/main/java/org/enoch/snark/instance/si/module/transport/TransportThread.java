@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.transport;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -19,14 +20,15 @@ import static org.enoch.snark.gi.types.Mission.TRANSPORT;
 import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 
+@RequiredArgsConstructor
 public class TransportThread extends AbstractThread {
 
     public static final String threadType = "transport";
     private int threadPause = 60;
 
-    public TransportThread(ThreadMap map) {
-        super(map);
-    }
+//    public TransportThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {

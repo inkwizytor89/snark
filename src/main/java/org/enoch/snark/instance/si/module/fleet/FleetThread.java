@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.fleet;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
 import org.enoch.snark.gi.types.Mission;
@@ -21,13 +22,14 @@ import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
+@RequiredArgsConstructor
 public class FleetThread extends AbstractThread {
 
     public static final String threadName = "fleet";
 
-    public FleetThread(ThreadMap map) {
-        super(map);
-    }
+//    public FleetThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {

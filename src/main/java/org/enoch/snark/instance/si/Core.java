@@ -1,29 +1,69 @@
 package org.enoch.snark.instance.si;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.snark.common.RunningState;
-import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.module.*;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.*;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+
+import static org.enoch.snark.instance.si.module.ThreadMap.MAIN;
+import static org.enoch.snark.instance.si.module.ThreadMap.TYPE;
 
 @Service
 @RequiredArgsConstructor
 public class Core {
 
+    private final ApplicationContext applicationContext;
     private final DefaultListableBeanFactory beanFactory;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
+
+    public void configurationUpdate(PropertiesMap propertiesMap) {
+        for(ModuleMap moduleMap : propertiesMap.modules()) {
+            String moduleName = moduleMap.getName();
+            AbstractModule module = createModule(moduleName, moduleMap);
+            modules.putIfAbsent(moduleName, module);
+//            AbstractModule module = registerModuleBeanIfAbsent(moduleName, modules);
+            module.updateMap(moduleMap);
+
+            for(ThreadMap threadMap : module.getModuleMap().threads()) {
+                String threadName = threadMap.name();
+                if(threadName.endsWith(MAIN)) {
+                    module.setMainMap(threadMap);
+                    continue;
+                }
+
+                AbstractThread thread = registerBeanIfAbsent(threadName, threadMap.getTypeClass(), module.getThreadsMap());
+                thread.setMap(threadMap);
+                thread.setModule(module);
+                threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
+                Executors.newSingleThreadExecutor().submit(thread);
+            }
+            // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
+        }
+    printAllBeans();
+
+//        propertiesMap.forEach((moduleName, moduleMap) -> {
+//            if(modules.containsKey(moduleName)) {
+//                modules.get(moduleName).updateMap(moduleMap);
+//            } else {
+//                AbstractModule module = AbstractModule.create(moduleName, moduleMap);
+//                modules.put(moduleName, module);
+//            }
+//        });
+//        modules.entrySet().stream()
+//                .filter(entry -> !propertiesMap.containsKey(entry.getKey()))
+//                .forEach(thread -> thread.getValue().destroy());
+//        SleepUtil.secondsToSleep(10L);
+    }
 
 //    private BaseSI() {
 //        waitForEndOfInitialActions();
@@ -47,34 +87,43 @@ public class Core {
 //        });
 //    }
 
-    public void configurationUpdate(PropertiesMap propertiesMap) {
-        for(ModuleMap moduleMap : propertiesMap.modules()) {
-            String moduleName = moduleMap.getName();
-            AbstractModule module = registerBeanIfAbsent(moduleName, moduleMap.getTypeClass(), modules);
-            module.updateMap(moduleMap);
-
-            for(ThreadMap threadMap : module.getModuleMap().threads()) {
-                String threadName = threadMap.name();
-                AbstractThread thread = registerBeanIfAbsent(threadName, threadMap.getTypeClass(), module.getThreadsMap());
-                thread.setMap(threadMap);
-            }
-           // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
-        }
-
-
-//        propertiesMap.forEach((moduleName, moduleMap) -> {
-//            if(modules.containsKey(moduleName)) {
-//                modules.get(moduleName).updateMap(moduleMap);
-//            } else {
-//                AbstractModule module = AbstractModule.create(moduleName, moduleMap);
-//                modules.put(moduleName, module);
+//    public <T> T registerBeanIfAbsent(
+//            String name,
+//            Class<? extends T> beanClass,
+//            Map<String, T> map,
+//            String... dependencies) {
+//
+//        T bean = map.get(name);
+//        if (bean == null) {
+//            // Tworzenie definicji beana
+//            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+//
+//            // Dodawanie zależności na podstawie nazw z dependencies
+//            for (String dependency : dependencies) {
+//                Object dependencyBean = beanFactory.getBean(dependency);
+//                beanDefinitionBuilder.addConstructorArgValue(dependencyBean);
 //            }
-//        });
-//        modules.entrySet().stream()
-//                .filter(entry -> !propertiesMap.containsKey(entry.getKey()))
-//                .forEach(thread -> thread.getValue().destroy());
-//        SleepUtil.secondsToSleep(10L);
-    }
+//            if(dependencies.length > 0) {
+//                Object dependencyCore = beanFactory.getBean(Core.class);
+//                beanDefinitionBuilder.addConstructorArgValue(dependencyCore);
+//            }
+//
+//            // Automatyczne wstrzykiwanie pozostałych zależności
+//            beanDefinitionBuilder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+//
+//            // Rejestracja beana
+//            beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
+//
+//            // Pobieranie beana
+//            System.err.println("getBean(" + name + ", " + beanClass + ")");
+//            bean = beanFactory.getBean(name, beanClass);
+//
+//            // Dodawanie do mapy
+//            map.put(name, bean);
+//            System.err.println("Create bean " + name + " as " + beanClass.getSimpleName());
+//        }
+//        return bean;
+//    }
 
     public <T> T registerBeanIfAbsent(String name, Class<? extends T> beanClass, Map<String, T> map) {
         T bean = map.get(name);
@@ -83,8 +132,40 @@ public class Core {
             beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
             bean = beanFactory.getBean(name, beanClass);
             map.put(name, bean);
+            Executors.newSingleThreadExecutor();
+            System.err.println("Create bean "+name+" as "+beanClass.getSimpleName());
         }
         return bean;
+    }
+
+    public AbstractModule registerModuleBeanIfAbsent(String name, Map<String, AbstractModule> map) {
+        AbstractModule bean = map.get(name);
+        if (bean == null) {
+            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(AbstractModule.class);
+            beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
+            bean = beanFactory.getBean(name, AbstractModule.class);
+            map.put(name, bean);
+            Executors.newSingleThreadExecutor();
+            System.err.println("Create bean "+name+" as AbstractModule");
+        }
+        return bean;
+    }
+
+    public AbstractModule createModule(String moduleName, ModuleMap map) {
+        // Jeśli już istnieje, zwracamy z cache
+        return modules.computeIfAbsent(moduleName, key -> {
+            Class<? extends AbstractModule> moduleClass = AbstractModule.class;
+            if (moduleClass == null) {
+                throw new IllegalArgumentException("Unknown module: " + key);
+            }
+
+            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(moduleClass)
+                    .addConstructorArgValue(map); // Przekazujemy `ModuleMap`
+
+            beanFactory.registerBeanDefinition(moduleName, beanDefinitionBuilder.getBeanDefinition());
+
+            return beanFactory.getBean(moduleName, moduleClass);
+        });
     }
 
 //    public int getAvailableFleetCount(String withOutThreadName) {
@@ -102,8 +183,17 @@ public class Core {
 //        return fleetMax - fleetInUse;
 //    }
 
+    public void printAllBeans() {
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
+        System.out.println("Zarejestrowane beany:");
+        for (String beanName : beanNames) {
+            System.out.println(beanName + " -> " + applicationContext.getBean(beanName).getClass().getName());
+        }
+    }
+
     public void register(CommandDeque commandDeque) {
         this.commandDeque = commandDeque;
+        System.err.println("Register CommandDeque");
     }
 
     public synchronized boolean isDequeReady() {

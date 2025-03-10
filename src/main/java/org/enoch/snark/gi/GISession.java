@@ -1,7 +1,6 @@
 package org.enoch.snark.gi;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 
 public class GISession {
 

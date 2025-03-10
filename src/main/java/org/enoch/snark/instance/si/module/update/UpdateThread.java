@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module.update;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.action.PlanetExpression.PROBE_SWAM;
 
+@RequiredArgsConstructor
 public class UpdateThread extends AbstractThread {
 
     public static final String threadType = "update";
@@ -32,9 +35,9 @@ public class UpdateThread extends AbstractThread {
     private Navigator navigator;
     private List<EventFleet> events;
 
-    public UpdateThread(ThreadMap map) {
-        super(map);
-    }
+//    public UpdateThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected void onStart() {
@@ -55,18 +58,19 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
-        boolean navigatorExpired = isNavigatorExpired();
-        boolean b = consumer.noBlockingHashInQueue(threadType);
-        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
-        if(navigatorExpired && b) {
-            updateState();
-            log(LocalDateTime.now() + " state updated");
-        }
-
-        events = navigator.getEventFleetList();
-        if (events == null) return;
-        markSpecialFleets();
+        throw new NotImplementedException("To fix in spring version");
+//        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
+//        boolean navigatorExpired = isNavigatorExpired();
+//        boolean b = consumer.noBlockingHashInQueue(threadType);
+//        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
+//        if(navigatorExpired && b) {
+//            updateState();
+//            log(LocalDateTime.now() + " state updated");
+//        }
+//
+//        events = navigator.getEventFleetList();
+//        if (events == null) return;
+//        markSpecialFleets();
     }
 
     private boolean isNavigatorExpired() {

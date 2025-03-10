@@ -1,8 +1,8 @@
 package org.enoch.snark.gi.command.impl;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.gi.GI;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.openqa.selenium.WebDriver;
@@ -32,15 +32,18 @@ public abstract class AbstractCommand {
     public abstract boolean execute();
 
     public void push(String action) {
-        Consumer.getInstance().push(this, action);
+        throw new NotImplementedException("To remove in spring version");
+//        Consumer.getInstance().push(this, action);
     }
 
     public void push(LocalDateTime from) {
-        Consumer.getInstance().push(this, from);
+        throw new NotImplementedException("To remove in spring version");
+//        Consumer.getInstance().push(this, from);
     }
 
     public void push() {
-        Consumer.getInstance().push(this);
+        throw new NotImplementedException("To remove in spring version");
+//        Consumer.getInstance().push(this);
     }
 
     public void doFallowing() {

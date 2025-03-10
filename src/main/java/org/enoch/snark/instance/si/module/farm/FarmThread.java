@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.farm;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.*;
@@ -39,9 +40,9 @@ public class FarmThread extends AbstractThread {
     private ColonyPlaner planer;
     private Integer threadPause = SHORT_PAUSE;
 
-    public FarmThread(ThreadMap map) {
-        super(map);
-    }
+//    public FarmThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -301,8 +302,9 @@ public class FarmThread extends AbstractThread {
     private boolean isSlotsToUseValid() {
         propertiesSlotToUse = map.getConfigInteger(SLOT_CONFIG, -1);
         if(propertiesSlotToUse < 0) {
-            int availableFleetCount = Core.getInstance().getAvailableFleetCount(threadType);
-            propertiesSlotToUse = availableFleetCount + propertiesSlotToUse;
+            throw new NotImplementedException("To fix in spring version");
+//            int availableFleetCount = Core.getInstance().getAvailableFleetCount(threadType);
+//            propertiesSlotToUse = availableFleetCount + propertiesSlotToUse;
         }
         return propertiesSlotToUse > 0;
     }

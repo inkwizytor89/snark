@@ -1,24 +1,23 @@
 package org.enoch.snark.instance.si.module.fleetSave;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.db.entity.FleetEntity.FLEET_SAVE_CODE;
-import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.ThreadMap.SOURCE;
 
+@RequiredArgsConstructor
 public class FleetSaveThread extends AbstractThread {
 
     public static final String threadType = "fleetSave";
@@ -28,9 +27,9 @@ public class FleetSaveThread extends AbstractThread {
     public static final String FS_KEY = "fs";
     private ColonyDAO colonyDAO;
 
-    public FleetSaveThread(ThreadMap map) {
-        super(map);
-    }
+//    public FleetSaveThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -67,14 +66,15 @@ public class FleetSaveThread extends AbstractThread {
             }
 
             String colonizationCode = getColonizationCode(fleet);
-            if(consumer.noBlockingHashInQueue(colonizationCode)) {
-                SendFleetCommand command = new SendFleetCommand(fleet);
-                command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
-                command.promise().setResources(everything);
-                command.hash(colonizationCode);
-                command.push();
-                System.err.println(fleet.source+" push to send with code "+colonizationCode);
-            }
+            throw new NotImplementedException("To fix in spring version");
+//            if(consumer.noBlockingHashInQueue(colonizationCode)) {
+//                SendFleetCommand command = new SendFleetCommand(fleet);
+//                command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
+//                command.promise().setResources(everything);
+//                command.hash(colonizationCode);
+//                command.push();
+//                System.err.println(fleet.source+" push to send with code "+colonizationCode);
+//            }
         }
     }
 

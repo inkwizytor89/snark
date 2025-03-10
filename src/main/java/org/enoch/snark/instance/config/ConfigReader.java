@@ -39,7 +39,8 @@ public class ConfigReader {
             String key = elements[elementsLength-1];
             String value = properties.getProperty(propertyString);
 
-            propertiesMap.putIfAbsent(module, new ModuleMap());
+            //todo: spring - not used
+//            propertiesMap.putIfAbsent(module, new ModuleMap());
             ModuleMap moduleMap = propertiesMap.get(module);
 
 

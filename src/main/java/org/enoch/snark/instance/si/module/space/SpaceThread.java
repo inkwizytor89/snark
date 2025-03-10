@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module.space;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
@@ -19,6 +21,7 @@ import java.util.logging.Logger;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
+@RequiredArgsConstructor
 public class SpaceThread extends AbstractThread {
 
     public static final String threadType = "space";
@@ -29,10 +32,10 @@ public class SpaceThread extends AbstractThread {
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>();
     private List<GalaxyEntity> galaxyToView = new ArrayList<>();
 
-    public SpaceThread(ThreadMap map) {
-        super(map);
-        threadPause = 300;
-    }
+//    public SpaceThread(ThreadMap map) {
+//        super(map);
+//        threadPause = 300;
+//    }
 
     @Override
     protected String getThreadType() {
@@ -64,32 +67,33 @@ public class SpaceThread extends AbstractThread {
     @Override
     protected void onStep() {
         Integer pageSize = map.getConfigInteger(PAGE_SIZE, DATA_COUNT);
-        if (!consumer.notingToPool()) return;
-        if(!notExplored.isEmpty()) {
-            log("Never checked galaxy: "+notExplored.size()+" page="+pageSize);
-            for (int i = 0; i < pageSize; i++) {
-                GalaxyEntity poll = notExplored.poll();
-                if(poll != null) {
-                    new GalaxyAnalyzeCommand(poll).setRunType(QueueRunType.SPAM).push();
-                }
-            }
-            return;
-        }
-        if (galaxyToView.isEmpty()) {
-            galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusDays(5));
-        }
-        if (galaxyToView.isEmpty()) {
-            return;
-        }
-        log("Outdated galaxy: "+galaxyToView.size()+" page="+pageSize);
-        List<GalaxyEntity> toView = new ArrayList<>();
-        if(galaxyToView.size() <= pageSize) {
-            toView.addAll(galaxyToView);
-        } else {
-            toView.addAll(galaxyToView.subList(0,pageSize));
-        }
-
-        toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
-        toView.forEach(galaxy -> new GalaxyAnalyzeCommand(galaxy).setRunType(QueueRunType.SPAM).push());
+        throw new NotImplementedException("To fix in spring version");
+//        if (!consumer.notingToPool()) return;
+//        if(!notExplored.isEmpty()) {
+//            log("Never checked galaxy: "+notExplored.size()+" page="+pageSize);
+//            for (int i = 0; i < pageSize; i++) {
+//                GalaxyEntity poll = notExplored.poll();
+//                if(poll != null) {
+//                    new GalaxyAnalyzeCommand(poll).setRunType(QueueRunType.SPAM).push();
+//                }
+//            }
+//            return;
+//        }
+//        if (galaxyToView.isEmpty()) {
+//            galaxyToView = GalaxyDAO.getInstance().findLatestGalaxyToView(LocalDateTime.now().minusDays(5));
+//        }
+//        if (galaxyToView.isEmpty()) {
+//            return;
+//        }
+//        log("Outdated galaxy: "+galaxyToView.size()+" page="+pageSize);
+//        List<GalaxyEntity> toView = new ArrayList<>();
+//        if(galaxyToView.size() <= pageSize) {
+//            toView.addAll(galaxyToView);
+//        } else {
+//            toView.addAll(galaxyToView.subList(0,pageSize));
+//        }
+//
+//        toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
+//        toView.forEach(galaxy -> new GalaxyAnalyzeCommand(galaxy).setRunType(QueueRunType.SPAM).push());
     }
 }

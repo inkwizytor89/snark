@@ -123,9 +123,9 @@ public class GIUrl {
             final WebElement slotsLabel = GI.getInstance().getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
-                Instance.consumer.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+                Instance.consumerThread.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
                 int expeditionCount = Integer.parseInt(m.group(3));
-                Instance.consumer.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+                Instance.consumerThread.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
             }
         } catch (Exception e) {
             System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");

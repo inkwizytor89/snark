@@ -12,7 +12,6 @@ import org.enoch.snark.gi.types.GIUrl;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.exception.*;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.ResourceUC;
@@ -142,7 +141,8 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     }
 
     private void validate() {
-        if(!Consumer.getInstance().isFleetFreeSlot()) throw new NoAvailableFleetSlots();
+        //todo: spring
+//        if(!Consumer.getInstance().isFleetFreeSlot()) throw new NoAvailableFleetSlots();
 
         List<AbstractCondition> wontedFit = promise().wontFit();
         if(!wontedFit.isEmpty()) throw new RuntimeException(wontedFit.getFirst().reason(promise));

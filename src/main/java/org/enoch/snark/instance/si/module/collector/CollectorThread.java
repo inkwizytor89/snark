@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module.collector;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -8,7 +10,6 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.SendFleetCommand;
 import org.enoch.snark.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
@@ -20,15 +21,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class CollectorThread extends AbstractThread {
 
     public static final String threadType = "collector";
     public static final String COLLECTION_DESTINATION = "coll_dest";
     public static final String FLEET_SIZE = "fleet_size";
 
-    public CollectorThread(ThreadMap map) {
-        super(map);
-    }
+//    public CollectorThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -109,7 +111,8 @@ public class CollectorThread extends AbstractThread {
     }
 
     private boolean isCollectingOngoing() {
-        return !(noCollectingByNavigator() && Consumer.getInstance().noBlockingHashInQueue(threadType) && noActiveCollectingInDB());
+        throw new NotImplementedException("To fix in spring version");
+//        return !(noCollectingByNavigator() && Consumer.getInstance().noBlockingHashInQueue(threadType) && noActiveCollectingInDB());
     }
 
     private boolean noActiveCollectingInDB() {

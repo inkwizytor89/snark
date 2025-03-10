@@ -1,10 +1,6 @@
 package org.enoch.snark.instance.si;
 
-import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.AbstractCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 
 import java.util.*;
 

@@ -3,7 +3,6 @@ package org.enoch.snark.instance.si.module.consumer;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
-import org.enoch.snark.common.RunningState;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -14,7 +13,6 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.CommandDeque;
-import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
@@ -27,13 +25,12 @@ import java.util.*;
 
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
-public class Consumer extends AbstractThread {
+public class ConsumerThread extends AbstractThread {
 
-    public static final String threadType = Consumer.class.getName().toLowerCase();
+    public static final String threadType = "consumer";
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
@@ -110,7 +107,7 @@ public class Consumer extends AbstractThread {
         boolean isOn = Instance.getGlobalMainConfigMap().isOn();
         boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
         return runningProcessor.update(isOn, shouldStop)
-                .logChangedStatus(Consumer.class.getName());
+                .logChangedStatus(ConsumerThread.class.getName());
     }
 
     private boolean isSomethingAttacking() {

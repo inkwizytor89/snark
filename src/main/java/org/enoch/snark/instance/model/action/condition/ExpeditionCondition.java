@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.instance.si.module.consumer.Consumer;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.instance.model.to.FleetPromise;
 
 public class ExpeditionCondition extends AbstractCondition {
@@ -13,11 +13,13 @@ public class ExpeditionCondition extends AbstractCondition {
 
     @Override
     public boolean fit(FleetPromise colony) {
-        return check && Consumer.getInstance().getExpeditionFreeSlots() > 0;
+        throw new NotImplementedException("To fix in spring version");
+//        return check && Consumer.getInstance().getExpeditionFreeSlots() > 0;
     }
 
     @Override
     public String reason(FleetPromise colony) {
-        return "Expedition free should be > 0 and was "+ Consumer.getInstance().getExpeditionFreeSlots();
+        throw new NotImplementedException("To fix in spring version");
+//        return "Expedition free should be > 0 and was "+ Consumer.getInstance().getExpeditionFreeSlots();
     }
 }

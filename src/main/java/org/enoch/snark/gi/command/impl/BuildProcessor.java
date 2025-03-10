@@ -49,10 +49,9 @@ public class BuildProcessor {
     private void refreshColonyWhenBuildingIsDone(ColonyEntity colony, BuildRequirements requirements) {
         GIUrl.openComponent(requirements.request.technology.getPage(), colony);
         Long seconds = gir.updateQueue(colony, TechnologyService.BUILDING);
-        if(seconds != null) {
-            setNext(new OpenPageCommand(requirements.request.technology.getPage(), colony)
-                    .sourceHash(this.getClass().getSimpleName()), seconds);
-        }
+        //todo: spring update setNext
+        //        if(seconds != null) setNext(new OpenPageCommand(requirements.request.technology.getPage(), colony)
+//                    .sourceHash(this.getClass().getSimpleName()), seconds);
     }
 
     private boolean isBuildQueueBlockedForBuildRequest(ColonyEntity colony, BuildRequest buildRequest) {

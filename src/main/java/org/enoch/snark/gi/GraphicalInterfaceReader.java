@@ -22,11 +22,11 @@ abstract class GraphicalInterfaceReader {
     public static final String ID_ATTRIBUTE = "id";
     public static final String CLASS_ATTRIBUTE = "class";
 
-    protected final ChromeDriver wd;
+    protected ChromeDriver wd;
 //    protected final WebDriverWait wait;
 
     GraphicalInterfaceReader() {
-        wd =(ChromeDriver) GI.getInstance().getWebDriver();
+//        wd =(ChromeDriver) GI.getInstance().getWebDriver();
 //        wait = new WebDriverWait(wd, 1);
     }
 

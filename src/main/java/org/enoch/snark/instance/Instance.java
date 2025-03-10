@@ -7,9 +7,8 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.gi.GISession;
 import org.enoch.snark.gi.command.impl.*;
 import org.enoch.snark.instance.service.Cleaner;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
+import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.config.ConfigReader;
-import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.ThreadMap;
@@ -33,7 +32,7 @@ public class Instance {
 
     @Getter
     private static PropertiesMap propertiesMap = new PropertiesMap();
-    public static Consumer consumer;
+    public static ConsumerThread consumerThread;
     public static GISession session;
     public static Integer level = 1;
 

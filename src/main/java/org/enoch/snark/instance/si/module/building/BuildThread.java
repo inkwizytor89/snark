@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.building;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -10,7 +11,6 @@ import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.*;
 
@@ -20,9 +20,10 @@ import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
 import static org.enoch.snark.instance.si.module.ThreadMap.SOURCE;
 
-public class BuildingThread extends AbstractThread {
+@RequiredArgsConstructor
+public class BuildThread extends AbstractThread {
 
-    public static final String threadType = "building";
+    public static final String threadType = "build";
     public static final String LIST = "list";
     public static final String SWAP_TRANSPORT = "swap_transport";
 
@@ -30,15 +31,15 @@ public class BuildingThread extends AbstractThread {
     public static final int SHORT_PAUSE = 20;
 
     private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
-    private final TechnologyService technologyService;
-    private final BuildingCost buildingCost;
+    private TechnologyService technologyService  = TechnologyService.getInstance();
+    private BuildingCost buildingCost = BuildingCost.getInstance();
     private String buildingList;
 
-    public BuildingThread(ThreadMap map) {
-        super(map);
-        buildingCost = BuildingCost.getInstance();
-        technologyService = TechnologyService.getInstance();
-    }
+//    public BuildingThread(ThreadMap map) {
+//        super(map);
+//        buildingCost = BuildingCost.getInstance();
+//        technologyService = TechnologyService.getInstance();
+//    }
 
     @Override
     protected String getThreadType() {

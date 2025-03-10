@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module.scan;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -9,6 +11,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Logger;
 
+@RequiredArgsConstructor
 public class ScanThread extends AbstractThread {
 
     protected static final Logger LOG = Logger.getLogger(ScanThread.class.getName());
@@ -17,9 +20,9 @@ public class ScanThread extends AbstractThread {
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
-    public ScanThread(ThreadMap map) {
-        super(map);
-    }
+//    public ScanThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -48,9 +51,10 @@ public class ScanThread extends AbstractThread {
             threadPause = 600;
             return;
         }
-        if(consumer.notingToPool()) {
-            setWaitingScan();
-        }
+        throw new NotImplementedException("To fix in spring version");
+//        if(consumer.notingToPool()) {
+//            setWaitingScan();
+//        }
     }
 
     private boolean loadNotScannedTargets() {

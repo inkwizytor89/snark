@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si.module.defense;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -34,6 +36,7 @@ import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
 
+@RequiredArgsConstructor
 public class DefenseThread extends AbstractThread {
 
     public static final String threadType = "defense";
@@ -46,9 +49,9 @@ public class DefenseThread extends AbstractThread {
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
 
-    public DefenseThread(ThreadMap map) {
-        super(map);
-    }
+//    public DefenseThread(ThreadMap map) {
+//        super(map);
+//    }
 
     @Override
     protected String getThreadType() {
@@ -83,14 +86,15 @@ public class DefenseThread extends AbstractThread {
         System.err.println("incomingAction "+ incomingAction.size());
 
 
-        if(!incomingAction.isEmpty() && consumer.noBlockingHashInQueue(threadType)) {
-            incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
-            Set<Planet> attackedPlanets = incomingAction.stream()
-                    .map(EventFleet::getTo)
-                    .collect(Collectors.toSet());
-            attackedPlanets.forEach(this::sendFleetEscape);
-            System.err.println("Send fleet to escape");
-        }
+        throw new NotImplementedException("To fix in spring version");
+//        if(!incomingAction.isEmpty() && consumer.noBlockingHashInQueue(threadType)) {
+//            incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
+//            Set<Planet> attackedPlanets = incomingAction.stream()
+//                    .map(EventFleet::getTo)
+//                    .collect(Collectors.toSet());
+//            attackedPlanets.forEach(this::sendFleetEscape);
+//            System.err.println("Send fleet to escape");
+//        }
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {

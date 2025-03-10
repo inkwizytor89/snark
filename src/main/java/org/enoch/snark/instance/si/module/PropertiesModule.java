@@ -15,7 +15,7 @@ import static org.enoch.snark.instance.si.module.ThreadMap.TIME;
 public abstract class PropertiesModule extends AbstractModule{
 
     public PropertiesModule(ModuleMap moduleMap) {
-//        super(moduleMap);
+        super(moduleMap);
     }
 
     protected ModuleMap createBaseMap() {
@@ -60,18 +60,18 @@ public abstract class PropertiesModule extends AbstractModule{
 //    }
 
     protected void overrideFromMain(ModuleMap moduleMap) {
-        Collection<String> keySet = extractKeysFromMainConfigMaps(moduleMap);
-        keySet.forEach(key -> {
-            String value = moduleMap.get(MAIN).get(key);
-            threadsMap.keySet().forEach(name -> {
-                if(moduleMap.containsKey(name)) moduleMap.get(name).put(key, value);
-                else {
-                    ThreadMap threadMap = new ThreadMap();
-                    threadMap.put(key, value);
-                    moduleMap.put(name, threadMap);
-                }
-            });
-        });
+//        Collection<String> keySet = extractKeysFromMainConfigMaps(moduleMap);
+//        keySet.forEach(key -> {
+//            String value = moduleMap.get(MAIN).get(key);
+//            threadsMap.keySet().forEach(name -> {
+//                if(moduleMap.containsKey(name)) moduleMap.get(name).put(key, value);
+//                else {
+//                    ThreadMap threadMap = new ThreadMap();
+//                    threadMap.put(key, value);
+//                    moduleMap.put(name, threadMap);
+//                }
+//            });
+//        });
     }
 
     private static Collection<String> extractKeysFromMainConfigMaps(ModuleMap moduleMap) {

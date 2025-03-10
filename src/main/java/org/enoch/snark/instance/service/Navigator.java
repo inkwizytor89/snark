@@ -1,12 +1,12 @@
 package org.enoch.snark.instance.service;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.gi.command.impl.OpenPageCommand;
 import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.si.module.consumer.Consumer;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.FleetMovement;
 import org.enoch.snark.instance.model.to.Planet;
@@ -83,14 +83,16 @@ public class Navigator {
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
-        int fleetCount = Consumer.getInstance().getFleetCount();
-        if(eventFleetList == null || eventFleetList.size() < fleetCount) {
-            return;
-        }
-        this.eventFleetList = eventFleetList;
-        this.lastUpdate = LocalDateTime.now();
-        removeAllTemporaryMovements();
-        eventFleetList.forEach(this::add);
+
+        throw new NotImplementedException("To fix in spring version");
+//        int fleetCount = Consumer.getInstance().getFleetCount();
+//        if(eventFleetList == null || eventFleetList.size() < fleetCount) {
+//            return;
+//        }
+//        this.eventFleetList = eventFleetList;
+//        this.lastUpdate = LocalDateTime.now();
+//        removeAllTemporaryMovements();
+//        eventFleetList.forEach(this::add);
 
     }
 
