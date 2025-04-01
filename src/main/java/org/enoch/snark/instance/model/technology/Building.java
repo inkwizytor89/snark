@@ -1,12 +1,13 @@
 package org.enoch.snark.instance.model.technology;
 
 import lombok.Getter;
-import org.enoch.snark.gi.types.UrlComponent;
+import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.enoch.snark.gi.types.UrlComponent.*;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FACILITIES;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.SUPPLIES;
 
 @Getter
 public enum Building implements Technology {

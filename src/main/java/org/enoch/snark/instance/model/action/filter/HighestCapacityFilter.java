@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action.filter;
 
-import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
 
 import java.util.List;
 

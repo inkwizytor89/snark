@@ -5,14 +5,10 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.GalaxyDAO;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.gi.command.impl.GalaxyAnalyzeCommand;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;

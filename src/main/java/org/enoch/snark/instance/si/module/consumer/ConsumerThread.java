@@ -1,20 +1,24 @@
 package org.enoch.snark.instance.si.module.consumer;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.AbstractCommand;
+import org.enoch.snark.action.command.LoadColoniesCommand;
+import org.enoch.snark.action.command.UpdateFleetEventsCommand;
+import org.enoch.snark.action.command.UpdateResearchCommand;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.GI;
-import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.*;
+import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.GISession;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
+import org.enoch.snark.action.processor.CommandProcessor;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -23,19 +27,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
+import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
-public class ConsumerThread extends AbstractThread {
+public class ConsumerThread extends AbstractThread implements Credentials {
 
     public static final String threadType = "consumer";
+
+    private final CommandProcessor processor;
+    private final CacheEntryRepository cacheEntryRepository;
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
 
+    private GI gi;
     private GISession session;
+
     private boolean isRunning = true;
 
     private int fleetCount = 0;
@@ -63,14 +73,15 @@ public class ConsumerThread extends AbstractThread {
     public void onStep() {
 
         try {
-        registerDequeIfNeeded();
-        session = GISession.getInstance();
+            startGiIfNeeded();
+            startGiSessionIfNeeded();
+            registerDequeIfNeeded();
 //        waitingToOpenServerTab();
 //        while(true) {
 //                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
 //                if(!isRunning) continue;
 
-                session.reopenServerIfSessionIsOver();
+
 
                 if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
                     UpdateThread.updateState();
@@ -86,6 +97,22 @@ public class ConsumerThread extends AbstractThread {
 //        }
     }
 
+    private void startGiIfNeeded() {
+        if(gi != null) return;
+//        String pathToDriver = map.getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
+        gi = new GI(this);
+        session = gi.getGiSession();
+    }
+
+    private void startGiSessionIfNeeded() {
+        if(!session.isNeededToRestart()) return;
+
+        String cachedLobbyToken = token();
+        String currentLobbyToken = session.reopenServerIfSessionIsOver(this);
+        if(!currentLobbyToken.equals(cachedLobbyToken))
+            cacheEntryRepository.setValue(GF_TOKEN_PRODUCTION, currentLobbyToken);
+    }
+
     private void registerDequeIfNeeded() {
         if(commandDeque != null) return;
         commandDeque = new CommandDeque();
@@ -97,11 +124,11 @@ public class ConsumerThread extends AbstractThread {
         core.register(commandDeque);
     }
 
-    private void waitingToOpenServerTab() {
-        while (!session.isRunning()) {
-            SleepUtil.pause();
-        }
-    }
+//    private void waitingToOpenServerTab() {
+//        while (!session.isRunning()) {
+//            SleepUtil.pause();
+//        }
+//    }
 
     public RunningProcessor updateRunningStatus() {
         boolean isOn = Instance.getGlobalMainConfigMap().isOn();
@@ -112,7 +139,7 @@ public class ConsumerThread extends AbstractThread {
 
     private boolean isSomethingAttacking() {
         try {
-            WebElement attack_alert = GI.getInstance().getWebDriver().findElement(By.id("attack_alert"));
+            WebElement attack_alert = gi.getWebDriver().findElement(By.id("attack_alert"));
             if(attack_alert.getAttribute("class").contains("soon")) {
                 return true;
             }
@@ -141,7 +168,8 @@ public class ConsumerThread extends AbstractThread {
         try {
 
             Debug.log(ThreadMap.MAIN, command + " start at " + LocalTime.now());
-            success = command.execute();
+            success = processor.execute(gi, command);
+
         } catch (ShipDoNotExists e) {
             e.printStackTrace();
             return;
@@ -250,5 +278,30 @@ public class ConsumerThread extends AbstractThread {
 
     public int getExpeditionMax() {
         return expeditionMax;
+    }
+
+    @Override
+    public String login() {
+        return map.getConfig(ThreadMap.LOGIN);
+    }
+
+    @Override
+    public String password() {
+        return map.getConfig(ThreadMap.PASSWORD);
+    }
+
+    @Override
+    public String token() {
+        return cacheEntryRepository.getValue(GF_TOKEN_PRODUCTION);
+    }
+
+    @Override
+    public String server() {
+        return map.getConfig(ThreadMap.SERVER);
+    }
+
+    @Override
+    public String hash() {
+        return "";
     }
 }

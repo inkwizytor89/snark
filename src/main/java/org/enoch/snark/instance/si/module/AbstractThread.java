@@ -9,11 +9,11 @@ import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
+import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 //@EqualsAndHashCode(callSuper = true)
@@ -33,7 +33,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Setter
     protected AbstractModule module;
 
-    @Setter
     protected ThreadMap map;
     private TimeScheduler timeScheduler;
     protected Duration pause = new Duration("1S");
@@ -155,5 +154,9 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected void log(String message) {
         Debug.log(map.getConfig(ThreadMap.NAME), message);
+    }
+
+    public ThreadMap map() {
+        return map;
     }
 }

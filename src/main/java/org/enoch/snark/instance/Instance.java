@@ -1,11 +1,15 @@
 package org.enoch.snark.instance;
 
 import lombok.Getter;
+import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.LoadColoniesCommand;
+import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.action.command.UpdateFleetEventsCommand;
+import org.enoch.snark.action.command.UpdateResearchCommand;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.GISession;
-import org.enoch.snark.gi.command.impl.*;
+import org.enoch.snark.instance.si.module.consumer.gi.GISession;
 import org.enoch.snark.instance.service.Cleaner;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.config.ConfigReader;
@@ -20,9 +24,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.enoch.snark.gi.types.UrlComponent.*;
 import static org.enoch.snark.instance.si.module.ThreadMap.GLOBAL;
 import static org.enoch.snark.instance.si.module.ThreadMap.MAIN;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 
 public class Instance {
 
@@ -33,7 +37,6 @@ public class Instance {
     @Getter
     private static PropertiesMap propertiesMap = new PropertiesMap();
     public static ConsumerThread consumerThread;
-    public static GISession session;
     public static Integer level = 1;
 
     public ColonyEntity lastVisited = null;
@@ -57,14 +60,9 @@ public class Instance {
         }
     }
 
-    public void startBrowser() {
-        session = GISession.getInstance();
-    }
-
     public void run() {
         MessageService.getInstance();
 
-        startBrowser();
         initialActionOnStart();
 //        Core.getInstance();
         Cleaner.getInstance();
@@ -98,9 +96,10 @@ public class Instance {
     }
 
     public static ThreadMap getGlobalMainConfigMap(String name) {
-        ModuleMap moduleMap = propertiesMap.get(GLOBAL);
-        if(!moduleMap.containsKey(name)) return new ThreadMap();
-        return moduleMap.get(name);
+        throw new NotImplementedException("getGlobalMainConfigMap not to use");
+//        ModuleMap moduleMap = propertiesMap.get(GLOBAL);
+//        if(!moduleMap.containsKey(name)) return new ThreadMap();
+//        return moduleMap.get(name);
     }
 
     public static List<ColonyEntity> getSources() {

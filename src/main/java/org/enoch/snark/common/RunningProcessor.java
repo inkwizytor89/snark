@@ -24,11 +24,11 @@ public class RunningProcessor {
         return update(shouldRunning, false);
     }
 
-    public RunningProcessor update(boolean shouldRunning, boolean shouldPaused) {
+    public RunningProcessor update(boolean threadRunning, boolean moduleRunning) {
         prevState = actualState;
 
-        if(shouldRunning && shouldPaused) actualState = PAUSE_ON;
-        else if(shouldRunning) actualState = ON;
+        if(threadRunning && !moduleRunning) actualState = PAUSE_ON;
+        else if(threadRunning) actualState = ON;
         else actualState = RunningState.OFF;
 
         if(RunningState.isNotRunning(prevState) && RunningState.isRunning(actualState)) actualState = STARTING;

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -29,7 +28,7 @@ public class Core {
     public void configurationUpdate(PropertiesMap propertiesMap) {
         for(ModuleMap moduleMap : propertiesMap.modules()) {
             String moduleName = moduleMap.getName();
-            AbstractModule module = createModule(moduleName, moduleMap);
+            AbstractModule module = registerBeanIfAbsent(moduleName, moduleMap);
             modules.putIfAbsent(moduleName, module);
 //            AbstractModule module = registerModuleBeanIfAbsent(moduleName, modules);
             module.updateMap(moduleMap);
@@ -42,14 +41,14 @@ public class Core {
                 }
 
                 AbstractThread thread = registerBeanIfAbsent(threadName, threadMap.getTypeClass(), module.getThreadsMap());
-                thread.setMap(threadMap);
+                thread.updateMap(threadMap);
                 thread.setModule(module);
                 threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
                 Executors.newSingleThreadExecutor().submit(thread);
             }
             // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
         }
-    printAllBeans();
+//    printAllBeans();
 
 //        propertiesMap.forEach((moduleName, moduleMap) -> {
 //            if(modules.containsKey(moduleName)) {
@@ -128,6 +127,7 @@ public class Core {
     public <T> T registerBeanIfAbsent(String name, Class<? extends T> beanClass, Map<String, T> map) {
         T bean = map.get(name);
         if (bean == null) {
+
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
             beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
             bean = beanFactory.getBean(name, beanClass);
@@ -138,20 +138,7 @@ public class Core {
         return bean;
     }
 
-    public AbstractModule registerModuleBeanIfAbsent(String name, Map<String, AbstractModule> map) {
-        AbstractModule bean = map.get(name);
-        if (bean == null) {
-            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(AbstractModule.class);
-            beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-            bean = beanFactory.getBean(name, AbstractModule.class);
-            map.put(name, bean);
-            Executors.newSingleThreadExecutor();
-            System.err.println("Create bean "+name+" as AbstractModule");
-        }
-        return bean;
-    }
-
-    public AbstractModule createModule(String moduleName, ModuleMap map) {
+    public AbstractModule registerBeanIfAbsent(String moduleName, ModuleMap map) {
         // Jeśli już istnieje, zwracamy z cache
         return modules.computeIfAbsent(moduleName, key -> {
             Class<? extends AbstractModule> moduleClass = AbstractModule.class;

@@ -46,6 +46,7 @@ public class AbstractModule {
     }
 
     public void updateMap(ModuleMap moduleMap) {
+        timeScheduler.update(moduleMap.get(MAIN).getConfig(TIME, OFF));
         // mysle ze niszczeni obiektów jest kompletnie nie tak i beany trzba też niszcyc
         threadsMap.entrySet().stream()
                 .filter(entry -> !moduleMap.containsKey(entry.getKey()))
@@ -59,11 +60,6 @@ public class AbstractModule {
                     }
                 });
         this.moduleMap = moduleMap;
-    }
-
-    public void updateMap(ThreadMap map) {
-        timeScheduler.update(map.getConfig(TIME, OFF));
-        this.mainMap = map;
     }
 
     public void destroy() {

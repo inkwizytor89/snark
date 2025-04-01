@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.service.Navigator;

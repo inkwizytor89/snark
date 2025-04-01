@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.si;
 
-import org.enoch.snark.gi.command.impl.AbstractCommand;
+import org.enoch.snark.action.command.AbstractCommand;
 
 import java.util.*;
 

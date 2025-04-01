@@ -2,9 +2,8 @@ package org.enoch.snark.instance.model.action.filter;
 
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import java.time.LocalDate;
 import java.util.*;

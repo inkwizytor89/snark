@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.model.to;
 
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.uc.ShipUC;
 
@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
-import static org.enoch.snark.instance.model.to.ShipsMap.TRANSPORT_COUNT;
 import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
 public class FleetPromise {

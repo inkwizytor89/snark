@@ -2,18 +2,18 @@ package org.enoch.snark.instance.si.module.collector;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.FleetPromise;
+import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
 
@@ -63,15 +63,14 @@ public class CollectorThread extends AbstractThread {
             System.err.println("Error: CollectorThread can not find destination colony");
             return;
         }
-        FleetEntity fleet = buildCollectingFleetEntity(destination);
+        FleetPromise promise = buildCollectingFleetEntity(destination);
 
-        Resources resources = new Resources();
-        resources.metal = fleet.source.metal;
-        resources.crystal = fleet.source.crystal;
-        resources.deuterium = fleet.source.deuterium < 10000000L? 0: fleet.source.deuterium;
+//        Resources resources = new Resources();
+//        resources.metal = promise.source.metal;
+//        resources.crystal = promise.source.crystal;
+//        resources.deuterium = promise.source.deuterium < 10000000L? 0: promise.source.deuterium;
 
-        SendFleetCommand collecting = new SendFleetCommand(fleet);
-        collecting.promise().setResources(resources);
+        SendFleetPromiseCommand collecting = new SendFleetPromiseCommand(promise);
         collecting.hash(threadType);
         collecting.push();
     }
@@ -86,16 +85,14 @@ public class CollectorThread extends AbstractThread {
         return readyPlanetCount < minFlyPoints;
     }
 
-    private FleetEntity buildCollectingFleetEntity(ColonyEntity destination) {
-        FleetEntity fleet = new FleetEntity();
-        fleet.mission = Mission.TRANSPORT;
-        fleet.source = getColonyToCollect(destination);
-        fleet.targetGalaxy = destination.galaxy;
-        fleet.targetSystem = destination.system;
-        fleet.targetPosition = destination.position;
-        fleet.spaceTarget = destination.is(ColonyType.PLANET) ? ColonyType.PLANET: ColonyType.MOON;
-        fleet.transporterLarge = fleet.source.calculateTransportByTransporterLarge();
-        return fleet;
+    private FleetPromise buildCollectingFleetEntity(ColonyEntity destination) {
+        FleetPromise promise = new FleetPromise();
+        promise.setMission(Mission.TRANSPORT);
+        promise.setSource(getColonyToCollect(destination));
+        promise.setTarget(destination.toPlanet());
+        ShipsMap shipsMap = new ShipsMap();
+        shipsMap.put(Ship.transporterLarge, promise.getSource().calculateTransportByTransporterLarge());
+        return promise;
     }
 
     private ColonyEntity getColonyToCollect(ColonyEntity destination) {

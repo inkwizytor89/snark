@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.technology;
 
-import org.enoch.snark.gi.types.UrlComponent;
+import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 
 public interface Technology {
 

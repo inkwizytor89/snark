@@ -1,6 +1,6 @@
 package org.enoch.snark.db.converter;
 
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

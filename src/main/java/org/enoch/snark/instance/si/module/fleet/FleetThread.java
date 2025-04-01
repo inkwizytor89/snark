@@ -2,21 +2,20 @@ package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.filter.AbstractFilter;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;

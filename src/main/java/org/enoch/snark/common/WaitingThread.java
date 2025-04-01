@@ -1,6 +1,6 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.gi.command.impl.FollowingAction;
+import org.enoch.snark.action.command.FollowingAction;
 
 public class WaitingThread extends Thread {
 

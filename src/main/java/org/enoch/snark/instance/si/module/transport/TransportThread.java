@@ -1,23 +1,22 @@
 package org.enoch.snark.instance.si.module.transport;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.OpenPageCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
+import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static org.enoch.snark.gi.types.Mission.TRANSPORT;
-import static org.enoch.snark.gi.types.UrlComponent.FLEETDISPATCH;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.TRANSPORT;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 
 @RequiredArgsConstructor
@@ -66,8 +65,8 @@ public class TransportThread extends AbstractThread {
 
             Resources resources = colony.getResources();
             if(resources.isCountMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
-                FleetEntity fleetEntity = creteFleetToTransport(colony);
-                SendFleetCommand command = new SendFleetCommand(fleetEntity);
+                FleetPromise fleetEntity = creteFleetToTransport(colony);
+                SendFleetPromiseCommand command = new SendFleetPromiseCommand(fleetEntity);
                 command.hash(threadType);
                 command.promise().setResources(everything);
                 command.push();
@@ -79,19 +78,17 @@ public class TransportThread extends AbstractThread {
         return colony.calculateTransportByTransporterSmall() < (colony.transporterSmall + 5 * colony.transporterLarge) *8;
     }
 
-    private FleetEntity creteFleetToTransport(ColonyEntity colony) {
+    private FleetPromise creteFleetToTransport(ColonyEntity colony) {
         ShipsMap shipsMap = new ShipsMap();
         shipsMap.put(Ship.transporterSmall, colony.transporterSmall);
         shipsMap.put(Ship.transporterLarge, colony.transporterLarge);
 
-        FleetEntity fleetEntity = new FleetEntity();
-        fleetEntity.source = colony;
-        fleetEntity.setTarget(ColonyDAO.getInstance().find(colony.cpm).toPlanet());
-        fleetEntity.mission = TRANSPORT;
-        fleetEntity.setShips(shipsMap);
-        fleetEntity.metal = Long.MAX_VALUE;
-        fleetEntity.crystal = Long.MAX_VALUE;
-        fleetEntity.deuterium = Long.MAX_VALUE;
-        return fleetEntity;
+        FleetPromise fleetPromise = new FleetPromise();
+        fleetPromise.setSource(colony);
+        fleetPromise.setTarget(ColonyDAO.getInstance().find(colony.cpm).toPlanet());
+        fleetPromise.setMission(TRANSPORT);
+        fleetPromise.setShipsMap(shipsMap);
+        fleetPromise.setResources(everything);
+        return fleetPromise;
     }
 }

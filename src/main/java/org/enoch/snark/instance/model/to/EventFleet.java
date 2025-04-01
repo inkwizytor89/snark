@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 

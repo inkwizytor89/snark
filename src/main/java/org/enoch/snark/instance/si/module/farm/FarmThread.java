@@ -4,13 +4,11 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.*;
-import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

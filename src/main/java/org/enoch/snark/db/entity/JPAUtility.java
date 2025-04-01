@@ -1,14 +1,16 @@
 package org.enoch.snark.db.entity;
 
+import jakarta.persistence.EntityManager;
+
 public class JPAUtility {
 //    private static EntityManagerFactory emFactory;
 //    private static EntityManager entityManager;
     public static final Object dbSynchro = new Object();
     public static String syncMethod;
-//
-//    public static final String H2_PERSISTENCE = "H2-PERSISTENCE";
-//
-//    public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";
+
+    public static final String H2_PERSISTENCE = "H2-PERSISTENCE";
+
+    public static final String H2_URL = "jdbc:h2:file:./db/snark;MODE=PostgreSQL";
 //
 //    public static void buildDefaultEntityManager(String persistence) {
 //        if(emFactory != null) {
@@ -21,12 +23,13 @@ public class JPAUtility {
 //        entityManager = emFactory.createEntityManager();
 //    }
 //
-//    public static EntityManager getEntityManager(){
+    public static EntityManager getEntityManager(){
+        return null;
 //        if(entityManager == null) {
 //            entityManager =  createEntityManager();
 //        }
 //        return entityManager;
-//    }
+    }
 //
 //    public static EntityManager createEntityManager(){
 //        EntityManagerFactory managerFactory;

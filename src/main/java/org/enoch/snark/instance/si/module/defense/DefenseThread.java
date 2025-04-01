@@ -5,36 +5,29 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.RecallCommand;
-import org.enoch.snark.gi.command.impl.SendFleetCommand;
-import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
-import org.enoch.snark.gi.command.impl.SendMessageToPlayerCommand;
-import org.enoch.snark.gi.types.Mission;
-import org.enoch.snark.gi.text.Msg;
+import org.enoch.snark.action.command.RecallCommand;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.action.command.SendMessageToPlayerCommand;
+import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.text.Msg;
 import org.enoch.snark.instance.model.action.FleetBuilder;
-import org.enoch.snark.instance.model.to.FleetPromise;
-import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
-import org.enoch.snark.instance.model.to.EventFleet;
-import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.db.entity.FleetEntity.DEFENCE_CODE;
-import static org.enoch.snark.gi.types.Mission.*;
-import static org.enoch.snark.gi.text.Msg.BAZINGA_PL;
+import static org.enoch.snark.instance.si.module.consumer.gi.text.Msg.BAZINGA_PL;
 import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.*;
 
 @RequiredArgsConstructor
 public class DefenseThread extends AbstractThread {
@@ -100,13 +93,13 @@ public class DefenseThread extends AbstractThread {
     private void sendFleetEscape(Planet sourcePlanet) {
         Duration recall = map.getDuration(RECALL, null);
         if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
-            SendFleetCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
+            SendFleetPromiseCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
             if(sendFleetCommand == null) return;
             if(recall != null) {
                 FleetPromise promise = new FleetPromise();
-                promise.setMission(sendFleetCommand.fleet.mission);
-                promise.setSource(sendFleetCommand.fleet.source);
-                promise.setTarget(sendFleetCommand.fleet.getTarget());
+                promise.setMission(sendFleetCommand.promise().getMission());
+                promise.setSource(sendFleetCommand.promise().getSource());
+                promise.setTarget(sendFleetCommand.promise().getTarget());
 
                 sendFleetCommand.setNext(new RecallCommand(promise), recall.getSeconds());
             }
@@ -151,25 +144,22 @@ public class DefenseThread extends AbstractThread {
                 .buildOne();
     }
 
-    private SendFleetCommand sendToAnotherMoon(Planet sourcePlanet) {
+    private SendFleetPromiseCommand sendToAnotherMoon(Planet sourcePlanet) {
         System.err.println("Escape from planet "+ sourcePlanet);
         ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
         System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
         ShipsMap shipsMap = sourceEntity.getShipsMap();
         if(shipsMap.isEmpty()) return null;
 
-        FleetEntity fleetEntity = new FleetEntity();
-        fleetEntity.source = sourceEntity;
-        fleetEntity.setTarget(chooseDestination(sourcePlanet).toPlanet());
-        fleetEntity.mission = STATIONED;
-        fleetEntity.setShips(shipsMap);
-        fleetEntity.metal = Long.MAX_VALUE;
-        fleetEntity.crystal = Long.MAX_VALUE;
-        fleetEntity.deuterium = Long.MAX_VALUE;
-        fleetEntity.speed = 10L;
-        fleetEntity.code = DEFENCE_CODE;
+        FleetPromise promise = new FleetPromise();
+        promise.setSource(sourceEntity);
+        promise.setTarget(chooseDestination(sourcePlanet).toPlanet());
+        promise.setMission(STATIONED);
+        promise.setShipsMap(shipsMap);
+        promise.setResources(everything);
+        promise.setSpeed(10L);
 
-        SendFleetCommand command = new SendFleetCommand(fleetEntity);
+        SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
         command.hash(threadType +sourceEntity);
         command.promise().setResources(everything);
         command.promise().setShipsMap(ShipsMap.ALL_SHIPS);

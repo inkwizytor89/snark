@@ -2,7 +2,7 @@ package org.enoch.snark.instance.model.action;
 
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.text.Text;
+import org.enoch.snark.instance.si.module.consumer.gi.text.Text;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 

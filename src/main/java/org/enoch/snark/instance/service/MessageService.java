@@ -5,13 +5,13 @@ import com.google.common.collect.Multimap;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.gi.command.impl.ReadMessageCommand;
+import org.enoch.snark.action.command.ReadMessageCommand;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.gi.types.Mission.SPY;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.SPY;
 
 public class MessageService {
     private static MessageService INSTANCE;

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.gi.command.impl.BuildCommand;
-import org.enoch.snark.gi.command.impl.SendFleetPromiseCommand;
+import org.enoch.snark.action.command.BuildCommand;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.instance.model.action.PlanetExpression;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.TechnologyService;
@@ -14,8 +14,8 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.util.*;
 
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.gi.command.impl.FollowingAction.DELAY_TO_FLEET_THERE;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
 import static org.enoch.snark.instance.si.module.ThreadMap.SOURCE;

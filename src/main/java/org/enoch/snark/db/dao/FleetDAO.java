@@ -4,7 +4,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.gi.types.Mission;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import jakarta.persistence.EntityTransaction;

@@ -1,19 +1,11 @@
 package org.enoch.snark.instance.si.module.hunting;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.entity.PlayerEntity;
-import org.enoch.snark.gi.command.impl.UpdateHighScoreCommand;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
-import static org.enoch.snark.instance.si.module.ThreadMap.HIGH_SCORE_PAGES;
 
 @RequiredArgsConstructor
 public class HuntingThread extends AbstractThread {
