@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.service;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -24,7 +26,19 @@ import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
 public class Navigator {
 
     public static final long TIME_DELAY_IN_SECONDS = 4L;
+
     private static Navigator INSTANCE;
+
+    @Setter
+    private static int fleetCount = 0;
+    @Setter
+    private static int fleetMax = 1;
+    @Setter
+    private static int expeditionCount = 0;
+    @Getter
+    @Setter
+    private static int expeditionMax = 0;
+
     private List<EventFleet> eventFleetList;
     private LocalDateTime lastUpdate = LocalDateTime.now().minusDays(1L);
     private final Set<FleetMovement> movements = new HashSet<>();
@@ -39,6 +53,22 @@ public class Navigator {
             INSTANCE = new Navigator();
         }
         return INSTANCE;
+    }
+
+    public static boolean isFleetFreeSlot() {
+        return getFleetFreeSlots() > 0;
+    }
+
+    public static int getFleetFreeSlots() {
+        return fleetMax - fleetCount;
+    }
+
+    public static boolean isExpeditionFreeSlot() {
+        return getFleetFreeSlots() > 0;
+    }
+
+    public static int getExpeditionFreeSlots() {
+        return expeditionMax - expeditionCount;
     }
 
     public void start() {

@@ -44,5 +44,6 @@ public interface CacheEntryRepository extends JpaRepository<CacheEntryEntity, Lo
         CacheEntryEntity cacheEntryNotNull = getCacheEntryNotNull(key);
         cacheEntryNotNull.value = value;
         cacheEntryNotNull.updated = LocalDateTime.now();
+        save(cacheEntryNotNull);
     }
 }

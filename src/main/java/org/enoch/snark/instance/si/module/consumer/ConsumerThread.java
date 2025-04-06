@@ -130,12 +130,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 //        }
 //    }
 
-    public RunningProcessor updateRunningStatus() {
-        boolean isOn = Instance.getGlobalMainConfigMap().isOn();
-        boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
-        return runningProcessor.update(isOn, shouldStop)
-                .logChangedStatus(ConsumerThread.class.getName());
-    }
+//    public RunningProcessor updateRunningStatus() {
+//        boolean isOn = Instance.getGlobalMainConfigMap().isOn();
+//        boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
+//        return runningProcessor.update(isOn, shouldStop)
+//                .logChangedStatus(ConsumerThread.class.getName());
+//    }
 
     private boolean isSomethingAttacking() {
         try {
@@ -167,7 +167,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         }
         try {
 
-            Debug.log(ThreadMap.MAIN, command + " start at " + LocalTime.now());
+            Debug.log(this, command + " start at " + LocalTime.now());
             success = processor.execute(gi, command);
 
         } catch (ShipDoNotExists e) {
@@ -192,17 +192,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             }
         }
         actualProcessedCommand = null;
-        Debug.log(ThreadMap.MAIN, command + " start at " + LocalTime.now());
-    }
-
-    public void setFleetStatus(int fleetCount, int fleetMax) {
-        this.fleetCount = fleetCount;
-        this.fleetMax = fleetMax;
-    }
-
-    public void setExpeditionStatus(int expeditionCount, int expeditionMax) {
-        this.expeditionCount = expeditionCount;
-        this.expeditionMax = expeditionMax;
+        Debug.log(this, command + " start at " + LocalTime.now());
     }
 
     public boolean noBlockingHashInQueue(String hash) {
@@ -250,34 +240,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
         commandsToView.addAll(commandDeque.peek());
         return commandsToView;
-    }
-
-    public boolean isFleetFreeSlot() {
-        return getFleetFreeSlots() > 0;
-    }
-
-    public int getFleetFreeSlots() {
-        return fleetMax - fleetCount;
-    }
-
-    public int getFleetCount() {
-        return fleetCount;
-    }
-
-    public int getFleetMax() {
-        return fleetMax;
-    }
-
-    public int getExpeditionFreeSlots() {
-        return expeditionMax - expeditionCount;
-    }
-
-    public int getExpeditionCount() {
-        return expeditionCount;
-    }
-
-    public int getExpeditionMax() {
-        return expeditionMax;
     }
 
     @Override

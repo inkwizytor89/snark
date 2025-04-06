@@ -12,6 +12,7 @@ import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.util.LinkedList;
@@ -51,7 +52,7 @@ public class ExpeditionThread extends AbstractThread {
 
     @Override
     public int getRequestedFleetCount() {
-        return Instance.consumerThread.getExpeditionMax();
+        return Navigator.getExpeditionMax();
     }
 
     @Override

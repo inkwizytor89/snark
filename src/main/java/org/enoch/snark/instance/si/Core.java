@@ -1,6 +1,9 @@
 package org.enoch.snark.instance.si;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +27,10 @@ public class Core {
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
+
+    @Getter
+    @Setter
+    private static ColonyEntity lastVisited;
 
     public void configurationUpdate(PropertiesMap propertiesMap) {
         for(ModuleMap moduleMap : propertiesMap.modules()) {

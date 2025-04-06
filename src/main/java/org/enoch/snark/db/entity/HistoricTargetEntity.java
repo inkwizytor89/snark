@@ -81,7 +81,7 @@ public class HistoricTargetEntity extends IdEntity {
     public Long transporterLarge = 0L;
 
     @Basic
-    @Column(name = "colonyShip")
+    @Column(name = "colonyship")
     public Long colonyShip = 0L;
 
     @Basic

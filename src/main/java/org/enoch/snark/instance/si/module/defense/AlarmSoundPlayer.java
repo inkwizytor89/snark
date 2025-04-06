@@ -43,13 +43,13 @@ public class AlarmSoundPlayer implements LineListener {
     public static void main(String[] args) {
         AlarmSoundPlayer alarmSoundPlayer = new AlarmSoundPlayer();
         shouldPlayAlarm = true;
-        alarmSoundPlayer.play();
+        alarmSoundPlayer.play("set path to file");
     }
 
-    private void play() {
+    private void play(String config) {
         Runnable task = () -> {
             try {
-                File soundFile = new File(getAlarmAudioFilePath());
+                File soundFile = new File(getAlarmAudioFilePath(config));
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
 
                 AudioFormat format = audioStream.getFormat();
@@ -78,19 +78,19 @@ public class AlarmSoundPlayer implements LineListener {
         new Thread(task).start();
     }
 
-    private String getAlarmAudioFilePath() {
-        String alarmPath = Instance.getGlobalMainConfigMap(DefenseThread.threadType).getConfig(ALARM, MISSING_WAV);
+    private String getAlarmAudioFilePath(String config) {
+        String alarmPath = config;
         if(!alarmPath.equals(MISSING_WAV)) return alarmPath;
         File[] files = new File("").listFiles((dir, name) -> name.toLowerCase().endsWith(".wav"));
         if(files== null || files.length == 0) return null;
         return files[0].getAbsolutePath();
     }
 
-    public static void start() {
+    public static void start(String config) {
         if(!shouldPlayAlarm) {
             System.err.println("Alarm activate");
             shouldPlayAlarm = true;
-            getInstance().play();
+            getInstance().play(config);
         }
     }
 

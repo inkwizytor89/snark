@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.si;
 
 import org.enoch.snark.action.command.AbstractCommand;
+import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.instance.service.Navigator;
 
 import java.util.*;
 
@@ -46,9 +48,9 @@ public class CommandDeque {
     public synchronized AbstractCommand pool(){
         for (QueueRunType type : runTypes) {
             Deque<AbstractCommand> deque = actionsMap.get(type);
-//            if (canPoll(deque)) {
+            if (canPoll(deque)) {
                 return deque.poll();
-//            }
+            }
         }
 
 //        List<FleetEntity> toProcess = FleetDAO.getInstance().findToProcess();
@@ -58,10 +60,10 @@ public class CommandDeque {
         return null;
     }
 
-//    private boolean canPoll(Deque<AbstractCommand> deque) {
-//        boolean isFleetFreeSlot = Consumer.getInstance().isFleetFreeSlot();
-//        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendFleetCommand));
-//    }
+    private boolean canPoll(Deque<AbstractCommand> deque) {
+        boolean isFleetFreeSlot = Navigator.isFleetFreeSlot();
+        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendFleetPromiseCommand));
+    }
 
 //    private boolean canPoll(List<FleetEntity> toProcess) {
 //        boolean atLeast2Slots = Consumer.getInstance().getFleetMax() - Consumer.getInstance().getFleetCount() > 1;

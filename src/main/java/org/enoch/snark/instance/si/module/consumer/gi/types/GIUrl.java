@@ -4,10 +4,10 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.instance.service.Navigator;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.TechnologyGIR;
-import org.enoch.snark.action.command.LoadColoniesCommand;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
@@ -16,15 +16,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlBuilder.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlPage.HIGHSCORE;
-import static org.enoch.snark.instance.si.module.ThreadMap.HIDING_ACTIVITY;
 
 public class GIUrl {
 
@@ -63,7 +60,7 @@ public class GIUrl {
 
     public void openGalaxy(SystemView systemView, ColonyEntity colony) {
         if(colony == null) {
-            colony = Instance.getInstance().lastVisited;
+            colony = Core.getLastVisited();
             if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
         openUrl(new UrlBuilder(gi, GALAXY)
@@ -72,7 +69,7 @@ public class GIUrl {
                 .param(CP_PARAM, colony.cp)
                 .get());
 
-        Instance.getInstance().lastVisited = colony;
+        Core.setLastVisited(colony);
         updateColony(colony);
         gi.updateGalaxy(systemView);
     }
@@ -98,7 +95,7 @@ public class GIUrl {
         String url = new UrlBuilder(gi, component).param(CP_PARAM, colony.cp).get();
         openUrl(url);
         if(debug) System.err.println("GET URL: "+url);
-        Instance.getInstance().lastVisited = colony;
+        Core.setLastVisited(colony);
 
         updateColony(colony);
         if (SUPPLIES.equals(component)) {
@@ -134,9 +131,11 @@ public class GIUrl {
             final WebElement slotsLabel = gi.getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
-                Instance.consumerThread.setFleetStatus(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
-                int expeditionCount = Integer.parseInt(m.group(3));
-                Instance.consumerThread.setExpeditionStatus(expeditionCount, Integer.parseInt(m.group(4)));
+                Navigator.setFleetCount(Integer.parseInt(m.group(1)));
+                Navigator.setFleetMax(Integer.parseInt(m.group(2)));
+
+                Navigator.setExpeditionCount(Integer.parseInt(m.group(3)));
+                Navigator.setExpeditionMax(Integer.parseInt(m.group(4)));
             }
         } catch (Exception e) {
             System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");
@@ -145,18 +144,7 @@ public class GIUrl {
     }
 
     private ColonyEntity selectColony() {
-        Boolean isHidingActivity = Instance.getGlobalMainConfigMap().getConfigBoolean(HIDING_ACTIVITY, false);
-        if(isHidingActivity) {
-            Optional<ColonyEntity> temporaryPlanet = ColonyDAO.getInstance().fetchAll().stream()
-                    .filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET))
-                    .filter(colonyEntity -> colonyEntity.cpm == null)
-                    .max(Comparator.comparing(o -> o.created));
-
-            if (temporaryPlanet.isPresent()) {
-                return temporaryPlanet.get();
-            }
-        }
-        ColonyEntity colony = Instance.getInstance().lastVisited;
+        ColonyEntity colony = Core.getLastVisited();
         if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         ColonyDAO.getInstance().fetchAll();
         return colony;

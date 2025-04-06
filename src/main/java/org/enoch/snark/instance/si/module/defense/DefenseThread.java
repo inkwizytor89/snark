@@ -28,6 +28,7 @@ import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.*;
+import static org.enoch.snark.instance.si.module.defense.AlarmSoundPlayer.MISSING_WAV;
 
 @RequiredArgsConstructor
 public class DefenseThread extends AbstractThread {
@@ -230,7 +231,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void playMusic() {
-        AlarmSoundPlayer.start();
+        AlarmSoundPlayer.start(map.getConfig(ALARM, MISSING_WAV));
     }
 
     private void writeMessageToPlayer(List<EventFleet> events) {

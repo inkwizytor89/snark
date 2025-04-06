@@ -153,7 +153,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     protected void log(String message) {
-        Debug.log(map.getConfig(ThreadMap.NAME), message);
+        Debug.log(this, message);
     }
 
     public ThreadMap map() {

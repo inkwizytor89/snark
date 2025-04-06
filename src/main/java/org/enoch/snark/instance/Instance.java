@@ -39,8 +39,6 @@ public class Instance {
     public static ConsumerThread consumerThread;
     public static Integer level = 1;
 
-    public ColonyEntity lastVisited = null;
-
     private Instance() {
         updatePropertiesMap();
     }
