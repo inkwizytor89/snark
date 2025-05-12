@@ -2,12 +2,10 @@ package org.enoch.snark.instance.si.module.consumer;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.action.command.AbstractCommand;
-import org.enoch.snark.action.command.LoadColoniesCommand;
-import org.enoch.snark.action.command.UpdateFleetEventsCommand;
-import org.enoch.snark.action.command.UpdateResearchCommand;
+import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
+import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
@@ -184,12 +182,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
         if(success) {
             if(command.isFollowingAction()) {
-                command.doFallowing();
+                new WaitingThread(command.getFollowingAction(), commandDeque).start();
             }
         } else {
             command.failed++;
             if (command.failed < 2) {
-                command.retry(2);
+                new WaitingThread(new FollowingAction(command, 2), commandDeque).start();
             } else {
                 command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");

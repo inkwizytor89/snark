@@ -1,7 +1,6 @@
 package org.enoch.snark.action.command;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.openqa.selenium.WebDriver;
@@ -46,19 +45,8 @@ public abstract class AbstractCommand {
 //        Consumer.getInstance().push(this);
     }
 
-    public void doFallowing() {
-        if(followingAction == null) {
-            return;
-        }
-        new WaitingThread(followingAction).start();
-    }
-
     public boolean isFollowingAction() {
         return followingAction != null;
-    }
-
-    public void retry(Integer secondsToDelay) {
-        new WaitingThread(new FollowingAction(this, secondsToDelay)).start();
     }
 
     public FollowingAction setNext(AbstractCommand command, String... args) {

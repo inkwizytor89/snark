@@ -1,14 +1,17 @@
 package org.enoch.snark.common;
 
 import org.enoch.snark.action.command.FollowingAction;
+import org.enoch.snark.instance.si.CommandDeque;
 
 public class WaitingThread extends Thread {
 
-    private FollowingAction followingAction;
+    private final FollowingAction followingAction;
+    private final CommandDeque commandDeque;
 
-    public WaitingThread(FollowingAction followingAction) {
+    public WaitingThread(FollowingAction followingAction, CommandDeque commandDeque) {
         super();
         this.followingAction = followingAction;
+        this.commandDeque = commandDeque;
     }
 
     @Override
@@ -20,6 +23,6 @@ public class WaitingThread extends Thread {
     public void run() {
         super.run();
         SleepUtil.secondsToSleep(followingAction.getSecondsToDelay());
-        followingAction.getCommand().push();
+        commandDeque.push(followingAction.getCommand());
     }
 }

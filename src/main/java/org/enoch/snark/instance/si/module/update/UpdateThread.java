@@ -60,7 +60,7 @@ public class UpdateThread extends AbstractThread {
     protected void onStep() {
         updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
         boolean navigatorExpired = isNavigatorExpired();
-        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired);
+        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" updateTimeInMinutes="+updateTimeInMinutes);
         if(navigatorExpired) {
             updateState();
             log(LocalDateTime.now() + " state updated");
