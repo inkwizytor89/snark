@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.consumer;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.LoadColoniesCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
@@ -10,9 +11,9 @@ import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.CommandDeque;
@@ -29,7 +30,6 @@ import java.util.*;
 
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -81,18 +81,22 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 //                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
 //                if(!isRunning) continue;
 
+            Core.isSomethingAttacking = isSomethingAttacking();
 
 
-                if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
-                    UpdateThread.updateState();
-                }
+//                if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
+//                    UpdateThread.updateState();
+//                }
 
                 resolve(commandDeque.pool());
+                commandDeque.release();
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
+                commandDeque.release();
             } catch (Throwable e) {
                 e.printStackTrace();
+                commandDeque.release();
             }
 //        }
     }
@@ -216,19 +220,20 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     }
 
     public synchronized void push(AbstractCommand command, String action) {
-        String hash = command.hash();
-        LocalDateTime now = LocalDateTime.now();
-        List<FleetEntity> withHash = FleetDAO.getInstance().findWithHash(hash);
-        withHash.sort(Comparator.comparing(o -> o.updated));
-        if(withHash.isEmpty()) push(command);
-        else if(DELAY_TO_FLEET_THERE.equals(action) && now.isAfter(withHash.getLast().visited)) push(command);
-        else if(DELAY_TO_FLEET_BACK.equals(action) && now.isAfter(withHash.getLast().back)) push(command);
+        throw new NotImplementedException("Implementation for send fleet and action is not implemented");
+//        String hash = command.hash();
+//        LocalDateTime now = LocalDateTime.now();
+//        List<FleetEntity> withHash = FleetDAO.getInstance().findWithHash(hash);
+//        withHash.sort(Comparator.comparing(o -> o.updated));
+//        if(withHash.isEmpty()) push(command);
+//        else if(DELAY_TO_FLEET_THERE.equals(action) && now.isAfter(withHash.getLast().visited)) push(command);
+//        else if(DELAY_TO_FLEET_BACK.equals(action) && now.isAfter(withHash.getLast().back)) push(command);
     }
 
-    public synchronized void push(AbstractCommand command) {
-        if(noBlockingHashInQueue(command.hash()))
-            commandDeque.push(command);
-    }
+//    public synchronized void push(AbstractCommand command) {
+//        if(noBlockingHashInQueue(command.hash()))
+//            commandDeque.pushToAction(command);
+//    }
 
     public synchronized void push(AbstractCommand command, LocalDateTime from) {
         if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))

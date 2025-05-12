@@ -73,16 +73,6 @@ public class ColonyDAO extends AbstractDAO<ColonyEntity> {
         }
     }
 
-    public ColonyEntity getOldestUpdated() {
-        synchronized (JPAUtility.dbSynchro) {
-            List<ColonyEntity> resultList = entityManager.createQuery(
-                    "from ColonyEntity " +
-                            "order by updated asc", ColonyEntity.class)
-                    .getResultList();
-            return resultList.stream().findFirst().get();
-        }
-    }
-
     public List<ColonyEntity> getColonies(String code) {
         String lowerCode = code.toLowerCase();
         List<ColonyEntity> colonies;

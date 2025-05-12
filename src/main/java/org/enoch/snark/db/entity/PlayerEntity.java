@@ -68,67 +68,67 @@ public class PlayerEntity extends IdEntity {
 
 //    Research
     @Basic
-    @Column(name = "energyTechnology")
+    @Column(name = "energy_technology")
     public Long energyTechnology;
 
     @Basic
-    @Column(name = "laserTechnology")
+    @Column(name = "laser_technology")
     public Long laserTechnology;
 
     @Basic
-    @Column(name = "ionTechnology")
+    @Column(name = "ion_technology")
     public Long ionTechnology;
 
     @Basic
-    @Column(name = "hyperspaceTechnology")
+    @Column(name = "hyperspace_technology")
     public Long hyperspaceTechnology;
 
     @Basic
-    @Column(name = "plasmaTechnology")
+    @Column(name = "plasma_technology")
     public Long plasmaTechnology;
 
     @Basic
-    @Column(name = "combustionDriveTechnology")
+    @Column(name = "combustion_drive_technology")
     public Long combustionDriveTechnology;
 
     @Basic
-    @Column(name = "impulseDriveTechnology")
+    @Column(name = "impulse_drive_technology")
     public Long impulseDriveTechnology;
 
     @Basic
-    @Column(name = "hyperspaceDriveTechnology")
+    @Column(name = "hyperspace_drive_technology")
     public Long hyperspaceDriveTechnology;
 
     @Basic
-    @Column(name = "espionageTechnology")
+    @Column(name = "espionage_technology")
     public Long espionageTechnology;
 
     @Basic
-    @Column(name = "computerTechnology")
+    @Column(name = "computer_technology")
     public Long computerTechnology;
 
     @Basic
-    @Column(name = "astrophysicsTechnology")
+    @Column(name = "astrophysics_technology")
     public Long astrophysicsTechnology;
 
     @Basic
-    @Column(name = "researchNetworkTechnology")
+    @Column(name = "research_network_technology")
     public Long researchNetworkTechnology;
 
     @Basic
-    @Column(name = "gravitonTechnology")
+    @Column(name = "graviton_technology")
     public Long gravitonTechnology;
 
     @Basic
-    @Column(name = "weaponsTechnology")
+    @Column(name = "weapons_technology")
     public Long weaponsTechnology;
 
     @Basic
-    @Column(name = "shieldingTechnology")
+    @Column(name = "shielding_technology")
     public Long shieldingTechnology;
 
     @Basic
-    @Column(name = "armorTechnology")
+    @Column(name = "armor_technology")
     public Long armorTechnology;
 
     public static PlayerEntity mainPlayer() {

@@ -113,17 +113,14 @@ public class Navigator {
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {
-
-        throw new NotImplementedException("To fix in spring version");
-//        int fleetCount = Consumer.getInstance().getFleetCount();
-//        if(eventFleetList == null || eventFleetList.size() < fleetCount) {
-//            return;
-//        }
-//        this.eventFleetList = eventFleetList;
-//        this.lastUpdate = LocalDateTime.now();
-//        removeAllTemporaryMovements();
-//        eventFleetList.forEach(this::add);
-
+        if(eventFleetList == null) {
+            System.err.println("Try to push null eventFleetList - skipping");
+            return;
+        }
+        this.eventFleetList = eventFleetList;
+        this.lastUpdate = LocalDateTime.now();
+        removeAllTemporaryMovements();
+        eventFleetList.forEach(this::add);
     }
 
     private void removeAllTemporaryMovements() {

@@ -3,6 +3,7 @@ package org.enoch.snark.instance.si;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
@@ -27,6 +28,7 @@ public class Core {
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
+    public static boolean isSomethingAttacking;
 
     @Getter
     @Setter
@@ -194,5 +196,9 @@ public class Core {
         if(isDequeReady) return true;
         isDequeReady = commandDeque != null && commandDeque.isEmpty();
         return isDequeReady;
+    }
+
+    public void push(AbstractCommand command) {
+        commandDeque.push(command);
     }
 }

@@ -1,5 +1,6 @@
 package org.enoch.snark.action.processor;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.BuildCommand;

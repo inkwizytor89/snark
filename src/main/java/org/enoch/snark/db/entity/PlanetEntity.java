@@ -74,11 +74,11 @@ public abstract class PlanetEntity extends IdEntity{
     public Long debrisDeuterium;
 
     @Basic
-    @Column(name = "fighterLight")
+    @Column(name = "fighter_light")
     public Long fighterLight = 0L;
 
     @Basic
-    @Column(name = "fighterHeavy")
+    @Column(name = "fighter_heavy")
     public Long fighterHeavy = 0L;
 
     @Basic
@@ -106,15 +106,15 @@ public abstract class PlanetEntity extends IdEntity{
     public Long deathstar = 0L;
 
     @Basic
-    @Column(name = "transporterSmall")
+    @Column(name = "transporter_small")
     public Long transporterSmall = 0L;
 
     @Basic
-    @Column(name = "transporterLarge")
+    @Column(name = "transporter_large")
     public Long transporterLarge = 0L;
 
     @Basic
-    @Column(name = "colonyShip")
+    @Column(name = "colony_ship")
     public Long colonyShip = 0L;
 
     @Basic
@@ -122,7 +122,7 @@ public abstract class PlanetEntity extends IdEntity{
     public Long recycler = 0L;
 
     @Basic
-    @Column(name = "espionageProbe")
+    @Column(name = "espionage_probe")
     public Long espionageProbe = 0L;
 
     @Basic
@@ -138,84 +138,84 @@ public abstract class PlanetEntity extends IdEntity{
     public Long reaper = 0L;
 
     @Basic
-    @Column(name = "rocketLauncher")
+    @Column(name = "rocket_launcher")
     public Long rocketLauncher = 0L;
 
     @Basic
-    @Column(name = "laserCannonLight")
+    @Column(name = "laser_cannon_light")
     public Long laserCannonLight = 0L;
 
     @Basic
-    @Column(name = "laserCannonHeavy")
+    @Column(name = "laser_cannon_heavy")
     public Long laserCannonHeavy = 0L;
 
     @Basic
-    @Column(name = "gaussCannon")
+    @Column(name = "gauss_cannon")
     public Long gaussCannon = 0L;
 
     @Basic
-    @Column(name = "ionCannon")
+    @Column(name = "ion_cannon")
     public Long ionCannon = 0L;
 
     @Basic
-    @Column(name = "plasmaCannon")
+    @Column(name = "plasma_cannon")
     public Long plasmaCannon = 0L;
 
     @Basic
-    @Column(name = "shieldDomeSmall")
+    @Column(name = "shield_dome_small")
     public Long shieldDomeSmall = 0L;
 
     @Basic
-    @Column(name = "shieldDomeLarge")
+    @Column(name = "shield_dome_large")
     public Long shieldDomeLarge = 0L;
 
     @Basic
-    @Column(name = "missileInterceptor")
+    @Column(name = "missile_interceptor")
     public Long missileInterceptor = 0L;
 
     @Basic
-    @Column(name = "missileInterplanetary")
+    @Column(name = "missile_interplanetary")
     public Long missileInterplanetary = 0L;
 
 //    Resources
     @Basic
-    @Column(name = "metalMine")
+    @Column(name = "metal_mine")
     public Long metalMine;
     @Basic
-    @Column(name = "crystalMine")
+    @Column(name = "crystal_mine")
     public Long crystalMine;
 
     @Basic
-    @Column(name = "deuteriumSynthesizer")
+    @Column(name = "deuterium_synthesizer")
     public Long deuteriumSynthesizer;
 
     @Basic
-    @Column(name = "solarPlant")
+    @Column(name = "solar_plant")
     public Long solarPlant;
 
     @Basic
-    @Column(name = "fusionPlant")
+    @Column(name = "fusion_plant")
     public Long fusionPlant;
 
     @Basic
-    @Column(name = "solarSatellite")
+    @Column(name = "solar_satellite")
     public Long solarSatellite;
 
     @Basic
-    @Column(name = "metalStorage")
+    @Column(name = "metal_storage")
     public Long metalStorage;
 
     @Basic
-    @Column(name = "crystalStorage")
+    @Column(name = "crystal_storage")
     public Long crystalStorage;
 
     @Basic
-    @Column(name = "deuteriumStorage")
+    @Column(name = "deuterium_storage")
     public Long deuteriumStorage;
 
 //    Facilities
     @Basic
-    @Column(name = "roboticsFactory")
+    @Column(name = "robotics_factory")
     public Long roboticsFactory;
 
     @Basic
@@ -223,19 +223,19 @@ public abstract class PlanetEntity extends IdEntity{
     public Long shipyard;
 
     @Basic
-    @Column(name = "researchLaboratory")
+    @Column(name = "research_laboratory")
     public Long researchLaboratory;
 
     @Basic
-    @Column(name = "allianceDepot")
+    @Column(name = "alliance_depot")
     public Long allianceDepot;
 
     @Basic
-    @Column(name = "missileSilo")
+    @Column(name = "missile_silo")
     public Long missileSilo;
 
     @Basic
-    @Column(name = "naniteFactory")
+    @Column(name = "nanite_factory")
     public Long naniteFactory;
 
     @Basic
@@ -243,7 +243,7 @@ public abstract class PlanetEntity extends IdEntity{
     public Long terraformer;
 
     @Basic
-    @Column(name = "repairDock")
+    @Column(name = "repair_dock")
     public Long repairDock;
 
     @Basic
@@ -251,208 +251,208 @@ public abstract class PlanetEntity extends IdEntity{
     public Long moonbase;
 
     @Basic
-    @Column(name = "sensorPhalanx")
+    @Column(name = "sensor_phalanx")
     public Long sensorPhalanx;
 
     @Basic
-    @Column(name = "jumpGate")
+    @Column(name = "jump_gate")
     public Long jumpGate;
 
 //    Lifeform
 
 // Humans
     @Basic
-    @Column(name = "lifeformTech11101")
+    @Column(name = "lifeform_tech11101")
     public Long lifeformTech11101;
 
     @Basic
-    @Column(name = "lifeformTech11102")
+    @Column(name = "lifeform_tech11102")
     public Long lifeformTech11102;
 
     @Basic
-    @Column(name = "lifeformTech11103")
+    @Column(name = "lifeform_tech11103")
     public Long lifeformTech11103;
 
     @Basic
-    @Column(name = "lifeformTech11104")
+    @Column(name = "lifeform_tech11104")
     public Long lifeformTech11104;
 
     @Basic
-    @Column(name = "lifeformTech11105")
+    @Column(name = "lifeform_tech11105")
     public Long lifeformTech11105;
 
     @Basic
-    @Column(name = "lifeformTech11106")
+    @Column(name = "lifeform_tech11106")
     public Long lifeformTech11106;
 
     @Basic
-    @Column(name = "lifeformTech11107")
+    @Column(name = "lifeform_tech11107")
     public Long lifeformTech11107;
 
     @Basic
-    @Column(name = "lifeformTech11108")
+    @Column(name = "lifeform_tech11108")
     public Long lifeformTech11108;
 
     @Basic
-    @Column(name = "lifeformTech11109")
+    @Column(name = "lifeform_tech11109")
     public Long lifeformTech11109;
 
     @Basic
-    @Column(name = "lifeformTech11110")
+    @Column(name = "lifeform_tech11110")
     public Long lifeformTech11110;
 
     @Basic
-    @Column(name = "lifeformTech11111")
+    @Column(name = "lifeform_tech11111")
     public Long lifeformTech11111;
 
     @Basic
-    @Column(name = "lifeformTech11112")
+    @Column(name = "lifeform_tech11112")
     public Long lifeformTech11112;
     // Rock´tal
     @Basic
-    @Column(name = "lifeformTech12101")
+    @Column(name = "lifeform_tech12101")
     public Long lifeformTech12101;
 
     @Basic
-    @Column(name = "lifeformTech12102")
+    @Column(name = "lifeform_tech12102")
     public Long lifeformTech12102;
 
     @Basic
-    @Column(name = "lifeformTech12103")
+    @Column(name = "lifeform_tech12103")
     public Long lifeformTech12103;
 
     @Basic
-    @Column(name = "lifeformTech12104")
+    @Column(name = "lifeform_tech12104")
     public Long lifeformTech12104;
 
     @Basic
-    @Column(name = "lifeformTech12105")
+    @Column(name = "lifeform_tech12105")
     public Long lifeformTech12105;
 
     @Basic
-    @Column(name = "lifeformTech12106")
+    @Column(name = "lifeform_tech12106")
     public Long lifeformTech12106;
 
     @Basic
-    @Column(name = "lifeformTech12107")
+    @Column(name = "lifeform_tech12107")
     public Long lifeformTech12107;
 
     @Basic
-    @Column(name = "lifeformTech12108")
+    @Column(name = "lifeform_tech12108")
     public Long lifeformTech12108;
 
     @Basic
-    @Column(name = "lifeformTech12109")
+    @Column(name = "lifeform_tech12109")
     public Long lifeformTech12109;
 
     @Basic
-    @Column(name = "lifeformTech12110")
+    @Column(name = "lifeform_tech12110")
     public Long lifeformTech12110;
 
     @Basic
-    @Column(name = "lifeformTech12111")
+    @Column(name = "lifeform_tech12111")
     public Long lifeformTech12111;
 
     @Basic
-    @Column(name = "lifeformTech12112")
+    @Column(name = "lifeform_tech12112")
     public Long lifeformTech12112;
 
     // Mecha
     @Basic
-    @Column(name = "lifeformTech13101")
+    @Column(name = "lifeform_tech13101")
     public Long lifeformTech13101;
 
     @Basic
-    @Column(name = "lifeformTech13102")
+    @Column(name = "lifeform_tech13102")
     public Long lifeformTech13102;
 
     @Basic
-    @Column(name = "lifeformTech13103")
+    @Column(name = "lifeform_tech13103")
     public Long lifeformTech13103;
 
     @Basic
-    @Column(name = "lifeformTech13104")
+    @Column(name = "lifeform_tech13104")
     public Long lifeformTech13104;
 
     @Basic
-    @Column(name = "lifeformTech13105")
+    @Column(name = "lifeform_tech13105")
     public Long lifeformTech13105;
 
     @Basic
-    @Column(name = "lifeformTech13106")
+    @Column(name = "lifeform_tech13106")
     public Long lifeformTech13106;
 
     @Basic
-    @Column(name = "lifeformTech13107")
+    @Column(name = "lifeform_tech13107")
     public Long lifeformTech13107;
 
     @Basic
-    @Column(name = "lifeformTech13108")
+    @Column(name = "lifeform_tech13108")
     public Long lifeformTech13108;
 
     @Basic
-    @Column(name = "lifeformTech13109")
+    @Column(name = "lifeform_tech13109")
     public Long lifeformTech13109;
 
     @Basic
-    @Column(name = "lifeformTech13110")
+    @Column(name = "lifeform_tech13110")
     public Long lifeformTech13110;
 
     @Basic
-    @Column(name = "lifeformTech13111")
+    @Column(name = "lifeform_tech13111")
     public Long lifeformTech13111;
 
     @Basic
-    @Column(name = "lifeformTech13112")
+    @Column(name = "lifeform_tech13112")
     public Long lifeformTech13112;
 
 // Kaelesh
     @Basic
-    @Column(name = "lifeformTech14101")
+    @Column(name = "lifeform_tech14101")
     public Long lifeformTech14101;
 
     @Basic
-    @Column(name = "lifeformTech14102")
+    @Column(name = "lifeform_tech14102")
     public Long lifeformTech14102;
 
     @Basic
-    @Column(name = "lifeformTech14103")
+    @Column(name = "lifeform_tech14103")
     public Long lifeformTech14103;
 
     @Basic
-    @Column(name = "lifeformTech14104")
+    @Column(name = "lifeform_tech14104")
     public Long lifeformTech14104;
 
     @Basic
-    @Column(name = "lifeformTech14105")
+    @Column(name = "lifeform_tech14105")
     public Long lifeformTech14105;
 
     @Basic
-    @Column(name = "lifeformTech14106")
+    @Column(name = "lifeform_tech14106")
     public Long lifeformTech14106;
 
     @Basic
-    @Column(name = "lifeformTech14107")
+    @Column(name = "lifeform_tech14107")
     public Long lifeformTech14107;
 
     @Basic
-    @Column(name = "lifeformTech14108")
+    @Column(name = "lifeform_tech14108")
     public Long lifeformTech14108;
 
     @Basic
-    @Column(name = "lifeformTech14109")
+    @Column(name = "lifeform_tech14109")
     public Long lifeformTech14109;
 
     @Basic
-    @Column(name = "lifeformTech14110")
+    @Column(name = "lifeform_tech14110")
     public Long lifeformTech14110;
 
     @Basic
-    @Column(name = "lifeformTech14111")
+    @Column(name = "lifeform_tech14111")
     public Long lifeformTech14111;
 
     @Basic
-    @Column(name = "lifeformTech14112")
+    @Column(name = "lifeform_tech14112")
     public Long lifeformTech14112;
 
 

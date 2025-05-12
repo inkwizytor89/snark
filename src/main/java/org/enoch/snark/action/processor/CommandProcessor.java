@@ -1,5 +1,6 @@
 package org.enoch.snark.action.processor;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.*;
@@ -22,6 +23,7 @@ public class CommandProcessor {
     private final UpdateFleetEventsProcessor updateFleetEventsProcessor;
     private final UpdateResearchProcessor updateResearchProcessor;
 
+    @Transactional
     public boolean execute(GI gi, AbstractCommand abstractCommand) {
         return switch (abstractCommand) {
             case OpenPageCommand open -> openPageProcessor.execute(gi, open);

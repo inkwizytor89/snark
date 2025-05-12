@@ -15,6 +15,7 @@ import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 public abstract class AbstractCommand {
     protected WebDriver webDriver;
     private FollowingAction followingAction;
+    public LocalDateTime from;
     private QueueRunType runType = NORMAL;
     protected Instance instance;
     public int failed = 0;

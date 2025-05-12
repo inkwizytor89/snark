@@ -9,6 +9,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.LoadColoniesCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -16,6 +17,7 @@ import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
@@ -56,42 +58,39 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        throw new NotImplementedException("To fix in spring version");
-//        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
-//        boolean navigatorExpired = isNavigatorExpired();
-//        boolean b = consumer.noBlockingHashInQueue(threadType);
-//        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" noBlockingHashInQueue="+b);
-//        if(navigatorExpired && b) {
-//            updateState();
-//            log(LocalDateTime.now() + " state updated");
-//        }
-//
-//        events = navigator.getEventFleetList();
-//        if (events == null) return;
-//        markSpecialFleets();
+        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
+        boolean navigatorExpired = isNavigatorExpired();
+        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired);
+        if(navigatorExpired) {
+            updateState();
+            log(LocalDateTime.now() + " state updated");
+        }
+
+        events = navigator.getEventFleetList();
+        if (events == null) return;
+        markSpecialFleets();
     }
 
     private boolean isNavigatorExpired() {
-        return navigator.isExpiredAfterMinutes(updateTimeInMinutes);
+        return  (Core.isSomethingAttacking && Navigator.getInstance().isExpiredAfterMinutes(2)) ||
+         navigator.isExpiredAfterMinutes(updateTimeInMinutes);
     }
 
-    public static void updateState() {
-        new LoadColoniesCommand()
+    public void updateState() {
+        core.push(new LoadColoniesCommand()
                 .hash(threadType +"_LoadColoniesCommand")
-                .setRunType(QueueRunType.MAJOR)
-                .push();
-        new UpdateFleetEventsCommand()
+                .setRunType(QueueRunType.MAJOR));
+        core.push(new UpdateFleetEventsCommand()
                 .hash(threadType +"_UpdateFleetEventsCommand")
-                .setRunType(QueueRunType.MAJOR)
-                .push();
+                .setRunType(QueueRunType.MAJOR));
     }
 
     private void markSpecialFleets() {
-        CacheEntryDAO cacheEntryDAO = CacheEntryDAO.getInstance();
+//        CacheEntryDAO cacheEntryDAO = CacheEntryDAO.getInstance();
 //        markMainFleet();
 
-        ColonyEntity probeSwarmColony = ProbeSwarmFinder.find();
-        cacheEntryDAO.setValue(PROBE_SWAM, probeSwarmColony != null ? probeSwarmColony.toString() : null);
+//        ColonyEntity probeSwarmColony = ProbeSwarmFinder.find();
+//        cacheEntryDAO.setValue(PROBE_SWAM, probeSwarmColony != null ? probeSwarmColony.toString() : null);
     }
 
     private void markMainFleet() {

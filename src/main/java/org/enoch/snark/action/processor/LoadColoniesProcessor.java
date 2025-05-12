@@ -7,10 +7,12 @@ import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.BaseGameInfoGIR;
 import org.enoch.snark.instance.model.action.DiffLists;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -51,6 +53,10 @@ public class LoadColoniesProcessor {
                 fleetRepository.deleteBySource(colony);
                 colonyRepository.delete(colony);
             });
+
+            if(Core.getLastVisited() == null) {
+                Core.setLastVisited(colonyRepository.findAll(Sort.by("updated")).getFirst());
+            }
         } catch (Throwable e) {
             System.err.println(this+" with error "+e.getMessage());
             return false;

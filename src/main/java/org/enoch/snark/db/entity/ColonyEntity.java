@@ -46,7 +46,7 @@ public class ColonyEntity extends PlanetEntity {
     }
 
     public ColonyEntity save() {
-        ColonyDAO.getInstance().saveOrUpdate(this);
+//        ColonyDAO.getInstance().saveOrUpdate(this);
         return this;
     }
 

@@ -1,7 +1,5 @@
 package org.enoch.snark.instance.si.module.consumer.gi.types;
 
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.service.Navigator;
@@ -61,7 +59,6 @@ public class GIUrl {
     public void openGalaxy(SystemView systemView, ColonyEntity colony) {
         if(colony == null) {
             colony = Core.getLastVisited();
-            if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
         }
         openUrl(new UrlBuilder(gi, GALAXY)
                 .param(GALAXY_PARAM, systemView.galaxy)
@@ -74,14 +71,12 @@ public class GIUrl {
         gi.updateGalaxy(systemView);
     }
 
-    public void openResearch() {
+    public void openResearch(PlayerEntity mainPlayer) {
         openUrl(new UrlBuilder(gi, RESEARCH).get());
 
-        PlayerEntity player = PlayerDAO.getInstance().fetch(PlayerEntity.mainPlayer());
-        gi.updateResearch(player);
+        gi.updateResearch(mainPlayer);
         new TechnologyGIR(gi).updateQueue(null, TechnologyService.RESEARCH);
-        player.updated = LocalDateTime.now();
-//        PlayerDAO.getInstance().saveOrUpdate(player);
+        mainPlayer.updated = LocalDateTime.now();
     }
 
     public void openComponent(UrlComponent component, ColonyEntity colony) {
@@ -90,8 +85,10 @@ public class GIUrl {
 
     public void openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
         if(colony == null) {
-            colony = selectColony();
+            colony = Core.getLastVisited();
         }
+        if(colony == null)
+            System.err.println("yyyyyyyyyy");
         String url = new UrlBuilder(gi, component).param(CP_PARAM, colony.cp).get();
         openUrl(url);
         if(debug) System.err.println("GET URL: "+url);
@@ -141,13 +138,6 @@ public class GIUrl {
             System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");
 //            new LoadColoniesCommand().execute();
         }
-    }
-
-    private ColonyEntity selectColony() {
-        ColonyEntity colony = Core.getLastVisited();
-        if(colony == null) colony = ColonyDAO.getInstance().getOldestUpdated();
-        ColonyDAO.getInstance().fetchAll();
-        return colony;
     }
 
     private void updateColony(ColonyEntity colony) {

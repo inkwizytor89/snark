@@ -19,22 +19,22 @@ create table players
   updated    timestamp default now(),
 
   --Research
-  energyTechnology              integer,
-  laserTechnology               integer,
-  ionTechnology                 integer,
-  hyperspaceTechnology          integer,
-  plasmaTechnology              integer,
-  combustionDriveTechnology     integer,
-  impulseDriveTechnology        integer,
-  hyperspaceDriveTechnology     integer,
-  espionageTechnology           integer,
-  computerTechnology            integer,
-  astrophysicsTechnology        integer,
-  researchNetworkTechnology     integer,
-  gravitonTechnology            integer,
-  weaponsTechnology             integer,
-  shieldingTechnology           integer,
-  armorTechnology               integer
+  energy_technology              integer,
+  laser_technology               integer,
+  ion_technology                 integer,
+  hyperspace_technology          integer,
+  plasma_technology              integer,
+  combustion_drive_technology     integer,
+  impulse_drive_technology        integer,
+  hyperspace_drive_technology     integer,
+  espionage_technology           integer,
+  computer_technology            integer,
+  astrophysics_technology        integer,
+  research_network_technology     integer,
+  graviton_technology            integer,
+  weapons_technology             integer,
+  shielding_technology           integer,
+  armor_technology               integer
 );
 
 create table players_activity
