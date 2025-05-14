@@ -1,5 +1,7 @@
 package org.enoch.snark.common;
 
+import org.enoch.snark.common.time.Duration;
+
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -28,6 +30,10 @@ public class SleepUtil {
 
     public static void secondsToSleep(long seconds) {
         sleep(SECONDS, seconds);
+    }
+
+    public static void sleep(Duration duration) {
+        sleep(SECONDS, duration.getSeconds());
     }
 
     public static void sleep(TimeUnit timeUnit, int i) {

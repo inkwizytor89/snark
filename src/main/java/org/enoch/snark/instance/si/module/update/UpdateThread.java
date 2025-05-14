@@ -1,17 +1,14 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.NumberUtil;
-import org.enoch.snark.db.dao.CacheEntryDAO;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.LoadColoniesCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.model.action.find.ProbeSwarmFinder;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -22,28 +19,21 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.model.action.PlanetExpression.PROBE_SWAM;
-
 @RequiredArgsConstructor
 public class UpdateThread extends AbstractThread {
 
     public static final String threadType = "update";
     public static final String REFRESH = "refresh";
-    public int updateTimeInMinutes = 12;
-    private int threadPause = 10;
+
+    public Duration refresh;
 
     private Navigator navigator;
     private List<EventFleet> events;
-
-//    public UpdateThread(ThreadMap map) {
-//        super(map);
-//    }
 
     @Override
     protected void onStart() {
         super.onStart();
         navigator = Navigator.getInstance();
-        threadPause = 10;
     }
 
     @Override
@@ -52,15 +42,15 @@ public class UpdateThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return threadPause;
+    protected String defaultPause() {
+        return "10S";
     }
 
     @Override
     protected void onStep() {
-        updateTimeInMinutes = map.getConfigInteger(REFRESH, 12);
+        refresh = map.getDuration(REFRESH, new Duration("12M"));
         boolean navigatorExpired = isNavigatorExpired();
-        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" updateTimeInMinutes="+updateTimeInMinutes);
+        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" refresh="+ refresh);
         if(navigatorExpired) {
             updateState();
             log(LocalDateTime.now() + " state updated");
@@ -72,8 +62,8 @@ public class UpdateThread extends AbstractThread {
     }
 
     private boolean isNavigatorExpired() {
-        return  (Core.isSomethingAttacking && Navigator.getInstance().isExpiredAfterMinutes(2)) ||
-         navigator.isExpiredAfterMinutes(updateTimeInMinutes);
+        return  (Core.isSomethingAttacking && Navigator.getInstance().isExpiredAfter(new Duration("2M"))) ||
+         navigator.isExpiredAfter(refresh);
     }
 
     public void updateState() {

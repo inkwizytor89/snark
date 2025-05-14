@@ -33,4 +33,9 @@ public abstract class Parsable<V> {
         }
         return value;
     }
+
+    @Override
+    public String toString() {
+        return input;
+    }
 }

@@ -35,7 +35,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected ThreadMap map;
     private TimeScheduler timeScheduler;
-    protected Duration pause = new Duration("1S");
+    protected Duration pause = new Duration("1M");
     private boolean isLive = true;
     protected Boolean debug;
 
@@ -76,7 +76,10 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected String getThreadType() {return "";}
 
-    protected int getPauseInSeconds() {return 0;}
+    @Deprecated // use defaultPause()
+    protected int getPauseInSeconds() {return -1;}
+
+    protected String defaultPause() {return null;}
 
     protected void onStart() {
         if(map.containsKey(SOURCE)) {
@@ -105,14 +108,17 @@ public abstract class AbstractThread extends ExecutorImpl {
             if (RunningState.isRunning(actualState)) {
                 try {
                     debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
+                    updatePause();
+                    log(actualState.name()+" pause="+pause);
+
                     onStep();
                 } catch (Exception e) {
                     runningProcessor.logChangedStatus("Thread " + map.name(), map);
                     e.printStackTrace();
                 }
-                SleepUtil.secondsToSleep(getPause());
+                SleepUtil.sleep(pause);
             }
-            else SleepUtil.secondsToSleep(60L);
+            else SleepUtil.sleep(pause);
         }
         System.err.println("Destroy "+map.name());
     }
@@ -125,14 +131,10 @@ public abstract class AbstractThread extends ExecutorImpl {
         return timeScheduler.isOn() && module.getTimeScheduler().isOn();
     }
 
-//    protected boolean pauseProcessing() {
-//        return !consumer.isRunning();
-//    }
-
-    private long getPause() {
-        String pauseInSecondsInput = getPauseInSeconds()+"S";
-        pause.update(map.getConfig(ThreadMap.PAUSE, pauseInSecondsInput));
-        return pause.getValue().getSeconds();
+    private void updatePause() {
+        String defaultPause = defaultPause();
+        if(defaultPause == null) defaultPause = getPauseInSeconds()+"S";
+        pause.update(map.getConfig(ThreadMap.PAUSE, defaultPause));
     }
 
     public void updateMap(ThreadMap map) {

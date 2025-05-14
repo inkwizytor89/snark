@@ -2,8 +2,8 @@ package org.enoch.snark.instance.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -108,8 +108,8 @@ public class Navigator {
         });
     }
 
-    public boolean isExpiredAfterMinutes(int minutes) {
-        return lastUpdate.plusMinutes(minutes).isBefore(LocalDateTime.now());
+    public boolean isExpiredAfter(Duration duration) {
+        return lastUpdate.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {

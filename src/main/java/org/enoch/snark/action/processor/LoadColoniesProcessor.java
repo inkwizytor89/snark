@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.DEFENSES;
@@ -29,6 +30,7 @@ import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 @Scope("prototype")
 public class LoadColoniesProcessor {
 
+    private final Core core;
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
     private BaseGameInfoGIR baseGameInfoGIR;
@@ -55,7 +57,9 @@ public class LoadColoniesProcessor {
             });
 
             if(Core.getLastVisited() == null) {
-                Core.setLastVisited(colonyRepository.findAll(Sort.by("updated")).getFirst());
+                ColonyEntity last = colonyRepository.findAll(Sort.by("updated")).getFirst();
+                System.err.println("LoadColoniesProcessor setLastVisited="+last);
+                Core.setLastVisited(last);
             }
         } catch (Throwable e) {
             System.err.println(this+" with error "+e.getMessage());
@@ -65,11 +69,11 @@ public class LoadColoniesProcessor {
     }
 
     public void updateColony(ColonyEntity colony) {
-        new OpenPageCommand(SUPPLIES, colony).sourceHash(this.getClass().getSimpleName()).push();
-        new OpenPageCommand(FACILITIES, colony).sourceHash(this.getClass().getSimpleName()).push();
-        if(colony.is(PLANET)) new OpenPageCommand(LFBUILDINGS, colony).sourceHash(this.getClass().getSimpleName()).push();
-        new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
-        new OpenPageCommand(DEFENSES, colony).sourceHash(this.getClass().getSimpleName()).push();
+        core.push(new OpenPageCommand(SUPPLIES, colony).sourceHash(this.getClass().getSimpleName()));
+        core.push(new OpenPageCommand(FACILITIES, colony).sourceHash(this.getClass().getSimpleName()));
+        if(colony.is(PLANET)) core.push(new OpenPageCommand(LFBUILDINGS, colony).sourceHash(this.getClass().getSimpleName()));
+        core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()));
+        core.push(new OpenPageCommand(DEFENSES, colony).sourceHash(this.getClass().getSimpleName()));
     }
 
     @Override

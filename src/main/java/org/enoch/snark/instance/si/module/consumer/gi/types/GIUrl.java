@@ -67,6 +67,7 @@ public class GIUrl {
                 .get());
 
         Core.setLastVisited(colony);
+        System.err.println("open galaxy setLastVisited="+colony);
         updateColony(colony);
         gi.updateGalaxy(systemView);
     }
@@ -86,6 +87,7 @@ public class GIUrl {
     public void openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
         if(colony == null) {
             colony = Core.getLastVisited();
+            System.err.println("openComponent setLastVisited="+colony);
         }
         if(colony == null)
             System.err.println("yyyyyyyyyy");
