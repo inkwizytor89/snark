@@ -143,7 +143,8 @@ public class ThreadMap extends HashMap<String, String> {
 
     public String getNearestConfig(String key, String defaultValue) {
         if(this.containsKey(key)) return this.get(key);
-        if(Instance.getGlobalMainConfigMap().containsKey(key)) return Instance.getGlobalMainConfigMap().get(key);
+        System.err.println("getNearestConfig to fix - used default");
+//        if(Instance.getGlobalMainConfigMap().containsKey(key)) return Instance.getGlobalMainConfigMap().get(key);
         return defaultValue;
     }
 

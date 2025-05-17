@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.consumer;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
@@ -9,6 +10,7 @@ import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
@@ -18,6 +20,7 @@ import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.action.processor.CommandProcessor;
+import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -37,6 +40,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private final CommandProcessor processor;
     private final CacheEntryRepository cacheEntryRepository;
+    private final ColonyRepository colonyRepository;
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
@@ -121,8 +125,9 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         commandDeque.push(new LoadColoniesCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
-//        getSources().forEach(colony -> commandDeque.push(
-//                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
+        colonyRepository.findByCode(map.getNearestConfig(ThreadMap.SOURCE, StringUtils.EMPTY))
+                .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
+                        .sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);
     }
 

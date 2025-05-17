@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.MAIN;
@@ -134,6 +135,7 @@ public class Core {
 //    }
 
     public <T> T registerBeanIfAbsent(String name, Class<? extends T> beanClass, Map<String, T> map) {
+//        T bean = beanFactory.getBean(name, beanClass);
         T bean = map.get(name);
         if (bean == null) {
 
@@ -141,7 +143,7 @@ public class Core {
             beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
             bean = beanFactory.getBean(name, beanClass);
             map.put(name, bean);
-            Executors.newSingleThreadExecutor();
+            Executors.newSingleThreadExecutor()
             System.err.println("Create bean "+name+" as "+beanClass.getSimpleName());
         }
         return bean;
