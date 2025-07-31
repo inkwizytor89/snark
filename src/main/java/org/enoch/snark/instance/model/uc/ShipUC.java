@@ -17,7 +17,7 @@ import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAP
 public class ShipUC {
 
     public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetPromise promise) {
-        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, promise.getTarget());
+        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, Planet.fromString(promise.getTarget()).getFirst());
         ShipsMap sourceShipsMap = promise.getSource().getShipsMap();
         ShipsMap maxToSend = sourceShipsMap.leave(promise.getLeaveShipsMap());
 

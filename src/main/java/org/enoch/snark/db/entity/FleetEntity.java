@@ -140,7 +140,7 @@ public class FleetEntity extends IdEntity {
     public FleetEntity(FleetPromise promise) {
         super();
         source = promise.getSource();
-        setTarget(promise.getTarget());
+        setTarget(Planet.fromString(promise.getTarget()).getFirst());
         mission = promise.getMission();
         speed = promise.getSpeed();
     }

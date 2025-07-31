@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.FleetPromise;
@@ -54,7 +55,7 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         return THERE.equals(row.iconMovement) &&
                 row.mission.equals(promise.getMission()) &&
                 row.getFrom().equals(promise.getSource().toPlanet()) &&
-                row.getTo().equals(promise.getTarget());
+                row.getTo().equals(Planet.fromString(promise.getTarget()).getFirst());
     }
 
     public List<EventFleet> readEventFleet() {

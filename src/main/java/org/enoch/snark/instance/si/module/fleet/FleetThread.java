@@ -1,8 +1,13 @@
 package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.FleetSendCommand;
+import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.instance.model.to.FleetPromise;
+import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.action.FleetBuilder;
@@ -26,9 +31,8 @@ public class FleetThread extends AbstractThread {
 
     public static final String threadName = "fleet";
 
-//    public FleetThread(ThreadMap map) {
-//        super(map);
-//    }
+    private final Core core;
+    private final PlanetService planetService;
 
     @Override
     protected String getThreadType() {
@@ -50,7 +54,7 @@ public class FleetThread extends AbstractThread {
     protected void onStep() {
         List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
-        List<SendFleetPromiseCommand> sendFleetCommands = new FleetBuilder()
+        List<FleetPromise> fleetPromises = new FleetBuilder()
                 .from(map.getNearestConfig(SOURCE, PLANET))
                 .to(map.getConfig(TARGET, null))
                 .conditions(AbstractCondition.create(conditionsEntry))
@@ -61,41 +65,59 @@ public class FleetThread extends AbstractThread {
                 .resources(map.getConfigResources(RESOURCES, nothing))
                 .leaveResources(map.getConfigResources(LEAVE_RESOURCES, null))
                 .speed(map.getConfigLong(SPEED, null))
-                .recall(map.getDuration(RECALL, null))
-                .queue(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())))
-                .hashPrefix(map.name())
                 .buildAll();
+
+//        SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
+
+
+
 // bardzo duzo tergetów niech wygeneruje flot i moze wrzucajmy jakimiś partiami
         // kolejny iteracja by wrzuciła nastepna porcje ktora nie poleciala
-        sendFleetCommands.forEach(command -> {
+        int index = 0;
+        List<FleetSendCommand> fleetSendCommands = planetService.from(fleetPromises);
+        for(FleetSendCommand command : fleetSendCommands) {
+
+//        fleetPromises.forEach(promise -> {
+            index++;
             logFleetOverview(command);
-            boolean areShips = areShips(command);
-            boolean fit = command.promise().fit();
-            if(fit && areShips) {
-                if (!map.getConfigBoolean(DRY_RUN, false))
-                    push(command);
+            boolean areShips = areShips(command.getPromise());
+            boolean fit = command.getPromise().fit();
+            if (fit && areShips && noBlockExpiredTime(command.getPromise())) {
+                if (!map.getConfigBoolean(DRY_RUN, false)) {
+                    command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
+                    command.generateHash(map.name(), Integer.toString(index));
+
+                    Duration recallDuration = map.getDuration(RECALL, null);
+                    if(recallDuration != null) command.setNext(new RecallCommand(command.getPromise()), recallDuration.getSeconds());
+                    core.push(command);
+                }
             }
-        });
+//        });
+        }
     }
 
-    private boolean areShips(SendFleetPromiseCommand command) {
-        boolean noShips = command.promise().normalizeShipMap().isEmpty();
+    private boolean areShips(FleetPromise promise) {
+        boolean noShips = promise.normalizeShipMap().isEmpty();
         return !noShips;
     }
 
-    private void push(SendFleetPromiseCommand command) {
+    private boolean noBlockExpiredTime(FleetPromise promise) {
         String expiredConfig = map.getConfig(EXPIRED_TIME, null);
-        if(expiredConfig == null) command.push();
-        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) command.push(DELAY_TO_FLEET_THERE);
-        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) command.push(DELAY_TO_FLEET_BACK);
-        else command.push(LocalDateTime.now().minusSeconds(new Duration(expiredConfig).getSeconds()));
+        if(expiredConfig == null) return true;
+        else throw new RuntimeException("Not implementet field "+EXPIRED_TIME);
+        // todo: ponizej sa przypadki kiedy strzeba zajrzec do bazy by sprawdzic czy poprzednia flota osiagnela cel
+        // albo wrocila albo minol czas od ostatniej i mozna juz wyslac nastepna
+        // jeszcze jest problem ze recall wchodzi w konflit poprzez setNext
+//        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) command.push(DELAY_TO_FLEET_THERE);
+//        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) command.push(DELAY_TO_FLEET_BACK);
+//        else command.push(LocalDateTime.now().minusSeconds(new Duration(expiredConfig).getSeconds()));
     }
 
-    private void logFleetOverview(SendFleetPromiseCommand command) {
-        List<AbstractCondition> wontFit = command.promise().wontFit();
-        StringBuilder errorMessage = new StringBuilder(command.hash());
+    private void logFleetOverview(FleetSendCommand promise) {
+        List<AbstractCondition> wontFit = promise.getPromise().wontFit();
+        StringBuilder errorMessage = new StringBuilder(promise.toString());
         errorMessage.append(" wontFit: ");
-        wontFit.forEach(condition -> errorMessage.append(condition.reason(command.promise())).append(" "));
+        wontFit.forEach(condition -> errorMessage.append(condition.reason(promise.getPromise())).append(" "));
         log(errorMessage.toString());
     }
 }

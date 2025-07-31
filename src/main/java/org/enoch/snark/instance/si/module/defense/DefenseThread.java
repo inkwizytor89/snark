@@ -110,29 +110,28 @@ public class DefenseThread extends AbstractThread {
         ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
         SendFleetPromiseCommand sendFleetPromiseCommand = null;
         if (sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0) {
-            sendFleetPromiseCommand = sendOnSpy(sourceEntity);
+            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnSpy(sourceEntity));
         } else {
             // zle powinien leciec na agresora i zawrócić
-            sendFleetPromiseCommand = sendOnHold(sourceEntity, Planet.parse("p[1:1:8]"));
+            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnHold(sourceEntity, Planet.parse("p[1:1:8]")));
         }
         if(recall != null) {
             sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recall.getValue().getSeconds());
         }
-        sendFleetPromiseCommand.push();
+        sendFleetPromiseCommand.queue(CRITICAL).push();
     }
 
-    private SendFleetPromiseCommand sendOnHold(ColonyEntity sourceEntity, Planet target) {
+    private FleetPromise sendOnHold(ColonyEntity sourceEntity, Planet target) {
         return new FleetBuilder()
                 .from(sourceEntity)
                 .to(target.toString())
                 .mission(STOP)
                 .ships(ShipsMap.ALL_SHIPS)
                 .resources(everything)
-                .queue(CRITICAL)
                 .buildOne();
     }
 
-    private SendFleetPromiseCommand sendOnSpy(ColonyEntity sourceEntity) {
+    private FleetPromise sendOnSpy(ColonyEntity sourceEntity) {
         Planet target = sourceEntity.toPlanet();
         target.position = 16;
         return new FleetBuilder()
@@ -141,7 +140,6 @@ public class DefenseThread extends AbstractThread {
                 .mission(SPY)
                 .ships(ShipsMap.ALL_SHIPS)
                 .resources(everything)
-                .queue(CRITICAL)
                 .buildOne();
     }
 

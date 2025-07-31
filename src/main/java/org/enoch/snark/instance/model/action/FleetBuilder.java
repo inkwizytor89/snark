@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.action;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -37,11 +38,8 @@ public class FleetBuilder {
     private List<ShipsMap> shipWaves;
     private List<ShipsMap> leaveShipWaves;
     private Long speed;
-    private Duration recall;
     private Resources resources;
     private Resources leaveResources;
-    private QueueRunType queue;
-    private String hashPrefix;
 
     public FleetBuilder from(ColonyEntity colony) {
         return from(singletonList(colony));
@@ -124,40 +122,28 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder recall(Duration recall) {
-        this.recall = recall;
-        return this;
-    }
-
-    public FleetBuilder hashPrefix(String hashPrefix) {
-        if(hashPrefix!= null && !hashPrefix.isEmpty())
-            this.hashPrefix = hashPrefix;
-        return this;
-    }
-
-    public FleetBuilder queue(QueueRunType queue) {
-        if(queue != null)
-            this.queue = queue;
-        return this;
-    }
-
-    private List<SendFleetPromiseCommand> build() {
+    private List<FleetPromise> build() {
         defaultValues();
         validate();
 
-        List<SendFleetPromiseCommand> results = new ArrayList<>();
+        List<FleetPromise> results = new ArrayList<>();
         int index = 0;
         for(ShipsMap shipsWave : shipWaves) {
             index++;
             for (ColonyEntity colony : from) {
-                List<Planet> targets = toPlanetList(asExpression(colony, to));
-                if(targets==null) continue;
-                for(Planet target : targets) {
-                    if (target == null) continue;
+//                List<Planet> targets = toPlanetList(asExpression(colony, to));
+//                if(targets==null) continue;
+//                for(Planet target : targets) {
+                    if (to == null) continue;
                     FleetPromise promise = new FleetPromise();
                     promise.setSource(colony);
-                    promise.setTarget(target);
-                    promise.setMission(missionExpression(target, mission));
+
+//                    target nie moze byc planeta, tu musi byc strin lub jakas klasa do wyrazenia
+//                    FleetThreed w promisie powinien miec cos takiego i wtedy zawolac beana ktory ma dostep do bazy danych
+//                    albo innych klaso beanow ktore beda mogły przetransformowac to do planety dopiero
+
+                    promise.setTarget(to);
+                    promise.setMission(missionExpression(to, mission));
                     promise.setShipsMap(shipsWave);
                     promise.setSpeed(speed);
 
@@ -165,28 +151,27 @@ public class FleetBuilder {
                     promise.setLeaveResources(leaveResources);
                     promise.addConditions(conditions);
 
-                    SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
-                    commandPromiseSetLeaveShipsMap(command, index);
-                    command.setRunType(queue);
-                    command.generateHash(hashPrefix, Integer.toString(index));
-                    if(recall != null) command.setNext(new RecallCommand(promise), recall.getSeconds());
+                    if(leaveShipWaves != null && !leaveShipWaves.isEmpty()) {
+                        promise.setLeaveShipsMap(leaveShipWaves.get(Math.min(index, leaveShipWaves.size()-1)));
+                    }
 
-                    results.add(command);
-                }
+                    results.add(promise);
+//                }
             }
         }
         return results;
     }
 
-    public SendFleetPromiseCommand buildOne() {
+    public FleetPromise buildOne() {
         return buildAll().get(0);
     }
 
-    public List<SendFleetPromiseCommand> buildAll() {
-        List<SendFleetPromiseCommand> built = build();
-        for (AbstractFilter filter : filters) {
-            built = filter.filter(built);
-        }
+    public List<FleetPromise> buildAll() {
+        List<FleetPromise> built = build();
+        if(!filters.isEmpty()) throw new RuntimeException("Filters not implemented yet");
+//        for (AbstractFilter filter : filters) {
+//            built = filter.filter(built);
+//        }
         return built;
     }
 
@@ -206,16 +191,11 @@ public class FleetBuilder {
         if(from.isEmpty()) throw new RuntimeException("Missing source for "+this);
     }
 
-    private Mission missionExpression(Planet target, Mission mission) {
+    private Mission missionExpression(String target, Mission mission) {
         if(mission != null) return mission;
-        ColonyEntity colony = ColonyDAO.getInstance().find(target);
-        if(colony != null) return Mission.STATIONED;
-        return Mission.ATTACK;
-    }
-
-    public void commandPromiseSetLeaveShipsMap(SendFleetPromiseCommand command, int index) {
-        if(leaveShipWaves != null && !leaveShipWaves.isEmpty()) {
-            command.promise().setLeaveShipsMap(leaveShipWaves.get(Math.min(index, leaveShipWaves.size()-1)));
-        }
+        throw new NotImplementedException("Default mission need fix");
+//        ColonyEntity colony = ColonyDAO.getInstance().find(target);
+//        if(colony != null) return Mission.STATIONED;
+//        return Mission.ATTACK;
     }
 }

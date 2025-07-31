@@ -4,6 +4,7 @@ import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.FleetPromise;
+import org.enoch.snark.instance.model.to.Planet;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -20,7 +21,7 @@ public abstract class ExpiredCondition extends AbstractCondition {
 
     @Override
     public boolean fit(FleetPromise promise) {
-        Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(promise.getTarget());
+        Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(Planet.fromString(promise.getTarget()).getFirst());
         if(targetEntityOptional.isEmpty()) throw new IllegalStateException(promise.getTarget() + " can not find in database");
         if(getDate(targetEntityOptional.get())==null) return true;
         boolean isExpired = DateUtil.isExpired(getDate(targetEntityOptional.get()), seconds, ChronoUnit.SECONDS);

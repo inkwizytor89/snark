@@ -2,6 +2,7 @@ package org.enoch.snark.action.command;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.openqa.selenium.WebDriver;
 
@@ -20,6 +21,8 @@ public abstract class AbstractCommand {
     public int failed = 0;
     private String hash;
     private final List<String> tags = new ArrayList<>();
+
+    private QueueRunType queueRunType;
 
 
     protected AbstractCommand() {
@@ -101,5 +104,14 @@ public abstract class AbstractCommand {
         if(runType != null)
             this.runType = runType;
         return this;
+    }
+
+    public AbstractCommand queue(QueueRunType queueRunType){
+        this.queueRunType = queueRunType;
+        return this;
+    }
+
+    public QueueRunType getQueueRunType(){
+        return queueRunType;
     }
 }

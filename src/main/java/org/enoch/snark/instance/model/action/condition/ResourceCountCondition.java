@@ -5,6 +5,7 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.FleetPromise;
+import org.enoch.snark.instance.model.to.Planet;
 
 import java.util.Optional;
 
@@ -35,7 +36,7 @@ public class ResourceCountCondition extends AbstractCondition {
 
     private PlanetEntity getPlanetEntity(FleetPromise promise) {
         if(RESOURCES_COUNT_IN_TARGET.equals(conditionType)) {
-            Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(promise.getTarget());
+            Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(Planet.fromString(promise.getTarget()).getFirst());
             if(targetEntityOptional.isPresent()) return targetEntityOptional.get();
             else throw new IllegalStateException(promise.getTarget() + " can not find in database");
         }
