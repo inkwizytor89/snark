@@ -7,15 +7,17 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.exception.*;
+import org.enoch.snark.instance.model.exception.FleetCantStart;
+import org.enoch.snark.instance.model.exception.NotEnoughResources;
+import org.enoch.snark.instance.model.exception.ShipDoNotExists;
+import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.Navigator;
+import org.enoch.snark.instance.si.QueueRunType;
+import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -28,18 +30,18 @@ import java.util.Optional;
 
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
+import static org.enoch.snark.instance.model.uc.ResourceUC.isNothingOrNull;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.ATTACK;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.SPY;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
-import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
-import static org.enoch.snark.instance.model.uc.ResourceUC.isNothingOrNull;
 
 public class SendFleetPromiseCommand extends AbstractCommand {
 
     public static final Long TIME_BUFFER = 3L;
-    protected FleetPromise promise;
+    public FleetPromise promise;
 
-//    private final SendFleetGIR gir = new SendFleetGIR();
+    private final SendFleetGIR gir = new SendFleetGIR(null);
 
     public SendFleetPromiseCommand(FleetPromise promise) {
         super();
@@ -47,7 +49,8 @@ public class SendFleetPromiseCommand extends AbstractCommand {
     }
 
 //    @Override
-//    public boolean execute() {
+    public boolean execute() {
+        return false;
 //        GIUrl.openSendFleetView(promise.getSource(), promise.getTarget(), promise.getMission());
 //        validate();
 //        //Scroll down till the bottom of the page
@@ -98,7 +101,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
 //        }
 //
 //        try {
-//            gir.sendFleet(fleet);
+//            gir.sendFleetDeprecated(fleet);
 //        } catch(FleetCantStart e) {
 //            e.printStackTrace();
 //            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -138,7 +141,7 @@ public class SendFleetPromiseCommand extends AbstractCommand {
 //        reloadColony();
 //
 //        return true;
-//    }
+    }
 //
 //    private void validate() {
 //        //todo: spring
@@ -195,18 +198,18 @@ public class SendFleetPromiseCommand extends AbstractCommand {
 //    public boolean isAllShips() {
 //        return ALL_SHIPS.equals(promise().getShipsMap());
 //    }
-
+//
     public FleetPromise promise() {
         return promise;
     }
-
-    @Override
-    public String toString() {
-        return promise.getMission().name()+" "+promise.getTarget()+" form "+promise.getSource();
-    }
-
-    public void generateHash(String hashPrefix, String code) {
-        String prefix = hashPrefix != null ? hashPrefix+"_" : "";
-        hash(prefix+promise.getSource()+"_"+promise.getMission()+"_"+promise.getTarget()+"_"+code);
-    }
+//
+//    @Override
+//    public String toString() {
+//        return promise.getMission().name()+" "+promise.getTarget()+" form "+promise.getSource();
+//    }
+//
+//    public void generateHash(String hashPrefix, String code) {
+//        String prefix = hashPrefix != null ? hashPrefix+"_" : "";
+//        hash(prefix+promise.getSource()+"_"+promise.getMission()+"_"+promise.getTarget()+"_"+code);
+//    }
 }

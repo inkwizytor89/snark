@@ -1,9 +1,14 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
+import org.enoch.snark.action.command.SendCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.instance.model.exception.ShipDoNotExists;
+import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
@@ -12,8 +17,10 @@ import org.enoch.snark.instance.model.exception.FleetCantStart;
 import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.types.ResourceType;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -21,11 +28,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
+import static org.enoch.snark.action.command.status.ExecutionIssue.*;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.types.ResourceType.DEUTERIUM;
 import static org.enoch.snark.instance.model.uc.ResourceUC.*;
+import static org.enoch.snark.instance.model.uc.ShipUC.fromExpressionToValues;
 import static org.enoch.snark.instance.si.module.ThreadMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
@@ -34,14 +45,20 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         super(gi);
     }
 
-    public void sendFleet(FleetEntity fleet) {
+    @Deprecated
+    public void sendFleetDeprecated(FleetEntity fleet) {
+        sendFleet(fleet);
+    }
+    public ExecutionIssue sendFleet(FleetEntity fleet) {
+
+        if(toWeakPlayer()) return TO_WEAK_PLAYER;
         SleepUtil.pause();
         final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
         try {
             new WebDriverWait(wd, Duration.ofSeconds(2))
                     .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
         } catch (TimeoutException e) {
-            throw new FleetCantStart();
+            return CAN_NOT_SENT;
         }
         SleepUtil.sleep();
         sendFleet.click();
@@ -49,11 +66,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         WebElement errorBox = getIfPresentById("errorBoxDecision");
         if(errorBox != null && Mission.COLONIZATION.equals(fleet.mission)) {
             wd.findElement(By.id("errorBoxDecisionYes")).click();
+            return NO_ISSUE;
         } else if(errorBox != null) {
             //todo change old code
             System.err.println("silny gracz ");
-            throw new ToStrongPlayerException();
+            return TO_STRONG_PLAYER;
         }
+        return NO_ISSUE;
     }
 
     public void setResources(Resources resources, ColonyEntity source) {
@@ -62,10 +81,16 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         else setCustomResources(resources, source);
     }
 
+    public void setNewResources(SendCommand command) {
+        if(isNothingOrNull(command.getResources())) return;
+        if(isEverything(command.getResources()) && isNothingOrNull(command.getLeaveResources())) selectAllResources();
+        else setNewCustomResources(command.getSource(), command.getResources(), command.getLeaveResources());
+    }
+
     public void setNewResources(FleetPromise promise) {
         if(isNothingOrNull(promise.getResources())) return;
         if(isEverything(promise.getResources()) && isNothingOrNull(promise.getLeaveResources())) selectAllResources();
-        else setNewCustomResources(promise);
+        else setNewCustomResources(promise.getSource(), promise.getResources(), promise.getLeaveResources());
     }
 
     private void setCustomResources(Resources resources, ColonyEntity source) {
@@ -94,14 +119,14 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    private void setNewCustomResources(FleetPromise promise) {
+    private void setNewCustomResources(ColonyEntity source, Resources resources, Resources leave) {
         WebElement resourcesArea = wd.findElement(By.id("resources"));
         WebElement metalInput = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
         WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
         WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
 //        Resources finalLeave = readTransportConsumption().plus(promise.getLeaveResources());
-        Resources transport = toTransport(promise);
+        Resources transport = toTransport(source, resources, leave);
         // tu sie zaczyna problem bo jak akcja zostanie powrórzona po błedzie to dalej bedzie problem bo dalej warunek jest spełniony, a przy konsumpci juz nie bedzie
 //        if(transport == null) throw new NotEnoughResources("SendFleet.validateResources not fit for promise "+promise);
 
@@ -155,8 +180,48 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
+    public void selectShips(SendCommand command) {
+        if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
+            selectAllShips();
+        } else {
+            ShipsMap realCanToSend = fromExpressionToValues(command.getShipsMap(), command);
+            selectShips(realCanToSend);
+        }
+        //Scroll down till the bottom of the page
+        ((JavascriptExecutor) gi.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+    }
+
     public void selectAllShips() {
         wd.findElement(By.id("sendall")).click();
+    }
+
+    private void selectShips(ShipsMap shipsMap) {
+        for (Map.Entry<Ship, Long> entry : shipsMap.entrySet()) {
+            Long value = typeShip(entry.getKey(), entry.getValue());
+//            promise.setShipsMap(ShipsMap.createSingle(entry.getKey(), value));
+        }
+    }
+
+    private Long typeShip(Ship ship, Long count) {
+        WebElement element = wd.findElement(By.name(ship.name()));
+        if(!element.isEnabled()) {
+            throw new ShipDoNotExists("Missing ships " + ship.name());
+        }
+        element.sendKeys(count.toString());
+        return count;
+    }
+
+    public void next() {
+        SleepUtil.pause();
+        wd.findElement(By.className("planet-header")).click();
+
+        final WebElement continueButton = wd.findElement(By.id("continueToFleet2"));
+        if(continueButton.getAttribute("class").equals("continue off")) {
+            throw new ShipDoNotExists("Can not select ships");
+        }
+        Actions actions = new Actions(wd);
+        actions.moveToElement(continueButton).click().perform();
+        SleepUtil.sleep();
     }
 
     public LocalTime parseDurationSecounds() {
@@ -171,6 +236,10 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public LocalDateTime parseFleetBack() {
         return parseDate("returnTime");
+    }
+
+    public boolean toWeakPlayer() {
+        return wd.findElements(By.className("status_abbr_noob")).size() != 0;
     }
 
     private LocalDateTime parseDate(String dateId) {

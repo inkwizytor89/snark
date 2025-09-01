@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.action.command.SendMessageToPlayerCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.TechnologyGIR;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
@@ -20,9 +21,12 @@ import org.springframework.stereotype.Component;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.MASTER;
 
+@RequiredArgsConstructor
 @Component
 @Scope("prototype")
 public class BuildProcessor {
+
+    private final ColonyRepository colonyRepository;
 
     public TechnologyGIR gir;
     private GI gi;
@@ -30,10 +34,10 @@ public class BuildProcessor {
     public boolean execute(GI gi, BuildCommand command) {
         this.gi = gi;
         gir = new TechnologyGIR(gi);
-        ColonyEntity colony = command.colony;
         BuildRequirements requirements = command.requirements;
 
-        gi.url().openComponent(command.requirements.request.technology.getPage(), colony);
+        ColonyEntity colony = gi.url().openComponent(command.requirements.request.technology.getPage(), command.colony);
+        colonyRepository.save(colony);
 
         if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return true;
 
@@ -55,7 +59,7 @@ public class BuildProcessor {
     }
 
     private void refreshColonyWhenBuildingIsDone(ColonyEntity colony, BuildRequirements requirements) {
-        gi.url().openComponent(requirements.request.technology.getPage(), colony);
+        colonyRepository.save(gi.url().openComponent(requirements.request.technology.getPage(), colony));
         Long seconds = gir.updateQueue(colony, TechnologyService.BUILDING);
         //todo: spring update setNext
         //        if(seconds != null) setNext(new OpenPageCommand(requirements.request.technology.getPage(), colony)

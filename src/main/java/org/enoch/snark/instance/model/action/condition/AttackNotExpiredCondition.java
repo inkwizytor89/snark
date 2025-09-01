@@ -1,22 +1,9 @@
 package org.enoch.snark.instance.model.action.condition;
 
-import org.enoch.snark.db.entity.TargetEntity;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
-
+//@SuperBuilder
+@Getter
 public class AttackNotExpiredCondition extends ExpiredCondition {
-
-    protected AttackNotExpiredCondition(Long seconds, Boolean is) {
-        super(seconds, is);
-    }
-
-    @Override
-    protected LocalDateTime getDate(TargetEntity targetEntity) {
-        return targetEntity.lastAttacked;
-    }
-
-    @Override
-    protected String getType() {
-        return AttackNotExpiredCondition.class.getSimpleName();
-    }
 }

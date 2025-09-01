@@ -1,6 +1,10 @@
 package org.enoch.snark.action.command;
 
+import lombok.Data;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.status.CommandStatus;
+import org.enoch.snark.action.command.status.ExecutionIssue;
+import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
@@ -10,15 +14,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
+import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
 import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 
+@Data
 public abstract class AbstractCommand {
+
+    protected final CommandStatus status;
     protected WebDriver webDriver;
     private FollowingAction followingAction;
     public LocalDateTime from;
     private QueueRunType runType = NORMAL;
     protected Instance instance;
-    public int failed = 0;
     private String hash;
     private final List<String> tags = new ArrayList<>();
 
@@ -26,10 +34,12 @@ public abstract class AbstractCommand {
 
 
     protected AbstractCommand() {
+        status = new CommandStatus(NEW, NO_ISSUE, 0);
 //        this.instance = Instance.getInstance();
 //        webDriver = GI.getInstance().getWebDriver();
 //        if(this instanceof SendFleetCommand) runType = NORMAL;
     }
+
 
 //    public abstract boolean execute();
 

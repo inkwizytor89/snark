@@ -21,6 +21,6 @@ public class OpenPageCommand extends AbstractCommand {
 
     @Override
     public String toString() {
-        return "On " + colony + " open page component " + component ;
+        return "On " + colony + " open page component " + component + "["+hash()+"]";
     }
 }

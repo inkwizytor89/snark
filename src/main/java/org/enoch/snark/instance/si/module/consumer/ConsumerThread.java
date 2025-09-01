@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.*;
+import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
@@ -190,8 +191,9 @@ public class ConsumerThread extends AbstractThread implements Credentials {
                 new WaitingThread(command.getFollowingAction(), commandDeque).start();
             }
         } else {
-            command.failed++;
-            if (command.failed < 2) {
+            CommandStatus status = command.getStatus();
+            status.failed();
+            if (status.getFailed() < 2) {
                 new WaitingThread(new FollowingAction(command, 2), commandDeque).start();
             } else {
                 command.onInterrupt();

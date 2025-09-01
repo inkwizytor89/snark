@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CustomFinder {
-    public static List<Planet> find(String query, ColonyEntity colonyEntity) {
+    public static List<Planet> find(String query) {
 
         List<QueryParam> params = extractQueryParams(query);
         if(params.isEmpty()) return null;

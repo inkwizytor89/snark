@@ -1,7 +1,9 @@
 package org.enoch.snark.instance.model.uc;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.dao.PlayerDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.Instance;
@@ -16,6 +18,11 @@ import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAP
 
 public class ShipUC {
 
+    public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, SendCommand command) {
+        return fromExpressionToValues(requestedShips, command.getSource(), command.getLeaveShipsMap());
+    }
+
+    @Deprecated
     public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetPromise promise) {
         ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, Planet.fromString(promise.getTarget()).getFirst());
         ShipsMap sourceShipsMap = promise.getSource().getShipsMap();
@@ -25,12 +32,22 @@ public class ShipUC {
         return valuedMap;
     }
 
-    private static ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, Planet target) {
+    public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, ColonyEntity source, ShipsMap leaveShipsMap) {
+        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source.toPlanet());
+        ShipsMap sourceShipsMap = source.getShipsMap();
+        ShipsMap maxToSend = sourceShipsMap.leave(leaveShipsMap);
+
+        valuedMap = valuedMap.reduce(maxToSend);
+        if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
+        return valuedMap;
+    }
+
+    private static ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, Planet planet) {
         ShipsMap result = new ShipsMap();
 
         if(shipsMap != null) shipsMap.forEach((key, value) -> {
             if (TRANSPORT_COUNT.equals(value))
-                result.put(key, calculateShipCountForTransport(key, target));
+                result.put(key, calculateShipCountForTransport(key, planet));
             else result.put(key, value);
         });
         return result;

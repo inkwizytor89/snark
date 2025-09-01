@@ -10,6 +10,7 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +25,8 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     @Autowired
     protected final Core core;
+    @Autowired
+    protected final ColonyRepository colonyRepository;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
     protected  CacheEntryDAO cacheEntryDAO;
@@ -82,11 +85,16 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected String defaultPause() {return null;}
 
     protected void onStart() {
-        if(map.containsKey(SOURCE)) {
-            ColonyDAO.getInstance().getColonies(map.getConfig(SOURCE)).forEach(colony -> {
-                if(DateUtil.isExpired2H(colony.updated))
-                    new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
-            });
+        try {
+            if(map.containsKey(SOURCE)) {
+                colonyRepository.findByCode(map.getConfig(SOURCE)).forEach(colony -> {
+                    if(DateUtil.isExpired2H(colony.updated))
+                        core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()));
+                });
+            }
+        } catch (Throwable throwable) {
+            System.err.println("For "+this.map.get("name")+" onStart skipping");
+            throwable.printStackTrace();
         }
     }
 
@@ -95,9 +103,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Override
     public void run() {
         System.err.println(this.map.get("name")+" runns");
-        if(this.map.get("name").equals("consumer")) {
-            System.err.println("Consumer live");
-        }
         while(isLive) {
             if(shouldWaitForDeque()) continue;
             RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
@@ -109,7 +114,7 @@ public abstract class AbstractThread extends ExecutorImpl {
                 try {
                     debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
                     updatePause();
-                    log(actualState.name()+" pause="+pause);
+//                    log(actualState.name()+" pause="+pause);
 
                     onStep();
                 } catch (Exception e) {

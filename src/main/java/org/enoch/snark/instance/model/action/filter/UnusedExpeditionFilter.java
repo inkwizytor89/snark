@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.action.filter;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.SendFleetPromiseCommand;
@@ -12,17 +13,18 @@ public class UnusedExpeditionFilter extends AbstractFilter {
 
     @Override
     public List<SendFleetPromiseCommand> filter(List<SendFleetPromiseCommand> fleets) {
-        if(fleets.isEmpty()) return fleets;
-        List<ColonyEntity> sources = fleets.stream().map(f -> f.promise().getSource()).toList();
-        Optional<Map.Entry<ColonyEntity, Integer>> min = createExpCountMap().entrySet().stream()
-                .filter(entry -> sources.contains(entry.getKey()))
-                .min(Comparator.comparingInt(Map.Entry::getValue));
-        if(min.isEmpty()) return new ArrayList<>();
-        ColonyEntity colonyToSend = min.get().getKey();
-
-        return fleets.stream()
-                .filter(f -> colonyToSend.equals(f.promise().getSource()))
-                .toList();
+        throw new NotImplementedException("To remove in spring version");
+//        if(fleets.isEmpty()) return fleets;
+//        List<ColonyEntity> sources = fleets.stream().map(f -> f.promise().getSource()).toList();
+//        Optional<Map.Entry<ColonyEntity, Integer>> min = createExpCountMap().entrySet().stream()
+//                .filter(entry -> sources.contains(entry.getKey()))
+//                .min(Comparator.comparingInt(Map.Entry::getValue));
+//        if(min.isEmpty()) return new ArrayList<>();
+//        ColonyEntity colonyToSend = min.get().getKey();
+//
+//        return fleets.stream()
+//                .filter(f -> colonyToSend.equals(f.promise().getSource()))
+//                .toList();
     }
 
     private static Map<ColonyEntity, Integer> createExpCountMap() {

@@ -1,15 +1,12 @@
 package org.enoch.snark.instance.model.to;
 
 import lombok.Data;
-import lombok.Getter;
-import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
-import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.promisecondition.AbstractPromiseCondition;
 import org.enoch.snark.instance.model.uc.ShipUC;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +22,7 @@ public class FleetPromise {
 
     private ShipsMap shipsMap;
     private Resources resources;
-    private final List<AbstractCondition> conditions = new ArrayList<>();
+    private final List<AbstractPromiseCondition> conditions = new ArrayList<>();
     private ShipsMap leaveShipsMap;
     private Resources leaveResources;
 
@@ -36,7 +33,7 @@ public class FleetPromise {
         return conditions.stream().allMatch(condition -> condition.fit(this));
     }
 
-    public List<AbstractCondition> wontFit() {
+    public List<AbstractPromiseCondition> wontFit() {
         return conditions.stream().filter(condition -> !condition.fit(this)).collect(Collectors.toList());
     }
 
@@ -55,11 +52,11 @@ public class FleetPromise {
     }
 
 
-    public void addCondition(AbstractCondition condition) {
+    public void addCondition(AbstractPromiseCondition condition) {
         addConditions(Collections.singletonList(condition));
     }
 
-    public void addConditions(List<AbstractCondition> conditions) {
+    public void addConditions(List<AbstractPromiseCondition> conditions) {
         this.conditions.addAll(conditions);
     }
 

@@ -123,7 +123,7 @@ public class DefenseThread extends AbstractThread {
 
     private FleetPromise sendOnHold(ColonyEntity sourceEntity, Planet target) {
         return new FleetBuilder()
-                .from(sourceEntity)
+                .from(sourceEntity.toString())
                 .to(target.toString())
                 .mission(STOP)
                 .ships(ShipsMap.ALL_SHIPS)
@@ -135,7 +135,7 @@ public class DefenseThread extends AbstractThread {
         Planet target = sourceEntity.toPlanet();
         target.position = 16;
         return new FleetBuilder()
-                .from(sourceEntity)
+                .from(sourceEntity.toString())
                 .to(target.toString())
                 .mission(SPY)
                 .ships(ShipsMap.ALL_SHIPS)

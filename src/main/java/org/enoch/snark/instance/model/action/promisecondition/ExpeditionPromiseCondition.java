@@ -1,13 +1,13 @@
-package org.enoch.snark.instance.model.action.condition;
+package org.enoch.snark.instance.model.action.promisecondition;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.instance.model.to.FleetPromise;
 
-public class ExpeditionCondition extends AbstractCondition {
+public class ExpeditionPromiseCondition extends AbstractPromiseCondition {
 
     private final boolean check;
 
-    public ExpeditionCondition(boolean check) {
+    public ExpeditionPromiseCondition(boolean check) {
         this.check = check;
     }
 

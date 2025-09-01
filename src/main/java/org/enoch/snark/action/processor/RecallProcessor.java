@@ -3,6 +3,8 @@ package org.enoch.snark.action.processor;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
+import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.EventContentGIR;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
@@ -11,14 +13,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 
+@RequiredArgsConstructor
 @Component
 @Scope("prototype")
 public class RecallProcessor{
 
+    private final UpdateFleetEventsProcessor updateFleetEventsProcessor;
+    private final ColonyRepository colonyRepository;
+
     public boolean execute(GI gi, RecallCommand command) {
-        gi.url().openComponent(FLEETDISPATCH, null);
+        ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, null);
+        colonyRepository.save(colony);
+
         boolean recall = new EventContentGIR(gi).recall(command.promise);
-        new UpdateFleetEventsProcessor().execute(gi, null);
+        updateFleetEventsProcessor.execute(gi, null);
         return recall;
     }
 

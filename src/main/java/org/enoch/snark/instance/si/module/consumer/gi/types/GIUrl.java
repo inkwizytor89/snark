@@ -41,7 +41,7 @@ public class GIUrl {
         openUrl(new UrlBuilder(gi, HIGHSCORE).param(SITE_PARAM, site).get());
     }
 
-    public void openSendFleetView(ColonyEntity source, Planet target, Mission mission) {
+    public ColonyEntity openSendFleetView(ColonyEntity source, Planet target, Mission mission) {
         openUrl(new UrlBuilder(gi, FLEETDISPATCH)
                 .param(CP_PARAM, source.cp)
                 .param(GALAXY_PARAM, target.galaxy)
@@ -54,6 +54,7 @@ public class GIUrl {
         updateColony(source);
         loadFleetStatus();
         gi.updateFleet(source);
+        return source;
     }
 
     public void openGalaxy(SystemView systemView, ColonyEntity colony) {
@@ -80,11 +81,11 @@ public class GIUrl {
         mainPlayer.updated = LocalDateTime.now();
     }
 
-    public void openComponent(UrlComponent component, ColonyEntity colony) {
-        openComponent(component, colony, false);
+    public ColonyEntity openComponent(UrlComponent component, ColonyEntity colony) {
+        return openComponent(component, colony, false);
     }
 
-    public void openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
+    public ColonyEntity openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
         if(colony == null) {
             colony = Core.getLastVisited();
             System.err.println("openComponent setLastVisited="+colony);
@@ -114,6 +115,7 @@ public class GIUrl {
             gi.updateDefence(colony);
             new TechnologyGIR(gi).updateQueue(colony, TechnologyService.SHIPYARD);
         }
+        return colony;
     }
 
     private String generateTargetType(ColonyType type) {

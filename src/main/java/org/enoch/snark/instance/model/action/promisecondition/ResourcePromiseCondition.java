@@ -1,16 +1,16 @@
-package org.enoch.snark.instance.model.action.condition;
+package org.enoch.snark.instance.model.action.promisecondition;
 
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 
-import static org.enoch.snark.instance.model.action.condition.ConditionType.RESOURCE_IN_SOURCE;
+import static org.enoch.snark.instance.model.action.promisecondition.ConditionType.RESOURCE_IN_SOURCE;
 import static org.enoch.snark.instance.model.uc.ResourceUC.toTransport;
 
-public class ResourceCondition extends AbstractCondition {
+public class ResourcePromiseCondition extends AbstractPromiseCondition {
     public final ConditionType type =  RESOURCE_IN_SOURCE;
     private final Resources resources;
 
-    public ResourceCondition(Resources resources) {
+    public ResourcePromiseCondition(Resources resources) {
         this.resources = resources;
     }
 

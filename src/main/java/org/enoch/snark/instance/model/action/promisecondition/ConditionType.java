@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.model.action.condition;
+package org.enoch.snark.instance.model.action.promisecondition;
 
 public enum ConditionType {
     RESOURCE_IN_SOURCE,

@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.MessageDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.dao.TargetDAO;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.SpyReportGIR;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
@@ -24,9 +27,12 @@ import org.springframework.stereotype.Component;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.OVERVIEW;
 
+@RequiredArgsConstructor
 @Component
 @Scope("prototype")
 public class ReadMessageProcessor {
+
+    private final ColonyRepository colonyRepository;
 
     private GI gi;
 
@@ -60,7 +66,8 @@ public class ReadMessageProcessor {
                 break;
             }
         }
-        gi.url().openComponent(OVERVIEW, null);
+        ColonyEntity colony = gi.url().openComponent(OVERVIEW, null);
+        colonyRepository.save(colony);
     }
 
     // TODO: 12.03.2019 przegladanie wiadommosci w osobnym oknie i jak jest duplikat to przerywanie

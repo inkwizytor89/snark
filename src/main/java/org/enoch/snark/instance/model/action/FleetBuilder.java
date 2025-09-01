@@ -1,19 +1,13 @@
 package org.enoch.snark.instance.model.action;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.action.command.RecallCommand;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.promisecondition.AbstractPromiseCondition;
+import org.enoch.snark.instance.model.action.promisecondition.ShipsPromiseCondition;
 import org.enoch.snark.instance.model.action.filter.AbstractFilter;
 import org.enoch.snark.instance.model.to.FleetPromise;
-import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 
@@ -23,8 +17,6 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.TRANSPORT;
 import static org.enoch.snark.instance.model.technology.Ship.transporterLarge;
-import static org.enoch.snark.instance.model.action.PlanetExpression.asExpression;
-import static org.enoch.snark.instance.model.action.PlanetExpression.toPlanetList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
@@ -32,7 +24,7 @@ public class FleetBuilder {
 
     private List<ColonyEntity> from;
     private String to;
-    private List<AbstractCondition> conditions = new ArrayList<>();
+    private List<AbstractPromiseCondition> conditions = new ArrayList<>();
     private List<AbstractFilter> filters = new ArrayList<>();
     private Mission mission;
     private List<ShipsMap> shipWaves;
@@ -41,16 +33,8 @@ public class FleetBuilder {
     private Resources resources;
     private Resources leaveResources;
 
-    public FleetBuilder from(ColonyEntity colony) {
-        return from(singletonList(colony));
-    }
-
     public FleetBuilder from(String expression) {
-        return from(PlanetExpression.toColonies(expression));
-    }
-
-    public FleetBuilder from(List<ColonyEntity> colonies) {
-        from = colonies;
+//        from = expression;
         return this;
     }
 
@@ -59,14 +43,14 @@ public class FleetBuilder {
         return this;
     }
 
-    public FleetBuilder conditions(List<AbstractCondition> conditionList) {
+    public FleetBuilder conditions(List<AbstractPromiseCondition> conditionList) {
         if(conditionList != null) {
             conditions = conditionList;
         }
         return this;
     }
 
-    public FleetBuilder addCondition(AbstractCondition condition) {
+    public FleetBuilder addCondition(AbstractPromiseCondition condition) {
         if(condition != null) {
             conditions.add(condition);
         }
@@ -181,7 +165,7 @@ public class FleetBuilder {
             ShipsMap transportShipsMap = new ShipsMap();
             transportShipsMap.put(transporterLarge, calculateShipCountForTransport(transporterLarge, resources));
 
-            addCondition(new ShipsCondition(transportShipsMap));
+            addCondition(new ShipsPromiseCondition(transportShipsMap));
             shipWaves = singletonList(transportShipsMap);
         }
     }

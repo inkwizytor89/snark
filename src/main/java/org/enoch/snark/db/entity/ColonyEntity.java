@@ -45,6 +45,7 @@ public class ColonyEntity extends PlanetEntity {
         return result;
     }
 
+    @Deprecated
     public ColonyEntity save() {
 //        ColonyDAO.getInstance().saveOrUpdate(this);
         return this;

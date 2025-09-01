@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.transport;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -52,26 +53,27 @@ public class TransportThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        threadPause = 60;
-        List<ColonyEntity> sources = map.getSources();
-        for(ColonyEntity colony : sources) {
-
-            if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {
-                OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, colony);
-                command.hash(command.toString()).push();
-                System.out.println(threadType +" first check "+command.toString());
-                continue;
-            }
-
-            Resources resources = colony.getResources();
-            if(resources.isCountMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
-                FleetPromise fleetEntity = creteFleetToTransport(colony);
-                SendFleetPromiseCommand command = new SendFleetPromiseCommand(fleetEntity);
-                command.hash(threadType);
-                command.promise().setResources(everything);
-                command.push();
-            }
-        }
+        throw new NotImplementedException("To remove in spring version");
+//        threadPause = 60;
+//        List<ColonyEntity> sources = map.getSources();
+//        for(ColonyEntity colony : sources) {
+//
+//            if(DateUtil.isExpired(colony.updated, 2L, ChronoUnit.HOURS)) {
+//                OpenPageCommand command = new OpenPageCommand(FLEETDISPATCH, colony);
+//                command.hash(command.toString()).push();
+//                System.out.println(threadType +" first check "+command.toString());
+//                continue;
+//            }
+//
+//            Resources resources = colony.getResources();
+//            if(resources.isCountMoreThan("2m") && isNumberOfShipsReasonable(colony) && colony.cpm != null) {
+//                FleetPromise fleetEntity = creteFleetToTransport(colony);
+//                SendFleetPromiseCommand command = new SendFleetPromiseCommand(fleetEntity);
+//                command.hash(threadType);
+//                command.promise().setResources(everything);
+//                command.push();
+//            }
+//        }
     }
 
     private boolean isNumberOfShipsReasonable(ColonyEntity colony) {

@@ -1,0 +1,10 @@
+package org.enoch.snark.action.command.status;
+
+public enum ExecutionIssue {
+    NO_ISSUE,
+    TO_STRONG_PLAYER,
+    TO_WEAK_PLAYER,
+    CAN_NOT_SENT,
+    NOT_ENOUGH_DEUTERIUM
+
+}

@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.technology.Ship;
@@ -137,12 +138,13 @@ public class FleetEntity extends IdEntity {
         super();
     }
 
-    public FleetEntity(FleetPromise promise) {
+    public FleetEntity(SendCommand command) {
         super();
-        source = promise.getSource();
-        setTarget(Planet.fromString(promise.getTarget()).getFirst());
-        mission = promise.getMission();
-        speed = promise.getSpeed();
+        source = command.getSource();
+        setTarget(command.getTarget());
+        mission = command.getMission();
+        speed = command.getSpeed();
+        hash = command.hash();
     }
 
     public boolean isItBack() {

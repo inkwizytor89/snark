@@ -1,12 +1,18 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.AbstractCommand;
+import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.action.command.LoadColoniesCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
+import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.FleetMovement;
+import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -16,14 +22,20 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
+
+import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
+import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 
 @RequiredArgsConstructor
 public class UpdateThread extends AbstractThread {
 
     public static final String threadType = "update";
     public static final String REFRESH = "refresh";
+
+    private final ColonyRepository colonyRepository;
 
     public Duration refresh;
 
@@ -43,22 +55,47 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected String defaultPause() {
-        return "10S";
+        return "1S";
     }
 
     @Override
     protected void onStep() {
         refresh = map.getDuration(REFRESH, new Duration("12M"));
         boolean navigatorExpired = isNavigatorExpired();
-        log(LocalDateTime.now() + " update check: navigatorExpired="+navigatorExpired+" refresh="+ refresh);
+        List<FleetMovement> pulled = Navigator.getInstance().pollExpired();
+        pulled.forEach(fleetMovement -> {
+            log(LocalDateTime.now() + " update after fleetMovement: "+fleetMovement);
+        });
+        updateColonies(pulled);
         if(navigatorExpired) {
+
             updateState();
             log(LocalDateTime.now() + " state updated");
         }
 
+
         events = navigator.getEventFleetList();
         if (events == null) return;
         markSpecialFleets();
+    }
+
+    private void updateColonies(List<FleetMovement> movements) {
+        movements.stream()
+                .filter(FleetMovement::haveImpactOnColony)
+                .map(movement -> {
+                    return  THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom();
+//                    ColonyEntity colony = ColonyDAO.getInstance().find(toUpdate);
+//                    ColonyEntity colony = colonyRepository.byPlanet(toUpdate);
+//
+//                    if(colony != null) {
+//                        AbstractCommand abstractCommand = new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName());
+//                        core.push(abstractCommand);
+//                    }
+                })
+                .collect(Collectors.toSet())
+                .stream().map(colonyRepository::byPlanet)
+                .filter(Objects::nonNull)
+                .forEach(colony -> core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
     }
 
     private boolean isNavigatorExpired() {

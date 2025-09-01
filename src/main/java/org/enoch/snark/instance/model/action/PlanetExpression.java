@@ -74,7 +74,7 @@ public class PlanetExpression {
 
 
             if(action.contains(FIND)) {
-                return CustomFinder.find(action, colony);
+                return CustomFinder.find(action);
             } else if(action.contains(NEXT)) {
                 ColonyEntity next = TripFinder.next(colony);
                 return next!=null ? singletonList(next.toPlanet()) : null;

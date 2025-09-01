@@ -3,12 +3,7 @@ package org.enoch.snark.instance.model.uc;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.SendFleetPromiseCommand;
-import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
-import org.enoch.snark.instance.model.action.FleetBuilder;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.to.Resources;
-
-import static org.enoch.snark.instance.model.uc.ResourceUC.isNothingOrNull;
 
 public class FleetUC {
 

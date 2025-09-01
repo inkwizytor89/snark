@@ -36,9 +36,13 @@ public class CommandDeque {
     }
 
     private boolean noBlockingHashInQueue(String hash) {
-        return hash == null || peek().stream()
-                .filter(command -> command.hash() != null)
+        if(hash == null) return true;
+        List<AbstractCommand> commandsToCheck = peek();
+        if(actualProcessedCommand != null ) commandsToCheck.add(actualProcessedCommand);
+
+        return commandsToCheck.stream()
                 .map(AbstractCommand::hash)
+                .filter(Objects::nonNull)
                 .noneMatch(s -> s.equals(hash));
     }
 
@@ -78,7 +82,9 @@ public class CommandDeque {
         for (QueueRunType type : runTypes) {
             Deque<AbstractCommand> deque = actionsMap.get(type);
             if (canPoll(deque)) {
-                return deque.poll();
+                AbstractCommand polled = deque.poll();
+                actualProcessedCommand = polled;
+                return polled;
             }
         }
 
