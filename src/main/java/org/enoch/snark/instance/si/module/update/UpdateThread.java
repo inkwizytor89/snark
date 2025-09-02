@@ -61,18 +61,16 @@ public class UpdateThread extends AbstractThread {
     @Override
     protected void onStep() {
         refresh = map.getDuration(REFRESH, new Duration("12M"));
-        boolean navigatorExpired = isNavigatorExpired();
         List<FleetMovement> pulled = Navigator.getInstance().pollExpired();
         pulled.forEach(fleetMovement -> {
             log(LocalDateTime.now() + " update after fleetMovement: "+fleetMovement);
         });
         updateColonies(pulled);
-        if(navigatorExpired) {
 
+        if(isNavigatorExpired()) {
             updateState();
             log(LocalDateTime.now() + " state updated");
         }
-
 
         events = navigator.getEventFleetList();
         if (events == null) return;
@@ -82,16 +80,7 @@ public class UpdateThread extends AbstractThread {
     private void updateColonies(List<FleetMovement> movements) {
         movements.stream()
                 .filter(FleetMovement::haveImpactOnColony)
-                .map(movement -> {
-                    return  THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom();
-//                    ColonyEntity colony = ColonyDAO.getInstance().find(toUpdate);
-//                    ColonyEntity colony = colonyRepository.byPlanet(toUpdate);
-//
-//                    if(colony != null) {
-//                        AbstractCommand abstractCommand = new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName());
-//                        core.push(abstractCommand);
-//                    }
-                })
+                .map(movement -> THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom())
                 .collect(Collectors.toSet())
                 .stream().map(colonyRepository::byPlanet)
                 .filter(Objects::nonNull)

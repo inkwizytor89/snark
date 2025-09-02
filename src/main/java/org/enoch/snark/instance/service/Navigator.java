@@ -71,22 +71,6 @@ public class Navigator {
         return expeditionMax - expeditionCount;
     }
 
-//    public void start() {
-//        Runnable task = () -> {
-//            while(true) try {
-//                SleepUtil.sleep();
-//                synchronized (movementsLock) {
-//                    List<FleetMovement> pulled = pollExpired();
-////                    pulled.forEach(System.err::println);
-//                    updateColonies(pulled);
-//                }
-//            } catch (Throwable e) {
-//                throw new IllegalStateException(e);
-//            }
-//        };
-//        new Thread(task).start();
-//    }
-
     public List<FleetMovement> pollExpired() {
         LocalDateTime relativeNow = LocalDateTime.now().minusSeconds(TIME_DELAY_IN_SECONDS);
         List<FleetMovement> expiredMovements = movements.stream()
@@ -95,18 +79,6 @@ public class Navigator {
         expiredMovements.forEach(movements::remove);
         return expiredMovements;
     }
-
-//    private void updateColonies(List<FleetMovement> movements) {
-//        movements.stream()
-//                .filter(FleetMovement::haveImpactOnColony)
-//                .forEach(movement -> {
-//            Planet toUpdate = THERE.equals(movement.getDirection()) ? movement.getTo() : movement.getFrom();
-//            ColonyEntity colony = ColonyDAO.getInstance().find(toUpdate);
-//            if(colony != null) {
-//                new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()).push();
-//            }
-//        });
-//    }
 
     public boolean isExpiredAfter(Duration duration) {
         return lastUpdate.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
@@ -120,31 +92,6 @@ public class Navigator {
         this.eventFleetList = eventFleetList;
         this.lastUpdate = LocalDateTime.now();
         eventFleetList.forEach(this::add);
-        System.err.println("--- eventFleetList "+ eventFleetList.size());
-        this.eventFleetList.forEach(System.err::println);
-        System.err.println("--- movements ");
-        movements.forEach(System.err::println);
-        List<FleetMovement> pollExpired = pollExpired();
-//        removeAllTemporaryMovements();
-        movements.addAll(pollExpired);
-        System.err.println("--- movements ");
-        movements.forEach(System.err::println);
-        System.err.println("--- end");
-    }
-
-    private void removeAllTemporaryMovements() {
-        LocalDateTime relativeNow = LocalDateTime.now().minusSeconds(TIME_DELAY_IN_SECONDS);
-        System.err.println("--- remove temporal ");
-        movements.stream()
-                .filter(FleetMovement::isTemporary)
-//                .filter(movement -> !relativeNow.isAfter(movement.getArrivalTime()))
-                        .forEach(System.err::println);
-
-            movements.stream()
-                    .filter(FleetMovement::isTemporary)
-//                    .filter(movement -> !relativeNow.isAfter(movement.getArrivalTime()))
-                    .collect(Collectors.toSet())
-                    .forEach(movements::remove);
     }
 
     @Deprecated
@@ -165,7 +112,6 @@ public class Navigator {
     }
 
     public void add(FleetEntity fleet) {
-        System.err.println("Add to Navigator "+fleet);
         Planet sourcePlanet = fleet.source.toPlanet();
         Planet targetPlanet = fleet.getTarget();
         Long shipsCount = fleet.getShips().count();
