@@ -1,10 +1,8 @@
 package org.enoch.snark.db.repository;
 
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.service.PlanetCache;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,8 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.model.action.PlanetExpression.MOON;
-import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
+import static org.enoch.snark.instance.service.PlanetService.*;
 
 @Repository
 public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
@@ -25,9 +22,10 @@ public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
     default List<ColonyEntity> findByCode(String code) {
         String lowerCode = code.toLowerCase();
         List<ColonyEntity> colonies;
-        if(lowerCode.contains(MOON)) return moons();
-        else if(lowerCode.contains(PLANET)) return planets();
-        else if(lowerCode.equals(StringUtils.EMPTY)) return allPositions();
+        if(lowerCode.equals(ALL)) return findAll();
+        else if(lowerCode.contains(MOONS)) return moons();
+        else if(lowerCode.contains(PLANETS)) return planets();
+        else if(lowerCode.equals(EACH_POSITION)) return allPositions();
         else return coloniesList(lowerCode);
     }
 

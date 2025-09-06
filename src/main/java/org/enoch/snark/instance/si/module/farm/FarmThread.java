@@ -48,8 +48,8 @@ public class FarmThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return threadPause;
+    protected String defaultPause() {
+        return threadPause+"S";
     }
 
     @Override

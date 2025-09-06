@@ -65,6 +65,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String CONDITION_RESOURCES = "condition_resources";
     public static final String CONDITION_SHIPS = "condition_ships";
     public static final String CONDITION_BLOCKING_MISSIONS = "condition_blocking_missions";
+    public static final String SHIPS = "ships";
     public static final String SHIPS_WAVE = "ships_wave";
     public static final String LEAVE_SHIPS_WAVE = "leave_ships_wave";
     public static final String MISSION = "mission";
@@ -251,13 +252,28 @@ public class ThreadMap extends HashMap<String, String> {
         return moduleName + "."+this.get(NAME);
     }
 
+    public String getSourcesCode() {
+        return getSourcesCode(StringUtils.EMPTY);
+    }
+
+    public String getSourcesCode(String defaultValue) {
+        return getConfig(SOURCE, defaultValue);
+    }
+
+    @Deprecated
     public List<ColonyEntity> getSources() {
         return ColonyDAO.getInstance().getColonies(getNearestConfig(SOURCE, StringUtils.EMPTY));
     }
 
+    @Deprecated
     public List<ColonyEntity> getColonies(String key, String defaultValue) {
         return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
     }
+
+    public ShipsMap getShips(ShipsMap defaultValue) {
+        return getShips(SHIPS, defaultValue);
+    }
+
     public ShipsMap getShips(String code, ShipsMap defaultValue) {
         String ships = getConfig(code, null);
         if(StringUtils.isEmpty(ships)) return defaultValue;

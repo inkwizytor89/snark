@@ -26,7 +26,7 @@ public class FleetDispatcher {
             index++;
             for (ColonyEntity colony : colonyRepository.findByCode(fleetPlan.getSource())) {
                 FleetPlan sourcesdFleetPlan = fleetPlan.toBuilder().source(colony.toString()).build();
-                List<PlanetData> targets = planetService.fromFleetPlan(sourcesdFleetPlan);
+                List<PlanetData> targets = planetService.fromTargetFleetPlan(sourcesdFleetPlan);
 //                List<Planet> targets = Planet.fromString(fleetPlan.getTarget());
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
@@ -48,6 +48,7 @@ public class FleetDispatcher {
     }
 
     private static ShipsMap calculateIndexedShipWave(List<ShipsMap> shipsWave, int index) {
+        if(shipsWave == null) return ShipsMap.NO_SHIPS;
         int size = shipsWave.size();
         if(size > 1) throw new NotImplementedException("ShipsWave more than 1 not implemented already");
 

@@ -47,8 +47,8 @@ public class BuildThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return SHORT_PAUSE; //maybe should wait number of colonies *10 or min level of colonies
+    protected String defaultPause() {
+        return SHORT_PAUSE+"S";
     }
 
     @Override

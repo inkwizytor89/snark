@@ -9,20 +9,17 @@ import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
-import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.action.processor.CommandProcessor;
 import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
-import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -30,8 +27,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -57,11 +52,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private int expeditionMax = 0;
 
     private AbstractCommand actualProcessedCommand = null;
-
-
-//    public Consumer(ThreadMap map) {
-//        super(map);
-//    }
 
     @Override
     protected boolean shouldWaitForDeque() {
@@ -126,7 +116,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         commandDeque.push(new LoadColoniesCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
-        colonyRepository.findByCode(map.getNearestConfig(ThreadMap.SOURCE, StringUtils.EMPTY))
+        getSources(StringUtils.EMPTY)
                 .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
                         .sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);

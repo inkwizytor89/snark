@@ -17,6 +17,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.enoch.snark.instance.si.module.ThreadMap.ARRAY_SEPARATOR;
 
+@Deprecated
 public class PlanetExpression {
 
     public static final String PLANET = "planet";

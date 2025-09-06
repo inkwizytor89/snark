@@ -1,5 +1,6 @@
 package org.enoch.snark.action.processor;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
@@ -18,6 +19,7 @@ import org.enoch.snark.instance.model.action.condition.ResourceInSourceCondition
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
+import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
@@ -65,7 +67,6 @@ public class FleetSendProcessor {
         fleet.start = LocalDateTime.now();
         fleet.visited = gir.parseFleetVisited();
         fleet.back = gir.parseFleetBack();
-
 
         ExecutionIssue executionIssue = gir.sendFleet(fleet);
         if(NO_ISSUE.equals(executionIssue)) {
@@ -126,7 +127,7 @@ public class FleetSendProcessor {
         List<AbstractCondition> conditions = new ArrayList<>(command.getConditions());
         conditions.add(new FleetSlotCondition(1));
         conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
-        conditions.add(new ResourceInSourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
+        if(!ResourceUC.isNothingOrNull(command.getResources())) conditions.add(new ResourceInSourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
 
         AbstractCondition wontFit = conditionChecker.check(conditions);
         if(wontFit != null) throw new RuntimeException(wontFit.toString());
@@ -142,6 +143,7 @@ public class FleetSendProcessor {
         }
     }
 
+    @Transactional
     private void reloadColony(GI gi, SendCommand command) {
         SleepUtil.sleep();
         ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());

@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module;
 
 import jakarta.annotation.PostConstruct;
 import lombok.*;
+import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
@@ -10,10 +11,20 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.enoch.snark.action.command.status.ExecutionStatus.IN_PROGRESS;
+import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
@@ -27,6 +38,8 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected final Core core;
     @Autowired
     protected final ColonyRepository colonyRepository;
+    @Autowired
+    protected final PlanetService planetService;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
     protected  CacheEntryDAO cacheEntryDAO;
@@ -41,6 +54,8 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected Duration pause = new Duration("1M");
     private boolean isLive = true;
     protected Boolean debug;
+
+    protected List<AbstractCommand> commands = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -79,10 +94,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected String getThreadType() {return "";}
 
-    @Deprecated // use defaultPause()
-    protected int getPauseInSeconds() {return -1;}
-
-    protected String defaultPause() {return null;}
+    protected String defaultPause() {return "1S";}
 
     protected void onStart() {
         try {
@@ -137,9 +149,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     private void updatePause() {
-        String defaultPause = defaultPause();
-        if(defaultPause == null) defaultPause = getPauseInSeconds()+"S";
-        pause.update(map.getConfig(ThreadMap.PAUSE, defaultPause));
+        pause.update(map.getConfig(ThreadMap.PAUSE, defaultPause()));
     }
 
     public void updateMap(ThreadMap map) {
@@ -166,4 +176,28 @@ public abstract class AbstractThread extends ExecutorImpl {
     public ThreadMap map() {
         return map;
     }
+
+    protected void pushCommand(AbstractCommand command) {
+        pushCommands(Collections.singletonList(command));
+    }
+
+    protected void pushCommands(List<AbstractCommand> commands) {
+        if(commands != null) this.commands = commands;
+        else this.commands = new ArrayList<>();
+        this.commands.forEach(command -> core.push(command));
+    }
+
+    protected boolean waitingForExecution() {
+        if(commands.isEmpty()) return false;
+        return commands.stream()
+                .anyMatch(command -> NEW.equals(command.getStatus().getStatus()) ||
+                        IN_PROGRESS.equals(command.getStatus().getStatus()));
+    }
+
+    protected List<ColonyEntity> getSources(String defaultValue) {
+        String sourcesCode = map().getSourcesCode(defaultValue);
+        List<PlanetData> planetData = planetService.fromExpression(sourcesCode);
+        return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
+    }
+
 }

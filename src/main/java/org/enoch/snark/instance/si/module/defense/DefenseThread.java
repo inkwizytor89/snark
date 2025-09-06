@@ -53,8 +53,8 @@ public class DefenseThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return UPDATE_TIME_IN_SECONDS;
+    protected String defaultPause() {
+        return UPDATE_TIME_IN_SECONDS+"S";
     }
 
     @Override

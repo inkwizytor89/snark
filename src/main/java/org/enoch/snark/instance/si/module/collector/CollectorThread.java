@@ -38,8 +38,8 @@ public class CollectorThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return 60;
+    protected String defaultPause() {
+        return "60S";
     }
 
     @Override

@@ -2,8 +2,8 @@ package org.enoch.snark.instance.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.action.find.CustomFinder;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.to.*;
@@ -12,14 +12,21 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")
 public class PlanetService {
+
+
+    public static final String PLANETS = "planets";
+    public static final String MOONS = "moons";
+    public static final String ALL = "all";
+    public static final String EACH_POSITION = EMPTY;
 
     public static final String SWAP = "swap";
     public static final String NEXT = "next";
@@ -39,8 +46,9 @@ public class PlanetService {
     public static final int PLANET_INDEX = 1;
 
     private final CacheEntryRepository cacheEntryRepository;
+    private final ColonyRepository colonyRepository;
 
-    public List<PlanetData> fromFleetPlan(FleetPlan fleetPlan) {
+    public List<PlanetData> fromTargetFleetPlan(FleetPlan fleetPlan) {
         return fromExpression(fleetPlan.getTarget(), FleetContext.fromFleetPlan(fleetPlan));
     }
 
@@ -63,24 +71,29 @@ public class PlanetService {
         input = input.toLowerCase().trim();
         PlanetTerm planetTerm = new PlanetTerm(input, context);
 
-            if(planetTerm.getAction() == null) {
-                return singletonList(planetTerm.getPlanetData());
-            } else if(planetTerm.getAction().contains(FIND)) {
-                return CustomFinder.find(planetTerm.getAction()).stream()
-                        .map(PlanetData::new).toList();
-            } else if(planetTerm.getAction().contains(NEXT)) {
-                return singletonList(TripFinder.next(planetTerm));
-            } else if(planetTerm.getAction().contains(PREV)) {
-                return singletonList(TripFinder.prev(planetTerm));
-            } else if(planetTerm.getAction().contains(SWAP)) {
-                return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().swapType()));
-            } else if(planetTerm.getAction().contains(FARM)) {
-                throw new NotImplementedException(FARM + " expression not yet implemented");
+
+        if(planetTerm.getAction() == null) {
+            return singletonList(planetTerm.getPlanetData());
+        } else if(List.of(ALL, MOONS, PLANETS, EACH_POSITION).contains(planetTerm.getAction())) {
+            return colonyRepository.findByCode(planetTerm.getAction()).stream()
+                    .map(PlanetData::new)
+                    .collect(Collectors.toList());
+        } else if(planetTerm.getAction().contains(FIND)) {
+            return CustomFinder.find(planetTerm.getAction()).stream()
+                    .map(PlanetData::new).toList();
+        } else if(planetTerm.getAction().contains(NEXT)) {
+            return singletonList(TripFinder.next(planetTerm));
+        } else if(planetTerm.getAction().contains(PREV)) {
+            return singletonList(TripFinder.prev(planetTerm));
+        } else if(planetTerm.getAction().contains(SWAP)) {
+            return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().swapType()));
+        } else if(planetTerm.getAction().contains(FARM)) {
+            throw new NotImplementedException(FARM + " expression not yet implemented");
 //                return FarmFinder.find(colony);
-            } else {
-                String value = cacheEntryRepository.getValue(planetTerm.getAction());
-                if(value != null) return fromExpression(value);
-                throw new IllegalStateException(planetTerm+" can not be interpreted as expression term");
-            }
+        } else {
+            String value = cacheEntryRepository.getValue(planetTerm.getAction());
+            if(value != null) return fromExpression(value);
+            throw new IllegalStateException(planetTerm+" can not be interpreted as expression term");
+        }
     }
 }

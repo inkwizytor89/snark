@@ -44,10 +44,9 @@ public class FleetThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return 1;
+    protected String defaultPause() {
+        return "1S";
     }
-
 
     @Override
     protected void onStart() {

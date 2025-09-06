@@ -25,8 +25,8 @@ public class HuntingThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return UPDATE_TIME_IN_SECONDS*10;
+    protected String defaultPause() {
+        return UPDATE_TIME_IN_SECONDS*10 + "S";
     }
 
     @Override

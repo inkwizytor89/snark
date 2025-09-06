@@ -20,8 +20,8 @@ public class EventThread extends AbstractThread {
     }
 
     @Override
-    protected int getPauseInSeconds() {
-        return 4;
+    protected String defaultPause() {
+        return "4S";
     }
 
     @Override

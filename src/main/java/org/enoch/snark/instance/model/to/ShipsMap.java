@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.instance.model.technology.Ship.transporterLarge;
+import static org.enoch.snark.instance.model.technology.Ship.transporterSmall;
 import static org.enoch.snark.instance.model.types.Expression.ALL;
 import static org.enoch.snark.instance.model.types.Expression.NONE;
 
@@ -78,6 +80,14 @@ public class ShipsMap extends HashMap<Ship, Long> {
 
     public Long count() {
         return values().stream().mapToLong(value -> value).sum();
+    }
+
+    public Long shipCount(Ship ship) {
+        return containsKey(ship) ? get(ship) : 0;
+    }
+
+    public Long getTransportUnitCount() {
+        return shipCount(transporterSmall) + 5 * shipCount(transporterLarge);
     }
 
     @Override
