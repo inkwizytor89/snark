@@ -14,6 +14,7 @@ import org.enoch.snark.instance.si.module.building.BuildThread;
 import org.enoch.snark.instance.si.module.collector.CollectorThread;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.defense.DefenseThread;
+import org.enoch.snark.instance.si.module.define.DefineThread;
 import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
 import org.enoch.snark.instance.si.module.farm.FarmThread;
 import org.enoch.snark.instance.si.module.fleet.FleetThread;
@@ -104,6 +105,8 @@ public class ThreadMap extends HashMap<String, String> {
             return ConsumerThread.class;
         } else if (name.contains(UpdateThread.threadType)) {
             return UpdateThread.class;
+        } else if (name.contains(DefineThread.threadType)) {
+            return DefineThread.class;
         } else if (name.contains(DefenseThread.threadType)) {
             return DefenseThread.class;
         } else if (name.contains(FleetSaveThread.threadType)) {
