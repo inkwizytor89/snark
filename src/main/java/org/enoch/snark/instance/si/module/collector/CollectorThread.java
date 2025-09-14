@@ -2,7 +2,6 @@ package org.enoch.snark.instance.si.module.collector;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -15,7 +14,6 @@ import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,16 +61,17 @@ public class CollectorThread extends AbstractThread {
             System.err.println("Error: CollectorThread can not find destination colony");
             return;
         }
-        FleetPromise promise = buildCollectingFleetEntity(destination);
+        throw new NotImplementedException("Not yet implemented!");
+//        FleetPromise promise = buildCollectingFleetEntity(destination);
 
 //        Resources resources = new Resources();
 //        resources.metal = promise.source.metal;
 //        resources.crystal = promise.source.crystal;
 //        resources.deuterium = promise.source.deuterium < 10000000L? 0: promise.source.deuterium;
 
-        SendFleetPromiseCommand collecting = new SendFleetPromiseCommand(promise);
-        collecting.hash(threadType);
-        collecting.push();
+//        SendFleetPromiseCommand collecting = new SendFleetPromiseCommand(promise);
+//        collecting.hash(threadType);
+//        collecting.push();
     }
 
     private boolean notEnoughReadyPlanets() {

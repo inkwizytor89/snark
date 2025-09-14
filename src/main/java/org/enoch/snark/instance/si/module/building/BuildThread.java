@@ -1,11 +1,12 @@
 package org.enoch.snark.instance.si.module.building;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.FleetSendCommand;
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.instance.model.action.PlanetExpression;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.TechnologyService;
@@ -68,7 +69,7 @@ public class BuildThread extends AbstractThread {
                continue;
             }
 
-            SendFleetPromiseCommand pushedCommand = null;
+            SendCommand pushedCommand = null;
             if (map.getConfigBoolean(SWAP_TRANSPORT, true))
                 pushedCommand = transportNearResourcesAndBuild(colony, requirements);
             if(pushedCommand != null) log("Move "+pushedCommand.hash()+" missing resource and push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
@@ -80,13 +81,13 @@ public class BuildThread extends AbstractThread {
         return technologyService.isBlocked(colony, buildRequest.technology);
     }
 
-    private SendFleetPromiseCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
+    private SendCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
         ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
         if(swapColony == null ) return null;
         Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
         Resources leaveSwap = map.getNearestLeaveResources(swapColony.type, nothing);
-        SendFleetPromiseCommand command = transportFleet(swapColony, colony, missing, leaveSwap);
+        FleetSendCommand command = transportFleet(swapColony, colony, missing, leaveSwap);
         if(command != null) {
             command.setNext(new BuildCommand(colony, requirements),DELAY_TO_FLEET_THERE);
             command.push(DELAY_TO_FLEET_BACK);

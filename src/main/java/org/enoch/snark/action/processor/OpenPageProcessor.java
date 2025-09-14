@@ -5,10 +5,8 @@ import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Component
@@ -19,7 +17,6 @@ public class OpenPageProcessor {
 
     public boolean execute(GI gi, OpenPageCommand command) {
         ColonyEntity colonyEntity = gi.url().openComponent(command.component, command.colony);
-        System.err.println(command+" "+colonyEntity.getShipsMap());
         colonyRepository.save(colonyEntity);
         return true;
     }

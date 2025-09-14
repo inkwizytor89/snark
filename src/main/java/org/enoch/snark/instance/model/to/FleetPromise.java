@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
 @Data
+@Deprecated
 public class FleetPromise {
     private ColonyEntity source;
     private String target;

@@ -2,7 +2,7 @@ package org.enoch.snark.instance.si;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.AbstractCommand;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.instance.service.Navigator;
 
@@ -55,7 +55,7 @@ public class CommandDeque {
         if(command.isFollowingAction())
             throw new NotImplementedException("Implementation for send fleet and action is not implemented");
 
-        if(command instanceof SendFleetPromiseCommand && command.from != null ) {
+        if(command instanceof SendCommand && command.from != null ) {
             if (!noBlockingHashInDb(command.hash(), command.from)) return;
         }
 
@@ -97,7 +97,7 @@ public class CommandDeque {
 
     private boolean canPoll(Deque<AbstractCommand> deque) {
         boolean isFleetFreeSlot = Navigator.isFleetFreeSlot();
-        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendFleetPromiseCommand));
+        return !deque.isEmpty() && (isFleetFreeSlot || !(deque.peekFirst() instanceof SendCommand));
     }
 
     public void release() {

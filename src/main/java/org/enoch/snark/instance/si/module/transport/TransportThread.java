@@ -2,22 +2,14 @@ package org.enoch.snark.instance.si.module.transport;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
-import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.FleetPromise;
-import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.TRANSPORT;
-import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 
 @RequiredArgsConstructor

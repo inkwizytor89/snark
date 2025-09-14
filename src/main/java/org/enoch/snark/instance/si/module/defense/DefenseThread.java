@@ -6,7 +6,6 @@ import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.RecallCommand;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.action.command.SendMessageToPlayerCommand;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
@@ -92,33 +91,33 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void sendFleetEscape(Planet sourcePlanet) {
-        Duration recall = map.getDuration(RECALL, null);
-        if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
-            SendFleetPromiseCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
-            if(sendFleetCommand == null) return;
-            if(recall != null) {
-                FleetPromise promise = new FleetPromise();
-                promise.setMission(sendFleetCommand.promise().getMission());
-                promise.setSource(sendFleetCommand.promise().getSource());
-                promise.setTarget(sendFleetCommand.promise().getTarget());
-
-                sendFleetCommand.setNext(new RecallCommand(promise), recall.getSeconds());
-            }
-            sendFleetCommand.push();
-            return;
-        }
-        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
-        SendFleetPromiseCommand sendFleetPromiseCommand = null;
-        if (sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0) {
-            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnSpy(sourceEntity));
-        } else {
-            // zle powinien leciec na agresora i zawrócić
-            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnHold(sourceEntity, Planet.parse("p[1:1:8]")));
-        }
-        if(recall != null) {
-            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recall.getValue().getSeconds());
-        }
-        sendFleetPromiseCommand.queue(CRITICAL).push();
+//        Duration recall = map.getDuration(RECALL, null);
+//        if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
+//            SendFleetPromiseCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
+//            if(sendFleetCommand == null) return;
+//            if(recall != null) {
+//                FleetPromise promise = new FleetPromise();
+//                promise.setMission(sendFleetCommand.promise().getMission());
+//                promise.setSource(sendFleetCommand.promise().getSource());
+//                promise.setTarget(sendFleetCommand.promise().getTarget());
+//
+//                sendFleetCommand.setNext(new RecallCommand(promise), recall.getSeconds());
+//            }
+//            sendFleetCommand.push();
+//            return;
+//        }
+//        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
+//        SendFleetPromiseCommand sendFleetPromiseCommand = null;
+//        if (sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0) {
+//            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnSpy(sourceEntity));
+//        } else {
+//            // zle powinien leciec na agresora i zawrócić
+//            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnHold(sourceEntity, Planet.parse("p[1:1:8]")));
+//        }
+//        if(recall != null) {
+//            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recall.getValue().getSeconds());
+//        }
+//        sendFleetPromiseCommand.queue(CRITICAL).push();
     }
 
     private FleetPromise sendOnHold(ColonyEntity sourceEntity, Planet target) {
@@ -143,29 +142,29 @@ public class DefenseThread extends AbstractThread {
                 .buildOne();
     }
 
-    private SendFleetPromiseCommand sendToAnotherMoon(Planet sourcePlanet) {
-        System.err.println("Escape from planet "+ sourcePlanet);
-        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
-        System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
-        ShipsMap shipsMap = sourceEntity.getShipsMap();
-        if(shipsMap.isEmpty()) return null;
-
-        FleetPromise promise = new FleetPromise();
-        promise.setSource(sourceEntity);
-        promise.setTarget(chooseDestination(sourcePlanet).toPlanet());
-        promise.setMission(STATIONED);
-        promise.setShipsMap(shipsMap);
-        promise.setResources(everything);
-        promise.setSpeed(10L);
-
-        SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
-        command.hash(threadType +sourceEntity);
-        command.promise().setResources(everything);
-        command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
-        command.setRunType(CRITICAL);
-
-        return command;
-    }
+//    private SendFleetPromiseCommand sendToAnotherMoon(Planet sourcePlanet) {
+//        System.err.println("Escape from planet "+ sourcePlanet);
+//        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
+//        System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
+//        ShipsMap shipsMap = sourceEntity.getShipsMap();
+//        if(shipsMap.isEmpty()) return null;
+//
+//        FleetPromise promise = new FleetPromise();
+//        promise.setSource(sourceEntity);
+//        promise.setTarget(chooseDestination(sourcePlanet).toPlanet());
+//        promise.setMission(STATIONED);
+//        promise.setShipsMap(shipsMap);
+//        promise.setResources(everything);
+//        promise.setSpeed(10L);
+//
+//        SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
+//        command.hash(threadType +sourceEntity);
+//        command.promise().setResources(everything);
+//        command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
+//        command.setRunType(CRITICAL);
+//
+//        return command;
+//    }
 
     private ColonyEntity chooseDestination(Planet source) {
         List<ColonyEntity> destinationList = ColonyDAO.getInstance().fetchAll().stream()

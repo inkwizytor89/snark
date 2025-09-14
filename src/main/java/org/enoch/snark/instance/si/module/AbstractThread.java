@@ -63,35 +63,6 @@ public abstract class AbstractThread extends ExecutorImpl {
         timeScheduler = new TimeScheduler(OFF);
     }
 
-//    public static AbstractThread create(ThreadMap map) {
-//        String name = map.name();
-//        if(name.contains(Consumer.threadType)) return new Consumer(map);
-//        else if(name.contains(UpdateThread.threadType)) return new UpdateThread(map);
-//        else if(name.contains(DefenseThread.threadType)) return new DefenseThread(map);
-//        else if(name.contains(FleetSaveThread.threadType)) return new FleetSaveThread(map);
-//        else if(name.contains(ExpeditionThread.threadType)) return new ExpeditionThread(map);
-//        else if(name.contains(BuildingThread.threadType)) return new BuildingThread(map);
-//        else if(name.contains(SpaceThread.threadType)) return new SpaceThread(map);
-//        else if(name.contains(ScanThread.threadType)) return new ScanThread(map);
-//        else if(name.contains(FarmThread.threadType)) return new FarmThread(map);
-//        else if(name.contains(CollectorThread.threadType)) return new CollectorThread(map);
-//        else if(name.contains(TransportThread.threadType)) return new TransportThread(map);
-//        else if(name.contains(HuntingThread.threadType)) return new HuntingThread(map);
-//        else return new FleetThread(map);
-//    }
-
-
-//    public AbstractThread(ThreadMap map) {
-//        moduleTime = new TimeScheduler(OFF);
-//        threadTime = new TimeScheduler(OFF);
-//        updateMap(map);
-//        instance = Instance.getInstance();
-////        consumer = Consumer.getInstance();
-//        fleetDAO = FleetDAO.getInstance();
-//        targetDAO = TargetDAO.getInstance();
-//        cacheEntryDAO = CacheEntryDAO.getInstance();
-//    }
-
     protected String getThreadType() {return "";}
 
     protected String defaultPause() {return "1S";}

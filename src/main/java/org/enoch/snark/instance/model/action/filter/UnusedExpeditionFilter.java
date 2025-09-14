@@ -1,9 +1,9 @@
 package org.enoch.snark.instance.model.action.filter;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ import java.util.*;
 public class UnusedExpeditionFilter extends AbstractFilter {
 
     @Override
-    public List<SendFleetPromiseCommand> filter(List<SendFleetPromiseCommand> fleets) {
+    public List<SendCommand> filter(List<SendCommand> fleets) {
         throw new NotImplementedException("To remove in spring version");
 //        if(fleets.isEmpty()) return fleets;
 //        List<ColonyEntity> sources = fleets.stream().map(f -> f.promise().getSource()).toList();

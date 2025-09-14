@@ -88,7 +88,6 @@ public class GIUrl {
     public ColonyEntity openComponent(UrlComponent component, ColonyEntity colony, boolean debug) {
         if(colony == null) {
             colony = Core.getLastVisited();
-            System.err.println("openComponent setLastVisited="+colony);
         }
         if(colony == null)
             System.err.println("yyyyyyyyyy");

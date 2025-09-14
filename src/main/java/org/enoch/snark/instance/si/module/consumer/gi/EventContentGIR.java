@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
+import org.enoch.snark.instance.model.to.FleetPlan;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -25,7 +26,7 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         super(gi);
     }
 
-    public boolean recall(FleetPromise promise) {
+    public boolean recall(FleetPlan promise) {
         List<WebElement> toRecall = new ArrayList<>();
         try {
             List<WebElement> tableRows = activateEventTable();
@@ -51,10 +52,10 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         return true;
     }
 
-    private boolean isSimilar(EventFleet row, FleetPromise promise) {
+    private boolean isSimilar(EventFleet row, FleetPlan promise) {
         return THERE.equals(row.iconMovement) &&
                 row.mission.equals(promise.getMission()) &&
-                row.getFrom().equals(promise.getSource().toPlanet()) &&
+                row.getFrom().equals(new Planet(promise.getSource())) &&
                 row.getTo().equals(Planet.fromString(promise.getTarget()).getFirst());
     }
 

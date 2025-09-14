@@ -20,6 +20,7 @@ import static org.enoch.snark.instance.model.technology.Ship.transporterLarge;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.ShipUC.calculateShipCountForTransport;
 
+@Deprecated
 public class FleetBuilder {
 
     private List<ColonyEntity> from;

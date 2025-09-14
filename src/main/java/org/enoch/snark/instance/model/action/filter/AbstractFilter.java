@@ -1,13 +1,13 @@
 package org.enoch.snark.instance.model.action.filter;
 
-import org.enoch.snark.action.command.SendFleetPromiseCommand;
+import org.enoch.snark.action.command.SendCommand;
 
 import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractFilter {
 
-    public abstract List<SendFleetPromiseCommand> filter(List<SendFleetPromiseCommand> fleets);
+    public abstract List<SendCommand> filter(List<SendCommand> fleets);
 
     private static AbstractFilter create(String key, String value) {
         String filterTypeString = key.substring(key.indexOf("_") + 1).toUpperCase();
