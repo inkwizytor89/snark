@@ -69,56 +69,57 @@ public class FleetSendProcessor {
         fleet.back = gir.parseFleetBack();
 
         ExecutionIssue executionIssue = gir.sendFleet(fleet);
-        if(NO_ISSUE.equals(executionIssue)) {
-            command.getStatus().setSuccess();
-        } else if(TO_WEAK_PLAYER.equals(executionIssue)) {
-            TargetEntity target = targetRepository.byPlanet(command.getTarget());
-            if (target != null) {
-                PlayerEntity player = target.player;
-                player.type = TargetEntity.WEAK;
-                playerRepository.save(player);
-            }
-            else gi.url().openGalaxy(new SystemView(command.getTarget().galaxy, command.getTarget().system), null);
-            command.getStatus().setFailed(executionIssue);
-        } else if(CAN_NOT_SENT.equals(executionIssue)) {
-            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
-            System.err.println("Can not send fleet to target " + target);
-            gi.url().openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
-//            instance.removePlanet(new Planet(fleet.getCoordinate()));
-            if(fleet.code != null) fleet.code = - fleet.code;
-            clearNext(command);
-            command.getStatus().setFailed(executionIssue);
-            return true;
-        } else if(TO_WEAK_PLAYER.equals(executionIssue)) {
-            clearNext(command);
-            if(fleet.code != null) fleet.code = -fleet.code;
-            command.getStatus().setFailed(executionIssue);
-        } else {
-            command.getStatus().setFailed(executionIssue);
-        }
-
         fleetRepository.save(fleet);
         Navigator.getInstance().add(fleet);
 
-        if(SPY.equals(fleet.mission)) {
+        if (SPY.equals(fleet.mission)) {
             TargetEntity targetEntity = targetRepository.byPlanet(fleet.getTarget());
-            if(targetEntity != null) {
+            if (targetEntity != null) {
                 targetEntity.lastSpiedOn = fleet.visited;
                 targetRepository.save(targetEntity);
             }
         }
 
-        if(ATTACK.equals(fleet.mission)) {
+        if (ATTACK.equals(fleet.mission)) {
             TargetEntity targetEntity = targetRepository.byPlanet(fleet.getTarget());
-            if(targetEntity != null) {
+            if (targetEntity != null) {
                 targetEntity.lastAttacked = fleet.visited;
                 targetRepository.save(targetEntity);
             }
         }
 
         updateDelayForAction(command, DELAY_TO_FLEET_THERE, durationSeconds);
-        updateDelayForAction(command, DELAY_TO_FLEET_BACK, durationSeconds*2);
+        updateDelayForAction(command, DELAY_TO_FLEET_BACK, durationSeconds * 2);
         reloadColony(gi, command);
+
+        if (NO_ISSUE.equals(executionIssue)) {
+            command.getStatus().setSuccess();
+        } else if (TO_WEAK_PLAYER.equals(executionIssue)) {
+            TargetEntity target = targetRepository.byPlanet(command.getTarget());
+            if (target != null) {
+                PlayerEntity player = target.player;
+                player.type = TargetEntity.WEAK;
+                playerRepository.save(player);
+            } else
+                gi.url().openGalaxy(new SystemView(command.getTarget().galaxy, command.getTarget().system), null);
+            command.getStatus().setFailed(executionIssue);
+        } else if (CAN_NOT_SENT.equals(executionIssue)) {
+            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            System.err.println("Can not send fleet to target " + target);
+            gi.url().openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+//            instance.removePlanet(new Planet(fleet.getCoordinate()));
+            if (fleet.code != null) fleet.code = -fleet.code;
+            clearNext(command);
+            command.getStatus().setFailed(executionIssue);
+            return true;
+        } else if (TO_WEAK_PLAYER.equals(executionIssue)) {
+            clearNext(command);
+            if (fleet.code != null) fleet.code = -fleet.code;
+            command.getStatus().setFailed(executionIssue);
+        } else {
+            command.getStatus().setFailed(executionIssue);
+        }
+
 
         return true;
     }
@@ -145,7 +146,7 @@ public class FleetSendProcessor {
 
     @Transactional
     private void reloadColony(GI gi, SendCommand command) {
-        SleepUtil.sleep();
+        SleepUtil.pause();
         ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());
         colonyRepository.save(colony);
     }

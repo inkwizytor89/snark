@@ -39,7 +39,7 @@ public class SleepUtil {
     public static void sleep(TimeUnit timeUnit, int i) {
         try {
             timeUnit.sleep(i);
-        } catch (InterruptedException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
@@ -47,7 +47,7 @@ public class SleepUtil {
     public static void sleep(TimeUnit timeUnit, long i) {
         try {
             timeUnit.sleep(i);
-        } catch (InterruptedException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }

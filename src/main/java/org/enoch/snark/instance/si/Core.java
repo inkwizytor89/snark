@@ -90,6 +90,8 @@ public class Core {
     }
 
     public void push(AbstractCommand command) {
+        if(commandDeque == null)
+            System.err.println("Unexpected error!!");
         commandDeque.push(command);
     }
 }

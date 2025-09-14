@@ -79,6 +79,7 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
 
         if (noFreeSlotsForExpedition()) return;
+        else  pause.update("1S");
         if (waitingForExecution()) return;
 
         ColonyEntity bestColony;
@@ -91,13 +92,13 @@ public class ExpeditionThread extends AbstractThread {
             // magic
             List<ColonyEntity> possibleColonies = possibleColonies(source);
             bestColony = specifyBestColony(possibleColonies);
-            requiredShipMap = specifyShips(bestColony, possibleColonies.size());
+            requiredShipMap = specifyShips(bestColony, possibleColonies);
             if(NO_SHIPS.equals(requiredShipMap)) {
                 throw new RuntimeException("Can not specify any expedition from "+source);
             }
         }
         pushCommand(createFleetSendCommand(bestColony, requiredShipMap));
-        pause.update("1S");
+
         //-------------------
 
 
@@ -117,24 +118,33 @@ public class ExpeditionThread extends AbstractThread {
 //        }
     }
 
-    private ShipsMap specifyShips(ColonyEntity colony, int size) {
+    private ShipsMap specifyShips(ColonyEntity colony, List<ColonyEntity> colonies) {
         int expeditionFreeSlots = Navigator.getExpeditionFreeSlots();
-        int divisor = Math.floorDiv(size + expeditionFreeSlots - 1, expeditionFreeSlots);
-        Long transportUnitCount = colony.getShipsMap().getTransportUnitCount() / divisor;
+
+        double sum = colonies.stream()
+                .mapToLong(colonyEntity -> colonyEntity.getShipsMap().getTransportUnitCount())
+                .sum();
+        long avgExpeditionTransportUnit = Math.round((double) sum / expeditionFreeSlots);
+
+//        int divisor = Math.floorDiv(size + expeditionFreeSlots - 1, expeditionFreeSlots);
+        Long colonyTransportUnitCount = colony.getShipsMap().getTransportUnitCount();
+        Long expeditionCount = (long) Math.round((double) colonyTransportUnitCount / avgExpeditionTransportUnit);// tutaj bardziej podłoga
+//        Long expeditionCount = (long) Math.ceil((double) expeditionFreeSlots / colonies.size());// tutaj bardziej podłoga srednia tez dziala
 
         ShipsMap shipsMap = new ShipsMap();
         if (colony.explorer > 0) shipsMap.put(explorer, 1L);
-        if(divisor == 1) {
+        if(expeditionCount == 1) {
             shipsMap.put(transporterSmall, colony.transporterSmall);
             shipsMap.put(transporterLarge, colony.transporterLarge);
         } else {
-            long neededLargeTransporter = transportUnitCount / 5;
+            Long singleExpeditionTransportUnit = colonyTransportUnitCount / expeditionCount;
+            long neededLargeTransporter = (long) Math.ceil((double) singleExpeditionTransportUnit / 5);
             if(colony.transporterLarge >= neededLargeTransporter) {
                 shipsMap.put(transporterLarge, neededLargeTransporter);
             } else {
                 shipsMap.put(transporterLarge, colony.transporterLarge);
-                transportUnitCount -= 5 * colony.transporterLarge;
-                shipsMap.put(transporterSmall, transportUnitCount);
+                singleExpeditionTransportUnit -= 5 * colony.transporterLarge;
+                shipsMap.put(transporterSmall, singleExpeditionTransportUnit);
             }
         }
         return shipsMap;
@@ -197,8 +207,13 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private List<ColonyEntity> possibleColonies(List<ColonyEntity> source) {
-        List<ColonyEntity> bestColonies = source.stream().filter(colony -> colony.explorer > 0).collect(Collectors.toList());
-        return bestColonies.isEmpty() ? source : bestColonies;
+        List<ColonyEntity> withExplorer = source.stream().filter(colony -> colony.explorer > 0).collect(Collectors.toList());
+        List<ColonyEntity> goodColonies = withExplorer.isEmpty() ? source : withExplorer;
+        double sum = source.stream()
+                .mapToLong(colonyEntity -> colonyEntity.getShipsMap().getTransportUnitCount())
+                .sum();
+        double limit = sum * 15 /100;
+        return goodColonies.stream().filter(colony -> colony.getShipsMap().getTransportUnitCount()>limit).toList();
     }
 
     private ColonyEntity specifyBestColony(List<ColonyEntity> source) {

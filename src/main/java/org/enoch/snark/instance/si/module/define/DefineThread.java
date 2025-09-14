@@ -21,6 +21,8 @@ public class DefineThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        //todo on start write in debug all tables and fields
+        //todo remove older als one week
         map.entrySet().stream()
                 .filter(entry -> !List.of(NAME, TYPE, PAUSE, TIME).contains(entry.getKey()))
                 .forEach(entry -> {

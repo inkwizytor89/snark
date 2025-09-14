@@ -33,6 +33,7 @@ public class Navigator {
     private static int fleetCount = 0;
     @Setter
     private static int fleetMax = 1;
+    @Getter
     @Setter
     private static int expeditionCount = 0;
     @Getter

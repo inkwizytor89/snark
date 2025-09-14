@@ -135,8 +135,10 @@ public class GIUrl {
                 Navigator.setFleetCount(Integer.parseInt(m.group(1)));
                 Navigator.setFleetMax(Integer.parseInt(m.group(2)));
 
-                Navigator.setExpeditionCount(Integer.parseInt(m.group(3)));
-                Navigator.setExpeditionMax(Integer.parseInt(m.group(4)));
+                int expeditionCount = Integer.parseInt(m.group(3));
+                int expeditionMax = Integer.parseInt(m.group(4));
+                Navigator.setExpeditionCount(expeditionCount);
+                Navigator.setExpeditionMax(expeditionMax);
             }
         } catch (Exception e) {
             System.err.println("Can not load slots, maybe temporary planet is removed reloadColonies");

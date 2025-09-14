@@ -60,7 +60,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         } catch (TimeoutException e) {
             return CAN_NOT_SENT;
         }
-        SleepUtil.sleep();
+        SleepUtil.pause();
         sendFleet.click();
 
         WebElement errorBox = getIfPresentById("errorBoxDecision");
@@ -172,7 +172,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void setSpeed(Long speed) {
         if(speed != null) {
-            SleepUtil.sleep();
+            SleepUtil.pause();
             WebElement element = wd.findElement(By.className("steps"));
             List<WebElement> steps = element.findElements(By.className("step"));
             WebElement speedElement = steps.get(Integer.parseInt(speed.toString()) / 10 - 1);
@@ -221,7 +221,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
         Actions actions = new Actions(wd);
         actions.moveToElement(continueButton).click().perform();
-        SleepUtil.sleep();
+        SleepUtil.pause();
     }
 
     public LocalTime parseDurationSecounds() {
@@ -245,7 +245,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     private LocalDateTime parseDate(String dateId) {
         String dateString = wd.findElement(By.id(dateId)).getText();
         if(dateString.contains("-")) {
-            SleepUtil.sleep();
+            SleepUtil.pause();
             dateString = wd.findElement(By.id(dateId)).getText();
         }
         return DateUtil.parseToLocalDateTime(dateString);

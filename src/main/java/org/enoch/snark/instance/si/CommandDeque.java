@@ -75,7 +75,7 @@ public class CommandDeque {
     }
 
     protected synchronized boolean isEmpty() {
-        return peek().isEmpty();
+        return peek().isEmpty() && actualProcessedCommand == null;
     }
 
     public synchronized AbstractCommand pool(){
