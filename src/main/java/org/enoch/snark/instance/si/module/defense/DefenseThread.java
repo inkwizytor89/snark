@@ -1,16 +1,13 @@
 package org.enoch.snark.instance.si.module.defense;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.action.command.RecallCommand;
-import org.enoch.snark.action.command.SendMessageToPlayerCommand;
 import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.module.consumer.gi.text.Msg;
-import org.enoch.snark.instance.model.action.FleetBuilder;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
@@ -22,10 +19,11 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.consumer.gi.text.Msg.BAZINGA_PL;
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
-import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
+import static org.enoch.snark.instance.si.module.consumer.gi.text.Msg.BAZINGA_PL;
+import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.*;
 import static org.enoch.snark.instance.si.module.defense.AlarmSoundPlayer.MISSING_WAV;
 
@@ -39,12 +37,10 @@ public class DefenseThread extends AbstractThread {
     public static final String EXAMPLE_TIME = "example_time";
     public static final String EXAMPLE_COORDINATE = "example_coordinate";
 
+    private final FleetDispatcher fleetDispatcher;
+
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
-
-//    public DefenseThread(ThreadMap map) {
-//        super(map);
-//    }
 
     @Override
     protected String getThreadType() {
@@ -53,7 +49,7 @@ public class DefenseThread extends AbstractThread {
 
     @Override
     protected String defaultPause() {
-        return UPDATE_TIME_IN_SECONDS+"S";
+        return UPDATE_TIME_IN_SECONDS + "S";
     }
 
     @Override
@@ -64,7 +60,7 @@ public class DefenseThread extends AbstractThread {
     @Override
     protected void onStep() {
         loadAggressiveFleet();
-        if(aggressorsEvents.isEmpty()) {
+        if (aggressorsEvents.isEmpty()) {
             clearCache();
             return;
         }
@@ -72,105 +68,118 @@ public class DefenseThread extends AbstractThread {
         long aggressiveActionCount = aggressorsEvents.size();
 
         List<EventFleet> nearAction = nearAction(aggressiveActionCount);
-        System.err.println("nearAction "+nearAction.size());
+        System.err.println("nearAction " + nearAction.size());
 //        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
 
         List<EventFleet> incomingAction = incomingAction(aggressiveActionCount);
-        System.err.println("incomingAction "+ incomingAction.size());
+        System.err.println("incomingAction " + incomingAction.size());
 
 
-        throw new NotImplementedException("To fix in spring version");
-//        if(!incomingAction.isEmpty() && consumer.noBlockingHashInQueue(threadType)) {
-//            incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet "+eventFleet));
-//            Set<Planet> attackedPlanets = incomingAction.stream()
-//                    .map(EventFleet::getTo)
-//                    .collect(Collectors.toSet());
-//            attackedPlanets.forEach(this::sendFleetEscape);
-//            System.err.println("Send fleet to escape");
-//        }
+        if (!incomingAction.isEmpty()) {
+            incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet " + eventFleet));
+            Set<ColonyEntity> attackedPlanets = incomingAction.stream()
+                    .map(eventFleet -> colonyRepository.byPlanet(eventFleet.getTo()))
+                    .filter(colonyEntity -> colonyEntity.getShipsMap().count() > 0)
+                    .collect(Collectors.toSet());
+
+            List<AbstractCommand> fleetToEscape = attackedPlanets.stream()
+                    .filter(colonyEntity -> !colonyEntity.getShipsMap().isEmpty())
+                    .map(colony -> {
+                        List<EventFleet> events = incomingAction.stream()
+                                .filter(eventFleet -> eventFleet.getTo().equals(colony.toPlanet())).toList();
+                        return sendFleetEscape(colony, events);
+                    })
+                    .toList();
+            noDuplicationPushCommands(fleetToEscape);
+            System.err.println("Send fleet to escape");
+        }
     }
 
-    private void sendFleetEscape(Planet sourcePlanet) {
-//        Duration recall = map.getDuration(RECALL, null);
-//        if(ColonyDAO.getInstance().fetchAll().size() > 1 ) {
-//            SendFleetPromiseCommand sendFleetCommand = sendToAnotherMoon(sourcePlanet);
-//            if(sendFleetCommand == null) return;
-//            if(recall != null) {
-//                FleetPromise promise = new FleetPromise();
-//                promise.setMission(sendFleetCommand.promise().getMission());
-//                promise.setSource(sendFleetCommand.promise().getSource());
-//                promise.setTarget(sendFleetCommand.promise().getTarget());
-//
-//                sendFleetCommand.setNext(new RecallCommand(promise), recall.getSeconds());
-//            }
-//            sendFleetCommand.push();
-//            return;
-//        }
-//        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
-//        SendFleetPromiseCommand sendFleetPromiseCommand = null;
-//        if (sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0) {
-//            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnSpy(sourceEntity));
-//        } else {
-//            // zle powinien leciec na agresora i zawrócić
-//            sendFleetPromiseCommand = new SendFleetPromiseCommand(sendOnHold(sourceEntity, Planet.parse("p[1:1:8]")));
-//        }
-//        if(recall != null) {
-//            sendFleetPromiseCommand.setNext(new RecallCommand(sendFleetPromiseCommand.promise()), recall.getValue().getSeconds());
-//        }
-//        sendFleetPromiseCommand.queue(CRITICAL).push();
+    private AbstractCommand sendFleetEscape(ColonyEntity source, List<EventFleet> eventFleets) {
+        Duration recall = map.getDuration(RECALL, null);
+        FleetSendCommand sendCommand = null;
+
+        if (isMoreColonies()) {
+            sendCommand = fleetToAnotherMoon(source);
+        } else if (isEspionageProbe(source)) {
+            sendCommand = fleetOnSpy(source);
+        } else {
+            if (recall == null) recall = new Duration("350S?50S");
+            EventFleet eventFleet = eventFleets.getFirst();
+            Planet target = new Planet(eventFleet.destCoords, eventFleet.destFleet);
+            sendCommand = sendOnAttacker(source, target);
+        }
+
+        if (recall != null) sendCommand.setNext(new RecallCommand(sendCommand), recall.getValue().getSeconds());
+
+        sendCommand.queue(CRITICAL).push();
+        return sendCommand;
     }
 
-    private FleetPromise sendOnHold(ColonyEntity sourceEntity, Planet target) {
-        return new FleetBuilder()
-                .from(sourceEntity.toString())
-                .to(target.toString())
-                .mission(STOP)
-                .ships(ShipsMap.ALL_SHIPS)
-                .resources(everything)
-                .buildOne();
+    private static boolean isEspionageProbe(ColonyEntity sourceEntity) {
+        return sourceEntity.espionageProbe != null && sourceEntity.espionageProbe > 0;
     }
 
-    private FleetPromise sendOnSpy(ColonyEntity sourceEntity) {
-        Planet target = sourceEntity.toPlanet();
+    private boolean isMoreColonies() {
+        return colonyRepository.findAll().size() > 1;
+    }
+
+    private FleetSendCommand sendOnAttacker(ColonyEntity source, Planet target) {
+        FleetSendCommand sendCommand = new FleetSendCommand();
+        sendCommand.setSource(source);
+        sendCommand.setTarget(target);
+        sendCommand.setMission(ATTACK);
+        sendCommand.setShipsMap(ALL_SHIPS);
+        sendCommand.setResources(everything);
+        sendCommand.setSpeed(10L);
+
+        sendCommand.setHash(threadType +"_"+ source);
+        sendCommand.setRunType(CRITICAL);
+
+        log("Escape from planet " + source);
+        return sendCommand;
+    }
+
+    private FleetSendCommand fleetOnSpy(ColonyEntity source) {
+        Planet target = source.toPlanet();
         target.position = 16;
-        return new FleetBuilder()
-                .from(sourceEntity.toString())
-                .to(target.toString())
-                .mission(SPY)
-                .ships(ShipsMap.ALL_SHIPS)
-                .resources(everything)
-                .buildOne();
+
+        FleetSendCommand sendCommand = new FleetSendCommand();
+        sendCommand.setSource(source);
+        sendCommand.setTarget(target);
+        sendCommand.setMission(SPY);
+        sendCommand.setShipsMap(ALL_SHIPS);
+        sendCommand.setResources(everything);
+        sendCommand.setSpeed(10L);
+
+        sendCommand.setHash(threadType +"_"+ source);
+        sendCommand.setRunType(CRITICAL);
+
+        log("Escape from planet " + source);
+        return sendCommand;
     }
 
-//    private SendFleetPromiseCommand sendToAnotherMoon(Planet sourcePlanet) {
-//        System.err.println("Escape from planet "+ sourcePlanet);
-//        ColonyEntity sourceEntity = ColonyDAO.getInstance().find(sourcePlanet);
-//        System.err.println("Escape from colony "+sourceEntity.toPlanet() + " " + sourceEntity);
-//        ShipsMap shipsMap = sourceEntity.getShipsMap();
-//        if(shipsMap.isEmpty()) return null;
-//
-//        FleetPromise promise = new FleetPromise();
-//        promise.setSource(sourceEntity);
-//        promise.setTarget(chooseDestination(sourcePlanet).toPlanet());
-//        promise.setMission(STATIONED);
-//        promise.setShipsMap(shipsMap);
-//        promise.setResources(everything);
-//        promise.setSpeed(10L);
-//
-//        SendFleetPromiseCommand command = new SendFleetPromiseCommand(promise);
-//        command.hash(threadType +sourceEntity);
-//        command.promise().setResources(everything);
-//        command.promise().setShipsMap(ShipsMap.ALL_SHIPS);
-//        command.setRunType(CRITICAL);
-//
-//        return command;
-//    }
+    private FleetSendCommand fleetToAnotherMoon(ColonyEntity source) {
+        FleetSendCommand sendCommand = new FleetSendCommand();
+        sendCommand.setSource(source);
+        sendCommand.setTarget(chooseDestination(source.toPlanet()).toPlanet());
+        sendCommand.setMission(STATIONED);
+        sendCommand.setShipsMap(ALL_SHIPS);
+        sendCommand.setResources(everything);
+        sendCommand.setSpeed(10L);
+
+        sendCommand.setHash(threadType +"_"+ source);
+        sendCommand.setRunType(CRITICAL);
+
+        log("Escape from planet " + source);
+        return sendCommand;
+    }
 
     private ColonyEntity chooseDestination(Planet source) {
-        List<ColonyEntity> destinationList = ColonyDAO.getInstance().fetchAll().stream()
+        List<ColonyEntity> destinationList = colonyRepository.findAll().stream()
                 .filter(colony -> !colony.is(ColonyType.PLANET)).collect(Collectors.toList());
-        if(destinationList.isEmpty()) {
-            destinationList = ColonyDAO.getInstance().fetchAll().stream()
+        if (destinationList.isEmpty()) {
+            destinationList = colonyRepository.findAll().stream()
                     .filter(colony -> colony.is(ColonyType.PLANET)).collect(Collectors.toList());
         }
 
@@ -184,18 +193,18 @@ public class DefenseThread extends AbstractThread {
         Long limit = map.getConfigLong(LIMIT, 3000L);
 
         aggressorsEvents = Navigator.getInstance().getEventFleetList().stream()
-        .filter(event -> (event.isHostile && event.mission.isAggressive())
+                .filter(event -> (event.isHostile && event.mission.isAggressive())
 //                || STATIONED.equals(event.mission)
-        )
-        .filter(eventFleet -> Long.parseLong(eventFleet.detailsFleet) > limit || DESTROY.equals(eventFleet.mission))
-        .collect(Collectors.toList());
+                )
+                .filter(eventFleet -> Long.parseLong(eventFleet.detailsFleet) > limit || DESTROY.equals(eventFleet.mission))
+                .collect(Collectors.toList());
 
         putExampleFromConfig(limit);
     }
 
     private void putExampleFromConfig(Long limit) {
         LocalTime exampleTime = map.getLocalTime(EXAMPLE_TIME, null);
-        if(exampleTime == null) return;
+        if (exampleTime == null) return;
 
         EventFleet exampleFleet = new EventFleet();
         exampleFleet.isHostile = true;
@@ -217,13 +226,13 @@ public class DefenseThread extends AbstractThread {
 
     private List<EventFleet> incomingAction(long aggressiveActionCount) {
         return aggressorsEvents.stream()
-                .filter(event -> LocalDateTime.now().plusMinutes(1+aggressiveActionCount).isAfter(event.arrivalTime))
+                .filter(event -> LocalDateTime.now().plusMinutes(1 + aggressiveActionCount).isAfter(event.arrivalTime))
                 .collect(Collectors.toList());
     }
 
     private List<EventFleet> nearAction(long aggressiveActionCount) {
         return aggressorsEvents.stream()
-                .filter(event -> LocalDateTime.now().plusMinutes(1+aggressiveActionCount).isBefore(event.arrivalTime))
+                .filter(event -> LocalDateTime.now().plusMinutes(1 + aggressiveActionCount).isBefore(event.arrivalTime))
                 .collect(Collectors.toList());
     }
 
@@ -245,7 +254,7 @@ public class DefenseThread extends AbstractThread {
         aggressorsAttacks = new ArrayList<>();
         aggressorsEvents = new ArrayList<>();
         AlarmSoundPlayer.stop();
-        return ;
+        return;
     }
 
     private boolean isDestroyMoonFleet() {

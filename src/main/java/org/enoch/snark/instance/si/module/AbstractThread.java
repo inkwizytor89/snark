@@ -158,11 +158,20 @@ public abstract class AbstractThread extends ExecutorImpl {
         this.commands.forEach(command -> core.push(command));
     }
 
+    protected void noDuplicationPushCommands(List<AbstractCommand> commands) {
+        if(commands == null) return;
+        List<AbstractCommand> notExecuted = this.commands.stream()
+                .filter(AbstractCommand::notExecuted).toList();
+
+        commands.stream()
+                .filter(command -> notExecuted.stream().noneMatch(notExecutedCommand -> notExecutedCommand.getHash().equals(command.getHash())))
+                .forEach(command -> core.push(command));
+    }
+
     protected boolean waitingForExecution() {
         if(commands.isEmpty()) return false;
         return commands.stream()
-                .anyMatch(command -> NEW.equals(command.getStatus().getStatus()) ||
-                        IN_PROGRESS.equals(command.getStatus().getStatus()));
+                .anyMatch(AbstractCommand::notExecuted);
     }
 
     protected List<ColonyEntity> getSources(String defaultValue) {

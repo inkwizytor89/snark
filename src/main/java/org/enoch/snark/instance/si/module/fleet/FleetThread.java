@@ -89,7 +89,7 @@ public class FleetThread extends AbstractThread {
                     command.generateHash(map.name(), Integer.toString(index));
 
                     Duration recallDuration = map.getDuration(RECALL, null);
-                    if(recallDuration != null) command.setNext(new RecallCommand(command.getFleetPlan()), recallDuration.getSeconds());
+                    if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
                     log(command.toString());
                     core.push(command);
                 }

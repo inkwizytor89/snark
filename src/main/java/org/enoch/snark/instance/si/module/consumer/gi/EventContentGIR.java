@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
+import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.instance.model.to.FleetPlan;
@@ -26,7 +27,7 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         super(gi);
     }
 
-    public boolean recall(FleetPlan promise) {
+    public boolean recall(SendCommand promise) {
         List<WebElement> toRecall = new ArrayList<>();
         try {
             List<WebElement> tableRows = activateEventTable();
@@ -52,11 +53,11 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         return true;
     }
 
-    private boolean isSimilar(EventFleet row, FleetPlan promise) {
+    private boolean isSimilar(EventFleet row, SendCommand sendCommand) {
         return THERE.equals(row.iconMovement) &&
-                row.mission.equals(promise.getMission()) &&
-                row.getFrom().equals(new Planet(promise.getSource())) &&
-                row.getTo().equals(Planet.fromString(promise.getTarget()).getFirst());
+                row.mission.equals(sendCommand.getMission()) &&
+                row.getFrom().equals(sendCommand.getSource().toPlanet()) &&
+                row.getTo().equals(sendCommand.getTarget());
     }
 
     public List<EventFleet> readEventFleet() {

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
+import static org.enoch.snark.action.command.status.ExecutionStatus.IN_PROGRESS;
 import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
 import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 
@@ -22,7 +23,6 @@ import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 public abstract class AbstractCommand {
 
     protected final CommandStatus status;
-    protected WebDriver webDriver;
     private FollowingAction followingAction;
     public LocalDateTime from;
     private QueueRunType runType = NORMAL;
@@ -85,6 +85,10 @@ public abstract class AbstractCommand {
     }
 
     public void onInterrupt() {
+    }
+
+    public boolean notExecuted() {
+        return NEW.equals(getStatus().getStatus()) || IN_PROGRESS.equals(getStatus().getStatus());
     }
 
     public AbstractCommand hash(String hash) {

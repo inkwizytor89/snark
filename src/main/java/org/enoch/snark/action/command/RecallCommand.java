@@ -1,13 +1,12 @@
 package org.enoch.snark.action.command;
 
-import org.enoch.snark.instance.model.to.FleetPlan;
 import org.enoch.snark.instance.si.QueueRunType;
 
 public class RecallCommand extends AbstractCommand {
 
-    public FleetPlan plan;
+    public SendCommand plan;
 
-    public RecallCommand(FleetPlan plan) {
+    public RecallCommand(SendCommand plan) {
         super();
         this.plan = plan;
         setRunType(QueueRunType.MAJOR);

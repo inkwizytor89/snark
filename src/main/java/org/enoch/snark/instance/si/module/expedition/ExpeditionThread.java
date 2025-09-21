@@ -110,7 +110,7 @@ public class ExpeditionThread extends AbstractThread {
                 .source(bestColony.toString())
                 .target(expeditionTarget.toString())
                 .mission(Mission.EXPEDITION)
-                .shipsWaves(singletonList(ships))
+                .ships(ships)
                 .build();
         return fleetDispatcher.from(fleetPlan).getFirst();
     }

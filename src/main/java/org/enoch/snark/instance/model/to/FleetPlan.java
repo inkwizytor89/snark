@@ -6,6 +6,7 @@ import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -23,4 +24,11 @@ public class FleetPlan {
     private Resources leaveResources;
 
     private List<PlanetData> trip;
+
+    public static class FleetPlanBuilder {
+        public FleetPlanBuilder ships(ShipsMap shipsMap) {
+            shipsWaves = Collections.singletonList(shipsMap);
+            return this;
+        }
+    }
 }
