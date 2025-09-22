@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.defense;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -41,6 +42,8 @@ public class DefenseThread extends AbstractThread {
 
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
+    private int nearActionCont;
+    private int incomingActionCont;
 
     @Override
     protected String getThreadType() {
@@ -68,12 +71,17 @@ public class DefenseThread extends AbstractThread {
         long aggressiveActionCount = aggressorsEvents.size();
 
         List<EventFleet> nearAction = nearAction(aggressiveActionCount);
-        System.err.println("nearAction " + nearAction.size());
+        if(nearActionCont != nearAction.size()) {
+            nearActionCont = nearAction.size();
+            System.err.println("nearAction " + nearActionCont + " at "+LocalTime.now());
 //        if(!nearAction.isEmpty()) writeMessageToPlayer(nearAction);
+        }
 
         List<EventFleet> incomingAction = incomingAction(aggressiveActionCount);
-        System.err.println("incomingAction " + incomingAction.size());
-
+        if(incomingActionCont != incomingAction.size()) {
+            incomingActionCont = incomingAction.size();
+            System.err.println("incomingAction " + incomingActionCont + " at "+LocalTime.now());
+        }
 
         if (!incomingAction.isEmpty()) {
             incomingAction.forEach(eventFleet -> System.err.println("incomingAction from eventFleet " + eventFleet));
@@ -112,7 +120,7 @@ public class DefenseThread extends AbstractThread {
 
         if (recall != null) sendCommand.setNext(new RecallCommand(sendCommand), recall.getValue().getSeconds());
 
-        sendCommand.queue(CRITICAL).push();
+        sendCommand.queue(CRITICAL);
         return sendCommand;
     }
 
@@ -241,13 +249,14 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void writeMessageToPlayer(List<EventFleet> events) {
-        events.stream()
-                .filter(event -> event.isHostile && Mission.ATTACK.equals(event.mission))
-                .filter(event -> !aggressorsAttacks.contains(event.sendMail))
-                .forEach(event -> {
-                    new SendMessageToPlayerCommand(event.sendMail, Msg.get(BAZINGA_PL)).push();
-                    aggressorsAttacks.add(event.sendMail);
-                });
+        throw new NotImplementedException("To remove in spring version"); // missing push
+//        events.stream()
+//                .filter(event -> event.isHostile && Mission.ATTACK.equals(event.mission))
+//                .filter(event -> !aggressorsAttacks.contains(event.sendMail))
+//                .forEach(event -> {
+//                    new SendMessageToPlayerCommand(event.sendMail, Msg.get(BAZINGA_PL));
+//                    aggressorsAttacks.add(event.sendMail);
+//                });
     }
 
     private void clearCache() {

@@ -52,8 +52,6 @@ public class CommandDeque {
     }
 
     public synchronized void push(AbstractCommand command) {
-        if(command.isFollowingAction())
-            throw new NotImplementedException("Implementation for send fleet and action is not implemented");
 
         if(command instanceof SendCommand && command.from != null ) {
             if (!noBlockingHashInDb(command.hash(), command.from)) return;

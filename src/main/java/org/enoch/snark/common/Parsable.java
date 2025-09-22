@@ -34,6 +34,15 @@ public abstract class Parsable<V> {
         return value;
     }
 
+    protected void randomize() {
+
+    }
+
+    public V getNewValue() {
+        randomize();
+        return getValue();
+    }
+
     @Override
     public String toString() {
         return input;

@@ -60,6 +60,7 @@ public class FleetSendProcessor {
         gir.next();
         gir.setSpeed(command.getSpeed());
         gir.setNewResources(command);
+        gir.fixDoNotWorkingDefaults(command);
 
         FleetEntity fleet = new FleetEntity(command);
 
@@ -72,7 +73,7 @@ public class FleetSendProcessor {
         fleetRepository.save(fleet);
         Navigator.getInstance().add(fleet);
 
-        if (SPY.equals(fleet.mission)) {
+        if (SPY.equals(fleet.mission) && fleet.targetPosition!= 16) {
             TargetEntity targetEntity = targetRepository.byPlanet(fleet.getTarget());
             if (targetEntity != null) {
                 targetEntity.lastSpiedOn = fleet.visited;
@@ -128,7 +129,7 @@ public class FleetSendProcessor {
         List<AbstractCondition> conditions = new ArrayList<>(command.getConditions());
         conditions.add(new FleetSlotCondition(1));
         conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
-        if(!ResourceUC.isNothingOrNull(command.getResources())) conditions.add(new ResourceInSourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
+        if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new ResourceInSourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
 
         AbstractCondition wontFit = conditionChecker.check(conditions);
         if(wontFit != null) throw new RuntimeException(wontFit.toString());

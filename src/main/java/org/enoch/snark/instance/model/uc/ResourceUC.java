@@ -39,6 +39,10 @@ public class ResourceUC {
         return baseDeficit.isEnough(needDeficit);
     }
 
+    public static boolean isAbstractOrNull(Resources resources) {
+        return resources == null || nothing.equals(resources) || everything.equals(resources);
+    }
+
     public static boolean isNothingOrNull(Resources resources) {
         return resources == null || nothing.equals(resources);
     }

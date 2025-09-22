@@ -13,8 +13,6 @@ import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.exception.FleetCantStart;
-import org.enoch.snark.instance.model.exception.ToStrongPlayerException;
 import org.enoch.snark.instance.model.types.ResourceType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -181,14 +179,14 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     public void selectShips(SendCommand command) {
+        //Scroll down till the bottom of the page
+        ((JavascriptExecutor) gi.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
         if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
             selectAllShips();
         } else {
             ShipsMap realCanToSend = fromExpressionToValues(command.getShipsMap(), command);
             selectShips(realCanToSend);
         }
-        //Scroll down till the bottom of the page
-        ((JavascriptExecutor) gi.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
     }
 
     public void selectAllShips() {
@@ -249,5 +247,12 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             dateString = wd.findElement(By.id(dateId)).getText();
         }
         return DateUtil.parseToLocalDateTime(dateString);
+    }
+
+    public void fixDoNotWorkingDefaults(SendCommand command) {
+        // spy on position 16
+        if(Mission.SPY.equals(command.getMission()) && command.getTarget().position == 16) {
+            wd.findElement(By.id("missionButton6")).click();
+        }
     }
 }
