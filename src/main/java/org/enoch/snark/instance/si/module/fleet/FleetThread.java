@@ -4,18 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.FleetPlan;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.model.uc.ShipUC;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.model.action.promisecondition.AbstractPromiseCondition;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.util.ArrayList;
@@ -89,7 +86,7 @@ public class FleetThread extends AbstractThread {
                     command.generateHash(map.name(), Integer.toString(index));
 
                     Duration recallDuration = map.getDuration(RECALL, null);
-                    if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
+                    if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getRandomSeconds());
                     log(command.toString());
                     core.push(command);
                 }

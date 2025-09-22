@@ -2,12 +2,8 @@ package org.enoch.snark.instance.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
-import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.FleetMovement;
@@ -20,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
 
 public class Navigator {
@@ -82,7 +77,7 @@ public class Navigator {
     }
 
     public boolean isExpiredAfter(Duration duration) {
-        return lastUpdate.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
+        return lastUpdate.plusSeconds(duration.getRandomSeconds()).isBefore(LocalDateTime.now());
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {

@@ -46,10 +46,10 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private boolean isRunning = true;
 
-    private int fleetCount = 0;
-    private int fleetMax = 1;
-    private int expeditionCount = 0;
-    private int expeditionMax = 0;
+//    private int fleetCount = 0;
+//    private int fleetMax = 1;
+//    private int expeditionCount = 0;
+//    private int expeditionMax = 0;
 
     private AbstractCommand actualProcessedCommand = null;
 
@@ -60,6 +60,11 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     public synchronized boolean isRunning() {
         return isRunning;
+    }
+
+    @Override
+    protected void onStart() {
+
     }
 
     @Override

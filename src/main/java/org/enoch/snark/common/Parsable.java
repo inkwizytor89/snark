@@ -38,7 +38,7 @@ public abstract class Parsable<V> {
 
     }
 
-    public V getNewValue() {
+    public V getRandomValue() {
         randomize();
         return getValue();
     }
