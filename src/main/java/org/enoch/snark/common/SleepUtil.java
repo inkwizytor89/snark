@@ -33,7 +33,7 @@ public class SleepUtil {
     }
 
     public static void sleep(Duration duration) {
-        sleep(SECONDS, duration.getRandomSeconds());
+        sleep(SECONDS, duration.getSeconds());
     }
 
     public static void sleep(TimeUnit timeUnit, int i) {

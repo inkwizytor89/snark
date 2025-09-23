@@ -36,20 +36,21 @@ public class Duration extends Parsable<java.time.Duration> {
             randomRange = java.time.Duration.parse(PT +durationParts[1]);
 //            value = calculateRandom(base.getSeconds(), randomRange.getSeconds());
         }
-        randomize();
     }
 
     @Override
     protected void randomize() {
+        if(value != null && java.time.Duration.ZERO.equals(randomRange)) return;
         long randomValue = 0L;
         if(!java.time.Duration.ZERO.equals(randomRange)) {
             Random random = new Random();
             randomValue = random.nextLong(randomRange.getSeconds());
         }
         value =  java.time.Duration.ofSeconds(randomValue + base.getSeconds());
+        expireDuration = value;
     }
 
-    public long getRandomSeconds() {
-        return getRandomValue().getSeconds();
+    public long getSeconds() {
+        return getValue().getSeconds();
     }
 }

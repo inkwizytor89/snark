@@ -24,7 +24,7 @@ public class FleetMovement {
 
     public boolean haveImpactOnColony() {
         if(Mission.LIFE_FORM.equals(mission)) return false;
-        if(Mission.SPY.equals(mission)) return false;
+        if(Mission.SPY.equals(mission) && to.position!=16) return false;
         return FleetDirectionType.BACK == direction || Mission.STATIONED.equals(mission) || Mission.TRANSPORT.equals(mission);
     }
 

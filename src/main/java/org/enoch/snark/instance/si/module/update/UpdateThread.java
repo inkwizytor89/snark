@@ -37,7 +37,7 @@ public class UpdateThread extends AbstractThread {
 
     private final ColonyRepository colonyRepository;
 
-    public Duration refresh;
+    public Duration refresh = new Duration("12M");
 
     private Navigator navigator;
     private List<EventFleet> events;
@@ -60,7 +60,7 @@ public class UpdateThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        refresh = map.getDuration(REFRESH, new Duration("12M"));
+        refresh.update(map.getConfig(REFRESH, "12M"));
         List<FleetMovement> pulled = Navigator.getInstance().pollExpired();
         pulled.forEach(fleetMovement -> {
             log(LocalDateTime.now() + " update after fleetMovement: "+fleetMovement);
@@ -69,7 +69,7 @@ public class UpdateThread extends AbstractThread {
 
         if(isNavigatorExpired()) {
             updateState();
-            log(LocalDateTime.now() + " state updated");
+            log(LocalDateTime.now() + " state updated after "+refresh.getValue());
         }
 
         events = navigator.getEventFleetList();

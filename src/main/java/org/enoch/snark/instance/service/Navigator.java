@@ -77,7 +77,7 @@ public class Navigator {
     }
 
     public boolean isExpiredAfter(Duration duration) {
-        return lastUpdate.plusSeconds(duration.getRandomSeconds()).isBefore(LocalDateTime.now());
+        return lastUpdate.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
     }
 
     public void informAboutEventFleets(List<EventFleet> eventFleetList) {

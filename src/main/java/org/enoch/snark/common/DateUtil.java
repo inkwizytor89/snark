@@ -2,6 +2,7 @@ package org.enoch.snark.common;
 
 import org.enoch.snark.db.dao.CacheEntryDAO;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -89,6 +90,11 @@ public class DateUtil {
     public static boolean isExpired(LocalDateTime date, long amountToAdd, TemporalUnit unit) {
         if (date == null) return true;
         else return date.plus(amountToAdd, unit).isBefore(LocalDateTime.now());
+    }
+
+    public static boolean isExpired(LocalDateTime date, Duration duration) {
+        if (date == null) return true;
+        else return date.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
     }
 
     public static boolean lessThanHours(int hour, LocalDateTime updated) {
