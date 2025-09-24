@@ -19,4 +19,13 @@ public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
                 .findFirst();
         return first.orElseThrow(() -> new RuntimeException(planet + " not known as target"));
     }
+
+    default Optional<TargetEntity> find(Planet planet) {
+        return findAll().stream()
+                .filter(colony -> planet.galaxy.equals(colony.galaxy))
+                .filter(colony -> planet.system.equals(colony.system))
+                .filter(colony -> planet.position.equals(colony.position))
+                .filter(colony -> planet.type.equals(colony.type))
+                .findFirst();
+    }
 }

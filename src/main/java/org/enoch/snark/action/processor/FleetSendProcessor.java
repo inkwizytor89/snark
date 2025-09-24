@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
@@ -74,18 +75,18 @@ public class FleetSendProcessor {
         Navigator.getInstance().add(fleet);
 
         if (SPY.equals(fleet.mission) && fleet.targetPosition!= 16) {
-            TargetEntity targetEntity = targetRepository.byPlanet(fleet.getTarget());
-            if (targetEntity != null) {
-                targetEntity.lastSpiedOn = fleet.visited;
-                targetRepository.save(targetEntity);
+            Optional<TargetEntity> targetEntity = targetRepository.find(fleet.getTarget());
+            if (targetEntity.isPresent()) {
+                targetEntity.get().lastSpiedOn = fleet.visited;
+                targetRepository.save(targetEntity.get());
             }
         }
 
         if (ATTACK.equals(fleet.mission)) {
-            TargetEntity targetEntity = targetRepository.byPlanet(fleet.getTarget());
-            if (targetEntity != null) {
-                targetEntity.lastAttacked = fleet.visited;
-                targetRepository.save(targetEntity);
+            Optional<TargetEntity> targetEntity = targetRepository.find(fleet.getTarget());
+            if (targetEntity.isPresent()) {
+                targetEntity.get().lastAttacked = fleet.visited;
+                targetRepository.save(targetEntity.get());
             }
         }
 

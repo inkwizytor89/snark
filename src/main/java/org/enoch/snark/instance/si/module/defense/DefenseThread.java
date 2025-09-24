@@ -37,6 +37,7 @@ public class DefenseThread extends AbstractThread {
     public static final String LIMIT = "limit";
     public static final String EXAMPLE_TIME = "example_time";
     public static final String EXAMPLE_COORDINATE = "example_coordinate";
+    public static final String EXAMPLE_ATTACKER_COORDINATE = "example_attacker_coordinate";
 
     private final FleetDispatcher fleetDispatcher;
 
@@ -99,7 +100,6 @@ public class DefenseThread extends AbstractThread {
                     })
                     .toList();
             noDuplicationPushCommands(fleetToEscape);
-            System.err.println("Send fleet to escape");
         }
     }
 
@@ -112,9 +112,10 @@ public class DefenseThread extends AbstractThread {
         } else if (isEspionageProbe(source)) {
             sendCommand = fleetOnSpy(source);
         } else {
-            if (recall == null) recall = new Duration("350S?50S");
+            if (recall == null)
+                recall = new Duration("350S?50S");
             EventFleet eventFleet = eventFleets.getFirst();
-            Planet target = new Planet(eventFleet.destCoords, eventFleet.destFleet);
+            Planet target = new Planet(eventFleet.coordsOrigin, eventFleet.originFleet);
             sendCommand = sendOnAttacker(source, target);
         }
 
@@ -227,6 +228,11 @@ public class DefenseThread extends AbstractThread {
         Planet destOrigin = map.getConfigPlanet(EXAMPLE_COORDINATE);
         exampleFleet.destCoords = destOrigin.toString().substring(1);
         exampleFleet.destFleet = destOrigin.type;
+
+        Planet coordsOrigin = map.getConfigPlanet(EXAMPLE_ATTACKER_COORDINATE);
+        if(coordsOrigin == null) coordsOrigin = new Planet("p[1:1:1]");
+        exampleFleet.coordsOrigin = coordsOrigin.toString();
+        exampleFleet.originFleet = coordsOrigin.type;
 
         aggressorsEvents.add(exampleFleet);
 
