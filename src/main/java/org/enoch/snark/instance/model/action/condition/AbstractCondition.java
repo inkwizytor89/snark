@@ -3,7 +3,6 @@ package org.enoch.snark.instance.model.action.condition;
 import lombok.experimental.SuperBuilder;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.instance.model.action.promisecondition.*;
-import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;

@@ -5,7 +5,6 @@ import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
-import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;

@@ -21,6 +21,7 @@ import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.action.processor.CommandProcessor;
 import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDateTime;
@@ -92,6 +93,8 @@ public class ConsumerThread extends AbstractThread implements Credentials {
                 System.err.println("TimeoutException znowu");
                 System.err.println(e);
                 commandDeque.release();
+            } catch (WebDriverException e) {
+                System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
             } catch (Throwable e) {
                 e.printStackTrace();
                 commandDeque.release();

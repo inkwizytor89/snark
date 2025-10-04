@@ -1,5 +1,6 @@
 package org.enoch.snark.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.ThreadMap;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.GLOBAL;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Component
 @RequiredArgsConstructor
@@ -25,15 +26,10 @@ public class ConfigurationScheduledTask {
     public static final String TEMPLATE = "template";
     private static List<ConfigTerm> configs = new ArrayList<>();
 
-//    private final DynamicTaskManager core;
     private final Core core;
 
     @Value("${properties:server.properties}")
     private String propertiesPath;
-
-//    public ConfigurationScheduledTask(DynamicTaskManager core) {
-//        this.core = core;
-//    }
 
     @Scheduled(fixedDelay = 10000)
     public void loadConfig() throws IOException {
@@ -90,6 +86,19 @@ public class ConfigurationScheduledTask {
 
     private String template(String module) {
         return TEMPLATE+File.separator+module+".properties";
+    }
+
+    public String determineDatabase() {
+        return getByKey(SERVER).getValue();
+    }
+
+    private ConfigTerm getByKey(String key) {
+        for(ConfigTerm term : configs) {
+            if(key.equals(term.getKey())) {
+               return term;
+            }
+        }
+        return null;
     }
 }
 

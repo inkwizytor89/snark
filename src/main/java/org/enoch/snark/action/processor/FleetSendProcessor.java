@@ -106,9 +106,9 @@ public class FleetSendProcessor {
                 gi.url().openGalaxy(new SystemView(command.getTarget().galaxy, command.getTarget().system), null);
             command.getStatus().setFailed(executionIssue);
         } else if (CAN_NOT_SENT.equals(executionIssue)) {
-            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
-            System.err.println("Can not send fleet to target " + target);
-            gi.url().openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
+//            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
+            System.err.println("Can not send fleet " + command);
+//            gi.url().openGalaxy(new SystemView(fleet.targetGalaxy, fleet.targetSystem), null);
 //            instance.removePlanet(new Planet(fleet.getCoordinate()));
             if (fleet.code != null) fleet.code = -fleet.code;
             clearNext(command);

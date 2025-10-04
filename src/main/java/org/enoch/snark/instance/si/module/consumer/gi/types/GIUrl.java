@@ -148,6 +148,5 @@ public class GIUrl {
     private void updateColony(ColonyEntity colony) {
         gi.updateResources(colony);
         colony.updated = LocalDateTime.now();
-        colony.save();
     }
 }
