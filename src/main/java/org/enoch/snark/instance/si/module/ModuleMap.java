@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Data
 public class ModuleMap extends HashMap<String, ThreadMap> {
@@ -36,5 +37,12 @@ public class ModuleMap extends HashMap<String, ThreadMap> {
                 this.get(name).putAll(configMap);
         });
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "{"+this.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", "))+"}";
     }
 }

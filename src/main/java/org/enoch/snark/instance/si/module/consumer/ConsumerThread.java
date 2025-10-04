@@ -65,7 +65,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @Override
     protected void onStart() {
-
     }
 
     @Override
@@ -75,31 +74,19 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             startGiIfNeeded();
             startGiSessionIfNeeded();
             registerDequeIfNeeded();
-//        waitingToOpenServerTab();
-//        while(true) {
-//                isRunning = isRunning && RunningState.isRunning(updateRunningStatus().getActualState());
-//                if(!isRunning) continue;
-
             Core.isSomethingAttacking = isSomethingAttacking();
-
-
-//                if(isSomethingAttacking() && Navigator.getInstance().isExpiredAfterMinutes(2)) {
-//                    UpdateThread.updateState();
-//                }
-
-                resolve(commandDeque.pool());
-                commandDeque.release();
-            } catch (org.openqa.selenium.TimeoutException e) {
-                System.err.println("TimeoutException znowu");
-                System.err.println(e);
-                commandDeque.release();
-            } catch (WebDriverException e) {
-                System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
-            } catch (Throwable e) {
-                e.printStackTrace();
-                commandDeque.release();
-            }
-//        }
+            resolve(commandDeque.pool());
+            commandDeque.release();
+        } catch (org.openqa.selenium.TimeoutException e) {
+            System.err.println("TimeoutException znowu");
+            System.err.println(e);
+            commandDeque.release();
+        } catch (WebDriverException e) {
+            System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
+        } catch (Throwable e) {
+            e.printStackTrace();
+            commandDeque.release();
+        }
     }
 
     private void startGiIfNeeded() {

@@ -1,7 +1,7 @@
 package org.enoch.snark.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.ModuleMap;
@@ -36,15 +36,12 @@ public class ConfigurationScheduledTask {
         List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL);
         List<ConfigTerm> result = new ArrayList<>(globals);
         for (ConfigTerm term : globals)
-            if(TEMPLATE.equals(term.getKey())) {
-                result.addAll(loadConfigsFromFile(template(term.getValue()), term.getModule()));
+            if(TEMPLATE.equals(term.getKey()) && !StringUtils.isEmpty(term.getValue())) {
+                result.addAll(loadConfigsFromFile(term.getValue(), term.getModule()));
             }
         if (areConfigsChanged(configs, result)) {
-            result.forEach(System.err::println);
             configs = result;
-            System.err.println("-----------------------------------------------");
-            PropertiesMap propertiesMap = buildPropertiesMap();
-            core.configurationUpdate(propertiesMap);
+            core.configurationUpdate(buildPropertiesMap());
         }
     }
 
@@ -84,15 +81,11 @@ public class ConfigurationScheduledTask {
                 .map(s -> ConfigTerm.parse(s, properties.getProperty(s), defaultModule)).toList();
     }
 
-    private String template(String module) {
-        return TEMPLATE+File.separator+module+".properties";
-    }
-
     public String determineDatabase() {
-        return getByKey(SERVER).getValue();
+        return getFirstByKey(SERVER).getValue();
     }
 
-    private ConfigTerm getByKey(String key) {
+    private ConfigTerm getFirstByKey(String key) {
         for(ConfigTerm term : configs) {
             if(key.equals(term.getKey())) {
                return term;

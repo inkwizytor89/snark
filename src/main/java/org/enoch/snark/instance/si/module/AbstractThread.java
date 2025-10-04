@@ -28,10 +28,7 @@ import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
-//@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor(force = true)
-//@AllArgsConstructor
-//@RequiredArgsConstructor
 public abstract class AbstractThread extends ExecutorImpl {
 
     @Autowired
@@ -85,7 +82,6 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     @Override
     public void run() {
-        System.err.println(this.map.get("name")+" runns");
         while(isLive) {
             if(shouldWaitForDeque()) continue;
             RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())

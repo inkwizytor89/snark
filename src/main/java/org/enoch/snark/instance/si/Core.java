@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.enoch.snark.action.command.AbstractCommand;
+import org.enoch.snark.common.Debug;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
@@ -14,8 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.MAIN;
-import static org.enoch.snark.instance.si.module.ThreadMap.TYPE;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +65,6 @@ public class Core {
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(moduleClass)
                     .addConstructorArgValue(map);
         beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-        System.err.println("Create module bean "+name+" as "+moduleClass.getSimpleName());
         return beanFactory.getBean(name, moduleClass);
     }
 
@@ -74,7 +73,6 @@ public class Core {
 
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
         beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-        System.err.println("Create thread bean "+name+" as "+beanClass.getSimpleName());
         return beanFactory.getBean(name, beanClass);
     }
 

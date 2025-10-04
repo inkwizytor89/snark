@@ -3,8 +3,8 @@ package org.enoch.snark.instance.si.module;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.time.TimeScheduler;
-import org.enoch.snark.instance.si.module.template.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,28 +24,13 @@ public class AbstractModule {
     @Setter
     protected ThreadMap mainMap;
 
-    @Deprecated
-    public static AbstractModule create(String moduleName, ModuleMap map) {
-        if(moduleName.equals(GLOBAL)) return new Module(null);
-        else if (moduleName.equals(CleanPlanetsModule.NAME))
-            return new CleanPlanetsModule(map);
-        else if (moduleName.equals(SleepModule.NAME))
-            return new SleepModule(map);
-        else if (moduleName.equals(BuildModule.NAME))
-            return new BuildModule(map);
-        else if (moduleName.equals(DutyModule.NAME))
-            return new BuildModule(map);
-        else if (moduleName.equals(TestModule.NAME))
-            return new TestModule(map);
-        else return null;
-    }
 
     public AbstractModule(ModuleMap map) {
         updateMap(map);
-        System.err.println("Constructor "+map.getName());
     }
 
     public void updateMap(ModuleMap moduleMap) {
+        Debug.log(moduleMap.get(MAIN), "Update ModuleMap "+moduleMap);
         timeScheduler.update(moduleMap.get(MAIN).getConfig(TIME, OFF));
         // mysle ze niszczeni obiektów jest kompletnie nie tak i beany trzba też niszcyc
         threadsMap.entrySet().stream()
