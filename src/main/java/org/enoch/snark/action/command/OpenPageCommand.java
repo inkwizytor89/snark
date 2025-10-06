@@ -4,6 +4,8 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
 import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 
+import static org.enoch.snark.instance.si.QueueRunType.REFRESH_ACTION;
+
 public class OpenPageCommand extends AbstractCommand {
 
     public final UrlComponent component;
@@ -13,6 +15,7 @@ public class OpenPageCommand extends AbstractCommand {
         super();
         this.component = component;
         this.colony = colony;
+        setRunType(REFRESH_ACTION);
     }
 
     public AbstractCommand sourceHash(String sourceHash) {

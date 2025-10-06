@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.time.Duration;
+import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.FleetPlan;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -15,10 +17,14 @@ import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
@@ -31,6 +37,7 @@ public class FleetThread extends AbstractThread {
     public static final String threadName = "fleet";
 
     private final Core core;
+    private final FleetRepository fleetRepository;
     private final FleetDispatcher fleetDispatcher;
     private final ConditionChecker conditionChecker;
     private final PlanetService planetService;
@@ -75,35 +82,36 @@ public class FleetThread extends AbstractThread {
         for(FleetSendCommand command : fleetSendCommands) {
 
             index++;
+            command.generateHash(map.name(), Integer.toString(index));
 //            logFleetOverview(command);
-            List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
             ShipsMap realShips = fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
-            boolean areShips = !realShips.isEmpty();
-            boolean fit = conditionChecker.fit(conditionsToCheck);
-            if (areShips && fit && noBlockExpiredTime(command.getFleetPlan())) {
-                if (!map.getConfigBoolean(DRY_RUN, false)) {
-                    command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
-                    command.generateHash(map.name(), Integer.toString(index));
+            if(realShips.isEmpty()) continue;
 
-                    Duration recallDuration = map.getDuration(RECALL, null);
-                    if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
-                    log(command.toString());
-                    core.push(command);
-                }
+            List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
+            if(!conditionChecker.fit(conditionsToCheck)) continue;
+
+            if (blockExpiredTime(command)) continue;
+
+            if (!map.getConfigBoolean(DRY_RUN, false)) {
+                command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
+
+                Duration recallDuration = map.getDuration(RECALL, null);
+                if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
+                log(command.toString());
+                core.push(command);
             }
         }
     }
 
-    private boolean noBlockExpiredTime(FleetPlan promise) {
+    private boolean blockExpiredTime(FleetSendCommand command) {
         String expiredConfig = map.getConfig(EXPIRED_TIME, null);
-        if(expiredConfig == null) return true;
-        else throw new RuntimeException("Not implementet field "+EXPIRED_TIME);
-        // todo: ponizej sa przypadki kiedy strzeba zajrzec do bazy by sprawdzic czy poprzednia flota osiagnela cel
-        // albo wrocila albo minol czas od ostatniej i mozna juz wyslac nastepna
-        // jeszcze jest problem ze recall wchodzi w konflit poprzez setNext
-//        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) command.push(DELAY_TO_FLEET_THERE);
-//        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) command.push(DELAY_TO_FLEET_BACK);
-//        else command.push(LocalDateTime.now().minusSeconds(new Duration(expiredConfig).getSeconds()));
+        if(expiredConfig == null) return false;
+        Optional<FleetEntity> lastSend = fleetRepository.findFirstByHashOrderByUpdatedDesc(command.getHash());
+        if(lastSend.isEmpty()) return false;
+
+        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) return LocalDateTime.now().isBefore(lastSend.get().visited);
+        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) return LocalDateTime.now().isBefore(lastSend.get().back);
+        else return LocalDateTime.now().isBefore(lastSend.get().updated.plusSeconds(new Duration(expiredConfig).getSeconds()));
     }
 
 //    private void logFleetOverview(FleetSendCommand promise) {

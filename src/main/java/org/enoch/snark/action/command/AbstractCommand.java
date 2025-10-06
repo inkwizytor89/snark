@@ -24,7 +24,6 @@ public abstract class AbstractCommand {
 
     protected final CommandStatus status;
     private FollowingAction followingAction;
-    public LocalDateTime from;
     private QueueRunType runType = NORMAL;
     protected Instance instance;
     private String hash;

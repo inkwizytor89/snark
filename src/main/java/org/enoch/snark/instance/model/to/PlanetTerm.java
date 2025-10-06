@@ -36,8 +36,8 @@ public class PlanetTerm {
 
     private void setActionWithContext(String expression, FleetContext context) {
         action = expression;
+        planetData = context.getSource();
         if(NEXT.equals(action) || PREV.equals(action)) {
-            planetData = context.getSource();
             if(context.getTrip() == null || context.getTrip().isEmpty()) {
                 throw new IllegalStateException("PlanetTerm has no trip for action " + action);
             }
