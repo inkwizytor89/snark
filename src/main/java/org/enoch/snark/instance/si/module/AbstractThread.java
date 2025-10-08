@@ -1,5 +1,8 @@
 package org.enoch.snark.instance.si.module;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.enoch.snark.action.command.AbstractCommand;
@@ -13,6 +16,7 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
@@ -37,6 +41,8 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected final ColonyRepository colonyRepository;
     @Autowired
     protected final PlanetService planetService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
     protected  CacheEntryDAO cacheEntryDAO;
@@ -174,6 +180,15 @@ public abstract class AbstractThread extends ExecutorImpl {
         String sourcesCode = map().getSourcesCode(defaultValue);
         List<PlanetData> planetData = planetService.fromExpression(sourcesCode);
         return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
+    }
+
+    protected List<AbstractCondition> getConditions(String configName) {
+        String configJson = map().getConfig(configName, "[]");
+        try {
+            return objectMapper.readValue(configJson, new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

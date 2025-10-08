@@ -64,7 +64,7 @@ public class FleetThread extends AbstractThread {
         FleetPlan fleetPlan = FleetPlan.builder()
                 .source(map.getNearestConfig(SOURCE, PLANET))
                 .target(map.getConfig(TARGET, null))
-//                .conditions(AbstractCondition.create(conditionsEntry))
+                .conditions(getConditions(START_CONDITION))
 //                .filters(AbstractFilter.create(filtersEntry))
                 .mission(Mission.convert(map.getConfig(MISSION, Mission.STATIONED.name())))
                 .shipsWaves(map.getShipsWaves(singletonList(ALL_SHIPS)))

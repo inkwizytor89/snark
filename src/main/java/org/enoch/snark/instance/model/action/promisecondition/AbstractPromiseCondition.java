@@ -8,7 +8,7 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 public abstract class AbstractPromiseCondition {
 
     protected static final String MISSING_REASON = "Missing reason";

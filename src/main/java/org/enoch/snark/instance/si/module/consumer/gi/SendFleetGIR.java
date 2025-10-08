@@ -73,11 +73,11 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         return NO_ISSUE;
     }
 
-    public void setResources(Resources resources, ColonyEntity source) {
-        if(resources == null || nothing.equals(resources)) return;
-        if(everything.equals(resources)) selectAllResources();
-        else setCustomResources(resources, source);
-    }
+//    public void setResources(Resources resources, ColonyEntity source) {
+//        if(resources == null || nothing.equals(resources)) return;
+//        if(everything.equals(resources)) selectAllResources();
+//        else setCustomResources(resources, source);
+//    }
 
     public void setNewResources(SendCommand command) {
         if(isNothingOrNull(command.getResources())) return;
@@ -170,7 +170,6 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void setSpeed(Long speed) {
         if(speed != null) {
-            SleepUtil.pause();
             WebElement element = wd.findElement(By.className("steps"));
             List<WebElement> steps = element.findElements(By.className("step"));
             WebElement speedElement = steps.get(Integer.parseInt(speed.toString()) / 10 - 1);
@@ -219,7 +218,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
         Actions actions = new Actions(wd);
         actions.moveToElement(continueButton).click().perform();
-        SleepUtil.pause();
+        SleepUtil.sleep();
     }
 
     public LocalTime parseDurationSecounds() {

@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.action.promisecondition;
 
+@Deprecated
 public enum ConditionType {
     RESOURCE_IN_SOURCE,
     RESOURCE_IN_TARGET,

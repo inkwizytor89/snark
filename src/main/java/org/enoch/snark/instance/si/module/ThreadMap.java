@@ -62,6 +62,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String DRY_RUN = "dry_run";
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
+    public static final String START_CONDITION = "start_conditions";
     public static final String CONDITION_RESOURCES_COUNT = "condition_resources_count";
     public static final String CONDITION_RESOURCES = "condition_resources";
     public static final String CONDITION_SHIPS = "condition_ships";
