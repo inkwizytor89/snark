@@ -11,6 +11,7 @@ import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
+import static org.enoch.snark.instance.model.types.Expression.NONE;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -111,7 +113,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         commandDeque.push(new LoadColoniesCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
-        getSources(StringUtils.EMPTY)
+        getSources(PlanetService.NONE)
                 .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
                         .sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);

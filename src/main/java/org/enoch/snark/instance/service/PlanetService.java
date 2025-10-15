@@ -27,11 +27,13 @@ public class PlanetService {
     public static final String MOONS = "moons";
     public static final String ALL = "all";
     public static final String EACH_POSITION = EMPTY;
+    public static final String NONE = "none";
 
     public static final String SWAP = "swap";
     public static final String NEXT = "next";
     public static final String FIND = "find";
     public static final String PREV = "prev";
+    public static final String SPACE = "space";
     public static final String MAIN_FLEET_TO = "main_fleet_to";
     public static final String MAIN_FLEET_ON = "main_fleet_on";
     public static final String MAIN_FLEET = "main_fleet";
@@ -74,7 +76,7 @@ public class PlanetService {
 
         if(planetTerm.getAction() == null) {
             return singletonList(planetTerm.getPlanetData());
-        } else if(List.of(ALL, MOONS, PLANETS, EACH_POSITION).contains(planetTerm.getAction())) {
+        } else if(List.of(ALL, MOONS, PLANETS, EACH_POSITION, NONE).contains(planetTerm.getAction())) {
             return colonyRepository.findByCode(planetTerm.getAction()).stream()
                     .map(PlanetData::new)
                     .collect(Collectors.toList());
@@ -87,13 +89,15 @@ public class PlanetService {
             return singletonList(TripFinder.prev(planetTerm));
         } else if(planetTerm.getAction().contains(SWAP)) {
             return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().swapType()));
+        } else if(planetTerm.getAction().contains(SPACE)) {
+            return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().toSpace()));
         } else if(planetTerm.getAction().contains(FARM)) {
             throw new NotImplementedException(FARM + " expression not yet implemented");
 //                return FarmFinder.find(colony);
         } else {
             String value = cacheEntryRepository.getValue(planetTerm.getAction());
             if(value != null) return fromExpression(value);
-            throw new IllegalStateException(planetTerm+" can not be interpreted as expression term");
+            throw new IllegalStateException("\""+input+"\" can not be interpreted as expression term");
         }
     }
 }

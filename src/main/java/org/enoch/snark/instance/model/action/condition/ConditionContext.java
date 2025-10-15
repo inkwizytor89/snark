@@ -2,9 +2,20 @@ package org.enoch.snark.instance.model.action.condition;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.SendCommand;
+import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.db.repository.TargetRepository;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Target;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+import static org.enoch.snark.instance.model.to.Planet.*;
 
 @Component
 @RequiredArgsConstructor
@@ -12,4 +23,31 @@ import org.springframework.stereotype.Component;
 public class ConditionContext {
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
+    private final TargetRepository targetRepository;
+
+    private SendCommand command;
+
+    public ColonyEntity colony(Planet planet) {
+        if(SOURCE_TERM.equals(planet)) return command.getSource();
+        if(TARGET_TERM.equals(planet)) return getColonyRepository().byPlanet(command.getTarget());
+        return getColonyRepository().byPlanet(planet);
+    }
+
+    public TargetEntity target(Planet planet) {
+        if(SOURCE_TERM.equals(planet)) throw new IllegalStateException("Incorrect "+SOURCE_STRING);
+        if(TARGET_TERM.equals(planet)) return getTargetRepository().byPlanet(command.getTarget());
+        return getTargetRepository().byPlanet(planet);
+    }
+
+    public PlanetEntity planet(Planet planet) {
+        if(SOURCE_TERM.equals(planet)) return command.getSource();
+        else if(TARGET_TERM.equals(planet))  return determinePlanetEntity(command.getTarget());
+        else return determinePlanetEntity(planet);
+    }
+
+    private PlanetEntity determinePlanetEntity(Planet planet) {
+        Optional<TargetEntity> targetEntity = getTargetRepository().find(planet);
+        if(targetEntity.isPresent()) return targetEntity.get();
+        else return getColonyRepository().byPlanet(planet);
+    }
 }

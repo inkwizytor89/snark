@@ -1,44 +1,29 @@
 package org.enoch.snark.instance.model.action.condition;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.PlanetEntity;
-import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.model.action.promisecondition.AbstractPromiseCondition;
-import org.enoch.snark.instance.model.action.promisecondition.ConditionType;
-import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Planet;
 
-import java.util.Optional;
-
-import static org.enoch.snark.instance.model.action.promisecondition.ConditionType.RESOURCES_COUNT_IN_TARGET;
-
-@RequiredArgsConstructor
 @Getter
 public class ResourceCountCondition extends AbstractCondition {
-    private final Long resourcesCount;
+    private final String resourcesCount;
     private final Planet planet;
 
-//    @Override
-//    public boolean fit(FleetPromise promise) {
-//        this.planetEntity = getPlanetEntity(promise);
-//        return this.planetEntity.getResources().isCountMoreThan(resourcesCount.toString());
-//    }
-//
-//    @Override
-//    public String reason(FleetPromise promise) {
-//        if(!fit(promise)) return planetEntity + " have " + planetEntity.getResources() + " but count is needed " + resourcesCount;
-//        else return MISSING_REASON;
-//    }
-//
-//    private PlanetEntity getPlanetEntity(FleetPromise promise) {
-//        if(RESOURCES_COUNT_IN_TARGET.equals(conditionType)) {
-//            Optional<TargetEntity> targetEntityOptional = TargetDAO.getInstance().find(Planet.fromString(promise.getTarget()).getFirst());
-//            if(targetEntityOptional.isPresent()) return targetEntityOptional.get();
-//            else throw new IllegalStateException(promise.getTarget() + " can not find in database");
-//        }
-//        return ColonyDAO.getInstance().find(promise.getSource().toPlanet());
-//    }
+    @JsonCreator
+    public ResourceCountCondition(
+            @JsonProperty("resourcesCount") String resourcesCount,
+            @JsonProperty("planet") Planet planet
+    ) {
+        this.resourcesCount = resourcesCount;
+        this.planet = planet;
+    }
+
+    @Override
+    public AbstractCondition check(ConditionContext context) {
+        PlanetEntity target = context.planet(planet);
+        boolean isPossible = target.getResources().isCountMoreThan(resourcesCount);
+        return isPossible ? null : this;
+    }
 }

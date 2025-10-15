@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.commons.lang3.EnumUtils;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.instance.model.technology.Ship;
@@ -21,6 +22,7 @@ public class ShipsMap extends HashMap<Ship, Long> {
     public static final Long TRANSPORT_COUNT = -1L;
     public static final List<ShipsMap> EMPTY_SHIP_WAVE = new ArrayList<>();
 
+    @JsonCreator
     public static ShipsMap parse(String expression) {
         if(ALL.is(expression)) return ALL_SHIPS;
         if(NONE.is(expression)) return NO_SHIPS;

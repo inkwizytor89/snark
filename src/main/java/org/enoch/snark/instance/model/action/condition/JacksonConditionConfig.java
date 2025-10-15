@@ -39,6 +39,7 @@ public class JacksonConditionConfig {
             if (AbstractCondition.class.isAssignableFrom(conditionClass)) {
                 String typeName = conditionClass.getSimpleName()
                         .replace("Condition", "")
+                        .replaceAll("([a-z])([A-Z]+)", "$1_$2")
                         .toUpperCase();
                 mapper.registerSubtypes(new NamedType(conditionClass, typeName));
             }

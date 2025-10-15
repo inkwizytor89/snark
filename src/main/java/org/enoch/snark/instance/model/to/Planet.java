@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.ColonyDAO;
@@ -17,9 +18,15 @@ import static org.enoch.snark.instance.si.module.ThreadMap.GALAXY_MAX;
 
 @EqualsAndHashCode
 public class Planet {
+
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
     public static final Integer POSITION_INDEX = 3;
+
+    public static final String SOURCE_STRING = "source";
+    public static final String TARGET_STRING = "target";
+    public static Planet SOURCE_TERM = parse("p[-1.-1,-1]");
+    public static Planet TARGET_TERM = parse("p[-2.-2,-2]");
 
     public ColonyType type = PLANET;
     public Integer galaxy;
@@ -49,8 +56,11 @@ public class Planet {
         this.type = type;
     }
 
+    @JsonCreator
     public static Planet parse(String input) {
         if(StringUtils.isBlank(input)) return null;
+        else if(SOURCE_STRING.equalsIgnoreCase(input.trim())) return SOURCE_TERM;
+        else if(TARGET_STRING.equalsIgnoreCase(input.trim())) return TARGET_TERM;
         return new Planet(input);
     }
 
@@ -65,6 +75,12 @@ public class Planet {
 
     public Planet swapType() {
         type = PLANET.equals(type) ? MOON : PLANET;
+        return this;
+    }
+
+    public Planet toSpace() {
+        type = PLANET;
+        position = 16;
         return this;
     }
 

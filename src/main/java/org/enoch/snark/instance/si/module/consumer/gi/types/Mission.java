@@ -1,9 +1,13 @@
 package org.enoch.snark.instance.si.module.consumer.gi.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.si.module.ThreadMap.ARRAY_SEPARATOR;
 
 public enum Mission {
@@ -43,6 +47,17 @@ public enum Mission {
             }
         }
         throw new RuntimeException("Unknown mission " + name);
+    }
+
+    @JsonCreator
+    public static List<Mission> convertMissions(String input) {
+        if(input == null) return singletonList(UNKNOWN);
+        String[] split = input.toLowerCase().split(";");
+        List<Mission> list = new ArrayList<>();
+        for(String misionString : split) {
+            list.add(convert(misionString));
+        }
+        return list;
     }
 
     public static Mission convert(String input) {

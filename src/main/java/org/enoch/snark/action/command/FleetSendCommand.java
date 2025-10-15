@@ -3,7 +3,6 @@ package org.enoch.snark.action.command;
 import lombok.Data;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.promisecondition.AbstractPromiseCondition;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 

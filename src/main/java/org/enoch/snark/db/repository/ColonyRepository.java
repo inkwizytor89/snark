@@ -26,6 +26,7 @@ public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
         else if(lowerCode.contains(MOONS)) return moons();
         else if(lowerCode.contains(PLANETS)) return planets();
         else if(lowerCode.equals(EACH_POSITION)) return allPositions();
+        else if(lowerCode.equals(NONE)) return new ArrayList<>();
         else return coloniesList(lowerCode);
     }
 

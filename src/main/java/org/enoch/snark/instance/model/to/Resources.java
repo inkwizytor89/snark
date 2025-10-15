@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.to;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.instance.model.types.ResourceType;
@@ -23,6 +24,7 @@ public class Resources {
     public boolean skipLeaveCrystal;
     public boolean skipLeaveDeuterium;
 
+    @JsonCreator
     public static Resources parse(String resourceExpression) {
         if (StringUtils.isEmpty(resourceExpression) ||
                 resourceExpression.contains("nothing") ||

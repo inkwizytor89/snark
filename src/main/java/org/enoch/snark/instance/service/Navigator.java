@@ -69,11 +69,13 @@ public class Navigator {
 
     public List<FleetMovement> pollExpired() {
         LocalDateTime relativeNow = LocalDateTime.now().minusSeconds(TIME_DELAY_IN_SECONDS);
-        List<FleetMovement> expiredMovements = movements.stream()
-                .filter(movement -> relativeNow.isAfter(movement.getArrivalTime()))
-                .toList();
-        expiredMovements.forEach(movements::remove);
-        return expiredMovements;
+        synchronized (movementsLock) {
+            List<FleetMovement> expiredMovements = movements.stream()
+                    .filter(movement -> relativeNow.isAfter(movement.getArrivalTime()))
+                    .toList();
+            expiredMovements.forEach(movements::remove);
+            return expiredMovements;
+        }
     }
 
     public boolean isExpiredAfter(Duration duration) {
@@ -134,7 +136,9 @@ public class Navigator {
     }
 
     private void add(FleetMovement movement) {
-        movements.add(movement);
+        synchronized (movementsLock) {
+            movements.add(movement);
+        }
     }
 
     public boolean noneMission(Mission mission) {

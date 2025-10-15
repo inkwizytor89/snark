@@ -59,7 +59,7 @@ public class FleetThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
+//        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
                 .source(map.getNearestConfig(SOURCE, PLANET))
@@ -88,7 +88,7 @@ public class FleetThread extends AbstractThread {
             if(realShips.isEmpty()) continue;
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
-            if(!conditionChecker.fit(conditionsToCheck)) continue;
+            if(!conditionChecker.fit(conditionsToCheck, command)) continue;
 
             if (blockExpiredTime(command)) continue;
 

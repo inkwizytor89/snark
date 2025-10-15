@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.model.uc;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
@@ -16,7 +17,7 @@ public class ResourceUC {
         return toTransport(promise.getSource(), promise.getResources(), promise.getLeaveResources());
     }
 
-    public static Resources toTransport(ColonyEntity colony, Resources requested, Resources leave) {
+    public static Resources toTransport(PlanetEntity colony, Resources requested, Resources leave) {
         return toTransport(colony.getResources(), requested, leave, colony.type);
     }
 

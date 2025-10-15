@@ -103,9 +103,7 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private FleetSendCommand createFleetSendCommand(ColonyEntity bestColony, ShipsMap ships) {
-        Planet expeditionTarget = bestColony.toPlanet();
-        expeditionTarget.position = 16;
-        expeditionTarget.type = ColonyType.PLANET;
+        Planet expeditionTarget = bestColony.toPlanet().toSpace();
 
         FleetPlan fleetPlan = FleetPlan.builder()
                 .source(bestColony.toString())

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.Instance;
@@ -32,7 +33,7 @@ public class ShipUC {
         return valuedMap;
     }
 
-    public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, ColonyEntity source, ShipsMap leaveShipsMap) {
+    public static ShipsMap fromExpressionToValues(ShipsMap requestedShips, PlanetEntity source, ShipsMap leaveShipsMap) {
         ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source.toPlanet());
         ShipsMap sourceShipsMap = source.getShipsMap();
         ShipsMap maxToSend = sourceShipsMap.leave(leaveShipsMap);

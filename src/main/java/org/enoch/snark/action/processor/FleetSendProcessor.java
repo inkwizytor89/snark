@@ -15,9 +15,8 @@ import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceInSourceCondition;
+import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
-import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.ConditionChecker;
@@ -54,14 +53,17 @@ public class FleetSendProcessor {
 
     public boolean execute(GI gi, SendCommand command) {
         SendFleetGIR gir = new SendFleetGIR(gi);
-        ColonyEntity colony = gi.url().openSendFleetView(command.getSource(), command.getTarget(), command.getMission());
-        colonyRepository.save(colony);
-        validate(command);
+        openSendFleetView(gi, command);
+        if(!isValidated(command)) {
+            command.getStatus().setSuccess();
+            command.getStatus().setIssue(CONDITION_WONT_FIT);
+            return true;
+        }
         gir.selectShips(command);
         gir.next();
         gir.setSpeed(command.getSpeed());
-        gir.setNewResources(command);
         gir.fixDoNotWorkingDefaults(command);
+        gir.setNewResources(command);
 
         FleetEntity fleet = new FleetEntity(command);
 
@@ -126,14 +128,26 @@ public class FleetSendProcessor {
         return true;
     }
 
-    private void validate(SendCommand command) {
+    @Transactional
+    private void openSendFleetView(GI gi, SendCommand command) {
+        ColonyEntity colony = gi.url().openSendFleetView(command.getSource(), command.getTarget(), command.getMission());
+        colonyRepository.save(colony);
+    }
+
+    private boolean isValidated(SendCommand command) {
         List<AbstractCondition> conditions = new ArrayList<>(command.getConditions());
         conditions.add(new FleetSlotCondition(1));
         conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
-        if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new ResourceInSourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
+        if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new ResourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
 
-        AbstractCondition wontFit = conditionChecker.check(conditions);
-        if(wontFit != null) throw new RuntimeException(wontFit.toString());
+        AbstractCondition wontFit = conditionChecker.check(conditions, command);
+        if(wontFit != null) {
+            String message = "Condition doesn't fit: " + wontFit;
+//            throw new RuntimeException(message);
+            System.err.println(message);
+            return false;
+        }
+        return true;
     }
 
     public void clearNext(SendCommand command) {
