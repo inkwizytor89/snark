@@ -5,24 +5,19 @@ import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.si.module.building.BuildThread;
-import org.enoch.snark.instance.si.module.collector.CollectorThread;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.defense.DefenseThread;
 import org.enoch.snark.instance.si.module.define.DefineThread;
 import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
-import org.enoch.snark.instance.si.module.farm.FarmThread;
 import org.enoch.snark.instance.si.module.fleet.FleetThread;
-import org.enoch.snark.instance.si.module.fleetSave.FleetSaveThread;
 import org.enoch.snark.instance.si.module.hunting.HuntingThread;
 import org.enoch.snark.instance.si.module.scan.ScanThread;
 import org.enoch.snark.instance.si.module.space.SpaceThread;
-import org.enoch.snark.instance.si.module.transport.TransportThread;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 
 import java.time.LocalTime;
@@ -109,8 +104,6 @@ public class ThreadMap extends HashMap<String, String> {
             return DefineThread.class;
         } else if (name.contains(DefenseThread.threadType)) {
             return DefenseThread.class;
-        } else if (name.contains(FleetSaveThread.threadType)) {
-            return FleetSaveThread.class;
         } else if (name.contains(ExpeditionThread.threadType)) {
             return ExpeditionThread.class;
         } else if (name.contains(BuildThread.threadType)) {
@@ -119,12 +112,6 @@ public class ThreadMap extends HashMap<String, String> {
             return SpaceThread.class;
         } else if (name.contains(ScanThread.threadType)) {
             return ScanThread.class;
-        } else if (name.contains(FarmThread.threadType)) {
-            return FarmThread.class;
-        } else if (name.contains(CollectorThread.threadType)) {
-            return CollectorThread.class;
-        } else if (name.contains(TransportThread.threadType)) {
-            return TransportThread.class;
         } else if (name.contains(HuntingThread.threadType)) {
             return HuntingThread.class;
         } else {

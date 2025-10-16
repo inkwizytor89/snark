@@ -85,7 +85,7 @@ public class ExpeditionThread extends AbstractThread {
 
         ShipsMap shipsMap = new ShipsMap();
         if (colony.explorer > 0) shipsMap.put(explorer, 1L);
-        if(expeditionCount == 1) {
+        if(expeditionCount <= 1) {
             shipsMap.put(transporterSmall, colony.transporterSmall);
             shipsMap.put(transporterLarge, colony.transporterLarge);
         } else {

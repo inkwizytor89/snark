@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.instance.model.action.PlanetExpression;
@@ -35,12 +34,6 @@ public class BuildThread extends AbstractThread {
     private TechnologyService technologyService  = TechnologyService.getInstance();
     private BuildingCost buildingCost = BuildingCost.getInstance();
     private String buildingList;
-
-//    public BuildingThread(ThreadMap map) {
-//        super(map);
-//        buildingCost = BuildingCost.getInstance();
-//        technologyService = TechnologyService.getInstance();
-//    }
 
     @Override
     protected String getThreadType() {
@@ -82,12 +75,12 @@ public class BuildThread extends AbstractThread {
     }
 
     private SendCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
-        ColonyEntity swapColony = ColonyDAO.getInstance().find(colony.cpm);
-        if(swapColony == null ) return null;
+        Optional<ColonyEntity> swapColony = colonyRepository.findByCp(colony.cpm);
+        if(swapColony.isEmpty()) return null;
         Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
-        Resources leaveSwap = map.getNearestLeaveResources(swapColony.type, nothing);
-        FleetSendCommand command = transportFleet(swapColony, colony, missing, leaveSwap);
+        Resources leaveSwap = map.getNearestLeaveResources(swapColony.get().type, nothing);
+        FleetSendCommand command = transportFleet(swapColony.get(), colony, missing, leaveSwap);
         if(command != null) {
             command.setNext(new BuildCommand(colony, requirements),DELAY_TO_FLEET_THERE);
             command.push(DELAY_TO_FLEET_BACK);
