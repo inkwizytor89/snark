@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.model.action;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.Instance;
@@ -12,7 +13,8 @@ public class ColonyPlaner {
     private final List<ColonyEntity> colonies;
 
     public ColonyPlaner() {
-        this(Instance.getSources());
+        throw new NotImplementedException("To Fix ColonyPlaner()");
+//        this(Instance.getSources());
     }
 
     public ColonyPlaner(List<ColonyEntity> colonies) {

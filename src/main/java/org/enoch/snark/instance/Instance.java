@@ -41,8 +41,4 @@ public class Instance {
 //        if(!moduleMap.containsKey(name)) return new ThreadMap();
 //        return moduleMap.get(name);
     }
-
-    public static List<ColonyEntity> getSources() {
-        return getGlobalMainConfigMap().getSources();
-    }
 }

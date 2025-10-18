@@ -1,16 +1,13 @@
 package org.enoch.snark.instance.si.module.consumer;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
-import org.enoch.snark.db.dao.FleetDAO;
+import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
-import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
@@ -25,11 +22,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
 
-import static org.enoch.snark.instance.model.types.Expression.NONE;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -39,7 +33,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private final CommandProcessor processor;
     private final CacheEntryRepository cacheEntryRepository;
-    private final ColonyRepository colonyRepository;
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
@@ -47,12 +40,8 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private GI gi;
     private GISession session;
 
+    private Duration restartPause = new Duration("300S");
     private boolean isRunning = true;
-
-//    private int fleetCount = 0;
-//    private int fleetMax = 1;
-//    private int expeditionCount = 0;
-//    private int expeditionMax = 0;
 
     private AbstractCommand actualProcessedCommand = null;
 
@@ -191,53 +180,42 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         Debug.log(this, command + " start at " + LocalTime.now());
     }
 
-    public boolean noBlockingHashInQueue(String hash) {
-        return hash == null || peekQueues().stream()
-                .filter(command -> command.hash() != null)
-                .map(AbstractCommand::hash)
-                .noneMatch(s -> s.equals(hash));
-    }
+//    public boolean noBlockingHashInQueue(String hash) {
+//        return hash == null || peekQueues().stream()
+//                .filter(command -> command.hash() != null)
+//                .map(AbstractCommand::hash)
+//                .noneMatch(s -> s.equals(hash));
+//    }
 
-    private boolean noBlockingHashInDb(String hash, LocalDateTime date) {
-        Long count = FleetDAO.getInstance().hashCount(hash, date);
-        return count < 1L;
-    }
+//    private boolean noBlockingHashInDb(String hash, LocalDateTime date) {
+//        Long count = FleetDAO.getInstance().hashCount(hash, date);
+//        return count < 1L;
+//    }
 
-    public boolean noCommands() {
-        return peekQueues().isEmpty();
-    }
-
-    public boolean notingToPool() {
-        return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
-    }
-
-    public synchronized void push(AbstractCommand command, String action) {
-        throw new NotImplementedException("Implementation for send fleet and action is not implemented");
-//        String hash = command.hash();
-//        LocalDateTime now = LocalDateTime.now();
-//        List<FleetEntity> withHash = FleetDAO.getInstance().findWithHash(hash);
-//        withHash.sort(Comparator.comparing(o -> o.updated));
-//        if(withHash.isEmpty()) push(command);
-//        else if(DELAY_TO_FLEET_THERE.equals(action) && now.isAfter(withHash.getLast().visited)) push(command);
-//        else if(DELAY_TO_FLEET_BACK.equals(action) && now.isAfter(withHash.getLast().back)) push(command);
-    }
+//    public boolean noCommands() {
+//        return peekQueues().isEmpty();
+//    }
+//
+//    public boolean notingToPool() {
+//        return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
+//    }
 
 //    public synchronized void push(AbstractCommand command) {
 //        if(noBlockingHashInQueue(command.hash()))
 //            commandDeque.pushToAction(command);
 //    }
 
-    public synchronized void push(AbstractCommand command, LocalDateTime from) {
-        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
-            commandDeque.push(command);
-    }
+//    public synchronized void push(AbstractCommand command, LocalDateTime from) {
+//        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
+//            commandDeque.push(command);
+//    }
 
-    public synchronized List<AbstractCommand> peekQueues() {
-        List<AbstractCommand> commandsToView = new ArrayList<>();
-        if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-        commandsToView.addAll(commandDeque.peek());
-        return commandsToView;
-    }
+//    public synchronized List<AbstractCommand> peekQueues() {
+//        List<AbstractCommand> commandsToView = new ArrayList<>();
+//        if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
+//        commandsToView.addAll(commandDeque.peek());
+//        return commandsToView;
+//    }
 
     @Override
     public String login() {
@@ -262,5 +240,11 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     @Override
     public String hash() {
         return "";
+    }
+
+    @Override
+    public Duration restartDuration() {
+        restartPause.update(map.getConfig(ThreadMap.RESTART_DURATION, "300S"));
+        return restartPause;
     }
 }

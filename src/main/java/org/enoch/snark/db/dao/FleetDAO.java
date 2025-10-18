@@ -174,8 +174,6 @@ public class FleetDAO extends AbstractDAO<FleetEntity> {
                     FleetEntity fleet;
                     if (Mission.SPY.equals(mission)) {
                         fleet = FleetEntity.createSpyFleet(farm);
-                    } else if (Mission.ATTACK.equals(mission)) {
-                        fleet = FleetEntity.createFarmFleet(farm);
                     } else throw new RuntimeException("Unknown mission on farm wave");
 
                     fleet.spaceTarget = ColonyType.PLANET;

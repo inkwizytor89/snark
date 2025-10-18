@@ -200,7 +200,6 @@ public class FleetEntity extends IdEntity {
         else throw new IllegalStateException("Unknown Ship "+ ship);
     }
 
-
     public void closeFlyPlan() {
         start = LocalDateTime.now();
         back = LocalDateTime.now();
@@ -228,53 +227,6 @@ public class FleetEntity extends IdEntity {
         fleet.mission = Mission.SPY;
         fleet.espionageProbe = count;
         return fleet;
-    }
-
-    public static FleetEntity createFarmFleet(TargetEntity target) {
-        FleetEntity fleet = new FleetEntity();
-        fleet.targetGalaxy = target.galaxy;
-        fleet.targetSystem = target.system;
-        fleet.targetPosition = target.position;
-        fleet.source = new ColonyPlaner().getNearestColony(target);
-        fleet.mission = Mission.ATTACK;
-        Long requiredTransporterSmall = target.calculateTransportByTransporterSmall();
-//        if(fleet.source.transporterSmall < requiredTransporterSmall) {
-//            requiredTransporterSmall = fleet.source.transporterSmall;
-//        }
-        fleet.transporterSmall = requiredTransporterSmall;
-        if(fleet.transporterSmall == 0) {
-            System.err.println("\nfor "+target+" try to send 0 lt ("+target.getResourceString()+")");
-        }
-        return fleet;
-    }
-
-    public static FleetEntity createExpeditionDirection(ColonyEntity colony) {
-        FleetEntity fleet = new FleetEntity();
-        fleet.targetGalaxy = colony.galaxy;
-        fleet.targetSystem = colony.system;
-        fleet.targetPosition = 16;
-        fleet.spaceTarget = ColonyType.PLANET;
-        fleet.source = colony;
-        fleet.mission = Mission.EXPEDITION;
-        return fleet;
-    }
-
-    public static FleetEntity createQuickFleetSave(ColonyEntity colony, Planet target) {
-        FleetEntity fleetEntity = new FleetEntity();
-        ColonyEntity source = ColonyDAO.getInstance().fetch(colony);
-        fleetEntity.source = source;
-        fleetEntity.setTarget(target);
-        if(ColonyType.MOON.equals(target.type)) {
-            fleetEntity.mission = Mission.STATIONED;
-        } else {
-            fleetEntity.mission = Mission.COLONIZATION;
-        }
-        fleetEntity.setShips(source.getShipsMap());
-
-        fleetEntity.metal = Long.MAX_VALUE;
-        fleetEntity.crystal = Long.MAX_VALUE;
-        fleetEntity.deuterium = Long.MAX_VALUE;
-        return fleetEntity;
     }
 
     public FleetEntity to(PlanetEntity planet) {

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.FleetPlan;
@@ -17,14 +16,10 @@ import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
-import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
@@ -106,12 +101,7 @@ public class FleetThread extends AbstractThread {
     private boolean blockExpiredTime(FleetSendCommand command) {
         String expiredConfig = map.getConfig(EXPIRED_TIME, null);
         if(expiredConfig == null) return false;
-        Optional<FleetEntity> lastSend = fleetRepository.findFirstByHashOrderByUpdatedDesc(command.getHash());
-        if(lastSend.isEmpty()) return false;
-
-        else if (DELAY_TO_FLEET_THERE.equals(expiredConfig)) return LocalDateTime.now().isBefore(lastSend.get().visited);
-        else if (DELAY_TO_FLEET_BACK.equals(expiredConfig)) return LocalDateTime.now().isBefore(lastSend.get().back);
-        else return LocalDateTime.now().isBefore(lastSend.get().updated.plusSeconds(new Duration(expiredConfig).getSeconds()));
+        return fleetRepository.isBlockedWithExpiredTime(command.getHash(), expiredConfig);
     }
 
 //    private void logFleetOverview(FleetSendCommand promise) {

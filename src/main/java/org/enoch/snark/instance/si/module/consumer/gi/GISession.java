@@ -16,7 +16,6 @@ public class GISession {
         gir = new SessionGIR(gi);
     }
 
-//    GISession powinien zrezygnowac z Credentials i korzystac z mapy i chyba polaczone powinnoi zostac z gir
     private String start(Credentials credentials) {
         isRunning = false;
         long waitingSecounds = 30L;
@@ -60,8 +59,8 @@ public class GISession {
 
         if (gir.isCurrentUrlBackToLobby()) {
             isRunning = false;
-            System.err.println("before restart sleep " + 300);
-            SleepUtil.secondsToSleep(300L);
+            System.err.println("before restart sleep " + credentials.restartDuration().getSeconds());
+            SleepUtil.sleep(credentials.restartDuration());
             return start(credentials);
         }
 

@@ -76,12 +76,6 @@ public class PlanetExpression {
 
             if(action.contains(FIND)) {
                 return CustomFinder.find(action);
-            } else if(action.contains(NEXT)) {
-                ColonyEntity next = TripFinder.next(colony);
-                return next!=null ? singletonList(next.toPlanet()) : null;
-            } else if(action.contains(PREV)) {
-                ColonyEntity prev = TripFinder.prev(colony);
-                return prev!=null ? singletonList(prev.toPlanet()) : null;
             } else if(action.contains(SWAP)) {
                 return singletonList(planet.swapType());
             } else if(action.contains(FARM)) {

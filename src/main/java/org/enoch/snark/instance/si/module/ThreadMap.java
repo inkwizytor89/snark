@@ -37,6 +37,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String HASH = "hash";
     public static final String LOGIN = "login";
     public static final String PASSWORD = "password";
+    public static final String RESTART_DURATION = "restart_duration";
     public static final String MODE = "mode";
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_PATH = "driver";
@@ -248,16 +249,6 @@ public class ThreadMap extends HashMap<String, String> {
 
     public String getSourcesCode(String defaultValue) {
         return getConfig(SOURCE, defaultValue);
-    }
-
-    @Deprecated
-    public List<ColonyEntity> getSources() {
-        return ColonyDAO.getInstance().getColonies(getNearestConfig(SOURCE, StringUtils.EMPTY));
-    }
-
-    @Deprecated
-    public List<ColonyEntity> getColonies(String key, String defaultValue) {
-        return ColonyDAO.getInstance().getColonies(getConfig(key, defaultValue));
     }
 
     public ShipsMap getShips(ShipsMap defaultValue) {

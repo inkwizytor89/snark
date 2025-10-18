@@ -57,7 +57,7 @@ public class SessionGIR extends GraphicalInterfaceReader {
 
     public boolean isCurrentUrlBackToLobby() {
         SleepUtil.sleep();
-        return wd().getCurrentUrl().contains(LOBBY_URL) ;
+        return wd().getCurrentUrl().contains("lobby") ;
     }
 
     public boolean isCurrentUrlEmpty() {

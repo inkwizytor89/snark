@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
+import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Service
@@ -92,4 +94,8 @@ public class Core {
             System.err.println("Unexpected error: "+command);
         commandDeque.push(command);
     }
+
+//    public synchronized void push(AbstractCommand command, String action) {
+//        if (!fleetRepository.isBlockedWithExpiredTime(command.getHash(), action)) push(command);
+//    }
 }

@@ -6,8 +6,9 @@ import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
-import org.enoch.snark.instance.model.action.PlanetExpression;
+import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.uc.ResourceUC;
+import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -18,7 +19,6 @@ import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
-import static org.enoch.snark.instance.si.module.ThreadMap.SOURCE;
 
 @RequiredArgsConstructor
 public class BuildThread extends AbstractThread {
@@ -29,6 +29,8 @@ public class BuildThread extends AbstractThread {
 
     public static final String DEFAULT_LIST = "small";
     public static final int SHORT_PAUSE = 20;
+
+    private final FleetRepository fleetRepository;
 
     private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
     private TechnologyService technologyService  = TechnologyService.getInstance();
@@ -58,7 +60,7 @@ public class BuildThread extends AbstractThread {
             Resources leave = map.getNearestLeaveResources(colony.type, nothing);
             if(requirements.isResourceUnknown() || ResourceUC.toTransport(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
                 log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
-                new BuildCommand(colony, requirements).push();
+                core.push(new BuildCommand(colony, requirements));
                continue;
             }
 
@@ -82,8 +84,9 @@ public class BuildThread extends AbstractThread {
         Resources leaveSwap = map.getNearestLeaveResources(swapColony.get().type, nothing);
         FleetSendCommand command = transportFleet(swapColony.get(), colony, missing, leaveSwap);
         if(command != null) {
-            command.setNext(new BuildCommand(colony, requirements),DELAY_TO_FLEET_THERE);
-            command.push(DELAY_TO_FLEET_BACK);
+            command.setNext(new BuildCommand(colony, requirements), DELAY_TO_FLEET_THERE);
+            if (!fleetRepository.isBlockedWithExpiredTime(command.getHash(), DELAY_TO_FLEET_BACK))
+                core.push(command);
         }
         return command;
     }
@@ -114,7 +117,7 @@ public class BuildThread extends AbstractThread {
             colonyMap = new HashMap<>();
             buildingList = configList;
         }
-        List<ColonyEntity> planets = new ArrayList<>(map.getColonies(SOURCE, PlanetExpression.PLANET));
+        List<ColonyEntity> planets = new ArrayList<>(this.getSources(PlanetService.PLANETS));
         Util.updateMapKeys(colonyMap, planets, null);
     }
 }
