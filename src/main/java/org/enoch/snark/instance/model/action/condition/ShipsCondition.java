@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.model.uc.ShipUC;
+import org.enoch.snark.instance.service.ShipService;
 
 @Getter
 public class ShipsCondition extends AbstractCondition {
@@ -28,8 +28,7 @@ public class ShipsCondition extends AbstractCondition {
     @Override
     public AbstractCondition check(ConditionContext context) {
         PlanetEntity colonyEntity = context.planet(planet);
-//        throw new NotImplementedException("ShipUC.fromExpressionToValues not implemented without promise");
-        ShipsMap valuedMap = ShipUC.fromExpressionToValues(shipsMap, colonyEntity, leave);
+        ShipsMap valuedMap = context.getShipService().fromExpressionToValues(shipsMap, colonyEntity, leave);
         boolean isPossible = colonyEntity.hasEnoughShips(valuedMap);
         return isPossible ? null : this;
     }

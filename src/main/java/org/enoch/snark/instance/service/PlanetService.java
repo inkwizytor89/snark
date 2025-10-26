@@ -2,8 +2,10 @@ package org.enoch.snark.instance.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.find.CustomFinder;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.to.*;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
@@ -49,8 +52,9 @@ public class PlanetService {
 
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
+    private final TargetRepository targetRepository;
 
-    public List<PlanetData> fromTargetFleetPlan(FleetPlan fleetPlan) {
+    public List<PlanetData> targetFromFleetPlan(FleetPlan fleetPlan) {
         return fromExpression(fleetPlan.getTarget(), FleetContext.fromFleetPlan(fleetPlan));
     }
 
@@ -75,7 +79,7 @@ public class PlanetService {
 
 
         if(planetTerm.getAction() == null) {
-            return singletonList(planetTerm.getPlanetData());
+            return singletonList(getPlanetData(planetTerm.getPlanetData().getPlanet()));
         } else if(List.of(ALL, MOONS, PLANETS, EACH_POSITION, NONE).contains(planetTerm.getAction())) {
             return colonyRepository.findByCode(planetTerm.getAction()).stream()
                     .map(PlanetData::new)
@@ -99,5 +103,10 @@ public class PlanetService {
             if(value != null) return fromExpression(value);
             throw new IllegalStateException("\""+input+"\" can not be interpreted as expression term");
         }
+    }
+
+    public PlanetData getPlanetData(Planet planet) {
+        Optional<TargetEntity> targetEntity = targetRepository.find(planet);
+        return targetEntity.map(PlanetData::new).orElseGet(() -> new PlanetData(colonyRepository.byPlanet(planet)));
     }
 }

@@ -11,6 +11,8 @@ import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Target;
+import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.ShipService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -24,6 +26,8 @@ public class ConditionContext {
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
     private final TargetRepository targetRepository;
+    private final PlanetService planetService;
+    private final ShipService shipService;
 
     private SendCommand command;
 
@@ -46,8 +50,6 @@ public class ConditionContext {
     }
 
     private PlanetEntity determinePlanetEntity(Planet planet) {
-        Optional<TargetEntity> targetEntity = getTargetRepository().find(planet);
-        if(targetEntity.isPresent()) return targetEntity.get();
-        else return getColonyRepository().byPlanet(planet);
+        return planetService.getPlanetData(planet).planetData();
     }
 }

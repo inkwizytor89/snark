@@ -103,15 +103,12 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     private FleetSendCommand createFleetSendCommand(ColonyEntity bestColony, ShipsMap ships) {
-        Planet expeditionTarget = bestColony.toPlanet().toSpace();
-
-        FleetPlan fleetPlan = FleetPlan.builder()
-                .source(bestColony.toString())
-                .target(expeditionTarget.toString())
-                .mission(Mission.EXPEDITION)
-                .ships(ships)
-                .build();
-        return fleetDispatcher.from(fleetPlan).getFirst();
+        FleetSendCommand command = new FleetSendCommand();
+        command.setSource(bestColony);
+        command.setTarget( bestColony.toPlanet().toSpace());
+        command.setMission(Mission.EXPEDITION);
+        command.setShipsMap(ships);
+        return command;
     }
 
     private ColonyEntity findBest(List<ColonyEntity> colonies) {

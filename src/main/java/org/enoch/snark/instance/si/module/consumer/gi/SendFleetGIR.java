@@ -9,6 +9,7 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
@@ -29,12 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.enoch.snark.action.command.status.ExecutionIssue.*;
-import static org.enoch.snark.instance.model.to.Resources.everything;
-import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.types.ResourceType.DEUTERIUM;
 import static org.enoch.snark.instance.model.uc.ResourceUC.*;
-import static org.enoch.snark.instance.model.uc.ShipUC.fromExpressionToValues;
 import static org.enoch.snark.instance.si.module.ThreadMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
@@ -177,14 +175,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         }
     }
 
-    public void selectShips(SendCommand command) {
+    public void selectShips(ShipsMap shipsMap) {
         //Scroll down till the bottom of the page
         ((JavascriptExecutor) gi.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
-        if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
+        if(ALL_SHIPS.equals(shipsMap)) {
             selectAllShips();
         } else {
-            ShipsMap realCanToSend = fromExpressionToValues(command.getShipsMap(), command);
-            selectShips(realCanToSend);
+            selectRealShips(shipsMap);
         }
     }
 
@@ -192,7 +189,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
         wd.findElement(By.id("sendall")).click();
     }
 
-    private void selectShips(ShipsMap shipsMap) {
+    private void selectRealShips(ShipsMap shipsMap) {
         for (Map.Entry<Ship, Long> entry : shipsMap.entrySet()) {
             Long value = typeShip(entry.getKey(), entry.getValue());
 //            promise.setShipsMap(ShipsMap.createSingle(entry.getKey(), value));

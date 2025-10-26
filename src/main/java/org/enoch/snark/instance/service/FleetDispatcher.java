@@ -26,7 +26,7 @@ public class FleetDispatcher {
             index++;
             for (ColonyEntity colony : colonyRepository.findByCode(fleetPlan.getSource())) {
                 FleetPlan sourcesdFleetPlan = fleetPlan.toBuilder().source(colony.toString()).build();
-                List<PlanetData> targets = planetService.fromTargetFleetPlan(sourcesdFleetPlan);
+                List<PlanetData> targets = planetService.targetFromFleetPlan(sourcesdFleetPlan);
 //                List<Planet> targets = Planet.fromString(fleetPlan.getTarget());
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();

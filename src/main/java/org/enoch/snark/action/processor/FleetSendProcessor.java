@@ -17,10 +17,12 @@ import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
 import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.Navigator;
+import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
 import org.springframework.context.annotation.Scope;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.action.command.status.ExecutionIssue.*;
+import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.ATTACK;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.SPY;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
@@ -50,6 +53,7 @@ public class FleetSendProcessor {
     private final PlayerRepository playerRepository;
     private final FleetRepository fleetRepository;
     private final ColonyRepository colonyRepository;
+    private final ShipService shipService;
 
     public boolean execute(GI gi, SendCommand command) {
         SendFleetGIR gir = new SendFleetGIR(gi);
@@ -59,7 +63,13 @@ public class FleetSendProcessor {
             command.getStatus().setIssue(CONDITION_WONT_FIT);
             return true;
         }
-        gir.selectShips(command);
+        ShipsMap shipsMap;
+        if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
+            shipsMap = ALL_SHIPS;
+        } else {
+            shipsMap = shipService.fromExpressionToValues(command);
+        }
+        gir.selectShips(shipsMap);
         gir.next();
         gir.setSpeed(command.getSpeed());
         gir.fixDoNotWorkingDefaults(command);

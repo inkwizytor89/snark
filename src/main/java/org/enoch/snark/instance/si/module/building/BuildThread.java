@@ -7,6 +7,7 @@ import org.enoch.snark.common.Util;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.instance.service.FleetService;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.service.TechnologyService;
@@ -18,7 +19,6 @@ import java.util.*;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_THERE;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
-import static org.enoch.snark.instance.model.uc.FleetUC.transportFleet;
 
 @RequiredArgsConstructor
 public class BuildThread extends AbstractThread {
@@ -31,6 +31,7 @@ public class BuildThread extends AbstractThread {
     public static final int SHORT_PAUSE = 20;
 
     private final FleetRepository fleetRepository;
+    private final FleetService fleetService;
 
     private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
     private TechnologyService technologyService  = TechnologyService.getInstance();
@@ -82,7 +83,7 @@ public class BuildThread extends AbstractThread {
         Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
         Resources leaveSwap = map.getNearestLeaveResources(swapColony.get().type, nothing);
-        FleetSendCommand command = transportFleet(swapColony.get(), colony, missing, leaveSwap);
+        FleetSendCommand command = fleetService.transportFleet(swapColony.get(), colony, missing, leaveSwap);
         if(command != null) {
             command.setNext(new BuildCommand(colony, requirements), DELAY_TO_FLEET_THERE);
             if (!fleetRepository.isBlockedWithExpiredTime(command.getHash(), DELAY_TO_FLEET_BACK))

@@ -11,6 +11,7 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
@@ -23,7 +24,6 @@ import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
-import static org.enoch.snark.instance.model.uc.ShipUC.fromExpressionToValues;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
@@ -36,6 +36,7 @@ public class FleetThread extends AbstractThread {
     private final FleetDispatcher fleetDispatcher;
     private final ConditionChecker conditionChecker;
     private final PlanetService planetService;
+    private final ShipService shipService;
 
     @Override
     protected String getThreadType() {
@@ -79,7 +80,7 @@ public class FleetThread extends AbstractThread {
             index++;
             command.generateHash(map.name(), Integer.toString(index));
 //            logFleetOverview(command);
-            ShipsMap realShips = fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
+            ShipsMap realShips = shipService.fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
             if(realShips.isEmpty()) continue;
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());

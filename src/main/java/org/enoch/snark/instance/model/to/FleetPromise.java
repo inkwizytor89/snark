@@ -3,12 +3,6 @@ package org.enoch.snark.instance.model.to;
 import lombok.Data;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
-import org.enoch.snark.instance.model.uc.ShipUC;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Data
@@ -25,13 +19,6 @@ public class FleetPromise {
     private Resources leaveResources;
 
     public FleetPromise() {
-    }
-
-
-    public ShipsMap normalizeShipMap() {
-        return ShipUC.fromExpressionToValues(shipsMap, this);
-
-//        return shipsMap.reduce(maxToSend);
     }
 
     public void setTarget(String target) {

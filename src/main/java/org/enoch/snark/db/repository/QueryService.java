@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -15,7 +17,9 @@ public class QueryService {
     public List<String> runString(String query) {
         // Rozbijamy po "|"
         String[] parts = query.split("\\|", 3);
-        if (parts.length < 2) {
+        if (parts.length == 1) {
+            return Collections.singletonList(parts[0]);
+        }if (parts.length < 1) {
             throw new IllegalArgumentException("Invalid query format. Expected: Class|SQL|params");
         }
 

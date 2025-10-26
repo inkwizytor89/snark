@@ -31,7 +31,7 @@ public class FleetSendCommand extends AbstractCommand implements SendCommand {
 
     public void generateHash(String hashPrefix, String code) {
         String prefix = hashPrefix != null ? hashPrefix+"_" : "";
-        hash(prefix+ fleetPlan.getSource()+"_"+ fleetPlan.getMission()+"_"+ fleetPlan.getTarget()+"_"+code);
+        hash(prefix+ source+"_"+ mission+"_"+ target+"_"+code);
     }
 
     @Override
