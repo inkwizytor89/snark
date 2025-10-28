@@ -6,6 +6,6 @@ public enum ExecutionIssue {
     TO_WEAK_PLAYER,
     CAN_NOT_SENT,
     CONDITION_WONT_FIT,
-    NOT_ENOUGH_DEUTERIUM
-
+    NOT_ENOUGH_DEUTERIUM,
+    OTHER
 }

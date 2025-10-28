@@ -3,6 +3,8 @@ package org.enoch.snark.instance.si.module;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.enoch.snark.action.command.AbstractCommand;
@@ -10,7 +12,6 @@ import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
 import org.enoch.snark.db.dao.CacheEntryDAO;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
@@ -18,23 +19,24 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.action.command.status.ExecutionStatus.IN_PROGRESS;
-import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
+import static java.util.Arrays.asList;
+import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @NoArgsConstructor(force = true)
 public abstract class AbstractThread extends ExecutorImpl {
 
+    public static final long NO_LIMIT = -1L;
     @Autowired
     protected final Core core;
     @Autowired
@@ -57,8 +59,10 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected Duration pause = new Duration("1M");
     private boolean isLive = true;
     protected Boolean debug;
+    protected Long limit = NO_LIMIT;
 
     protected List<AbstractCommand> commands = new ArrayList<>();
+    protected ListMultimap<String, AbstractCommand> commandsMap = ArrayListMultimap.create();
 
     @PostConstruct
     public void init() {
@@ -98,10 +102,12 @@ public abstract class AbstractThread extends ExecutorImpl {
             if (RunningState.isRunning(actualState)) {
                 try {
                     debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
+                    limit = map.getConfigNumber(ThreadMap.COMMAND_LIMIT, "-1");
                     updatePause();
 //                    log(actualState.name()+" pause="+pause);
 
                     onStep();
+                    limitedPush();
                 } catch (Exception e) {
                     runningProcessor.logChangedStatus("Thread " + map.name(), map);
                     e.printStackTrace();
@@ -150,11 +156,69 @@ public abstract class AbstractThread extends ExecutorImpl {
         return map;
     }
 
-    protected void pushCommand(AbstractCommand command) {
-        pushCommands(Collections.singletonList(command));
+    protected boolean readyToPush(String key) {
+        if(!commandsMap.containsKey(key)) return true;
+        List<AbstractCommand> commandsChain = commandsMap.get(key);
+        if(commandsChain.isEmpty()) return true;
+        return commandsChain.stream().allMatch(AbstractCommand::executed);
     }
 
-    protected void pushCommands(List<AbstractCommand> commands) {
+    protected void pushCommands(AbstractCommand command) {
+        pushCommand(command.getHash(), command);
+    }
+
+    protected void pushCommand(String key, AbstractCommand command) {
+        if(command == null) return;
+        command.getStatus().setStatus(WAITING);
+        putCommandChain(key, command);
+
+        if(NO_LIMIT == limit) {
+            core.push(command);
+        }
+    }
+
+    private void putCommandChain(String key, AbstractCommand command) {
+        commandsMap.removeAll(key);
+        while(command != null) {
+            commandsMap.put(key, command);
+            if(command.isFollowingAction()) {
+                command = command.getFollowingAction().getCommand();
+            } else break;
+        }
+    }
+
+    private void limitedPush() {
+        if(limit < 0) return;
+
+        long inQueueCount = commandsMap.asMap().values().stream()
+                .filter(list -> !list.isEmpty() && isFirstCommandInQueue(list))
+                .count();
+        while(inQueueCount <= limit) {
+            Optional<Collection<AbstractCommand>> firstWaitingList = commandsMap.asMap().values().stream()
+                    .filter(list -> !list.isEmpty() && isFirstCommandWaiting(list))
+                    .findFirst();
+            if(firstWaitingList.isEmpty()) break;
+            AbstractCommand toQueue = firstWaitingList.get().stream().findFirst().get();
+            core.push(toQueue);
+            inQueueCount++;
+        }
+    }
+
+    private boolean isFirstCommandInQueue(Collection<AbstractCommand> cmd) {
+        AbstractCommand first = cmd.stream().findFirst().get();
+        return asList(NEW, IN_PROGRESS).contains(first);
+    }
+
+    private boolean isFirstCommandWaiting(Collection<AbstractCommand> cmd) {
+        AbstractCommand first = cmd.stream().findFirst().get();
+        return asList(WAITING).contains(first);
+    }
+
+    protected void pushOldCommand(AbstractCommand command) {
+        pushOldCommands(Collections.singletonList(command));
+    }
+
+    protected void pushOldCommands(List<AbstractCommand> commands) {
         if(commands != null) this.commands = commands;
         else this.commands = new ArrayList<>();
         this.commands.forEach(command -> core.push(command));
@@ -174,6 +238,20 @@ public abstract class AbstractThread extends ExecutorImpl {
         if(commands.isEmpty()) return false;
         return commands.stream()
                 .anyMatch(AbstractCommand::notExecuted);
+    }
+
+    protected String getNearestConfig(String key, String defaultValue) {
+        if(map().containsKey(key)) return map().get(key);
+        ThreadMap moduleMainMap = module.getModuleMap().get(MAIN);
+        if(moduleMainMap.containsKey(key)) return moduleMainMap.get(key);
+        return defaultValue;
+    }
+
+    public Resources getNearestLeaveResources(ColonyType type, Resources defaultResources) {
+        String key = ColonyType.PLANET.equals(type) ? LEAVE_PLANET_RESOURCES : LEAVE_MOON_RESOURCES;
+        String nearestConfig = getNearestConfig(key, null);
+        if (nearestConfig == null) return defaultResources;
+        return Resources.parse(nearestConfig);
     }
 
     protected List<ColonyEntity> getSources(String defaultValue) {

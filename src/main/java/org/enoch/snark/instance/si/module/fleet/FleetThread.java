@@ -58,7 +58,7 @@ public class FleetThread extends AbstractThread {
 //        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
-                .source(map.getNearestConfig(SOURCE, PLANET))
+                .source(getNearestConfig(SOURCE, PLANET))
                 .target(map.getConfig(TARGET, null))
                 .conditions(getConditions(START_CONDITION))
 //                .filters(AbstractFilter.create(filtersEntry))

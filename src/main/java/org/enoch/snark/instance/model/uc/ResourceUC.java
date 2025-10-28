@@ -22,7 +22,7 @@ public class ResourceUC {
     }
 
     public static Resources toTransport(Resources current, Resources requested, Resources leave, ColonyType colonyType) {
-        if(leave == null) leave = Instance.getGlobalMainConfigMap().getNearestLeaveResources(colonyType, nothing);
+        if(leave == null) leave = nothing;
         if(everything.equals(requested) && nothing.equals(leave)) return everything;
         if(everything.equals(requested) && !nothing.equals(leave)) return current.missing(leave);
         Resources needed = sum(requested, leave);

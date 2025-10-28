@@ -3,6 +3,8 @@ package org.enoch.snark.instance.si.module.consumer;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
+import org.enoch.snark.action.command.status.ExecutionIssue;
+import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
@@ -24,6 +26,8 @@ import org.openqa.selenium.WebElement;
 
 import java.time.LocalTime;
 
+import static org.enoch.snark.action.command.status.ExecutionIssue.OTHER;
+import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -144,34 +148,39 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     }
 
     private synchronized void resolve(AbstractCommand command) {
+        if(command == null) return;
+        command.getStatus().setStatus(IN_PROGRESS);
         actualProcessedCommand = command;
         boolean success;
-        if(command == null) {
-            return;
-        }
         try {
 
             Debug.log(this, command + " start at " + LocalTime.now());
             success = processor.execute(gi, command);
+            if(success) {
+                command.getStatus().setSuccess();
+                if(command.isFollowingAction()) {
+                    new WaitingThread(command.getFollowingAction(), commandDeque).start();
+                }
+            }
 
-        } catch (ShipDoNotExists e) {
-            e.printStackTrace();
-            return;
+//        } catch (ShipDoNotExists e) {
+//            e.printStackTrace();
+//            return;
         } catch (Throwable e) {
-            e.printStackTrace();
             success = false;
+            System.err.println(e.getMessage());
+            command.getStatus().setFailed(OTHER);
+            e.printStackTrace();
         }
 
-        if(success) {
-            if(command.isFollowingAction()) {
-                new WaitingThread(command.getFollowingAction(), commandDeque).start();
-            }
-        } else {
-            CommandStatus status = command.getStatus();
+        CommandStatus status = command.getStatus();
+        if(!SUCCESS.equals(status.getStatus())) {
             status.failed();
             if (status.getFailed() < 2) {
+                status.setStatus(FAILED);
                 new WaitingThread(new FollowingAction(command, 2), commandDeque).start();
             } else {
+                status.setStatus(CRASHED);
                 command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
             }

@@ -1,7 +1,6 @@
 package org.enoch.snark.instance.si.module.building.list.lf;
 
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.instance.model.technology.Building;
 import org.enoch.snark.instance.model.technology.LFBuilding;
 import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
@@ -19,19 +18,22 @@ public class MechaT3 extends AbstractBuildingList {
 
     public List<BuildRequest> create() {
         List<BuildRequest> buildRequests = new ArrayList<>(new MechaT2(StringUtils.EMPTY).create());
-        buildRequests.addAll(Arrays.asList(
-                new BuildRequest(LFBuilding.lifeformTech13101, 73),
-                new BuildRequest(LFBuilding.lifeformTech13102, 85)
-        ));
-        buildRequests.addAll(Arrays.asList(
-                new BuildRequest(LFBuilding.lifeformTech13108, 23),
-                new BuildRequest(LFBuilding.lifeformTech13109, 14)
-        ));
 
-        buildRequests.addAll(Arrays.asList(
-                new BuildRequest(LFBuilding.lifeformTech13104, 13),
+        buildRequests.addAll(create(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13101, 72),
+                new BuildRequest(LFBuilding.lifeformTech13102, 83),
+                new BuildRequest(LFBuilding.lifeformTech13108, 30),
+                new BuildRequest(LFBuilding.lifeformTech13109, 22),
+                new BuildRequest(LFBuilding.lifeformTech13104, 12),
+                new BuildRequest(LFBuilding.lifeformTech13105, 7)
+        )));
+
+        // t2 and t3 buildings requires population and sometimes list is blocked by this reason,
+        // that is why is divided on second list on end processing
+        buildRequests.addAll(create(Arrays.asList(
+                new BuildRequest(LFBuilding.lifeformTech13104, 14),
                 new BuildRequest(LFBuilding.lifeformTech13105, 9)
-        ));
-        return create(buildRequests);
+        )));
+        return buildRequests;
     }
 }

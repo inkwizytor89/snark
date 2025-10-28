@@ -55,6 +55,7 @@ public class ThreadMap extends HashMap<String, String> {
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     public static final String DEBUG = "debug";
+    public static final String COMMAND_LIMIT = "command_limit";
     public static final String DRY_RUN = "dry_run";
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
@@ -133,12 +134,12 @@ public class ThreadMap extends HashMap<String, String> {
         return value;
     }
 
-    public String getNearestConfig(String key, String defaultValue) {
-        if(this.containsKey(key)) return this.get(key);
-        System.err.println("getNearestConfig to fix - used default: "+key+" = "+defaultValue);
-//        if(Instance.getGlobalMainConfigMap().containsKey(key)) return Instance.getGlobalMainConfigMap().get(key);
-        return defaultValue;
-    }
+//    public String getNearestConfig(String key, String defaultValue) {
+//        if(this.containsKey(key)) return this.get(key);
+//
+////        if(Instance.getGlobalMainConfigMap().containsKey(key)) return Instance.getGlobalMainConfigMap().get(key);
+//        return defaultValue;
+//    }
 
     public Boolean getConfigBoolean(String key, Boolean defaultValue) {
         return Boolean.parseBoolean(getConfig(key, defaultValue.toString()));
@@ -227,12 +228,12 @@ public class ThreadMap extends HashMap<String, String> {
         return Resources.parse(config);
     }
 
-    public Resources getNearestLeaveResources(ColonyType type, Resources defaultResources) {
-        String key = ColonyType.PLANET.equals(type) ? LEAVE_PLANET_RESOURCES : LEAVE_MOON_RESOURCES;
-        String nearestConfig = getNearestConfig(key, null);
-        if (nearestConfig == null) return defaultResources;
-        return Resources.parse(nearestConfig);
-    }
+//    public Resources getNearestLeaveResources(ColonyType type, Resources defaultResources) {
+//        String key = ColonyType.PLANET.equals(type) ? LEAVE_PLANET_RESOURCES : LEAVE_MOON_RESOURCES;
+//        String nearestConfig = getNearestConfig(key, null);
+//        if (nearestConfig == null) return defaultResources;
+//        return Resources.parse(nearestConfig);
+//    }
 
     public String name() {
         if(!this.containsKey(NAME)) {

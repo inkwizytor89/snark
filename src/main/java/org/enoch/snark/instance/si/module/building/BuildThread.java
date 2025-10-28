@@ -52,16 +52,17 @@ public class BuildThread extends AbstractThread {
     protected void onStep() {
         updateSourceMap();
         for(ColonyEntity colony : colonyMap.keySet()) {
+            if(!readyToPush(colony.toString())) continue;
 
             BuildRequest buildRequest = getNextRequest(colony);
             if (isNothingToBuild(buildRequest)) continue;
             if (isBuildQueueBlockedForBuildRequest(colony, buildRequest)) continue;
 
             BuildRequirements requirements = new BuildRequirements(buildRequest, buildingCost.getCosts(buildRequest));
-            Resources leave = map.getNearestLeaveResources(colony.type, nothing);
+            Resources leave = getNearestLeaveResources(colony.type, nothing);
             if(requirements.isResourceUnknown() || ResourceUC.toTransport(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
                 log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
-                core.push(new BuildCommand(colony, requirements));
+                pushCommand(colony.toString(), new BuildCommand(colony, requirements));
                continue;
             }
 
@@ -80,14 +81,14 @@ public class BuildThread extends AbstractThread {
     private SendCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
         Optional<ColonyEntity> swapColony = colonyRepository.findByCp(colony.cpm);
         if(swapColony.isEmpty()) return null;
-        Resources leaveColony = map.getNearestLeaveResources(colony.type, nothing);
+        Resources leaveColony = getNearestLeaveResources(colony.type, nothing);
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
-        Resources leaveSwap = map.getNearestLeaveResources(swapColony.get().type, nothing);
+        Resources leaveSwap = getNearestLeaveResources(swapColony.get().type, nothing);
         FleetSendCommand command = fleetService.transportFleet(swapColony.get(), colony, missing, leaveSwap);
         if(command != null) {
             command.setNext(new BuildCommand(colony, requirements), DELAY_TO_FLEET_THERE);
             if (!fleetRepository.isBlockedWithExpiredTime(command.getHash(), DELAY_TO_FLEET_BACK))
-                core.push(command);
+                pushCommand(colony.toString() ,command);
         }
         return command;
     }

@@ -131,6 +131,9 @@ public enum Building implements Technology {
             case naniteFactory:
             case terraformer:
             case repairDock:
+            case moonbase:
+            case sensorPhalanx:
+            case jumpGate:
                 return FACILITIES;
             default: throw new RuntimeException("Can not find component for " + this.name());
         }

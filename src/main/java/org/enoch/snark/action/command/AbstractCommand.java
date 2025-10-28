@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
-import static org.enoch.snark.action.command.status.ExecutionStatus.IN_PROGRESS;
-import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
+import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 
 @Data
@@ -33,7 +33,7 @@ public abstract class AbstractCommand {
 
 
     protected AbstractCommand() {
-        status = new CommandStatus(NEW, NO_ISSUE, 0);
+        status = new CommandStatus(NOT_REGISTERED, NO_ISSUE, 0);
 //        this.instance = Instance.getInstance();
 //        webDriver = GI.getInstance().getWebDriver();
 //        if(this instanceof SendFleetCommand) runType = NORMAL;
@@ -87,7 +87,11 @@ public abstract class AbstractCommand {
     }
 
     public boolean notExecuted() {
-        return NEW.equals(getStatus().getStatus()) || IN_PROGRESS.equals(getStatus().getStatus());
+        return asList(NEW, IN_PROGRESS, WAITING, NOT_REGISTERED).contains(getStatus().getStatus());
+    }
+
+    public boolean executed() {
+        return asList(SUCCESS, FAILED, CRASHED).contains(getStatus().getStatus());
     }
 
     public AbstractCommand hash(String hash) {

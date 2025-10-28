@@ -161,3 +161,11 @@ You can specify which types of missions should be considered as blocking.
   "blockingMissions": ["ATTACK", "TRANSPORT"]
 }
 ```
+```json
+{
+  "type": "NO_MISSIONS",
+  "source": "source",
+  "blockingMissions": ["ATTACK", "TRANSPORT"],
+  "duration": "1H"
+}
+```

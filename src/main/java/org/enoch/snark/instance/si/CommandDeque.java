@@ -2,9 +2,12 @@ package org.enoch.snark.instance.si;
 
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.SendCommand;
+import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.instance.service.Navigator;
 
 import java.util.*;
+
+import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
 
 public class CommandDeque {
     private final List<QueueRunType> runTypes = Arrays.asList(QueueRunType.values());
@@ -33,6 +36,7 @@ public class CommandDeque {
     private synchronized void pushToAction(AbstractCommand command) {
         Deque<AbstractCommand> deque = actionsMap.get(command.getRunType());
         deque.offer(command);
+        command.getStatus().setStatus(NEW);
     }
 
     public synchronized List<AbstractCommand> peek() {

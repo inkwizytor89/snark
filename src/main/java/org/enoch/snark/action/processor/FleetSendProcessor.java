@@ -133,8 +133,6 @@ public class FleetSendProcessor {
         } else {
             command.getStatus().setFailed(executionIssue);
         }
-
-
         return true;
     }
 

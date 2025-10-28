@@ -607,6 +607,9 @@ public abstract class PlanetEntity extends IdEntity{
             case Building.naniteFactory -> naniteFactory;
             case Building.terraformer -> terraformer;
             case Building.repairDock -> repairDock;
+            case Building.moonbase -> moonbase;
+            case Building.sensorPhalanx -> sensorPhalanx;
+            case Building.jumpGate -> jumpGate;
             case LFBuilding.lifeformTech11101 -> lifeformTech11101;
             case LFBuilding.lifeformTech11102 -> lifeformTech11102;
             case LFBuilding.lifeformTech11103 -> lifeformTech11103;
@@ -658,7 +661,7 @@ public abstract class PlanetEntity extends IdEntity{
 
 //            case Research.energyTechnology -> energyTechnology;
 
-            default -> throw new RuntimeException("Unknown Building");
+            default -> throw new RuntimeException("Unknown Building "+building);
         };
     }
 
