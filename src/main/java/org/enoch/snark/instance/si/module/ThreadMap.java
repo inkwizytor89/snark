@@ -44,6 +44,7 @@ public class ThreadMap extends HashMap<String, String> {
 
     public static final String MODULE_TIME = "module_time";
     public static final String TIME = "time";
+    public static final String CONDITIONS = "conditions";
     public static final String TAG = "tag";
     public static final String PAUSE = "pause";
     public static final String ON = "on";

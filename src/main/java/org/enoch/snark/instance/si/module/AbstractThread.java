@@ -17,10 +17,12 @@ import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +42,11 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Autowired
     protected final Core core;
     @Autowired
+    protected final ConditionChecker conditionChecker;
+    @Autowired
     protected final ColonyRepository colonyRepository;
+    @Autowired
+    protected final GalaxyRepository galaxyRepository;
     @Autowired
     protected final PlanetService planetService;
     @Autowired
@@ -61,7 +67,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected Boolean debug;
     protected Long limit = NO_LIMIT;
 
-    protected List<AbstractCommand> commands = new ArrayList<>();
     protected ListMultimap<String, AbstractCommand> commandsMap = ArrayListMultimap.create();
 
     @PostConstruct
@@ -94,6 +99,9 @@ public abstract class AbstractThread extends ExecutorImpl {
     public void run() {
         while(isLive) {
             if(shouldWaitForDeque()) continue;
+            if(shouldWaitForConditions())
+                continue;
+
             RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
                     .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
                     .getActualState();
@@ -121,6 +129,10 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected boolean shouldWaitForDeque() {
         return !core.isDequeReady();
+    }
+
+    private boolean shouldWaitForConditions() {
+        return !conditionChecker.fit(getConditions(CONDITIONS), null);
     }
 
     private boolean isOn() {
@@ -156,14 +168,24 @@ public abstract class AbstractThread extends ExecutorImpl {
         return map;
     }
 
-    protected boolean readyToPush(String key) {
-        if(!commandsMap.containsKey(key)) return true;
-        List<AbstractCommand> commandsChain = commandsMap.get(key);
-        if(commandsChain.isEmpty()) return true;
-        return commandsChain.stream().allMatch(AbstractCommand::executed);
+    protected boolean somethingPushed() {
+        return anythingNotExecuted(commandsMap.values());
     }
 
-    protected void pushCommands(AbstractCommand command) {
+    protected boolean alreadyPushed(String key) {
+        return anythingNotExecuted(commandsMap.get(key));
+    }
+
+    private boolean anythingNotExecuted(Collection<AbstractCommand> commandsChain) {
+        if(commandsChain.isEmpty()) return false;
+        return commandsChain.stream().anyMatch(AbstractCommand::notExecuted);
+    }
+
+    protected void pushSingleListCommand(AbstractCommand command) {
+        pushCommand(MAIN, command);
+    }
+
+    protected void pushCommand(AbstractCommand command) {
         pushCommand(command.getHash(), command);
     }
 
@@ -191,7 +213,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         if(limit < 0) return;
 
         long inQueueCount = commandsMap.asMap().values().stream()
-                .filter(list -> !list.isEmpty() && isFirstCommandInQueue(list))
+                .filter(list -> !list.isEmpty() && isAnyCommandInQueue(list))
                 .count();
         while(inQueueCount <= limit) {
             Optional<Collection<AbstractCommand>> firstWaitingList = commandsMap.asMap().values().stream()
@@ -204,40 +226,13 @@ public abstract class AbstractThread extends ExecutorImpl {
         }
     }
 
-    private boolean isFirstCommandInQueue(Collection<AbstractCommand> cmd) {
-        AbstractCommand first = cmd.stream().findFirst().get();
-        return asList(NEW, IN_PROGRESS).contains(first);
+    private boolean isAnyCommandInQueue(Collection<AbstractCommand> cmd) {
+        return cmd.stream().anyMatch(command -> asList(NEW, IN_PROGRESS).contains(command.getStatus().getStatus()));
     }
 
     private boolean isFirstCommandWaiting(Collection<AbstractCommand> cmd) {
         AbstractCommand first = cmd.stream().findFirst().get();
         return asList(WAITING).contains(first);
-    }
-
-    protected void pushOldCommand(AbstractCommand command) {
-        pushOldCommands(Collections.singletonList(command));
-    }
-
-    protected void pushOldCommands(List<AbstractCommand> commands) {
-        if(commands != null) this.commands = commands;
-        else this.commands = new ArrayList<>();
-        this.commands.forEach(command -> core.push(command));
-    }
-
-    protected void noDuplicationPushCommands(List<AbstractCommand> commands) {
-        if(commands == null) return;
-        List<AbstractCommand> notExecuted = this.commands.stream()
-                .filter(AbstractCommand::notExecuted).toList();
-
-        commands.stream()
-                .filter(command -> notExecuted.stream().noneMatch(notExecutedCommand -> notExecutedCommand.getHash().equals(command.getHash())))
-                .forEach(command -> core.push(command));
-    }
-
-    protected boolean waitingForExecution() {
-        if(commands.isEmpty()) return false;
-        return commands.stream()
-                .anyMatch(AbstractCommand::notExecuted);
     }
 
     protected String getNearestConfig(String key, String defaultValue) {

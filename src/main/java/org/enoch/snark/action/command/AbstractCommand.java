@@ -3,12 +3,8 @@ package org.enoch.snark.action.command;
 import lombok.Data;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.status.CommandStatus;
-import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.openqa.selenium.WebDriver;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,14 +29,8 @@ public abstract class AbstractCommand {
 
 
     protected AbstractCommand() {
-        status = new CommandStatus(NOT_REGISTERED, NO_ISSUE, 0);
-//        this.instance = Instance.getInstance();
-//        webDriver = GI.getInstance().getWebDriver();
-//        if(this instanceof SendFleetCommand) runType = NORMAL;
+        status = new CommandStatus(NOT_REGISTERED, NO_ISSUE, null,0);
     }
-
-
-//    public abstract boolean execute();
 
     public void push(String action) {
         throw new NotImplementedException("To remove in spring version");
@@ -83,15 +73,12 @@ public abstract class AbstractCommand {
         return followingAction != null && followingAction.contains(action);
     }
 
-    public void onInterrupt() {
-    }
-
     public boolean notExecuted() {
-        return asList(NEW, IN_PROGRESS, WAITING, NOT_REGISTERED).contains(getStatus().getStatus());
+        return asList(NEW, IN_PROGRESS, FAILED, WAITING, NOT_REGISTERED).contains(getStatus().getStatus());
     }
 
     public boolean executed() {
-        return asList(SUCCESS, FAILED, CRASHED).contains(getStatus().getStatus());
+        return asList(SUCCESS, CRASHED).contains(getStatus().getStatus());
     }
 
     public AbstractCommand hash(String hash) {

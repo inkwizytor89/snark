@@ -84,7 +84,7 @@ public class UpdateThread extends AbstractThread {
                 .collect(Collectors.toSet())
                 .stream().map(colonyRepository::byPlanet)
                 .filter(Objects::nonNull)
-                .forEach(colony -> core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
+                .forEach(colony -> pushCommand(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName())));
     }
 
     private boolean isNavigatorExpired() {
@@ -93,10 +93,10 @@ public class UpdateThread extends AbstractThread {
     }
 
     public void updateState() {
-        core.push(new LoadColoniesCommand()
+        pushCommand(new LoadColoniesCommand()
                 .hash(threadType +"_LoadColoniesCommand")
                 .setRunType(QueueRunType.MAJOR));
-        core.push(new UpdateFleetEventsCommand()
+        pushCommand(new UpdateFleetEventsCommand()
                 .hash(threadType +"_UpdateFleetEventsCommand")
                 .setRunType(QueueRunType.MAJOR));
     }

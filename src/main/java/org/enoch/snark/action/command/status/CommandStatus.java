@@ -8,6 +8,7 @@ import lombok.Data;
 public class CommandStatus {
     private ExecutionStatus status;
     private ExecutionIssue issue;
+    private String reason;
     private int failed;
 
     public void failed() {

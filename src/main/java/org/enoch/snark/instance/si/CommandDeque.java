@@ -2,7 +2,6 @@ package org.enoch.snark.instance.si;
 
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.SendCommand;
-import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.instance.service.Navigator;
 
 import java.util.*;
@@ -69,9 +68,4 @@ public class CommandDeque {
     public void release() {
         actualProcessedCommand = null;
     }
-
-//    private boolean canPoll(List<FleetEntity> toProcess) {
-//        boolean atLeast2Slots = Consumer.getInstance().getFleetMax() - Consumer.getInstance().getFleetCount() > 1;
-//        return !toProcess.isEmpty() && atLeast2Slots;
-//    }
 }

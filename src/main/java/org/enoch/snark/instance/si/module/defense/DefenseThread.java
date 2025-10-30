@@ -91,7 +91,7 @@ public class DefenseThread extends AbstractThread {
                     .filter(colonyEntity -> colonyEntity.getShipsMap().count() > 0)
                     .collect(Collectors.toSet());
 
-            List<AbstractCommand> fleetToEscape = attackedPlanets.stream()
+            List<FleetSendCommand> fleetToEscape = attackedPlanets.stream()
                     .filter(colonyEntity -> !colonyEntity.getShipsMap().isEmpty())
                     .map(colony -> {
                         List<EventFleet> events = incomingAction.stream()
@@ -99,11 +99,14 @@ public class DefenseThread extends AbstractThread {
                         return sendFleetEscape(colony, events);
                     })
                     .toList();
-            noDuplicationPushCommands(fleetToEscape);
+            for(FleetSendCommand command : fleetToEscape) {
+                if(alreadyPushed(command.getHash())) continue;
+                pushCommand(command);
+            }
         }
     }
 
-    private AbstractCommand sendFleetEscape(ColonyEntity source, List<EventFleet> eventFleets) {
+    private FleetSendCommand sendFleetEscape(ColonyEntity source, List<EventFleet> eventFleets) {
         Duration recall = map.getDuration(RECALL, null);
         FleetSendCommand sendCommand = null;
 
@@ -120,7 +123,7 @@ public class DefenseThread extends AbstractThread {
         }
 
         if (recall != null) sendCommand.setNext(new RecallCommand(sendCommand), recall.getValue().getSeconds());
-
+        sendCommand.generateHash(threadType, threadType);
         sendCommand.queue(CRITICAL);
         return sendCommand;
     }

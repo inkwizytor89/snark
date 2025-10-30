@@ -51,7 +51,7 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (noFreeSlotsForExpedition()) return;
         else  pause.update("1S");
-        if (waitingForExecution()) return;
+        if (somethingPushed()) return;
 
         ColonyEntity bestColony;
         List<ColonyEntity> source = getSources(PlanetService.ALL);
@@ -67,7 +67,7 @@ public class ExpeditionThread extends AbstractThread {
                 throw new RuntimeException("Can not specify any expedition from "+source);
             }
         }
-        pushOldCommand(createFleetSendCommand(bestColony, requiredShipMap));
+        pushSingleListCommand(createFleetSendCommand(bestColony, requiredShipMap));
     }
 
     private ShipsMap specifyShips(ColonyEntity colony, List<ColonyEntity> colonies) {
@@ -106,6 +106,7 @@ public class ExpeditionThread extends AbstractThread {
         command.setTarget( bestColony.toPlanet().toSpace());
         command.setMission(Mission.EXPEDITION);
         command.setShipsMap(ships);
+        command.generateHash(threadType, null);
         return command;
     }
 

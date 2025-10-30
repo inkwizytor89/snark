@@ -47,8 +47,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private Duration restartPause = new Duration("300S");
     private boolean isRunning = true;
 
-    private AbstractCommand actualProcessedCommand = null;
-
     @Override
     protected boolean shouldWaitForDeque() {
         return false;
@@ -71,22 +69,19 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             registerDequeIfNeeded();
             Core.isSomethingAttacking = isSomethingAttacking();
             resolve(commandDeque.pool());
-            commandDeque.release();
         } catch (org.openqa.selenium.TimeoutException e) {
             System.err.println("TimeoutException znowu");
             System.err.println(e);
-            commandDeque.release();
         } catch (WebDriverException e) {
             System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
         } catch (Throwable e) {
             e.printStackTrace();
-            commandDeque.release();
         }
+        commandDeque.release();
     }
 
     private void startGiIfNeeded() {
         if(gi != null) return;
-//        String pathToDriver = map.getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
         gi = new GI(this);
         session = gi.getGiSession();
     }
@@ -137,20 +132,9 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         return false;
     }
 
-    public void startCommander() {
-        System.err.println("Commander is startedped");
-        this.isRunning = true;
-    }
-
-    public void stopCommander() {
-        System.err.println("Commander is stopped");
-        this.isRunning = false;
-    }
-
     private synchronized void resolve(AbstractCommand command) {
         if(command == null) return;
         command.getStatus().setStatus(IN_PROGRESS);
-        actualProcessedCommand = command;
         boolean success;
         try {
 
@@ -176,16 +160,14 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         CommandStatus status = command.getStatus();
         if(!SUCCESS.equals(status.getStatus())) {
             status.failed();
-            if (status.getFailed() < 2) {
+            if (status.getFailed() < 1) {
                 status.setStatus(FAILED);
-                new WaitingThread(new FollowingAction(command, 2), commandDeque).start();
+                commandDeque.push(command);
             } else {
                 status.setStatus(CRASHED);
-                command.onInterrupt();
                 System.err.println("\n\nTOTAL CRASH: " + command + "\n");
             }
         }
-        actualProcessedCommand = null;
         Debug.log(this, command + " start at " + LocalTime.now());
     }
 

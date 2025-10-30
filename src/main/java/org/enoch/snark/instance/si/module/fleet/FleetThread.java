@@ -76,9 +76,9 @@ public class FleetThread extends AbstractThread {
         int index = 0;
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);
         for(FleetSendCommand command : fleetSendCommands) {
-
             index++;
             command.generateHash(map.name(), Integer.toString(index));
+            if(alreadyPushed(command.getHash())) continue;
 //            logFleetOverview(command);
             ShipsMap realShips = shipService.fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
             if(realShips.isEmpty()) continue;
@@ -94,7 +94,7 @@ public class FleetThread extends AbstractThread {
                 Duration recallDuration = map.getDuration(RECALL, null);
                 if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
                 log(command.toString());
-                core.push(command);
+                pushCommand(command);
             }
         }
     }

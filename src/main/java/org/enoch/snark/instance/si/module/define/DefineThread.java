@@ -24,7 +24,7 @@ public class DefineThread extends AbstractThread {
         //todo on start write in debug all tables and fields
         //todo remove older als one week
         map.entrySet().stream()
-                .filter(entry -> !List.of(MODULE, NAME, TYPE, PAUSE, TIME, DEBUG, COMMAND_LIMIT).contains(entry.getKey()))
+                .filter(entry -> !List.of(MODULE, NAME, TYPE, PAUSE, TIME, DEBUG, COMMAND_LIMIT, CONDITIONS).contains(entry.getKey()))
                 .forEach(entry -> {
                     String result = String.join(ARRAY_SEPARATOR, queryService.runString(entry.getValue()));
                     log("ADD CacheEntry key "+entry.getKey()+" and value "+result);

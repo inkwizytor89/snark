@@ -52,7 +52,7 @@ public class BuildThread extends AbstractThread {
     protected void onStep() {
         updateSourceMap();
         for(ColonyEntity colony : colonyMap.keySet()) {
-            if(!readyToPush(colony.toString())) continue;
+            if(alreadyPushed(colony.toString())) continue;
 
             BuildRequest buildRequest = getNextRequest(colony);
             if (isNothingToBuild(buildRequest)) continue;
