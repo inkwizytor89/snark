@@ -1,7 +1,10 @@
 package org.enoch.snark.instance.model.to;
 
+import lombok.Data;
+
 import java.util.Objects;
 
+@Data
 public class SystemView {
     public Integer galaxy;
     public Integer system;
@@ -23,5 +26,10 @@ public class SystemView {
     @Override
     public int hashCode() {
         return Objects.hash(galaxy, system);
+    }
+
+    @Override
+    public String toString() {
+        return "SystemView_"+galaxy+"_"+system;
     }
 }

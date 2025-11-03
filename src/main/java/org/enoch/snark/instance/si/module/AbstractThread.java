@@ -7,6 +7,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
@@ -98,31 +99,34 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Override
     public void run() {
         while(isLive) {
-            if(shouldWaitForDeque()) continue;
-            if(shouldWaitForConditions())
-                continue;
+            try {
+                if(shouldWaitForDeque()) continue;
+                if(shouldWaitForConditions())
+                    continue;
 
-            RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
-                    .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
-                    .getActualState();
-            if(RunningState.STARTING.equals(actualState)) onStart();
+                RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
+                        .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
+                        .getActualState();
 
-            if (RunningState.isRunning(actualState)) {
-                try {
-                    debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
-                    limit = map.getConfigNumber(ThreadMap.COMMAND_LIMIT, "-1");
-                    updatePause();
-//                    log(actualState.name()+" pause="+pause);
+                if(RunningState.STARTING.equals(actualState)) onStart();
 
-                    onStep();
-                    limitedPush();
-                } catch (Exception e) {
-                    runningProcessor.logChangedStatus("Thread " + map.name(), map);
-                    e.printStackTrace();
+                if (RunningState.isRunning(actualState)) {
+                        debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
+                        limit = map.getConfigNumber(ThreadMap.COMMAND_LIMIT, "-1");
+                        updatePause();
+    //                    log(actualState.name()+" pause="+pause);
+
+                        onStep();
+                        limitedPush();
+                    SleepUtil.sleep(pause);
                 }
-                SleepUtil.sleep(pause);
+                else SleepUtil.sleep(pause);
+
+            } catch (Exception e) {
+                runningProcessor.logChangedStatus("Thread " + map.name(), map);
+                System.err.println(map.name());
+                e.printStackTrace();
             }
-            else SleepUtil.sleep(pause);
         }
         System.err.println("Destroy "+map.name());
     }
@@ -215,24 +219,33 @@ public abstract class AbstractThread extends ExecutorImpl {
         long inQueueCount = commandsMap.asMap().values().stream()
                 .filter(list -> !list.isEmpty() && isAnyCommandInQueue(list))
                 .count();
-        while(inQueueCount <= limit) {
+        long start = inQueueCount;
+        while(inQueueCount < limit) {
             Optional<Collection<AbstractCommand>> firstWaitingList = commandsMap.asMap().values().stream()
-                    .filter(list -> !list.isEmpty() && isFirstCommandWaiting(list))
+                    .filter(list -> !list.isEmpty() && isWaiting(list))
                     .findFirst();
             if(firstWaitingList.isEmpty()) break;
             AbstractCommand toQueue = firstWaitingList.get().stream().findFirst().get();
             core.push(toQueue);
             inQueueCount++;
         }
+        long end = inQueueCount;
+        if(start!=end) System.err.println("Limited push for "+map().name()+":"+start+" -> "+end);
     }
 
     private boolean isAnyCommandInQueue(Collection<AbstractCommand> cmd) {
         return cmd.stream().anyMatch(command -> asList(NEW, IN_PROGRESS).contains(command.getStatus().getStatus()));
     }
 
-    private boolean isFirstCommandWaiting(Collection<AbstractCommand> cmd) {
-        AbstractCommand first = cmd.stream().findFirst().get();
-        return asList(WAITING).contains(first);
+    private boolean isWaiting(Collection<AbstractCommand> cmd) {
+        return cmd.stream().allMatch(command -> asList(WAITING).contains(command.getStatus().getStatus()));
+//        AbstractCommand first = cmd.stream().findFirst().get();
+//        return asList(WAITING).contains(first);
+    }
+
+    protected boolean isNearestConfig(String key) {
+        return (map().containsKey(key) &&  !StringUtils.EMPTY.equals(map().get(key))) ||
+                (module.getModuleMap().get(MAIN).containsKey(key) && !StringUtils.EMPTY.equals(module.getModuleMap().get(MAIN).get(key)));
     }
 
     protected String getNearestConfig(String key, String defaultValue) {
@@ -253,6 +266,11 @@ public abstract class AbstractThread extends ExecutorImpl {
         String sourcesCode = map().getSourcesCode(defaultValue);
         List<PlanetData> planetData = planetService.fromExpression(sourcesCode);
         return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
+    }
+
+    protected List<PlanetData> getNearestCoordinate(String defaultValue) {
+        String coordinateCode = getNearestConfig(COORDINATE, defaultValue);
+        return  planetService.fromExpression(coordinateCode);
     }
 
     protected List<AbstractCondition> getConditions(String configName) {

@@ -2,6 +2,7 @@ package org.enoch.snark.common.time;
 
 import org.enoch.snark.common.Parsable;
 
+import java.time.format.DateTimeParseException;
 import java.util.Random;
 
 public class Duration extends Parsable<java.time.Duration> {
@@ -21,21 +22,29 @@ public class Duration extends Parsable<java.time.Duration> {
 
     @Override
     public void setUp() {
-        String[] durationParts = input.split("\\?");
-        if(durationParts.length == 1) {
-            base = java.time.Duration.parse(PT+input);
-            randomRange = java.time.Duration.ZERO;
+        try {
+            String[] durationParts = input.split("\\?");
+            if (durationParts.length == 1) {
+                base = java.time.Duration.parse(convertInput(input));
+                randomRange = java.time.Duration.ZERO;
 //            value = base;
-        }
-        else if (input.startsWith("?")) {
-            base = java.time.Duration.ZERO;
-            randomRange = java.time.Duration.parse(PT +durationParts[1]);
+            } else if (input.startsWith("?")) {
+                base = java.time.Duration.ZERO;
+                randomRange = java.time.Duration.parse(convertInput(durationParts[1]));
 //            value = calculateRandom(0L, randomRange.getSeconds());
-        } else {
-            base = java.time.Duration.parse(PT+durationParts[0]);
-            randomRange = java.time.Duration.parse(PT +durationParts[1]);
+            } else {
+                base = java.time.Duration.parse(convertInput(durationParts[0]));
+                randomRange = java.time.Duration.parse(convertInput(durationParts[1]));
 //            value = calculateRandom(base.getSeconds(), randomRange.getSeconds());
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalStateException("Can not convert "+convertInput(input)+"  java.time.Duration",e);
         }
+    }
+
+    private String convertInput(String input) {
+        if(input.startsWith("P")) return input;
+        return PT + input;
     }
 
     @Override

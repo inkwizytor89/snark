@@ -20,10 +20,6 @@ public class ScanThread extends AbstractThread {
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
 
-//    public ScanThread(ThreadMap map) {
-//        super(map);
-//    }
-
     @Override
     protected String getThreadType() {
         return threadType;

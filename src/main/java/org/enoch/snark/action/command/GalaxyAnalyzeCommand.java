@@ -1,35 +1,28 @@
 package org.enoch.snark.action.command;
 
-import org.enoch.snark.db.dao.GalaxyDAO;
+import lombok.Data;
 import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
+import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.SystemView;
 
-import java.util.Optional;
-
+@Data
 public class GalaxyAnalyzeCommand extends AbstractCommand {
 
-    public GalaxyEntity galaxyEntity;
+    public SystemView systemView;
 
     public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
-        super();
-        init(galaxyEntity);
+        this(galaxyEntity.toSystemView());
     }
 
     public GalaxyAnalyzeCommand(SystemView systemView) {
         super();
-        Optional<GalaxyEntity> galaxyOptional = GalaxyDAO.getInstance().find(systemView);
-        galaxyOptional.ifPresent(this::init);
-        galaxyOptional.orElseThrow(() -> new RuntimeException("All galaxy should be present"));
+        this.systemView = systemView;
+        hash(systemView.toString());
+        setRunType(QueueRunType.SPAM);
     }
-
-    private void init(GalaxyEntity galaxyEntity) {
-        this.galaxyEntity = galaxyEntity;
-    }
-
 
     @Override
     public String toString() {
-        return "Look at " + galaxyEntity + " updated at "+galaxyEntity.updated;
+        return systemView + "_Command";
     }
 }

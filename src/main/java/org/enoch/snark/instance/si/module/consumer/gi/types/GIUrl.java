@@ -57,7 +57,7 @@ public class GIUrl {
         return source;
     }
 
-    public void openGalaxy(SystemView systemView, ColonyEntity colony) {
+    public ColonyEntity openGalaxy(SystemView systemView, ColonyEntity colony) {
         if(colony == null) {
             colony = Core.getLastVisited();
         }
@@ -68,9 +68,8 @@ public class GIUrl {
                 .get());
 
         Core.setLastVisited(colony);
-        System.err.println("open galaxy setLastVisited="+colony);
         updateColony(colony);
-        gi.updateGalaxy(systemView);
+        return colony;
     }
 
     public void openResearch(PlayerEntity mainPlayer) {

@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
@@ -46,7 +47,8 @@ public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
 
     @Override
     public int compareTo(GalaxyEntity o) {
-        return Integer.compare(distance(), o.distance());
+        throw new NotImplementedException(" distance don't work");
+//        return Integer.compare(distance(), o.distance());
     }
 
     private int distance() {

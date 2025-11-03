@@ -10,12 +10,9 @@ import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.model.to.Target;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.service.ShipService;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 import static org.enoch.snark.instance.model.to.Planet.*;
 

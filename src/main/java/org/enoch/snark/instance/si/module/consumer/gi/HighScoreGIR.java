@@ -23,7 +23,7 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
     public static final String ECONOMY_AREA = "economy";
     public static final String FLEET_AREA = "fleet";
 
-    HighScoreGIR(GI gi) {
+    public HighScoreGIR(GI gi) {
         super(gi);
     }
 
