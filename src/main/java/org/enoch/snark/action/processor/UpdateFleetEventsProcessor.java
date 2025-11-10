@@ -3,6 +3,7 @@ package org.enoch.snark.action.processor;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.action.command.UpdateFleetEventsCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -27,13 +28,13 @@ public class UpdateFleetEventsProcessor {
 //        super();
 //    }
 
-    public boolean execute(GI gi, UpdateFleetEventsCommand command) {
+    public ExecutionIssue execute(GI gi, UpdateFleetEventsCommand command) {
         ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, null);
         colonyRepository.save(colony);
 
         List<EventFleet> eventFleetList = new EventContentGIR(gi).readEventFleet();
         Navigator.getInstance().informAboutEventFleets(eventFleetList);
-        return true;
+        return ExecutionIssue.NO_ISSUE;
     }
 
     @Override

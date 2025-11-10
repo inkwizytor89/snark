@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.dao.MessageDAO;
 import org.enoch.snark.db.dao.PlayerDAO;
@@ -36,7 +37,7 @@ public class ReadMessageProcessor {
 
     private GI gi;
 
-    public boolean execute(GI gi) {
+    public ExecutionIssue execute(GI gi) {
         this.gi = gi;
         gi.url().openMessages();
         SleepUtil.secondsToSleep(8L);
@@ -44,7 +45,7 @@ public class ReadMessageProcessor {
         List<String> spyReports = loadMessagesLinks();
         storeSpyMessage(spyReports);
         MessageService.getInstance().update();
-        return true;
+        return ExecutionIssue.NO_ISSUE;
     }
 
     private List<String> loadMessagesLinks() {

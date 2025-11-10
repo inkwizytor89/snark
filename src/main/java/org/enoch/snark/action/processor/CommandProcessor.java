@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +30,7 @@ public class CommandProcessor {
     private final FleetSendProcessor fleetSendProcessor;
 
     @Transactional
-    public boolean execute(GI gi, AbstractCommand abstractCommand) {
+    public ExecutionIssue execute(GI gi, AbstractCommand abstractCommand) {
         CommandStatus status = abstractCommand.getStatus();
         status.setStatus(IN_PROGRESS);
         return switch (abstractCommand) {

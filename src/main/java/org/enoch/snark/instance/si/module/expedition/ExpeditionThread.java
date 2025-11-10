@@ -50,7 +50,7 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStep() {
         if (noFreeSlotsForExpedition()) return;
-        else  pause.update("1S");
+//        else  pause.update("1S");
         if (somethingPushed()) return;
 
         ColonyEntity bestColony;

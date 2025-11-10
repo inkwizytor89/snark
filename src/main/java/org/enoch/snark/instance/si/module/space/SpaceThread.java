@@ -8,6 +8,7 @@ import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.SystemUC;
+import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -91,7 +92,6 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-
         if(spaceHash.equals(spaceHash())) return;
         System.out.println(spaceHash());
 
@@ -114,11 +114,29 @@ public class SpaceThread extends AbstractThread {
         }
 
         if(!isNearestConfig(COMMAND_LIMIT)) limit=10L; // limit must be se before push command
+// tu trzeba jakos te wymagania wsprzadz do skanowania albo zeby puste sie szybko odpalało
+
+        List<Planet> spyCoordinate = new ArrayList<>();
+        if(isNearestConfig(COORDINATE)) {
+            List<PlanetData> nearestCoordinate = getNearestCoordinate(StringUtils.EMPTY);
+            if(nearestCoordinate.size() > 1) throw new IllegalStateException(threadType+" required only one coordinate to use "+SPY_COORDINATE+" but was "+getNearestConfig(COORDINATE, StringUtils.EMPTY));
+            spyCoordinate = spyCoordinate(nearestCoordinate.getFirst());
+        }
 
         Duration duration = map().getDuration(EXPIRED_TIME, new Duration("7D"));
+        List<Planet> finalSpyCoordinate = spyCoordinate;
         galaxyEntityMap.entrySet().stream()
                 .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, duration.getValue()))
-                .forEach(entry -> pushCommand(new GalaxyAnalyzeCommand(entry.getKey())));
+                .forEach(entry -> {
+                    GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
+                    command.setSpyPositions(finalSpyCoordinate.stream()
+                            .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList());
+                    if(!command.getSpyPositions().isEmpty() && isNearestConfig(COORDINATE)) {
+                        List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
+                        if(!coordinate.isEmpty()) command.setSource(colonyRepository.byPlanet(coordinate.getFirst().getPlanet()));
+                    }
+                    pushCommand(command);
+                });
 
         spaceHash = spaceHash();
     }
@@ -165,27 +183,12 @@ public class SpaceThread extends AbstractThread {
         }
         return ranges;
     }
+    
+    private List<Planet> spyCoordinate(PlanetData planetData) {
+        if(! isNearestConfig(SPY_COORDINATE)) return new ArrayList<>();
+        String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
-    private String getRange(List<PlanetData> list, int range) {
-        int systemMax = map.getConfigInteger(SYSTEM_MAX, 499);
-        boolean wrap = map.getConfigBoolean("wrap_system", true);
-
-        Map<SystemView, GalaxyEntity> galaxyEntityMap = new HashMap<>();
-        for(PlanetData planetData : list) {
-            Planet planet = planetData.getPlanet();
-            int from = planet.system - range;
-            int to = planet.system + range;
-            List<SystemView> systemRange = SystemUC.range(planet.galaxy, from, to, systemMax, wrap);
-            systemRange.forEach(systemView -> galaxyEntityMap.put(systemView, null));
-        }
-        for(PlanetData planetData : list) {
-            Planet planet = planetData.getPlanet();
-
-            List<SystemView> systemRange = SystemUC.range(planet.galaxy, planet.system - range, planet.system + range, systemMax, wrap);
-            systemRange.forEach(systemView -> galaxyEntityMap.put(systemView, null));
-        }
-
-//        galaxyRepository.persistGalaxyMap();
-        return null;
+        FleetContext fleetContext = FleetContext.builder().source(planetData).build();
+        return planetService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
     }
 }

@@ -3,6 +3,7 @@ package org.enoch.snark.action.processor;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
@@ -15,6 +16,8 @@ import org.enoch.snark.instance.si.module.building.BuildingCost;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
+
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")
@@ -25,7 +28,7 @@ public class BuildProcessor {
     public TechnologyGIR gir;
     private GI gi;
 
-    public boolean execute(GI gi, BuildCommand command) {
+    public ExecutionIssue execute(GI gi, BuildCommand command) {
         this.gi = gi;
         gir = new TechnologyGIR(gi);
         BuildRequirements requirements = command.requirements;
@@ -33,12 +36,12 @@ public class BuildProcessor {
         ColonyEntity colony = gi.url().openComponent(command.requirements.request.technology.getPage(), command.colony);
         colonyRepository.save(colony);
 
-        if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return true;
+        if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return NO_ISSUE;
 
         boolean isUpgraded = gir.upgradeBuilding(requirements);
         if(isUpgraded) {
             refreshColonyWhenBuildingIsDone(command, requirements);
-            return true;
+            return NO_ISSUE;
         }
         if(requirements.isResourceUnknown()) {
             Resources costs = gir.findTechnologyCosts(requirements.request.technology.name());
@@ -49,7 +52,7 @@ public class BuildProcessor {
 //                new SendMessageToPlayerCommand(masterHref, "Master poprosze " + costs + " na " + colony).push();
 //            }
         }
-        return true;
+        return NO_ISSUE;
     }
 
     private void refreshColonyWhenBuildingIsDone(BuildCommand command, BuildRequirements requirements) {

@@ -2,6 +2,7 @@ package org.enoch.snark.instance.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
@@ -9,6 +10,7 @@ import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.find.CustomFinder;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -96,8 +98,18 @@ public class PlanetService {
         } else if(planetTerm.getAction().contains(SPACE)) {
             return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().toSpace()));
         } else if(planetTerm.getAction().contains(FARM)) {
-            throw new NotImplementedException(FARM + " expression not yet implemented");
-//                return FarmFinder.find(colony);
+//            throw new NotImplementedException(FARM + " expression not yet implemented");
+            Planet source = context.getSource().getPlanet();
+            source = source.is(ColonyType.MOON) ? source.swapType() : source;
+
+            Planet finalSource = source;
+            List<Planet> others = colonyRepository.findAll().stream()
+                    .map(PlanetEntity::toPlanet)
+                    .filter(colony -> colony.galaxy.equals(finalSource.galaxy))
+                    .filter(colony -> colony.is(ColonyType.PLANET))
+                    .filter(colony -> !colony.equals(finalSource))
+                    .toList();
+            return targetRepository.findTargetsCloserTo(source, others).stream().map(PlanetData::new).toList();
         } else {
             String value = cacheEntryRepository.getValue(planetTerm.getAction());
             if(value != null) return fromExpression(value);
@@ -109,4 +121,5 @@ public class PlanetService {
         Optional<TargetEntity> targetEntity = targetRepository.find(planet);
         return targetEntity.map(PlanetData::new).orElseGet(() -> new PlanetData(colonyRepository.byPlanet(planet)));
     }
+
 }

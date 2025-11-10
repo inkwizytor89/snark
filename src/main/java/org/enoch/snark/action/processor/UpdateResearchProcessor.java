@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.action.command.UpdateResearchCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
@@ -19,10 +20,10 @@ public class UpdateResearchProcessor {
 
     private final PlayerRepository playerRepository;
 
-    public boolean execute(GI gi, UpdateResearchCommand command) {
+    public ExecutionIssue execute(GI gi, UpdateResearchCommand command) {
         PlayerEntity mainPlayer = playerRepository.mainPlayer();
         new GIUrl(gi).openResearch(mainPlayer);
-        return true;
+        return ExecutionIssue.NO_ISSUE;
     }
 
     @Override

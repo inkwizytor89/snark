@@ -1,13 +1,14 @@
 package org.enoch.snark.action.processor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
-import org.enoch.snark.db.dao.GalaxyDAO;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
@@ -15,13 +16,16 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
+import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GalaxyGIR;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
-import org.enoch.snark.instance.model.to.SystemView;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
+import static org.enoch.snark.action.command.status.ExecutionIssue.RETRY;
 
 @RequiredArgsConstructor
 @Component
@@ -32,16 +36,17 @@ public class GalaxyAnalyzeProcessor{
     private final TargetRepository targetRepository;
     private final GalaxyRepository galaxyRepository;
 
-    public boolean execute(GI gi, GalaxyAnalyzeCommand command) {
+    public ExecutionIssue execute(GI gi, GalaxyAnalyzeCommand command) {
         GalaxyGIR gir = new GalaxyGIR(gi);
         Integer galaxy = command.getSystemView().getGalaxy();
         Integer system = command.getSystemView().getSystem();
 
-        ColonyEntity colony = gi.url().openGalaxy(command.getSystemView(), null);
+        ColonyEntity colony = gi.url().openGalaxy(command.getSystemView(), command.getSource());
         List<TargetEntity> fromDB = targetRepository.findByGalaxyAndSystem(galaxy, system);
         gir.updateGalaxy(command.getSystemView(), fromDB);
+
         removeNotUpdated(fromDB);
-        addNewTargets(fromDB);
+        addNewTargets(fromDB.stream().filter(targetEntity -> targetEntity.updated != null && targetEntity.id == null).toList());
 
         Optional<GalaxyEntity> galaxyEntityOptional = galaxyRepository.findByGalaxyAndSystem(galaxy, system);
         if(galaxyEntityOptional.isPresent()) galaxyEntityOptional.get().updated = LocalDateTime.now();
@@ -52,26 +57,35 @@ public class GalaxyAnalyzeProcessor{
             galaxyEntity.updated = LocalDateTime.now();
             galaxyRepository.save(galaxyEntity);
         }
-        return true;
+        Map<Planet, Boolean> spyPositions = command.getSpyPositions();
+        gir.takeAction(spyPositions, Mission.SPY);
+
+        boolean anySpyFailed = spyPositions.values().stream().anyMatch(aBoolean -> !aBoolean);
+        if(anySpyFailed) {
+            System.err.println("------------------\n"+command.getSystemView());
+            spyPositions.forEach((planet, aBoolean) -> System.err.println(planet.position+" "+aBoolean));
+            System.err.println("------------------");
+            return RETRY;
+        }
+        return NO_ISSUE;
     }
 
     private void removeNotUpdated(List<TargetEntity> targets) {
         targetRepository.deleteAll(targets.stream().filter(targetEntity -> targetEntity.updated == null).toList());
     }
 
+    @Transactional
     private void addNewTargets(List<TargetEntity> targets) {
-        targets.forEach(targetEntity -> {
-            if(targetEntity.player.id == null) {
-                Optional<PlayerEntity> byCode = playerRepository.findFirstByCode(targetEntity.player.code);
-                targetEntity.player = byCode.orElseGet(() -> playerRepository.save(targetEntity.player));
-            }
-        });
-
-
-        List<TargetEntity> newTargets = targets.stream().filter(targetEntity -> targetEntity.id == null).toList();
-
-
-        targetRepository.saveAllAndFlush(newTargets);
+        Map<String, PlayerEntity> playerCache = new HashMap<>();
+        for (TargetEntity target : targets) {
+            PlayerEntity player = target.getPlayer();
+            playerCache.computeIfAbsent(player.getCode(), code ->
+                    playerRepository.findFirstByCode(code)
+                            .orElseGet(() -> playerRepository.save(player))
+            );
+            target.setPlayer(playerCache.get(player.getCode()));
+        }
+        targetRepository.saveAll(targets);
     }
 
 }

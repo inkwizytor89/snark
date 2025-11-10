@@ -1,5 +1,6 @@
 package org.enoch.snark.db.entity;
 
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.instance.model.to.HighScorePosition;
@@ -10,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "players", schema = "public", catalog = "snark")
 public class PlayerEntity extends IdEntity {

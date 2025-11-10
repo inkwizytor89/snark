@@ -17,6 +17,7 @@ import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAPACITY;
 
+//@Data
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{
 
@@ -495,7 +496,7 @@ public abstract class PlanetEntity extends IdEntity{
     }
 
     public Planet toPlanet() {
-        return new Planet(this.toString());
+        return new Planet(galaxy, system, position, type);
     }
 
     public ShipsMap getShipsMap() {
@@ -711,6 +712,12 @@ public abstract class PlanetEntity extends IdEntity{
         return new Resources(metal, crystal, deuterium);
     }
 
+    public void putResources(Resources resources) {
+        metal = resources.metal;
+        crystal = resources.crystal;
+        deuterium = resources.deuterium;
+    }
+
     public boolean hasEnoughResources(Resources required) {
         return getResources().isEnough(required);
     }
@@ -739,7 +746,6 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Override
     public String toString() {
-        String type = ColonyType.PLANET.equals(this.type)?"p":"m";
-        return type + "[" + galaxy + ", " + system + ", " + position + "]";
+        return new Planet(galaxy, system, position, type).toString();
     }
 }

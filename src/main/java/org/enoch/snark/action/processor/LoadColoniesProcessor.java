@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.LoadColoniesCommand;
 import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
@@ -36,7 +37,7 @@ public class LoadColoniesProcessor {
     private BaseGameInfoGIR baseGameInfoGIR;
 
     @Transactional
-    public boolean execute(GI gi, LoadColoniesCommand command) {
+    public ExecutionIssue execute(GI gi, LoadColoniesCommand command) {
         try {
             baseGameInfoGIR = new BaseGameInfoGIR(gi);
             DiffLists<ColonyEntity> diff = new DiffLists<>(colonyRepository.findAll(), baseGameInfoGIR.loadPlanetList());
@@ -44,6 +45,7 @@ public class LoadColoniesProcessor {
             diff.added().forEach(colony -> {
                 System.out.println(LoadColoniesProcessor.class.getSimpleName()+" add " + colony);
                 colony.level = colony.formsLevel = 1L;
+                colony.tags = colony.toString();
                 Optional<ColonyEntity> cpmEntity = colonyRepository.findByCp(colony.cpm);
                 cpmEntity.ifPresent(colonyEntity -> colonyEntity.cpm = colony.cp);
                 colonyRepository.save(colony);
@@ -63,9 +65,9 @@ public class LoadColoniesProcessor {
             }
         } catch (Throwable e) {
             System.err.println(this+" with error "+e.getMessage());
-            return false;
+            return ExecutionIssue.OTHER;
         }
-        return true;
+        return ExecutionIssue.NO_ISSUE;
     }
 
     public void updateColony(ColonyEntity colony) {

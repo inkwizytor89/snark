@@ -101,6 +101,10 @@ public class Planet {
         return (long) Math.min(Math.abs(x1 - x2), max - Math.abs(x1 - x2));
     }
 
+    public int distance(Planet planet) {
+        return Math.abs(planet.galaxy - galaxy) * 1000 + Math.abs(planet.system - system)*10 + Math.abs(planet.position - position);
+    }
+
     protected void loadPlanetCoordinate(String coordinateString) {
         String[] numbersTable = coordinateString.split("\\D+");
         galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
@@ -127,6 +131,9 @@ public class Planet {
         return "["+galaxy+":"+system+":"+position+"]";
     }
 
+    public SystemView getSystemView() {
+        return new SystemView(galaxy, system);
+    }
 
     public ColonyEntity toColonyEntity() {
         return ColonyDAO.getInstance().find(this);

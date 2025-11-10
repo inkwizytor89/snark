@@ -2,6 +2,7 @@ package org.enoch.snark.action.command.status;
 
 public enum ExecutionIssue {
     NO_ISSUE,
+    RETRY,
     TO_STRONG_PLAYER,
     TO_WEAK_PLAYER,
     CAN_NOT_SENT,

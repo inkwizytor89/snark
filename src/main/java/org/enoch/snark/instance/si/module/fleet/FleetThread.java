@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
+import static org.enoch.snark.instance.service.PlanetService.PLANETS;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
@@ -58,7 +58,7 @@ public class FleetThread extends AbstractThread {
 //        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
-                .source(getNearestConfig(SOURCE, PLANET))
+                .source(getNearestConfig(SOURCE, PLANETS))
                 .target(map.getConfig(TARGET, null))
                 .conditions(getConditions(START_CONDITION))
 //                .filters(AbstractFilter.create(filtersEntry))

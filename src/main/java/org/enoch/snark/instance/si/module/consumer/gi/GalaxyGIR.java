@@ -1,27 +1,25 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.model.to.HighScorePosition;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.interactions.Actions;
 
-import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static org.enoch.snark.common.SleepUtil.pause;
+import static org.enoch.snark.instance.model.types.ColonyType.MOON;
+import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 
 
 public class GalaxyGIR extends GraphicalInterfaceReader {
@@ -31,68 +29,107 @@ public class GalaxyGIR extends GraphicalInterfaceReader {
     }
 
     public void updateGalaxy(SystemView systemView, List<TargetEntity> targets) {
-//        List<TargetEntity> targets
         for(WebElement row : wd().findElements(By.className("galaxyRow"))) {
-            // skip table headers
-            if(row.findElements(By.className("cellPosition")).isEmpty()) {
-                continue;
-            }
+            Optional<WebElement> positionOptional = row.findElements(By.className("cellPosition")).stream().findAny();
+            if(positionOptional.isEmpty()) continue; // skip table headers
+            final int position = Integer.parseInt(positionOptional.get().getText());
 
-            //skip lear rows
-            final int position = Integer.parseInt(row.findElement(By.className("cellPosition")).getText());
-            Optional<TargetEntity> targetFromDb = targets.stream()
-                    .filter(t -> t.position.equals(position))
-                    .findAny();
-            WebElement cellPlayerName = row.findElement(By.className("cellPlayerName"));
-            if(targetFromDb.isPresent() && cellPlayerName.getText().trim().isEmpty()) {
-                targetFromDb.get().updated = null;
-                continue;
+            if(false) {// after catching debris resources are always empty ""
+                // debris
+                List<WebElement> elements = wd().findElements(By.id("galaxyRow" + position));
+                if (!elements.isEmpty()) {
+                    List<WebElement> webElements = elements.get(0).findElements(By.cssSelector(".debris-content"));
+                    if (!webElements.isEmpty()) {
+                        for (WebElement web : webElements) {
+
+                            WebElement microdebris = elements.get(0).findElement(By.className("microdebris"));
+                            Actions actions = new Actions(wd());
+                            actions.moveToElement(microdebris).perform();
+                            SleepUtil.sleep();
+                            String text = web.getText();
+                            System.err.println(text);
+                        }
+                    }
+                }
+
+
+                Resources debrisResources = debrisToResource(row.findElements(By.className("debris-content")));
+                Planet debris = new Planet(systemView.getGalaxy(), systemView.getSystem(), position, ColonyType.DEBRIS);
+                Optional<TargetEntity> debrisTargetEntity = sync(targets, debris, !Resources.nothing.equals(debrisResources));
+                debrisTargetEntity.ifPresent(targetEntity -> targetEntity.putResources(debrisResources));
             }
-            if(cellPlayerName.getText().trim().isEmpty()) {
-                continue;
-            }
-            List<WebElement> targetElement = cellPlayerName.findElements(By.className("tooltipRel"));
-            // me on player list
-            if(targetElement.isEmpty()) {
-                continue;
-            }
-            final WebElement playerElement = targetElement.get(0);
-            final String playerName = playerElement.getText().trim();
+            // checking if row not empty
+            List<WebElement> playerList = row.findElements(By.className("playerName"));
+            if(playerList.isEmpty()) continue; //no player or ownPlayerRow
+
+            //planet
+            Planet planet = new Planet(systemView.getGalaxy(), systemView.getSystem(), position, PLANET);
+            Optional<TargetEntity> planetTargetEntity = sync(targets, planet, true);
+
+            //moon
+            boolean isMoon = !row.findElements(By.className("micromoon")).isEmpty();
+            Planet moon = new Planet(systemView.getGalaxy(), systemView.getSystem(), position, ColonyType.MOON);
+            Optional<TargetEntity> moonTargetEntity = sync(targets, moon, isMoon);
+
+            //player
+            final WebElement playerElement = playerList.getFirst();
             final String playerCode = playerElement.getAttribute("rel").substring(6);
-            List<WebElement> isStatus = cellPlayerName.findElements(By.tagName("pre"));
-            String status = "";
-            if(!isStatus.isEmpty()) {
-                status = isStatus.get(0).getText();
+
+            if(planetTargetEntity.get().player == null || !planetTargetEntity.get().player.code.equals(playerCode)) {
+                planetTargetEntity.get().player = new PlayerEntity();
             }
-            final String alliance = row.findElement(By.className("cellAlliance")).getText();
-            if(StringUtils.isEmpty(playerName) && !targetFromDb.isPresent()) {
-                continue;
-            }
-            // nothing changed, nothing to process
-            if(targetFromDb.isPresent() && status.equals(targetFromDb.get().player.status)) {
-                continue;
-            }
-            TargetEntity entity;
-            if(targetFromDb.isPresent()) {
-                entity = targetFromDb.get();
-            } else {
-                entity = new TargetEntity();
-                entity.galaxy = systemView.galaxy;
-                entity.system = systemView.system;
-                entity.position = position;
-                entity.type = ColonyType.PLANET;
-                targets.add(entity);
-            }
-            if(entity.player == null || entity.player.code.equals(playerCode)) {
-                PlayerEntity playerEntity = new PlayerEntity();
-                playerEntity.name = playerName;
-                playerEntity.code = playerCode;
-                playerEntity.alliance = alliance;
-                playerEntity.status = status;
-                playerEntity.type = setStatus(status);
-                entity.player = playerEntity;
-            }
+            PlayerEntity playerEntity = planetTargetEntity.get().player;
+
+            playerEntity.code = playerCode;
+            playerEntity.name = playerElement.getText().trim();
+            playerEntity.alliance = row.findElement(By.className("cellAlliance")).getText();
+            List<WebElement> statusList = row.findElement(By.className("cellPlayerName")).findElements(By.tagName("pre"));
+            String status = statusList.isEmpty() ? "" : statusList.getFirst().getText();
+            playerEntity.status = status;
+            playerEntity.type = setStatus(status);
+
+            moonTargetEntity.ifPresent(targetEntity -> targetEntity.player = playerEntity);
         }
+    }
+
+    private Resources debrisToResource(List<WebElement> elements) {
+        if(elements.isEmpty()) return Resources.nothing;
+        String resourcesString = StringUtils.EMPTY;
+        for (int i = 0; i<elements.size(); i++) {
+            String[] parts = elements.get(i).getText().split(" ");
+            String last = parts[parts.length - 1];
+            if(i == 0) resourcesString+= "m"+last;
+            else if(i == 1) resourcesString+= "c"+last;
+            else if(i == 2) resourcesString+= "d"+last;
+        }
+        return new Resources(resourcesString);
+    }
+
+    private Optional<TargetEntity> findTarget(List<TargetEntity> targets, Integer position, ColonyType type) {
+        return targets.stream()
+                .filter(t -> t.position.equals(position))
+                .filter(t -> type.equals(t.type))
+                .findAny();
+    }
+
+    private Optional<TargetEntity> sync(List<TargetEntity> targets, Planet coordinate, boolean exist) {
+        Optional<TargetEntity> optionalTarget = findTarget(targets, coordinate.position, coordinate.type);
+        if(optionalTarget.isPresent() && exist) {
+            return optionalTarget;
+        } else if(optionalTarget.isPresent()) {
+            optionalTarget.get().updated = null;
+            return optionalTarget;
+        } else if(exist) {
+            TargetEntity entity = new TargetEntity();
+            entity.galaxy = coordinate.galaxy;
+            entity.system = coordinate.system;
+            entity.position = coordinate.position;
+            entity.type = coordinate.type;
+            entity.tags = coordinate.toString();
+            targets.add(entity);
+            return Optional.of(entity);
+        }
+        return Optional.empty();
     }
 
     public static String setStatus(String status) {
@@ -106,6 +143,46 @@ public class GalaxyGIR extends GraphicalInterfaceReader {
             return TargetEntity.WEAK;
         } else {
             return TargetEntity.NORMAL;
+        }
+    }
+
+    public void takeAction(Map<Planet, Boolean> positions, Mission mission) {
+        for(WebElement row : wd().findElements(By.className("galaxyRow"))) {
+            Optional<WebElement> positionOptional = row.findElements(By.className("cellPosition")).stream().findAny();
+            if(positionOptional.isEmpty()) continue; // skip table headers
+            final int position = Integer.parseInt(positionOptional.get().getText());
+
+            Optional<Map.Entry<Planet, Boolean>> positionEntry = positions.entrySet().stream()
+                    .filter(entry -> entry.getKey().position.equals(position)).findAny();
+            boolean toTake = positionEntry.isPresent() && !positionEntry.get().getValue();
+            if (Mission.SPY.equals(mission) && toTake) {
+                spy(row, positionEntry.get());
+
+
+            }
+        }
+    }
+
+    private void spy(WebElement row, Map.Entry<Planet, Boolean> entry) {
+        Planet coordinate = entry.getKey();
+        if(PLANET.equals(coordinate.type)) {
+            spyClick(entry, row, "microplanet");
+        } else if(MOON.equals(coordinate.type)) {
+            spyClick(entry, row, "micromoon");
+        }
+    }
+
+    private void spyClick(Map.Entry<Planet, Boolean> entry, WebElement row, String tag) {
+        List<WebElement> list = row.findElements(By.className(tag));
+        if(!list.isEmpty()) {
+            list.getFirst().click();
+            boolean fleetHostile = false;
+            for(int i = 0; i<4; i++) {
+                pause();
+                fleetHostile = !list.getFirst().findElements(By.className("fleetHostile")).isEmpty();
+                if(fleetHostile) break;
+            }
+            entry.setValue(fleetHostile);
         }
     }
 }

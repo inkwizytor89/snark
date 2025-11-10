@@ -26,7 +26,7 @@ import org.openqa.selenium.WebElement;
 
 import java.time.LocalTime;
 
-import static org.enoch.snark.action.command.status.ExecutionIssue.OTHER;
+import static org.enoch.snark.action.command.status.ExecutionIssue.*;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
@@ -135,12 +135,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private synchronized void resolve(AbstractCommand command) {
         if(command == null) return;
         command.getStatus().setStatus(IN_PROGRESS);
-        boolean success;
+        ExecutionIssue executionIssue = OTHER;
         try {
 
             Debug.log(this, command + " start at " + LocalTime.now());
-            success = processor.execute(gi, command);
-            if(success) {
+            executionIssue = processor.execute(gi, command);
+            if(NO_ISSUE.equals(executionIssue)) {
                 command.getStatus().setSuccess();
                 if(command.isFollowingAction()) {
                     new WaitingThread(command.getFollowingAction(), commandDeque).start();
@@ -151,21 +151,29 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 //            e.printStackTrace();
 //            return;
         } catch (Throwable e) {
-            success = false;
             System.err.println(e.getMessage());
-            command.getStatus().setFailed(OTHER);
+            command.getStatus().setFailed(executionIssue);
             e.printStackTrace();
         }
 
         CommandStatus status = command.getStatus();
-        if(!SUCCESS.equals(status.getStatus())) {
+        if(RETRY.equals(status.getIssue())) {
+            status.failed();
+            if (status.getFailed() < 6) {
+                status.setStatus(NEW);
+                new WaitingThread(new FollowingAction(command, status.getFailed() * 10L), commandDeque).start();
+            } else {
+                status.setStatus(CRASHED);
+                System.err.println("\n\nRETRY CRASH: " + command + "\n");
+            }
+        } else if(!SUCCESS.equals(status.getStatus())) {
             status.failed();
             if (status.getFailed() < 1) {
                 status.setStatus(FAILED);
                 commandDeque.push(command);
             } else {
                 status.setStatus(CRASHED);
-                System.err.println("\n\nTOTAL CRASH: " + command + "\n");
+                System.err.println("\n\nFAILED CRASH: " + command + "\n");
             }
         }
         Debug.log(this, command + " start at " + LocalTime.now());

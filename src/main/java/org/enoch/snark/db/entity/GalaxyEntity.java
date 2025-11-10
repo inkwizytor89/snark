@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.enoch.snark.instance.model.action.PlanetExpression.PLANET;
+import static org.enoch.snark.instance.service.PlanetService.PLANETS;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")
@@ -52,7 +52,7 @@ public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
     }
 
     private int distance() {
-        List<Planet> cachedPlaned = PlanetCache.get(PLANET);
+        List<Planet> cachedPlaned = PlanetCache.get(PLANETS);
         Optional<Planet> min = cachedPlaned.stream().min(Comparator.comparingInt(this::distance));
         if(min.isPresent()) {
             return distance(min.get());

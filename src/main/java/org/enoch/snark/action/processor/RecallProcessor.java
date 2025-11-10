@@ -2,6 +2,7 @@ package org.enoch.snark.action.processor;
 
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.RecallCommand;
+import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.si.module.consumer.gi.EventContentGIR;
@@ -19,13 +20,13 @@ public class RecallProcessor{
     private final UpdateFleetEventsProcessor updateFleetEventsProcessor;
     private final ColonyRepository colonyRepository;
 
-    public boolean execute(GI gi, RecallCommand command) {
+    public ExecutionIssue execute(GI gi, RecallCommand command) {
         ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, null);
         colonyRepository.save(colony);
 
         boolean recall = new EventContentGIR(gi).recall(command.plan);
         updateFleetEventsProcessor.execute(gi, null);
-        return recall;
+        return recall ? ExecutionIssue.NO_ISSUE : ExecutionIssue.OTHER;
     }
 
     @Override

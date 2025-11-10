@@ -1,8 +1,6 @@
 package org.enoch.snark.instance.model.uc;
 
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;

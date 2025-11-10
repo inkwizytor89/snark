@@ -2,9 +2,11 @@ package org.enoch.snark.instance.si.module.define;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.QueryService;
 import org.enoch.snark.instance.si.module.AbstractThread;
+import org.hibernate.exception.SQLGrammarException;
 
 import java.util.List;
 
@@ -26,11 +28,16 @@ public class DefineThread extends AbstractThread {
         map.entrySet().stream()
                 .filter(entry -> !List.of(MODULE, NAME, TYPE, PAUSE, TIME, DEBUG, COMMAND_LIMIT, CONDITIONS).contains(entry.getKey()))
                 .forEach(entry -> {
-                    String result = String.join(ARRAY_SEPARATOR, queryService.runString(entry.getValue()));
-                    log("ADD CacheEntry key "+entry.getKey()+" and value "+result);
-                    String oldValue = cacheEntryRepository.getValue(entry.getKey());
-                    if(oldValue == null || !oldValue.equals(result)) System.out.println("define "+entry.getKey()+" = "+ result+"("+oldValue+")");
-                    cacheEntryRepository.setValue(entry.getKey(), result);
+                    try {
+                        String result = String.join(ARRAY_SEPARATOR, queryService.runString(entry.getValue()));
+                        log("ADD CacheEntry key "+entry.getKey()+" and value "+result);
+                        String oldValue = cacheEntryRepository.getValue(entry.getKey());
+                        if(oldValue == null || !oldValue.equals(result)) System.out.println("define "+entry.getKey()+" = "+ result+"("+oldValue+")");
+                        cacheEntryRepository.setValue(entry.getKey(), result);
+                    } catch (SQLGrammarException e) {
+                        System.err.println(e.getMessage());
+                        SleepUtil.secondsToSleep(30L);
+                    }
                 });
     }
 }

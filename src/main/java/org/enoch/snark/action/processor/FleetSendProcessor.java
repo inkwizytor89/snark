@@ -55,13 +55,13 @@ public class FleetSendProcessor {
     private final ColonyRepository colonyRepository;
     private final ShipService shipService;
 
-    public boolean execute(GI gi, SendCommand command) {
+    public ExecutionIssue execute(GI gi, SendCommand command) {
         SendFleetGIR gir = new SendFleetGIR(gi);
         openSendFleetView(gi, command);
         if(!isValidated(command)) {
             command.getStatus().setSuccess();
             command.getStatus().setIssue(CONDITION_WONT_FIT);
-            return true;
+            return NO_ISSUE;
         }
         ShipsMap shipsMap;
         if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
@@ -125,7 +125,7 @@ public class FleetSendProcessor {
             if (fleet.code != null) fleet.code = -fleet.code;
             clearNext(command);
             command.getStatus().setFailed(executionIssue);
-            return true;
+            return CAN_NOT_SENT;
         } else if (TO_WEAK_PLAYER.equals(executionIssue)) {
             clearNext(command);
             if (fleet.code != null) fleet.code = -fleet.code;
@@ -133,7 +133,7 @@ public class FleetSendProcessor {
         } else {
             command.getStatus().setFailed(executionIssue);
         }
-        return true;
+        return NO_ISSUE;
     }
 
     @Transactional

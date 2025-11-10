@@ -1,8 +1,11 @@
 package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
+//@Data
 @MappedSuperclass
 public abstract class IdEntity {
 

@@ -57,6 +57,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String DRY_RUN = "dry_run";
     public static final String RANGE = "range";
     public static final String COORDINATE = "coordinate";
+    public static final String SPY_COORDINATE = "spy_coordinate";
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
     public static final String START_CONDITION = "start_conditions";

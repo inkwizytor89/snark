@@ -1,9 +1,12 @@
 package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Data
 @Entity
 @Table(name = "targets", schema = "public", catalog = "snark")
 public class TargetEntity extends PlanetEntity {
@@ -16,7 +19,7 @@ public class TargetEntity extends PlanetEntity {
 
     @Basic
     @Column(name = "resources")
-    public Long resources;
+    public Long resourcesMsu;
 
     @Basic
     @Column(name = "fleet_sum")
@@ -66,7 +69,7 @@ public class TargetEntity extends PlanetEntity {
         this.metal = targetEntity.metal;
         this.crystal = targetEntity.crystal;
         this.deuterium = targetEntity.deuterium;
-        this.resources = metal + 2 * crystal + 3 * deuterium;
+        this.resourcesMsu = metal + 2 * crystal + 3 * deuterium;
         this.energy = targetEntity.energy;
 
         this.fleetSum = targetEntity.fleetSum;
