@@ -12,6 +12,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
+import static org.enoch.snark.action.command.status.ExecutionIssue.RETRY;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 
@@ -74,7 +75,7 @@ public abstract class AbstractCommand {
     }
 
     public boolean notExecuted() {
-        return asList(NEW, IN_PROGRESS, FAILED, WAITING, NOT_REGISTERED).contains(getStatus().getStatus());
+        return asList(NEW, IN_PROGRESS, FAILED, WAITING, NOT_REGISTERED, RETRY).contains(getStatus().getStatus());
     }
 
     public boolean executed() {

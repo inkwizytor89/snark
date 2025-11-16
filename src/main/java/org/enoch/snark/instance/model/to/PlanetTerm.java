@@ -19,10 +19,6 @@ public class PlanetTerm {
     private PlanetData planetData;
     private String action;
 
-    public PlanetTerm(String expression) {
-        this(expression, FleetContext.builder().build());
-    }
-
     public PlanetTerm(String expression, FleetContext context) {
         this.context = context;
         if (containsActionSeparator(expression)) {

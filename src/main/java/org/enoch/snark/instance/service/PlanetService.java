@@ -46,6 +46,7 @@ public class PlanetService {
     public static final String PROBE_SWAM = "probe_swam";
 
     public static final String FARM = "farm";
+    public static final String UNKNOWN = "unknown";
 
     public static final String TERM_SEPARATOR = ";";
     public static final String ACTION_SEPARATOR = "-";
@@ -55,10 +56,6 @@ public class PlanetService {
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
     private final TargetRepository targetRepository;
-
-    public List<PlanetData> targetFromFleetPlan(FleetPlan fleetPlan) {
-        return fromExpression(fleetPlan.getTarget(), FleetContext.fromFleetPlan(fleetPlan));
-    }
 
     public List<PlanetData> fromExpression(String expression) {
         return fromExpression(expression, FleetContext.builder().build());
@@ -97,6 +94,8 @@ public class PlanetService {
             return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().swapType()));
         } else if(planetTerm.getAction().contains(SPACE)) {
             return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().toSpace()));
+        } else if(planetTerm.getAction().contains(UNKNOWN)) {
+            return targetRepository.findAll().stream().filter(target -> target.lastSpiedOn == null).map(PlanetData::new).toList();
         } else if(planetTerm.getAction().contains(FARM)) {
 //            throw new NotImplementedException(FARM + " expression not yet implemented");
             Planet source = context.getSource().getPlanet();

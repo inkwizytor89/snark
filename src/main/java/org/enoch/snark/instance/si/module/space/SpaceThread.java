@@ -26,6 +26,9 @@ public class SpaceThread extends AbstractThread {
     private int threadPause = 300;
     private String spaceHash = StringUtils.EMPTY;
 
+    private LocalDateTime lastCheck = LocalDateTime.now();
+    private Duration expiredTime = new Duration("7D");
+
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>(
             Comparator.comparingInt(value -> value.galaxy*1000 + value.system)
     );
@@ -92,7 +95,9 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(spaceHash.equals(spaceHash())) return;
+        expiredTime.update(getNearestConfig(EXPIRED_TIME, "7D"));
+
+        if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(spaceHash())) return;
         System.out.println(spaceHash());
 
         List<SystemViewRange> spacedRange = spaceRange();
@@ -123,10 +128,9 @@ public class SpaceThread extends AbstractThread {
             spyCoordinate = spyCoordinate(nearestCoordinate.getFirst());
         }
 
-        Duration duration = map().getDuration(EXPIRED_TIME, new Duration("7D"));
         List<Planet> finalSpyCoordinate = spyCoordinate;
         galaxyEntityMap.entrySet().stream()
-                .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, duration.getValue()))
+                .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, expiredTime.getValue()))
                 .forEach(entry -> {
                     GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
                     command.setSpyPositions(finalSpyCoordinate.stream()

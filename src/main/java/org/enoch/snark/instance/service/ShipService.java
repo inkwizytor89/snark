@@ -3,18 +3,19 @@ package org.enoch.snark.instance.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.SendCommand;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.FleetContext;
 import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
-import static org.enoch.snark.instance.model.to.ShipsMap.TRANSPORT_COUNT;
+import static org.enoch.snark.instance.model.to.ShipsMap.*;
 import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAPACITY;
 
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class ShipService {
 //        if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
 //        return valuedMap;
     }
-
+    @Deprecated
     public ShipsMap fromExpressionToValues(ShipsMap requestedShips, PlanetEntity source, ShipsMap leaveShipsMap) {
         ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source);
         ShipsMap sourceShipsMap = source.getShipsMap();
@@ -51,16 +52,47 @@ public class ShipService {
         return valuedMap;
     }
 
+    @Deprecated
     private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, PlanetEntity planet) {
         ShipsMap result = new ShipsMap();
 
         if(shipsMap != null) shipsMap.forEach((key, value) -> {
             if (TRANSPORT_COUNT.equals(value))
                 result.put(key, calculateShipCountForTransport(key, planet.getResources()));
+            else if (ATTACK_COUNT.equals(value))
+//                target tutaj
+                result.put(key, calculateShipCountForTransport(key, planet.getResources()));
             else result.put(key, value);
         });
         return result;
     }
+
+    public ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetContext context) {
+        ColonyEntity source = context.getSource().getColony();
+
+        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source);
+        ShipsMap sourceShipsMap = source.getShipsMap();
+        ShipsMap maxToSend = sourceShipsMap.leave(context.getLeaveShipsMap());
+
+        valuedMap = valuedMap.reduce(maxToSend);
+        if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
+        return valuedMap;
+    }
+
+//    private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, FleetContext context) {
+//        ShipsMap result = new ShipsMap();
+//
+//        if(shipsMap != null) shipsMap.forEach((key, value) -> {
+//            if (TRANSPORT_COUNT.equals(value)) {
+//                PlanetEntity source = context.getSource().planetData();
+//                result.put(key, calculateShipCountForTransport(key, source.getResources()));
+//            } else if (ATTACK_COUNT.equals(value))
+//                PlanetEntity source = context.getSource().planetData();
+//                result.put(key, calculateShipCountForTransport(key, planet.getResources()));
+//            else result.put(key, value);
+//        });
+//        return result;
+//    }
 
     public Long calculateShipCountForTransport(Ship ship, Resources resources) {
         Long capacity = calculateCapacity(ship);

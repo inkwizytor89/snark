@@ -10,17 +10,12 @@ import java.util.List;
 public class FleetContext {
     List<PlanetData> trip;
     PlanetData source;
+    PlanetData target;
+
+    ShipsMap leaveShipsMap;
 //
 //    public FleetContext(FleetPlan fleetPlan) {
 //        trip = fleetPlan.getTrip();
 //        source = new PlanetData(fleetPlan.getSource());
 //    }
-
-
-    public static FleetContext fromFleetPlan(FleetPlan fleetPlan) {
-        return FleetContext.builder()
-                .trip(fleetPlan.getTrip())
-                .source(new PlanetData(fleetPlan.getSource()))
-                .build();
-    }
 }

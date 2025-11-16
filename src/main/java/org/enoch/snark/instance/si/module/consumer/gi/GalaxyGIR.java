@@ -8,6 +8,7 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -157,8 +158,6 @@ public class GalaxyGIR extends GraphicalInterfaceReader {
             boolean toTake = positionEntry.isPresent() && !positionEntry.get().getValue();
             if (Mission.SPY.equals(mission) && toTake) {
                 spy(row, positionEntry.get());
-
-
             }
         }
     }
@@ -182,6 +181,7 @@ public class GalaxyGIR extends GraphicalInterfaceReader {
                 fleetHostile = !list.getFirst().findElements(By.className("fleetHostile")).isEmpty();
                 if(fleetHostile) break;
             }
+            if(fleetHostile) MessageService.getInstance().put(entry.getKey());
             entry.setValue(fleetHostile);
         }
     }

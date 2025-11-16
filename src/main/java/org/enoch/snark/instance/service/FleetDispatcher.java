@@ -25,9 +25,12 @@ public class FleetDispatcher {
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
             for (ColonyEntity colony : colonyRepository.findByCode(fleetPlan.getSource())) {
-                FleetPlan sourcesdFleetPlan = fleetPlan.toBuilder().source(colony.toString()).build();
-                List<PlanetData> targets = planetService.targetFromFleetPlan(sourcesdFleetPlan);
-//                List<Planet> targets = Planet.fromString(fleetPlan.getTarget());
+                FleetContext fleetContext = FleetContext.builder()
+                        .trip(fleetPlan.getTrip())
+                        .source(new PlanetData(colony))
+                        .build();
+
+                List<PlanetData> targets = planetService.fromExpression(fleetPlan.getTarget(), fleetContext);
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
                     command.setSource(colony);

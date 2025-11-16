@@ -11,10 +11,6 @@ public class PlanetData {
     private ColonyEntity colony;
     private TargetEntity target;
 
-    public PlanetData(String planetString) {
-        this.planet = new Planet(planetString);
-    }
-
     public PlanetData(Planet planet) {
         this.planet = planet;
     }

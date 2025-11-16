@@ -204,7 +204,9 @@ public class DefenseThread extends AbstractThread {
     private void loadAggressiveFleet() {
         Long limit = map.getConfigLong(LIMIT, 3000L);
 
-        aggressorsEvents = Navigator.getInstance().getEventFleetList().stream()
+        List<EventFleet> eventFleetList = Navigator.getInstance().getEventFleetList();
+        if(eventFleetList == null) return;
+        aggressorsEvents = eventFleetList.stream()
                 .filter(event -> (event.isHostile && event.mission.isAggressive())
 //                || STATIONED.equals(event.mission)
                 )

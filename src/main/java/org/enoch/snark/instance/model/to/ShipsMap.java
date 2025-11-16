@@ -20,6 +20,7 @@ public class ShipsMap extends HashMap<Ship, Long> {
     public static final ShipsMap NO_SHIPS = new ShipsMap();
     public static final ShipsMap ALL_SHIPS = new ShipsMap();
     public static final Long TRANSPORT_COUNT = -1L;
+    public static final Long ATTACK_COUNT = -2L;
     public static final List<ShipsMap> EMPTY_SHIP_WAVE = new ArrayList<>();
 
     @JsonCreator

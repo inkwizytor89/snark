@@ -1,18 +1,14 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.snark.action.command.AbstractCommand;
-import org.enoch.snark.action.command.OpenPageCommand;
+import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.action.command.LoadColoniesCommand;
-import org.enoch.snark.action.command.UpdateFleetEventsCommand;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.FleetMovement;
-import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -34,6 +30,7 @@ public class UpdateThread extends AbstractThread {
 
     public static final String threadType = "update";
     public static final String REFRESH = "refresh";
+    public static final String CHECK_SPY_REPORTS_DURATION = "check_spy_reports_duration";
 
     private final ColonyRepository colonyRepository;
 
@@ -71,8 +68,13 @@ public class UpdateThread extends AbstractThread {
             updateState();
             log(LocalDateTime.now() + " state updated after "+refresh.getValue());
         }
-
         events = navigator.getEventFleetList();
+
+        java.time.Duration duration = new Duration(getNearestConfig(CHECK_SPY_REPORTS_DURATION, "2M")).getValue();
+        if(MessageService.getInstance().shouldTrigger(duration) && !alreadyPushed(CHECK_SPY_REPORTS_DURATION)) {
+            pushCommand(CHECK_SPY_REPORTS_DURATION, new ReadMessageCommand());
+        }
+
         if (events == null) return;
         markSpecialFleets();
     }

@@ -8,18 +8,18 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.MessageDAO;
-import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.MessageEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.MessageRepository;
+import org.enoch.snark.db.repository.PlayerRepository;
+import org.enoch.snark.db.repository.TargetRepository;
+import org.enoch.snark.instance.service.MessageService;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.SpyReportGIR;
-import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
 import org.enoch.snark.instance.model.to.SystemView;
-import org.enoch.snark.instance.service.MessageService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,7 +33,11 @@ import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.
 @Scope("prototype")
 public class ReadMessageProcessor {
 
+    private final Core core;
     private final ColonyRepository colonyRepository;
+    private final TargetRepository targetRepository;
+    private final PlayerRepository playerRepository;
+    private final MessageRepository messageRepository;
 
     private GI gi;
 
@@ -44,7 +48,7 @@ public class ReadMessageProcessor {
 
         List<String> spyReports = loadMessagesLinks();
         storeSpyMessage(spyReports);
-        MessageService.getInstance().update();
+//        MessageService.getInstance().update(duration);
         return ExecutionIssue.NO_ISSUE;
     }
 
@@ -75,30 +79,32 @@ public class ReadMessageProcessor {
     private boolean storeSpyMessage(String link) {
         Long messageId = Long.parseLong(getMessageIdFromLink(link));
 
-        boolean alreadyExists = MessageDAO.getInstance().fetchAll().stream().anyMatch(
+        boolean alreadyExists =messageRepository.findAll().stream().anyMatch(
                 messageEntity -> messageEntity.messageId.equals(messageId));
         if(alreadyExists) return false;
 
         MessageEntity messageEntity = MessageEntity.create(gi.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
-        MessageDAO.getInstance().saveOrUpdate(messageEntity);
+        messageRepository.save(messageEntity);
         if(MessageEntity.SPY.equals(messageEntity.type)) {
 
             SpyReportGIR spyReportGIR = new SpyReportGIR(gi);
             TargetEntity spyTarget = spyReportGIR.readTargetFromReport(link);
-            Optional<TargetEntity> targetOptional = TargetDAO.getInstance().find(spyTarget.toPlanet());
+            MessageService.getInstance().release(spyTarget.toPlanet());
+            Optional<TargetEntity> targetOptional = targetRepository.find(spyTarget.toPlanet());
             if(targetOptional.isEmpty()) {
                 System.err.println("Spy report for "+spyTarget.toPlanet()+" have no association for TargetEntity");
-                new GalaxyAnalyzeCommand(new SystemView(spyTarget.galaxy, spyTarget.galaxy)).push();
+                core.push(new GalaxyAnalyzeCommand(new SystemView(spyTarget.galaxy, spyTarget.galaxy)));
+
                 return true;
             }
             TargetEntity targetEntity = targetOptional.get();
             if(spyTarget.metal == null) { // not enough spy probe
                 targetEntity.player.spyLevel*=2;
-                PlayerDAO.getInstance().saveOrUpdate(targetEntity.player);
+                playerRepository.save(targetEntity.player);
             } else {
                 targetEntity.update(spyTarget);
-                TargetDAO.getInstance().saveOrUpdate(targetEntity);
+                targetRepository.save(targetEntity);
             }
         }
         return true;
