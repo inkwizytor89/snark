@@ -11,10 +11,6 @@ public class PlanetData {
     private ColonyEntity colony;
     private TargetEntity target;
 
-    public PlanetData(Planet planet) {
-        this.planet = planet;
-    }
-
     public PlanetData(ColonyEntity planet) {
         this.planet = planet.toPlanet();
         this.colony = planet;

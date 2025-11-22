@@ -709,6 +709,7 @@ public abstract class PlanetEntity extends IdEntity{
     }
 
     public Resources getResources() {
+        if(metal == null || crystal == null || deuterium == null) return Resources.unknown;
         return new Resources(metal, crystal, deuterium);
     }
 

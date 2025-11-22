@@ -247,7 +247,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void fixDoNotWorkingDefaults(SendCommand command) {
         // spy on position 16
-        if(Mission.SPY.equals(command.getMission()) && command.getTarget().position == 16) {
+        if(Mission.SPY.equals(command.getMission()) && command.getTarget().getPlanet().position == 16) {
             wd.findElement(By.id("missionButton6")).click();
         }
     }

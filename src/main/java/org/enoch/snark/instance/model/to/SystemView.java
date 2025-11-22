@@ -9,6 +9,10 @@ public class SystemView {
     public Integer galaxy;
     public Integer system;
 
+    public SystemView(Planet planet) {
+        this(planet.galaxy, planet.system);
+    }
+
     public SystemView(Integer galaxy, Integer system) {
         this.galaxy = galaxy;
         this.system = system;

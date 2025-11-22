@@ -5,6 +5,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
@@ -139,7 +140,7 @@ public class DefenseThread extends AbstractThread {
     private FleetSendCommand sendOnAttacker(ColonyEntity source, Planet target) {
         FleetSendCommand sendCommand = new FleetSendCommand();
         sendCommand.setSource(source);
-        sendCommand.setTarget(target);
+        sendCommand.setTarget(new PlanetData(new TargetEntity(target)));
         sendCommand.setMission(ATTACK);
         sendCommand.setShipsMap(ALL_SHIPS);
         sendCommand.setResources(everything);
@@ -154,11 +155,10 @@ public class DefenseThread extends AbstractThread {
 
     private FleetSendCommand fleetOnSpy(ColonyEntity source) {
         Planet target = source.toPlanet();
-        target.position = 16;
 
         FleetSendCommand sendCommand = new FleetSendCommand();
         sendCommand.setSource(source);
-        sendCommand.setTarget(target);
+        sendCommand.setTarget(new PlanetData(new TargetEntity(target.toSpace())));
         sendCommand.setMission(SPY);
         sendCommand.setShipsMap(ALL_SHIPS);
         sendCommand.setResources(everything);
@@ -174,7 +174,7 @@ public class DefenseThread extends AbstractThread {
     private FleetSendCommand fleetToAnotherMoon(ColonyEntity source) {
         FleetSendCommand sendCommand = new FleetSendCommand();
         sendCommand.setSource(source);
-        sendCommand.setTarget(chooseDestination(source.toPlanet()).toPlanet());
+        sendCommand.setTarget(new PlanetData(chooseDestination(source.toPlanet())));
         sendCommand.setMission(STATIONED);
         sendCommand.setShipsMap(ALL_SHIPS);
         sendCommand.setResources(everything);

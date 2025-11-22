@@ -78,22 +78,30 @@ public class PlanetService {
 
 
         if(planetTerm.getAction() == null) {
-            return singletonList(getPlanetData(planetTerm.getPlanetData().getPlanet()));
+            return singletonList(getPlanetData(planetTerm.getPlanetData()));
         } else if(List.of(ALL, MOONS, PLANETS, EACH_POSITION, NONE).contains(planetTerm.getAction())) {
             return colonyRepository.findByCode(planetTerm.getAction()).stream()
                     .map(PlanetData::new)
                     .collect(Collectors.toList());
         } else if(planetTerm.getAction().contains(FIND)) {
-            return CustomFinder.find(planetTerm.getAction()).stream()
-                    .map(PlanetData::new).toList();
+            throw new NotImplementedException(FIND+" not yet implemented");
+//            return CustomFinder.find(planetTerm.getAction()).stream()
+//                    .map(PlanetData::new).toList();
         } else if(planetTerm.getAction().contains(NEXT)) {
             return singletonList(TripFinder.next(planetTerm));
         } else if(planetTerm.getAction().contains(PREV)) {
             return singletonList(TripFinder.prev(planetTerm));
         } else if(planetTerm.getAction().contains(SWAP)) {
-            return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().swapType()));
+            Planet swapCoordinate = planetTerm.getPlanetData().swapType();
+            return singletonList(new PlanetData(colonyRepository.byPlanet(swapCoordinate)));
         } else if(planetTerm.getAction().contains(SPACE)) {
-            return singletonList(new PlanetData(planetTerm.getPlanetData().getPlanet().toSpace()));
+            Planet space = planetTerm.getPlanetData().toSpace();
+            TargetEntity spaceTarget = new TargetEntity();
+            spaceTarget.galaxy = space.galaxy;
+            spaceTarget.system = space.system;
+            spaceTarget.position = space.position;
+            spaceTarget.type = space.type;
+            return singletonList(new PlanetData(spaceTarget));
         } else if(planetTerm.getAction().contains(UNKNOWN)) {
             return targetRepository.findAll().stream().filter(target -> target.lastSpiedOn == null).map(PlanetData::new).toList();
         } else if(planetTerm.getAction().contains(FARM)) {

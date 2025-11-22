@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.*;
 import org.springframework.context.annotation.Scope;
@@ -16,7 +17,6 @@ import java.util.List;
 @Component
 @Scope("prototype")
 public class FleetDispatcher {
-    private final ColonyRepository colonyRepository;
     private final PlanetService planetService;
 
     public List<FleetSendCommand> from(FleetPlan fleetPlan) {
@@ -24,17 +24,19 @@ public class FleetDispatcher {
         int index = 0;
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
-            for (ColonyEntity colony : colonyRepository.findByCode(fleetPlan.getSource())) {
+
+            List<PlanetData> colonies = planetService.fromExpression(fleetPlan.getSource());
+            for (PlanetData colony : colonies) {
                 FleetContext fleetContext = FleetContext.builder()
                         .trip(fleetPlan.getTrip())
-                        .source(new PlanetData(colony))
+                        .source(colony)
                         .build();
 
                 List<PlanetData> targets = planetService.fromExpression(fleetPlan.getTarget(), fleetContext);
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
-                    command.setSource(colony);
-                    command.setTarget(target.getPlanet());
+                    command.setSource(colony.getColony());
+                    command.setTarget(target);
                     command.setMission(fleetPlan.getMission());
                     command.setSpeed(fleetPlan.getSpeed());
                     command.setShipsMap(shipsWave);
@@ -75,7 +77,7 @@ public class FleetDispatcher {
             for(Planet target : from(promise.getTarget())) {
                 FleetSendCommand command = new FleetSendCommand();
                 command.setSource(promise.getSource());
-                command.setTarget(target);
+                command.setTarget(new PlanetData(new TargetEntity(target)));
                 command.setMission(promise.getMission());
                 command.setSpeed(promise.getSpeed());
                 command.setShipsMap(promise.getShipsMap());

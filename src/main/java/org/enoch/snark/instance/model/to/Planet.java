@@ -106,10 +106,14 @@ public class Planet {
     }
 
     protected void loadPlanetCoordinate(String coordinateString) {
-        String[] numbersTable = coordinateString.split("\\D+");
-        galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
-        system = Integer.parseInt(numbersTable[SYSTEM_INDEX]);
-        position = Integer.parseInt(numbersTable[POSITION_INDEX]);
+        try {
+            String[] numbersTable = coordinateString.split("\\D+");
+            galaxy = Integer.parseInt(numbersTable[GALAXY_INDEX]);
+            system = Integer.parseInt(numbersTable[SYSTEM_INDEX]);
+            position = Integer.parseInt(numbersTable[POSITION_INDEX]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalStateException("Can not parse "+coordinateString+" to planet");
+        }
     }
 
 //    @Override

@@ -16,7 +16,7 @@ public class PlanetTerm {
     public static final int PLANET_INDEX = 1;
     private final FleetContext context;
 
-    private PlanetData planetData;
+    private Planet planetData;
     private String action;
 
     public PlanetTerm(String expression, FleetContext context) {
@@ -24,7 +24,7 @@ public class PlanetTerm {
         if (containsActionSeparator(expression)) {
             parseActionPlanetData(expression);
         } else if (isSingleCoordinate(expression)) {
-            planetData = new PlanetData(new Planet(expression));
+            planetData = new Planet(expression);
         } else {
             setActionWithContext(expression, context);
         }
@@ -32,8 +32,8 @@ public class PlanetTerm {
 
     private void setActionWithContext(String expression, FleetContext context) {
         action = expression;
-        planetData = context.getSource();
         if(NEXT.equals(action) || PREV.equals(action)) {
+            planetData = context.getSource().getPlanet();
             if(context.getTrip() == null || context.getTrip().isEmpty()) {
                 throw new IllegalStateException("PlanetTerm has no trip for action " + action);
             }
@@ -43,7 +43,7 @@ public class PlanetTerm {
     private void parseActionPlanetData(String expression) {
         String[] s = expression.split(ACTION_SEPARATOR);
         action = s[ACTION_INDEX];
-        planetData = new PlanetData(new Planet(s[PLANET_INDEX]));
+        planetData = new Planet(s[PLANET_INDEX]);
     }
 
     private static boolean isSingleCoordinate(String expression) {

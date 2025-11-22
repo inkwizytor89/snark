@@ -140,7 +140,7 @@ public class FleetEntity extends IdEntity {
     public FleetEntity(SendCommand command) {
         super();
         source = command.getSource();
-        setTarget(command.getTarget());
+        setTarget(command.getTarget().getPlanet());
         mission = command.getMission();
         speed = command.getSpeed();
         hash = command.hash();

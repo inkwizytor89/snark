@@ -119,4 +119,6 @@ public abstract class AbstractCommand {
     public QueueRunType getQueueRunType(){
         return queueRunType;
     }
+
+
 }

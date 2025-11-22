@@ -5,9 +5,9 @@ import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.to.FleetPlan;
-import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.service.PlanetService;
@@ -37,6 +37,9 @@ public class FleetThread extends AbstractThread {
     private final ConditionChecker conditionChecker;
     private final PlanetService planetService;
     private final ShipService shipService;
+    private final TargetRepository targetRepository;
+
+    private int size = 0;
 
     @Override
     protected String getThreadType() {
@@ -71,16 +74,19 @@ public class FleetThread extends AbstractThread {
                 .trip(planetService.fromExpression(map.getConfig(TRIP, null)))
                 .build();
 
-// bardzo duzo tergetów niech wygeneruje flot i moze wrzucajmy jakimiś partiami
-        // kolejny iteracja by wrzuciła nastepna porcje ktora nie poleciala
-        int index = 0;
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);
         for(FleetSendCommand command : fleetSendCommands) {
-            index++;
-            command.generateHash(map.name(), Integer.toString(index));
+            command.generateHash(map.name(), "X");
             if(alreadyPushed(command.getHash())) continue;
 //            logFleetOverview(command);
-            ShipsMap realShips = shipService.fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
+
+            FleetContext fleetContext = FleetContext.builder()
+                    .source(new PlanetData(command.getSource()))
+                    .target(command.getTarget())
+                    .leaveShipsMap(command.getLeaveShipsMap())
+                    .build();
+
+            ShipsMap realShips = shipService.fromExpressionToValues(command.getShipsMap(), fleetContext);
             if(realShips.isEmpty()) continue;
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
@@ -97,6 +103,13 @@ public class FleetThread extends AbstractThread {
                 pushCommand(command);
             }
         }
+        if(fleetSendCommands.size() != size) {
+
+            size = fleetSendCommands.size();
+            System.err.println("Fleets "+map().name()+" in map "+size);
+            fleetSendCommands.forEach(fleetSendCommand -> System.err.print(fleetSendCommand+"="+fleetSendCommand.getStatus().getStatus()+", "));
+        }
+
     }
 
     private boolean blockExpiredTime(FleetSendCommand command) {

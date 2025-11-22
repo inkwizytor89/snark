@@ -2,6 +2,7 @@ package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.enoch.snark.instance.model.to.Planet;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -47,6 +48,14 @@ public class TargetEntity extends PlanetEntity {
 
     public TargetEntity(String input) {
         super(input);
+    }
+
+    public TargetEntity(Planet planet) {
+        super();
+        galaxy = planet.galaxy;
+        system = planet.system;
+        position = planet.position;
+        type = planet.type;
     }
 
     @Override

@@ -23,8 +23,8 @@ public class TripFinder {
     public static int currentTripIndex(PlanetTerm term) {
         List<PlanetData> configTrip = term.getContext().getTrip();
         if(configTrip == null) throw new IllegalStateException("Missing trip for "+term);
-        int index = indexOf(configTrip, term.getPlanetData().getPlanet());
-        if(index == -1) throw new IllegalStateException("Missing planet "+term.getPlanetData().getPlanet() + " in trip "+configTrip);
+        int index = indexOf(configTrip, term.getPlanetData());
+        if(index == -1) throw new IllegalStateException("Missing planet "+term.getPlanetData() + " in trip "+configTrip);
         return index;
     }
 

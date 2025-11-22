@@ -30,17 +30,6 @@ public class ShipService {
         return fromExpressionToValues(command.getShipsMap(), command.getSource(), command.getLeaveShipsMap());
     }
 
-
-    @Deprecated
-    public ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetPromise promise) {
-        throw new NotImplementedException(" to remove");
-//        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, Planet.fromString(promise.getTarget()).getFirst());
-//        ShipsMap sourceShipsMap = promise.getSource().getShipsMap();
-//        ShipsMap maxToSend = sourceShipsMap.leave(promise.getLeaveShipsMap());
-//
-//        if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
-//        return valuedMap;
-    }
     @Deprecated
     public ShipsMap fromExpressionToValues(ShipsMap requestedShips, PlanetEntity source, ShipsMap leaveShipsMap) {
         ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source);
@@ -70,7 +59,7 @@ public class ShipService {
     public ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetContext context) {
         ColonyEntity source = context.getSource().getColony();
 
-        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, source);
+        ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, context);
         ShipsMap sourceShipsMap = source.getShipsMap();
         ShipsMap maxToSend = sourceShipsMap.leave(context.getLeaveShipsMap());
 
@@ -79,20 +68,22 @@ public class ShipService {
         return valuedMap;
     }
 
-//    private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, FleetContext context) {
-//        ShipsMap result = new ShipsMap();
-//
-//        if(shipsMap != null) shipsMap.forEach((key, value) -> {
-//            if (TRANSPORT_COUNT.equals(value)) {
-//                PlanetEntity source = context.getSource().planetData();
-//                result.put(key, calculateShipCountForTransport(key, source.getResources()));
-//            } else if (ATTACK_COUNT.equals(value))
-//                PlanetEntity source = context.getSource().planetData();
-//                result.put(key, calculateShipCountForTransport(key, planet.getResources()));
-//            else result.put(key, value);
-//        });
-//        return result;
-//    }
+    private ShipsMap changeExpressionCountsToLong(ShipsMap shipsMap, FleetContext context) {
+        ShipsMap result = new ShipsMap();
+
+        if(shipsMap != null) shipsMap.forEach((key, value) -> {
+            if (TRANSPORT_COUNT.equals(value)) {
+                PlanetEntity source = context.getSource().planetData();
+                result.put(key, calculateShipCountForTransport(key, source.getResources()));
+            } else if (ATTACK_COUNT.equals(value)) {
+                PlanetEntity target = context.getTarget().planetData();
+                Long catchFullResources = calculateShipCountForTransport(key, target.getResources());
+                result.put(key, (catchFullResources*76)/100);
+            }
+            else result.put(key, value);
+        });
+        return result;
+    }
 
     public Long calculateShipCountForTransport(Ship ship, Resources resources) {
         Long capacity = calculateCapacity(ship);

@@ -28,6 +28,7 @@ import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class FleetSendProcessor {
         if(ALL_SHIPS.equals(command.getShipsMap()) && (command.getLeaveShipsMap() == null || command.getLeaveShipsMap().isEmpty())) {
             shipsMap = ALL_SHIPS;
         } else {
-            shipsMap = shipService.fromExpressionToValues(command);
+            shipsMap = shipService.fromExpressionToValues(command.getShipsMap(), command.createFleetContext());
         }
         gir.selectShips(shipsMap);
         gir.next();
@@ -85,6 +86,12 @@ public class FleetSendProcessor {
         ExecutionIssue executionIssue = gir.sendFleet(fleet);
         fleetRepository.save(fleet);
         Navigator.getInstance().add(fleet);
+
+        if(ATTACK.equals(fleet.mission)) {
+            TargetEntity targetEntity = targetRepository.find(fleet.getTarget()).get();
+            System.err.println("ATTACK "+targetEntity.toPlanet()+" spied "+timeAgo(targetEntity.lastSpiedOn)+" attacked "+timeAgo(targetEntity.lastAttacked));
+        }
+
 
         if (SPY.equals(fleet.mission) && fleet.targetPosition!= 16) {
             Optional<TargetEntity> targetEntity = targetRepository.find(fleet.getTarget());
@@ -109,13 +116,13 @@ public class FleetSendProcessor {
         if (NO_ISSUE.equals(executionIssue)) {
             command.getStatus().setSuccess();
         } else if (TO_WEAK_PLAYER.equals(executionIssue)) {
-            TargetEntity target = targetRepository.byPlanet(command.getTarget());
+            TargetEntity target = targetRepository.byPlanet(command.getTarget().getPlanet());
             if (target != null) {
                 PlayerEntity player = target.player;
                 player.type = TargetEntity.WEAK;
                 playerRepository.save(player);
             } else
-                gi.url().openGalaxy(new SystemView(command.getTarget().galaxy, command.getTarget().system), null);
+                gi.url().openGalaxy(new SystemView(command.getTarget().getPlanet()), null);
             command.getStatus().setFailed(executionIssue);
         } else if (CAN_NOT_SENT.equals(executionIssue)) {
 //            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -138,7 +145,7 @@ public class FleetSendProcessor {
 
     @Transactional
     private void openSendFleetView(GI gi, SendCommand command) {
-        ColonyEntity colony = gi.url().openSendFleetView(command.getSource(), command.getTarget(), command.getMission());
+        ColonyEntity colony = gi.url().openSendFleetView(command.getSource(), command.getTarget().getPlanet(), command.getMission());
         colonyRepository.save(colony);
     }
 
@@ -173,5 +180,28 @@ public class FleetSendProcessor {
         SleepUtil.pause();
         ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());
         colonyRepository.save(colony);
+    }
+
+    public static String timeAgo(LocalDateTime time) {
+        if (time == null) {
+            return "pierwszy raz";
+        }
+
+        Duration duration = Duration.between(time, LocalDateTime.now());
+        long totalSeconds = duration.getSeconds();
+
+        long days = totalSeconds / (24 * 3600);
+        long hours = (totalSeconds % (24 * 3600)) / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+
+        if (days > 0) sb.append(days).append(" dni ");
+        if (hours > 0) sb.append(hours).append(" godz ");
+        if (minutes > 0) sb.append(minutes).append(" min ");
+        sb.append(seconds).append(" sek");
+
+        return sb.toString().trim();
     }
 }

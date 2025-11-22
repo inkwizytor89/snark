@@ -27,7 +27,7 @@ public class SpaceThread extends AbstractThread {
     private String spaceHash = StringUtils.EMPTY;
 
     private LocalDateTime lastCheck = LocalDateTime.now();
-    private Duration expiredTime = new Duration("7D");
+    private Duration expiredTime = new Duration("P7D");
 
     private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>(
             Comparator.comparingInt(value -> value.galaxy*1000 + value.system)
@@ -95,7 +95,7 @@ public class SpaceThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        expiredTime.update(getNearestConfig(EXPIRED_TIME, "7D"));
+        expiredTime.update(getNearestConfig(EXPIRED_TIME, "P7D"));
 
         if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(spaceHash())) return;
         System.out.println(spaceHash());
@@ -131,10 +131,18 @@ public class SpaceThread extends AbstractThread {
         List<Planet> finalSpyCoordinate = spyCoordinate;
         galaxyEntityMap.entrySet().stream()
                 .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, expiredTime.getValue()))
+                .sorted(Comparator.comparingInt(a -> a.getKey().galaxy * 1000 + a.getKey().system))
                 .forEach(entry -> {
                     GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
-                    command.setSpyPositions(finalSpyCoordinate.stream()
-                            .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList());
+                    List<Planet> spyList = finalSpyCoordinate.stream()
+                            .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList();
+                    System.err.println(entry.getKey()+" "+spyList.size());
+                    command.setSpyPositions(spyList);
+
+                    if(isNearestConfig(SPY_PATTERN)) {
+                        command.setSpyNew(getNearestConfig(SPY_PATTERN, StringUtils.EMPTY).toLowerCase());
+                    }
+
                     if(!command.getSpyPositions().isEmpty() && isNearestConfig(COORDINATE)) {
                         List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
                         if(!coordinate.isEmpty()) command.setSource(colonyRepository.byPlanet(coordinate.getFirst().getPlanet()));
@@ -146,8 +154,11 @@ public class SpaceThread extends AbstractThread {
     }
 
     private String spaceHash() {
-        if(isNearestConfig(COORDINATE)) return "range="+getNearestConfig(RANGE, StringUtils.EMPTY)+
-                " coordinate="+ getNearestConfig(COORDINATE, StringUtils.EMPTY);
+        if(isNearestConfig(COORDINATE)) {
+            Planet coordinate = getNearestCoordinate(StringUtils.EMPTY).getFirst().getPlanet();
+            return "range="+getNearestConfig(RANGE, StringUtils.EMPTY)+
+                    " coordinate="+ coordinate;
+        }
         if(isNearestConfig(RANGE)) return "range="+getNearestConfig(RANGE, StringUtils.EMPTY);
         if(map().containsKey(GALAXY_MAX)) return "for "+map.getConfigInteger(GALAXY_MAX, -1)+" galaxies";
         int galaxyMax = colonyRepository.findAll().stream()

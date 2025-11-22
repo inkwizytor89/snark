@@ -54,7 +54,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     private ObjectMapper objectMapper;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
-    protected  CacheEntryDAO cacheEntryDAO;
     protected  FleetDAO fleetDAO;
     protected  TargetDAO targetDAO;
 
@@ -83,7 +82,9 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected void onStart() {
         try {
             if(map.containsKey(SOURCE)) {
-                colonyRepository.findByCode(map.getConfig(SOURCE)).forEach(colony -> {
+                planetService.fromExpression(map.getConfig(SOURCE)).stream()
+                                .map(PlanetData::getColony)
+                                .forEach(colony -> {
                     if(DateUtil.isExpired2H(colony.updated))
                         core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()));
                 });
@@ -230,7 +231,13 @@ public abstract class AbstractThread extends ExecutorImpl {
             inQueueCount++;
         }
         long end = inQueueCount;
-        if(start!=end) System.err.println("Limited push for "+map().name()+":"+start+" -> "+end);
+        if(start!=end) {
+            long executed = commandsMap.asMap().values().stream()
+                    .filter(list -> !list.isEmpty() && list.stream().findFirst().get().executed())
+                    .count();
+            long all = commandsMap.size();
+            System.err.println("Limited push for "+map().name()+":"+start+" -> "+end+"(inQueueCount: "+inQueueCount+" executed: "+executed+" all: "+all);
+        }
     }
 
     private boolean isAnyCommandInQueue(Collection<AbstractCommand> cmd) {

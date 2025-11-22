@@ -18,6 +18,7 @@ public class GalaxyAnalyzeCommand extends AbstractCommand {
     public SystemView systemView;
     private Map<Planet, Boolean> spyPositions = new HashMap<>();
     private ColonyEntity source;
+    private String spyNew;
 
     public GalaxyAnalyzeCommand(GalaxyEntity galaxyEntity) {
         this(galaxyEntity.toSystemView());

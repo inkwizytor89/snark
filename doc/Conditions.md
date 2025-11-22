@@ -87,7 +87,7 @@ Checks whether a specified amount of time (in seconds) has passed since a fleet-
 **Example:**
 ```json
 {
-  "type": "EXPIRED_FLEET",
+  "type": "ATTACK_NOT_EXPIRED",
   "seconds": 300,
   "is": true,
   "target": "target"
@@ -112,7 +112,7 @@ Checks whether a specified amount of time (in seconds) has passed since a fleet-
 **Example:**
 ```json
 {
-  "type": "EXPIRED_FLEET",
+  "type": "SPY_NOT_EXPIRED",
   "seconds": 300,
   "is": true,
   "target": "target"

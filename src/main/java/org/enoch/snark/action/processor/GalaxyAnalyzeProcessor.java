@@ -7,12 +7,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.db.entity.GalaxyEntity;
-import org.enoch.snark.db.entity.PlayerEntity;
-import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.entity.*;
 import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
@@ -46,7 +44,8 @@ public class GalaxyAnalyzeProcessor{
         gir.updateGalaxy(command.getSystemView(), fromDB);
 
         removeNotUpdated(fromDB);
-        addNewTargets(fromDB.stream().filter(targetEntity -> targetEntity.updated != null && targetEntity.id == null).toList());
+        List<TargetEntity> newTargets = fromDB.stream().filter(targetEntity -> targetEntity.updated != null && targetEntity.id == null).toList();
+        addNewTargets(newTargets, command.getSpyPositions(), command.getSpyNew());
 
         Optional<GalaxyEntity> galaxyEntityOptional = galaxyRepository.findByGalaxyAndSystem(galaxy, system);
         if(galaxyEntityOptional.isPresent()) galaxyEntityOptional.get().updated = LocalDateTime.now();
@@ -58,6 +57,7 @@ public class GalaxyAnalyzeProcessor{
             galaxyRepository.save(galaxyEntity);
         }
         Map<Planet, Boolean> spyPositions = command.getSpyPositions();
+        System.err.println(command.getSystemView()+" spy to click "+spyPositions.size());
         gir.takeAction(spyPositions, Mission.SPY);
 
         boolean anySpyFailed = spyPositions.values().stream().anyMatch(aBoolean -> !aBoolean);
@@ -71,11 +71,18 @@ public class GalaxyAnalyzeProcessor{
     }
 
     private void removeNotUpdated(List<TargetEntity> targets) {
-        targetRepository.deleteAll(targets.stream().filter(targetEntity -> targetEntity.updated == null).toList());
+
+        List<TargetEntity> list = targets.stream().filter(targetEntity -> targetEntity.updated == null).toList();
+        if(!list.isEmpty()) {
+            System.err.print(list.size()+" targets to remove: ");
+            list.forEach(System.err::print);
+            System.err.println();
+        }
+        targetRepository.deleteAll(list);
     }
 
     @Transactional
-    private void addNewTargets(List<TargetEntity> targets) {
+    private void addNewTargets(List<TargetEntity> targets, Map<Planet, Boolean> spyPositions, String spyPattern) {
         Map<String, PlayerEntity> playerCache = new HashMap<>();
         for (TargetEntity target : targets) {
             PlayerEntity player = target.getPlayer();
@@ -84,6 +91,24 @@ public class GalaxyAnalyzeProcessor{
                             .orElseGet(() -> playerRepository.save(player))
             );
             target.setPlayer(playerCache.get(player.getCode()));
+        }
+        List<Planet> list = targets.stream()
+                .filter(targetEntity -> targetEntity.id == null)
+                .map(PlanetEntity::toPlanet).toList();
+        if(!list.isEmpty()) {
+            System.err.print(list.size()+" targets to add: ");
+            list.forEach(System.err::print);
+            System.err.println();
+        }
+
+        if(!StringUtils.isEmpty(spyPattern)) {
+            targets.forEach(target -> {
+                String targetProperties = target.player.status;
+                if(targetProperties.toLowerCase().contains(spyPattern)) {
+                    spyPositions.put(target.toPlanet(), false);
+                    System.err.println("Match "+spyPattern+" to "+targetProperties.toLowerCase()+" for "+target.toPlanet());
+                }
+            });
         }
         targetRepository.saveAll(targets);
     }

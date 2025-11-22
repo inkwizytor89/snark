@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
+import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.FleetDispatcher;
@@ -103,7 +105,7 @@ public class ExpeditionThread extends AbstractThread {
     private FleetSendCommand createFleetSendCommand(ColonyEntity bestColony, ShipsMap ships) {
         FleetSendCommand command = new FleetSendCommand();
         command.setSource(bestColony);
-        command.setTarget( bestColony.toPlanet().toSpace());
+        command.setTarget(new PlanetData(new TargetEntity(bestColony.toPlanet().toSpace())));
         command.setMission(Mission.EXPEDITION);
         command.setShipsMap(ships);
         command.generateHash(threadType, null);

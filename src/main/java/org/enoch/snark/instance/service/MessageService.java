@@ -12,6 +12,7 @@ public class MessageService {
     private static MessageService INSTANCE;
 
     private Map<Planet, LocalDateTime> waiting = new HashMap<>();
+    private static String released = "";
 
     @Getter
     private LocalDateTime lastChecked = LocalDateTime.now();
@@ -22,7 +23,10 @@ public class MessageService {
 
     public void release(Planet planet) {
         waiting.remove(planet);
-        System.err.println("MessageService.release "+planet+" left "+waiting.size());
+        released+=planet+", ";
+        if(waiting.isEmpty())
+        System.err.println("MessageService.release "+released);
+        released = "";
     }
 
     public static MessageService getInstance() {

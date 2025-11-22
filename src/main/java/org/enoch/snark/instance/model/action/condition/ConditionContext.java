@@ -30,19 +30,19 @@ public class ConditionContext {
 
     public ColonyEntity colony(Planet planet) {
         if(SOURCE_TERM.equals(planet)) return command.getSource();
-        if(TARGET_TERM.equals(planet)) return getColonyRepository().byPlanet(command.getTarget());
+        if(TARGET_TERM.equals(planet)) return command.getTarget().getColony();
         return getColonyRepository().byPlanet(planet);
     }
 
     public TargetEntity target(Planet planet) {
         if(SOURCE_TERM.equals(planet)) throw new IllegalStateException("Incorrect "+SOURCE_STRING);
-        if(TARGET_TERM.equals(planet)) return getTargetRepository().byPlanet(command.getTarget());
+        if(TARGET_TERM.equals(planet)) return command.getTarget().getTarget();
         return getTargetRepository().byPlanet(planet);
     }
 
     public PlanetEntity planet(Planet planet) {
         if(SOURCE_TERM.equals(planet)) return command.getSource();
-        else if(TARGET_TERM.equals(planet))  return determinePlanetEntity(command.getTarget());
+        else if(TARGET_TERM.equals(planet))  return command.getTarget().planetData();
         else return determinePlanetEntity(planet);
     }
 

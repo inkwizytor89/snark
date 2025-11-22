@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class FleetSendCommand extends AbstractCommand implements SendCommand {
     private ColonyEntity source;
-    private Planet target;
+    private PlanetData target;
     private Mission mission;
     private Long speed;
 
@@ -31,7 +31,16 @@ public class FleetSendCommand extends AbstractCommand implements SendCommand {
 
     public void generateHash(String hashPrefix, String code) {
         String prefix = hashPrefix != null ? hashPrefix+"_" : "";
-        hash(prefix+ source+"_"+ mission+"_"+ target+"_"+code);
+        hash(prefix+ source+"_"+ mission+"_"+ target.getPlanet()+"_"+code);
+    }
+
+    public FleetContext createFleetContext() {
+        return FleetContext.builder()
+                .source(new PlanetData(source))
+                .target(target)
+                .leaveShipsMap(leaveShipsMap)
+                .trip(fleetPlan.getTrip())
+                .build();
     }
 
     @Override

@@ -38,7 +38,7 @@ public class Duration extends Parsable<java.time.Duration> {
 //            value = calculateRandom(base.getSeconds(), randomRange.getSeconds());
             }
         } catch (DateTimeParseException e) {
-            throw new IllegalStateException("Can not convert "+convertInput(input)+"  java.time.Duration",e);
+            throw new IllegalStateException("Can not convert "+convertInput(input)+" java.time.Duration",e);
         }
     }
 
