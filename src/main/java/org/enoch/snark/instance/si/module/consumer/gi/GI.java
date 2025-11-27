@@ -13,6 +13,7 @@ import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
@@ -178,7 +179,7 @@ public class GI {
         } else {
             String warningInfo = warnings.get(0).findElement(By.tagName("p")).getText();
             if(warningInfo.contains(".")) //Obecnie flota toczy walkę.
-                throw new RuntimeException(colony+": The fleet is currently in combat.");
+                throw new FleetIsCurrentlyInCombatException(colony);
             //Na tej planecie nie ma żadnych statków!
             colony.fighterLight = 0L;
             colony.fighterHeavy = 0L;

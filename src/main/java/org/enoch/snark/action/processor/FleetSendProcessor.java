@@ -2,6 +2,7 @@ package org.enoch.snark.action.processor;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.SleepUtil;
@@ -17,12 +18,14 @@ import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
 import org.enoch.snark.instance.model.action.condition.ResourceCondition;
 import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.service.ShipService;
+import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
 import org.springframework.context.annotation.Scope;
@@ -55,6 +58,7 @@ public class FleetSendProcessor {
     private final FleetRepository fleetRepository;
     private final ColonyRepository colonyRepository;
     private final ShipService shipService;
+    private final Core core;
 
     public ExecutionIssue execute(GI gi, SendCommand command) {
         SendFleetGIR gir = new SendFleetGIR(gi);
@@ -89,9 +93,9 @@ public class FleetSendProcessor {
 
         if(ATTACK.equals(fleet.mission)) {
             TargetEntity targetEntity = targetRepository.find(fleet.getTarget()).get();
-            System.err.println("ATTACK "+targetEntity.toPlanet()+" spied "+timeAgo(targetEntity.lastSpiedOn)+" attacked "+timeAgo(targetEntity.lastAttacked));
+            System.err.println(command.hash()+" "+targetEntity.toPlanet()+" "+ targetEntity.getResources()+"("+targetEntity.getResources().count()+")"+" ss"+ shipsMap +
+                    " spied "+timeAgo(targetEntity.lastSpiedOn)+" attacked "+timeAgo(targetEntity.lastAttacked));
         }
-
 
         if (SPY.equals(fleet.mission) && fleet.targetPosition!= 16) {
             Optional<TargetEntity> targetEntity = targetRepository.find(fleet.getTarget());
@@ -178,8 +182,12 @@ public class FleetSendProcessor {
     @Transactional
     private void reloadColony(GI gi, SendCommand command) {
         SleepUtil.pause();
-        ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());
-        colonyRepository.save(colony);
+        try {
+            ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());
+            colonyRepository.save(colony);
+        } catch (FleetIsCurrentlyInCombatException e) {
+            core.push(new OpenPageCommand(FLEETDISPATCH, command.getSource()));
+        }
     }
 
     public static String timeAgo(LocalDateTime time) {

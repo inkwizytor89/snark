@@ -84,9 +84,8 @@ public class Planet {
         return this;
     }
 
-    public Long calculateDistance(Planet planet) {
+    public Long calculateDistance(Planet planet, int galaxyMax) {
         if(!galaxy.equals(planet.galaxy)) {
-            int galaxyMax = Instance.getGlobalMainConfigMap().getConfigInteger(GALAXY_MAX, 6);
             return roundDistance(galaxy, planet.galaxy, galaxyMax) *20000;
         } else if(!system.equals(planet.system)) {
             return roundDistance(system, planet.system, 499) *95 +2700;

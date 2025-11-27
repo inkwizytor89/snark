@@ -12,11 +12,11 @@ import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
-import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
@@ -44,6 +44,8 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected final Core core;
     @Autowired
     protected final ConditionChecker conditionChecker;
+    @Autowired
+    protected final CacheEntryRepository cacheEntryRepository;
     @Autowired
     protected final ColonyRepository colonyRepository;
     @Autowired
@@ -122,7 +124,7 @@ public abstract class AbstractThread extends ExecutorImpl {
                     SleepUtil.sleep(pause);
                 }
                 else SleepUtil.sleep(pause);
-
+                cacheProcessingStatus();
             } catch (Exception e) {
                 runningProcessor.logChangedStatus("Thread " + map.name(), map);
                 System.err.println(map.name());
@@ -130,6 +132,25 @@ public abstract class AbstractThread extends ExecutorImpl {
             }
         }
         System.err.println("Destroy "+map.name());
+    }
+
+    private void cacheProcessingStatus() {
+        String processingStatus;
+        if(commandsMap.isEmpty()) processingStatus = "START";
+        else if(somethingNotProcessed()) processingStatus = "IN_PROGRESS";
+        else processingStatus = "END";
+
+        String key = "thread_" + map().name() + "_processing";
+        String oldValue = cacheEntryRepository.getValue(key);
+        if(!processingStatus.equals(oldValue)) {
+            cacheEntryRepository.setValue(key, processingStatus);
+            Debug.log(this, "SET "+key+" = "+processingStatus);
+        }
+    }
+
+    private boolean somethingNotProcessed() {
+        return commandsMap.asMap().values().stream()
+                .anyMatch(list -> !list.isEmpty() && isAnyCommandInQueue(list));
     }
 
     protected boolean shouldWaitForDeque() {
@@ -178,6 +199,10 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     protected boolean alreadyPushed(String key) {
+        return commandsMap.containsKey(key);
+    }
+
+    protected boolean alreadyWaiting(String key) {
         return anythingNotExecuted(commandsMap.get(key));
     }
 
@@ -227,6 +252,7 @@ public abstract class AbstractThread extends ExecutorImpl {
                     .findFirst();
             if(firstWaitingList.isEmpty()) break;
             AbstractCommand toQueue = firstWaitingList.get().stream().findFirst().get();
+            System.err.println("AT push: "+toQueue.getDebugId()+" "+ toQueue.getStatus()+" "+toQueue);
             core.push(toQueue);
             inQueueCount++;
         }

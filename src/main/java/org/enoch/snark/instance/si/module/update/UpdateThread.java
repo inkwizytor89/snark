@@ -71,7 +71,7 @@ public class UpdateThread extends AbstractThread {
         events = navigator.getEventFleetList();
 
         java.time.Duration duration = new Duration(getNearestConfig(CHECK_SPY_REPORTS_DURATION, "2M")).getValue();
-        if(MessageService.getInstance().shouldTrigger(duration) && !alreadyPushed(CHECK_SPY_REPORTS_DURATION)) {
+        if(MessageService.getInstance().shouldTrigger(duration) && !alreadyWaiting(CHECK_SPY_REPORTS_DURATION)) {
             pushCommand(CHECK_SPY_REPORTS_DURATION, new ReadMessageCommand());
         }
 

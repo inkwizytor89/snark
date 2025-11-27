@@ -268,7 +268,7 @@ create table targets
   lifeform_tech14111 integer default 0,
   lifeform_tech14112 integer default 0,
 
-  resources   integer,
+  resources   bigint,
   fleet_sum   bigint default 0,
   defense_sum bigint default 0,
   spy_level integer default 4

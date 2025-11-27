@@ -101,7 +101,7 @@ public class DefenseThread extends AbstractThread {
                     })
                     .toList();
             for(FleetSendCommand command : fleetToEscape) {
-                if(alreadyPushed(command.getHash())) continue;
+                if(alreadyWaiting(command.getHash())) continue;
                 pushCommand(command);
             }
         }

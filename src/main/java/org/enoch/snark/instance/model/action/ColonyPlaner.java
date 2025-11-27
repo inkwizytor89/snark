@@ -8,6 +8,7 @@ import org.enoch.snark.instance.model.to.Planet;
 
 import java.util.*;
 
+@Deprecated
 public class ColonyPlaner {
 
     private final List<ColonyEntity> colonies;
@@ -27,7 +28,7 @@ public class ColonyPlaner {
 
     public ColonyEntity getNearestColony(Planet planet) {
         HashMap<ColonyEntity, Long> distanceMap = new HashMap<>();
-        colonies.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet())));
+        colonies.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet(), galaxyMax())));
         return distanceMap.entrySet().stream()
                 .filter(colony -> !colony.getKey().toPlanet().equals(planet))
                 .min(Comparator.comparingLong(Map.Entry::getValue)).get().getKey();
@@ -35,7 +36,7 @@ public class ColonyPlaner {
 
     public ColonyEntity findSimilar(Planet planet) {
         HashMap<ColonyEntity, Long> distanceMap = new HashMap<>();
-        colonies.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet())));
+        colonies.forEach(colony -> distanceMap.put(colony, planet.calculateDistance(colony.toPlanet(), galaxyMax())));
         return distanceMap.entrySet().stream()
                 .min(Comparator.comparingLong(Map.Entry::getValue)).get().getKey();
     }
@@ -53,13 +54,25 @@ public class ColonyPlaner {
     }
 
     public boolean isNear(Planet planet, Long maxDistance) {
-        return colonies.stream().anyMatch(colony -> planet.calculateDistance(colony.toPlanet()) < maxDistance);
+        return colonies.stream().anyMatch(colony -> planet.calculateDistance(colony.toPlanet(), galaxyMax()) < maxDistance);
     }
 
     public static Long mapSystemToDistance(Integer systemMax) {
         if(systemMax == -1) return 13000L;
         Long systemMaxLong = Long.valueOf(systemMax);
         return systemMaxLong* 95 + 2700;
+    }
+
+    /**
+     * NOT WORKING sample fix current problem
+     * @return
+     */
+    @Deprecated
+    private int galaxyMax() {
+        return colonies.stream()
+                .mapToInt(value -> value.galaxy)
+                .max()
+                .orElseThrow();
     }
 
 }

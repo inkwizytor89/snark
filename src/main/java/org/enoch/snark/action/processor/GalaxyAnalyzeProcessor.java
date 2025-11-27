@@ -96,6 +96,7 @@ public class GalaxyAnalyzeProcessor{
                 .filter(targetEntity -> targetEntity.id == null)
                 .map(PlanetEntity::toPlanet).toList();
         if(!list.isEmpty()) {
+            System.err.println();
             System.err.print(list.size()+" targets to add: ");
             list.forEach(System.err::print);
             System.err.println();
@@ -103,7 +104,7 @@ public class GalaxyAnalyzeProcessor{
 
         if(!StringUtils.isEmpty(spyPattern)) {
             targets.forEach(target -> {
-                String targetProperties = target.player.status;
+                String targetProperties = target.player.type;
                 if(targetProperties.toLowerCase().contains(spyPattern)) {
                     spyPositions.put(target.toPlanet(), false);
                     System.err.println("Match "+spyPattern+" to "+targetProperties.toLowerCase()+" for "+target.toPlanet());

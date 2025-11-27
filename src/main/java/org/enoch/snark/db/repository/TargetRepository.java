@@ -2,6 +2,7 @@ package org.enoch.snark.db.repository;
 
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
 
     List<TargetEntity> findByGalaxyAndSystem(Integer galaxy, Integer system);
+    Optional<TargetEntity> findByGalaxyAndSystemAndPositionAndType(Integer galaxy, Integer system, Integer position, ColonyType type);
     List<TargetEntity> findByGalaxy(Integer galaxy);
 
     @Query("""
@@ -47,12 +49,7 @@ public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
     }
 
     default Optional<TargetEntity> find(Planet planet) {
-        return findAll().stream()
-                .filter(colony -> planet.galaxy.equals(colony.galaxy))
-                .filter(colony -> planet.system.equals(colony.system))
-                .filter(colony -> planet.position.equals(colony.position))
-                .filter(colony -> planet.type.equals(colony.type))
-                .findFirst();
+        return this.findByGalaxyAndSystemAndPositionAndType(planet.galaxy, planet.system, planet.position, planet.type);
     }
 
     default List<TargetEntity> findTargetsCloserTo(Planet source, List<Planet> others) {

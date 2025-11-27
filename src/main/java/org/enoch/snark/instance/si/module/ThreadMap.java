@@ -81,6 +81,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String EXPLORATION_AREA = "exploration_area";
     public static final String GALAXY_MAX = "galaxy_max";
     public static final String SYSTEM_MAX = "system_max";
+    public static final String WRAP_SYSTEM = "wrap_system";
     public static final String PAGE_SIZE = "page_size";
     public static final String HIGH_SCORE_PAGES = "high_score_pages";
     public static final String MASTER = "master_href";

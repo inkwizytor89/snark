@@ -8,5 +8,6 @@ public enum ExecutionIssue {
     CAN_NOT_SENT,
     CONDITION_WONT_FIT,
     NOT_ENOUGH_DEUTERIUM,
+    FLEET_IN_COMBAT,
     OTHER
 }

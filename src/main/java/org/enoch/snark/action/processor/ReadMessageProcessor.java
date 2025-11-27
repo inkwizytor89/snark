@@ -79,23 +79,27 @@ public class ReadMessageProcessor {
     private boolean storeSpyMessage(String link) {
         Long messageId = Long.parseLong(getMessageIdFromLink(link));
 
-        boolean alreadyExists =messageRepository.findAll().stream().anyMatch(
-                messageEntity -> messageEntity.messageId.equals(messageId));
+        boolean alreadyExists =messageRepository.findByMessageId(messageId).isPresent();
         if(alreadyExists) return false;
 
         MessageEntity messageEntity = MessageEntity.create(gi.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
+//        TargetEntity planet = messageEntity.getPlanet();
+//        if(planet.galaxy == 8 && planet.system== 146 && planet.position == 12) {
+//            System.err.println("skipped message for "+planet.toPlanet());
+//            return true;
+//        }
         messageRepository.save(messageEntity);
         if(MessageEntity.SPY.equals(messageEntity.type)) {
 
             SpyReportGIR spyReportGIR = new SpyReportGIR(gi);
             TargetEntity spyTarget = spyReportGIR.readTargetFromReport(link);
+            if(spyTarget.position == 16) return true;
             MessageService.getInstance().release(spyTarget.toPlanet());
             Optional<TargetEntity> targetOptional = targetRepository.find(spyTarget.toPlanet());
             if(targetOptional.isEmpty()) {
                 System.err.println("Spy report for "+spyTarget.toPlanet()+" have no association for TargetEntity");
                 core.push(new GalaxyAnalyzeCommand(new SystemView(spyTarget.galaxy, spyTarget.galaxy)));
-
                 return true;
             }
             TargetEntity targetEntity = targetOptional.get();

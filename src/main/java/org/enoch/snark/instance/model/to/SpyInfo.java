@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class SpyInfo implements Comparable  {
+public class SpyInfo  {
 
     public File file;
     public String messageId;
@@ -72,17 +72,17 @@ public class SpyInfo implements Comparable  {
         return metal + crystal + deuterium;
     }
 
-    @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof SpyInfo)) {
-            throw new RuntimeException("Object is not instance of" + this.getClass().getName());
-        }
-
-        SpyInfo anotherInfo =  (SpyInfo) o;
-        Long thisValue = resourcePoint / (source.calculateDistance(planet));
-        Long anotherValue = anotherInfo.resourcePoint / (anotherInfo.source.calculateDistance(anotherInfo.planet));
-        return -thisValue.compareTo(anotherValue);
-    }
+//    @Override
+//    public int compareTo(Object o) {
+//        if (!(o instanceof SpyInfo)) {
+//            throw new RuntimeException("Object is not instance of" + this.getClass().getName());
+//        }
+//
+//        SpyInfo anotherInfo =  (SpyInfo) o;
+//        Long thisValue = resourcePoint / (source.calculateDistance(planet));
+//        Long anotherValue = anotherInfo.resourcePoint / (anotherInfo.source.calculateDistance(anotherInfo.planet));
+//        return -thisValue.compareTo(anotherValue);
+//    }
 
     @Override
     public String toString() {

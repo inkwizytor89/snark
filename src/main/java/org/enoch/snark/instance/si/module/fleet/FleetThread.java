@@ -91,7 +91,7 @@ public class FleetThread extends AbstractThread {
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
             if(!conditionChecker.fit(conditionsToCheck, command)) continue;
-
+//conditionChecker.check(conditionsToCheck, command).getClass().getSimpleName() +" "+command.getTarget().getTarget().getResources().count()
             if (blockExpiredTime(command)) continue;
 
             if (!map.getConfigBoolean(DRY_RUN, false)) {

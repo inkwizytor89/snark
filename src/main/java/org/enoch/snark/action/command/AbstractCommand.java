@@ -19,6 +19,8 @@ import static org.enoch.snark.instance.si.QueueRunType.NORMAL;
 @Data
 public abstract class AbstractCommand {
 
+    protected Long debugId;
+    protected static Long debugIndex = 0L;
     protected final CommandStatus status;
     private FollowingAction followingAction;
     private QueueRunType runType = NORMAL;
@@ -31,21 +33,8 @@ public abstract class AbstractCommand {
 
     protected AbstractCommand() {
         status = new CommandStatus(NOT_REGISTERED, NO_ISSUE, null,0);
-    }
-
-    public void push(String action) {
-        throw new NotImplementedException("To remove in spring version");
-//        Consumer.getInstance().push(this, action);
-    }
-
-    public void push(LocalDateTime from) {
-        throw new NotImplementedException("To remove in spring version");
-//        Consumer.getInstance().push(this, from);
-    }
-
-    public void push() {
-        throw new NotImplementedException("To remove in spring version");
-//        Consumer.getInstance().push(this);
+        hash = this.getClass().getSimpleName();
+        debugId = ++debugIndex;
     }
 
     public boolean isFollowingAction() {

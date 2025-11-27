@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.action.command.status.ExecutionStatus;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
@@ -14,7 +13,6 @@ import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
-import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
@@ -101,6 +99,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         if(commandDeque != null) return;
         commandDeque = new CommandDeque();
         commandDeque.push(new LoadColoniesCommand());
+//        commandDeque.push(new ReadMessageCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
         getSources(PlanetService.NONE)
@@ -136,12 +135,9 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private synchronized void resolve(AbstractCommand command) {
         if(command == null) return;
-//        System.err.println("Pool "+command+" with status "+command.getStatus().getStatus());
         command.getStatus().setStatus(IN_PROGRESS);
         ExecutionIssue executionIssue = OTHER;
         try {
-
-            Debug.log(this, command + " start at " + LocalTime.now());
             executionIssue = processor.execute(gi, command);
             command.getStatus().setIssue(executionIssue);
             if(NO_ISSUE.equals(executionIssue)) {
@@ -149,6 +145,8 @@ public class ConsumerThread extends AbstractThread implements Credentials {
                 if(command.isFollowingAction()) {
                     new WaitingThread(command.getFollowingAction(), commandDeque).start();
                 }
+            } if (FLEET_IN_COMBAT.equals(executionIssue)) {
+
             }
 
 //        } catch (ShipDoNotExists e) {
@@ -171,7 +169,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
                 new WaitingThread(new FollowingAction(command, status.getFailed() * 10L), commandDeque).start();
             } else {
                 status.setStatus(CRASHED);
-                System.err.println("\nRETRY CRASH: " + command + " after "+status.getFailed());
             }
         } else {
             status.failed();
@@ -180,11 +177,9 @@ public class ConsumerThread extends AbstractThread implements Credentials {
                 commandDeque.push(command);
             } else {
                 status.setStatus(CRASHED);
-                System.err.println("\nFAILED CRASH: " + command + "after "+status.getFailed());
             }
         }
-        System.err.println("Resolved "+command+" with status "+command.getStatus().getStatus());
-        Debug.log(this, command + " start at " + LocalTime.now());
+        Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash());
     }
 
 //    public boolean noBlockingHashInQueue(String hash) {

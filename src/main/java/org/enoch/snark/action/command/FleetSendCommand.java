@@ -39,7 +39,7 @@ public class FleetSendCommand extends AbstractCommand implements SendCommand {
                 .source(new PlanetData(source))
                 .target(target)
                 .leaveShipsMap(leaveShipsMap)
-                .trip(fleetPlan.getTrip())
+                .trip(fleetPlan != null ? fleetPlan.getTrip() : new ArrayList<>())
                 .build();
     }
 

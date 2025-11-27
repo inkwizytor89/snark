@@ -1,10 +1,12 @@
 package org.enoch.snark.instance.si.module.space;
 
+import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
+import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.SystemUC;
@@ -14,6 +16,7 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
@@ -45,65 +48,54 @@ public class SpaceThread extends AbstractThread {
         return threadPause+"S";
     }
 
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        int galaxyMax = map.getConfigInteger(GALAXY_MAX, 6);
-//        int systemMax = map.getConfigInteger(SYSTEM_MAX, 499);
-//        for(int i = 1 ; i <= galaxyMax; i++) {
-//            if(isNecessaryGalaxyPersist(i))
-//                galaxyRepository.persistGalaxyMap(i, systemMax);
-//        }
-//        notExplored.addAll(galaxyRepository.findByUpdatedIsNull());
-//    }
-
-    private boolean isNecessaryGalaxyPersist(final Integer galaxy) {
-        return galaxyRepository.findByGalaxyAndSystem(galaxy, 1).isEmpty();
-    }
-
-
-    protected void onOldStep() {
-        Integer pageSize = map.getConfigInteger(PAGE_SIZE, DATA_COUNT);
-//        if (!consumer.notingToPool()) return;
-        if(!notExplored.isEmpty()) {
-            log("Never checked galaxy: "+notExplored.size()+" page="+pageSize);
-            for (int i = 0; i < pageSize; i++) {
-                GalaxyEntity poll = notExplored.poll();
-                if(poll != null) {
-                    pushCommand(new GalaxyAnalyzeCommand(poll));
-                }
-            }
-            return;
-        }
-        if (galaxyToView.isEmpty()) {
-            galaxyToView = galaxyRepository.findByUpdatedBeforeOrderByUpdatedAsc(LocalDateTime.now().minusDays(5));
-        }
-        if (galaxyToView.isEmpty()) {
-            return;
-        }
-        log("Outdated galaxy: "+galaxyToView.size()+" page="+pageSize);
-        List<GalaxyEntity> toView = new ArrayList<>();
-        if(galaxyToView.size() <= pageSize) {
-            toView.addAll(galaxyToView);
-        } else {
-            toView.addAll(galaxyToView.subList(0,pageSize));
-        }
-
-        toView.forEach(galaxyEntity -> galaxyToView.remove(galaxyEntity));
-        toView.forEach(galaxy -> pushCommand(new GalaxyAnalyzeCommand(galaxy)));
-    }
-
     @Override
     protected void onStep() {
-        expiredTime.update(getNearestConfig(EXPIRED_TIME, "P7D"));
-
-        if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(spaceHash())) return;
-        System.out.println(spaceHash());
+        String newSpaceHash = generateNewSpaceHashIfNeeded();
+        if (newSpaceHash == null) return;
 
         List<SystemViewRange> spacedRange = spaceRange();
-        int systemMax = map.getConfigInteger(SYSTEM_MAX, 499);
-        boolean wrap = map.getConfigBoolean("wrap_system", true);
+
+        List<Planet> spyCoordinate = spyCoordinate();
+        buildGalaxyEntityMap(spacedRange).entrySet().stream()
+                .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, expiredTime.getValue()))
+                .sorted(Comparator.comparingInt(a -> a.getKey().galaxy * 1000 + a.getKey().system))
+                .forEach(entry -> pushGalaxyAnalyzeCommandIfNeeded(entry, spyCoordinate));
+
+        spaceHash = newSpaceHash;
+    }
+
+    private void pushGalaxyAnalyzeCommandIfNeeded(Entry<SystemView, GalaxyEntity> entry, List<Planet> spyCoordinate) {
+        GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
+
+        command.setSpyPositions(getSpyPositionList(entry, spyCoordinate));
+        if(isNearestConfig(SPY_PATTERN)) command.setSpyNew(getNearestConfig(SPY_PATTERN, StringUtils.EMPTY).toLowerCase());
+
+        command.setSource(getSourceForCommand());
+// trzeba dorobic przypadek kiedy zwieksza sie zakres i nie mamy entity w bazie danych a dla niego nie ma farmy jeszcze bo nigdy nie bylo sknowane ale wtedy z patternu powinny zostac wyluskane
+        // a co jak nie wyskanowalo jednej planety w ukladzie i jest ciagle niewiadomoa -farma powinna rowniez wybierac do skanowania te clee ktore sa z zakresu a jeszcze nie byly atakowane
+        if(!spyCoordinate.isEmpty() && command.getSpyPositions().isEmpty() && entry.getValue() != null) {
+            log("skipping "+ entry.getKey()+" nothing to spy from "+SPY_COORDINATE+" = "+getNearestConfig(SPY_COORDINATE, "no value"));
+        } else pushCommand(command);
+    }
+
+    private ColonyEntity getSourceForCommand() {
+        if(!isNearestConfig(COORDINATE)) return null;
+        List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
+        if(coordinate.isEmpty()) return null;
+        return colonyRepository.byPlanet(coordinate.getFirst().getPlanet());
+    }
+
+    private List<Planet> getSpyPositionList(Entry<SystemView, GalaxyEntity> entry, List<Planet> spyCoordinate) {
+        List<Planet> spyPositionList = spyCoordinate.stream()
+                .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList();
+        log(entry.getKey()+" "+spyPositionList.size());
+        return spyPositionList;
+    }
+
+    private Map<SystemView, GalaxyEntity> buildGalaxyEntityMap(List<SystemViewRange> spacedRange) {
         Map<SystemView, GalaxyEntity> galaxyEntityMap = new HashMap<>();
+        int systemMax = map.getConfigInteger(SYSTEM_MAX, 499);
+        boolean wrap = map.getConfigBoolean(WRAP_SYSTEM, true);
         for(SystemViewRange range : spacedRange) {
             List<SystemView> systemList = SystemUC.range(range.getGalaxy(), range.systemRange.getFrom(), range.systemRange.getTo(), systemMax, wrap);
             systemList.forEach(systemView -> galaxyEntityMap.put(systemView, null));
@@ -117,44 +109,24 @@ public class SpaceThread extends AbstractThread {
                     wrap);
             galaxyList.forEach(galaxyEntity -> galaxyEntityMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         }
-
-        if(!isNearestConfig(COMMAND_LIMIT)) limit=10L; // limit must be se before push command
-// tu trzeba jakos te wymagania wsprzadz do skanowania albo zeby puste sie szybko odpalało
-
-        List<Planet> spyCoordinate = new ArrayList<>();
-        if(isNearestConfig(COORDINATE)) {
-            List<PlanetData> nearestCoordinate = getNearestCoordinate(StringUtils.EMPTY);
-            if(nearestCoordinate.size() > 1) throw new IllegalStateException(threadType+" required only one coordinate to use "+SPY_COORDINATE+" but was "+getNearestConfig(COORDINATE, StringUtils.EMPTY));
-            spyCoordinate = spyCoordinate(nearestCoordinate.getFirst());
-        }
-
-        List<Planet> finalSpyCoordinate = spyCoordinate;
-        galaxyEntityMap.entrySet().stream()
-                .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, expiredTime.getValue()))
-                .sorted(Comparator.comparingInt(a -> a.getKey().galaxy * 1000 + a.getKey().system))
-                .forEach(entry -> {
-                    GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
-                    List<Planet> spyList = finalSpyCoordinate.stream()
-                            .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList();
-                    System.err.println(entry.getKey()+" "+spyList.size());
-                    command.setSpyPositions(spyList);
-
-                    if(isNearestConfig(SPY_PATTERN)) {
-                        command.setSpyNew(getNearestConfig(SPY_PATTERN, StringUtils.EMPTY).toLowerCase());
-                    }
-
-                    if(!command.getSpyPositions().isEmpty() && isNearestConfig(COORDINATE)) {
-                        List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
-                        if(!coordinate.isEmpty()) command.setSource(colonyRepository.byPlanet(coordinate.getFirst().getPlanet()));
-                    }
-                    pushCommand(command);
-                });
-
-        spaceHash = spaceHash();
+        return galaxyEntityMap;
     }
 
-    private String spaceHash() {
-        if(isNearestConfig(COORDINATE)) {
+    private String generateNewSpaceHashIfNeeded() {
+        expiredTime.update(getNearestConfig(EXPIRED_TIME, "P7D"));
+        String newSpaceHash = spaceToProcess();
+        if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(newSpaceHash)) return null;
+        commandsMap = ArrayListMultimap.create(); // clear old state
+        lastCheck = LocalDateTime.now();
+        log(newSpaceHash);
+
+        // limit must be set before push
+        if(!isNearestConfig(COMMAND_LIMIT)) limit= map().getConfigLong(COMMAND_LIMIT, 10L);
+        return newSpaceHash;
+    }
+
+    private String spaceToProcess() {
+        if(isNearestConfig(COORDINATE) && isNearestConfig(RANGE)) {
             Planet coordinate = getNearestCoordinate(StringUtils.EMPTY).getFirst().getPlanet();
             return "range="+getNearestConfig(RANGE, StringUtils.EMPTY)+
                     " coordinate="+ coordinate;
@@ -171,7 +143,7 @@ public class SpaceThread extends AbstractThread {
 
     private List<SystemViewRange> spaceRange() {
         List<SystemViewRange> ranges = new ArrayList<>();
-        if(isNearestConfig(COORDINATE)) {
+        if(isNearestConfig(COORDINATE) && isNearestConfig(RANGE)) {
             String coordinateString = getNearestConfig(COORDINATE, StringUtils.EMPTY);
             String rangeString = getNearestConfig(RANGE, StringUtils.EMPTY);
             Integer range = Integer.parseInt(rangeString);
@@ -196,11 +168,19 @@ public class SpaceThread extends AbstractThread {
                 }
             }
         }
+
+        log("spacedRange "+ ranges.size()+": "+ranges.stream().map(SystemViewRange::toString).collect(Collectors.joining(", ")));
         return ranges;
     }
     
-    private List<Planet> spyCoordinate(PlanetData planetData) {
-        if(! isNearestConfig(SPY_COORDINATE)) return new ArrayList<>();
+    private List<Planet> spyCoordinate() {
+        if(!isNearestConfig(COORDINATE)) return new ArrayList<>();
+
+        List<PlanetData> nearestCoordinate = getNearestCoordinate(StringUtils.EMPTY);
+        if(nearestCoordinate.size() > 1) throw new IllegalStateException(map().name()+" required only one coordinate to use "+SPY_COORDINATE+" but was "+getNearestConfig(COORDINATE, StringUtils.EMPTY));
+
+        PlanetData planetData = nearestCoordinate.getFirst();
+        if(!isNearestConfig(SPY_COORDINATE)) return new ArrayList<>();
         String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
         FleetContext fleetContext = FleetContext.builder().source(planetData).build();

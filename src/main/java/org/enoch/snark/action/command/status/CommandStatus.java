@@ -24,4 +24,13 @@ public class CommandStatus {
         setStatus(ExecutionStatus.FAILED);
         setIssue(executionIssue);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(status);
+        if(failed > 0) builder.append("(").append(failed).append(")");
+        builder.append("-").append(issue);
+        return builder.toString();
+    }
 }
