@@ -1,10 +1,12 @@
 package org.enoch.snark.instance.service;
 
 import lombok.Getter;
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.instance.model.to.Planet;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,8 @@ public class MessageService {
     }
 
     public boolean shouldTrigger(Duration maxWait) {
+        removeNotRealised(Duration.ofSeconds(maxWait.getSeconds() * 3));
+
         if (waiting.size() >= 30) {
             return true;
         }
@@ -49,6 +53,16 @@ public class MessageService {
         }
 
         return false;
+    }
+
+    private void removeNotRealised(Duration maxWait) {
+        new ArrayList<>(waiting.keySet()).forEach(planet -> {
+            LocalDateTime waitingTime = waiting.get(planet);
+            if(DateUtil.isExpired(waitingTime, maxWait)) {
+                System.err.println("Force realase from MessageService "+ planet + " after "+waitingTime);
+                release(planet);
+            }
+        });
     }
 
 }

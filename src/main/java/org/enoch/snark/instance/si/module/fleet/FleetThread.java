@@ -77,7 +77,7 @@ public class FleetThread extends AbstractThread {
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);
         for(FleetSendCommand command : fleetSendCommands) {
             command.generateHash(map.name(), "X");
-            if(alreadyPushed(command.getHash())) continue;
+            if(container.contains(command.getHash())) continue;
 //            logFleetOverview(command);
 
             FleetContext fleetContext = FleetContext.builder()

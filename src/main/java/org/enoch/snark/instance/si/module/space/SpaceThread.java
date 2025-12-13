@@ -25,18 +25,11 @@ public class SpaceThread extends AbstractThread {
 
     public static final String threadType = "space";
     protected static final Logger LOG = Logger.getLogger( SpaceThread.class.getName());
-    public static final int DATA_COUNT = 10;
     private int threadPause = 300;
     private String spaceHash = StringUtils.EMPTY;
 
     private LocalDateTime lastCheck = LocalDateTime.now();
     private Duration expiredTime = new Duration("P7D");
-
-    private final Queue<GalaxyEntity> notExplored = new PriorityQueue<>(
-            Comparator.comparingInt(value -> value.galaxy*1000 + value.system)
-    );
-    private List<GalaxyEntity> galaxyToView = new ArrayList<>();
-
 
     @Override
     protected String getThreadType() {
@@ -55,7 +48,7 @@ public class SpaceThread extends AbstractThread {
 
         List<SystemViewRange> spacedRange = spaceRange();
 
-        List<Planet> spyCoordinate = spyCoordinate();
+        ArrayListMultimap<SystemView, Planet> spyCoordinate = spyCoordinate();
         buildGalaxyEntityMap(spacedRange).entrySet().stream()
                 .filter(entry -> entry.getValue() == null || DateUtil.isExpired(entry.getValue().updated, expiredTime.getValue()))
                 .sorted(Comparator.comparingInt(a -> a.getKey().galaxy * 1000 + a.getKey().system))
@@ -64,18 +57,22 @@ public class SpaceThread extends AbstractThread {
         spaceHash = newSpaceHash;
     }
 
-    private void pushGalaxyAnalyzeCommandIfNeeded(Entry<SystemView, GalaxyEntity> entry, List<Planet> spyCoordinate) {
+    private void pushGalaxyAnalyzeCommandIfNeeded(Entry<SystemView, GalaxyEntity> entry, ArrayListMultimap<SystemView, Planet> spyCoordinate) {
         GalaxyAnalyzeCommand command = new GalaxyAnalyzeCommand(entry.getKey());
 
-        command.setSpyPositions(getSpyPositionList(entry, spyCoordinate));
+        command.setSpyPositions(spyCoordinate.get(entry.getKey()));
         if(isNearestConfig(SPY_PATTERN)) command.setSpyNew(getNearestConfig(SPY_PATTERN, StringUtils.EMPTY).toLowerCase());
 
         command.setSource(getSourceForCommand());
 // trzeba dorobic przypadek kiedy zwieksza sie zakres i nie mamy entity w bazie danych a dla niego nie ma farmy jeszcze bo nigdy nie bylo sknowane ale wtedy z patternu powinny zostac wyluskane
         // a co jak nie wyskanowalo jednej planety w ukladzie i jest ciagle niewiadomoa -farma powinna rowniez wybierac do skanowania te clee ktore sa z zakresu a jeszcze nie byly atakowane
         if(!spyCoordinate.isEmpty() && command.getSpyPositions().isEmpty() && entry.getValue() != null) {
-            log("skipping "+ entry.getKey()+" nothing to spy from "+SPY_COORDINATE+" = "+getNearestConfig(SPY_COORDINATE, "no value"));
-        } else pushCommand(command);
+
+//            log("skipping "+ entry.getKey()+" nothing to spy from "+SPY_COORDINATE+" = "+getNearestConfig(SPY_COORDINATE, "no value"));
+        } else {
+            log(command.getSystemView()+" "+command.getSpyPositions().size());
+            pushCommand(command);
+        }
     }
 
     private ColonyEntity getSourceForCommand() {
@@ -83,13 +80,6 @@ public class SpaceThread extends AbstractThread {
         List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
         if(coordinate.isEmpty()) return null;
         return colonyRepository.byPlanet(coordinate.getFirst().getPlanet());
-    }
-
-    private List<Planet> getSpyPositionList(Entry<SystemView, GalaxyEntity> entry, List<Planet> spyCoordinate) {
-        List<Planet> spyPositionList = spyCoordinate.stream()
-                .filter(planet -> entry.getKey().equals(planet.getSystemView())).toList();
-        log(entry.getKey()+" "+spyPositionList.size());
-        return spyPositionList;
     }
 
     private Map<SystemView, GalaxyEntity> buildGalaxyEntityMap(List<SystemViewRange> spacedRange) {
@@ -109,6 +99,12 @@ public class SpaceThread extends AbstractThread {
                     wrap);
             galaxyList.forEach(galaxyEntity -> galaxyEntityMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         }
+        if(map().getConfigBoolean(DEBUG, false)) {
+            String spyRangesString = spacedRange.stream().map(SystemViewRange::toString).collect(Collectors.joining(", "));
+            log("spacedRange "+ spacedRange.size()+": "+ spyRangesString);
+            long nullCount = galaxyEntityMap.values().stream().filter(Objects::isNull).count();
+            log("SystemView total: "+  galaxyEntityMap.size()+" in that "+ nullCount + " never checked");
+        }
         return galaxyEntityMap;
     }
 
@@ -116,7 +112,7 @@ public class SpaceThread extends AbstractThread {
         expiredTime.update(getNearestConfig(EXPIRED_TIME, "P7D"));
         String newSpaceHash = spaceToProcess();
         if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(newSpaceHash)) return null;
-        commandsMap = ArrayListMultimap.create(); // clear old state
+        container.create();
         lastCheck = LocalDateTime.now();
         log(newSpaceHash);
 
@@ -168,22 +164,23 @@ public class SpaceThread extends AbstractThread {
                 }
             }
         }
-
-        log("spacedRange "+ ranges.size()+": "+ranges.stream().map(SystemViewRange::toString).collect(Collectors.joining(", ")));
         return ranges;
     }
     
-    private List<Planet> spyCoordinate() {
-        if(!isNearestConfig(COORDINATE)) return new ArrayList<>();
+    private ArrayListMultimap<SystemView, Planet> spyCoordinate() {
+        if(!isNearestConfig(COORDINATE)) return ArrayListMultimap.create();
 
         List<PlanetData> nearestCoordinate = getNearestCoordinate(StringUtils.EMPTY);
         if(nearestCoordinate.size() > 1) throw new IllegalStateException(map().name()+" required only one coordinate to use "+SPY_COORDINATE+" but was "+getNearestConfig(COORDINATE, StringUtils.EMPTY));
 
         PlanetData planetData = nearestCoordinate.getFirst();
-        if(!isNearestConfig(SPY_COORDINATE)) return new ArrayList<>();
+        if(!isNearestConfig(SPY_COORDINATE)) return ArrayListMultimap.create();
         String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
         FleetContext fleetContext = FleetContext.builder().source(planetData).build();
-        return planetService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
+        List<Planet> spyCoordinate = planetService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
+        ArrayListMultimap<SystemView, Planet> spyCoordinateMap = ArrayListMultimap.create();
+        spyCoordinate.forEach(planet -> spyCoordinateMap.put(planet.getSystemView(), planet));
+        return spyCoordinateMap;
     }
 }

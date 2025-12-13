@@ -4,6 +4,7 @@ import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.instance.service.Navigator;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.enoch.snark.action.command.status.ExecutionStatus.NEW;
@@ -16,6 +17,7 @@ public class CommandDeque {
     public CommandDeque() {
         runTypes.forEach(type -> actionsMap.put(type, new LinkedList<>()));
     }
+    public Map<LocalDateTime, AbstractCommand> waiting = new HashMap<>();
 
     private boolean noBlockingHashInQueue(String hash) {
         if(hash == null) return true;
@@ -32,6 +34,12 @@ public class CommandDeque {
         if(!noBlockingHashInQueue(command.hash())) return;
         pushToAction(command);
     }
+
+    public synchronized void pushFailed(AbstractCommand command) {
+        long secondsToDelay = (command.getStatus().getFailed() + 3) * 10L;
+        waiting.put(LocalDateTime.now().plusSeconds(secondsToDelay), command);
+    }
+
     private synchronized void pushToAction(AbstractCommand command) {
         Deque<AbstractCommand> deque = actionsMap.get(command.getRunType());
         deque.offer(command);
@@ -41,6 +49,7 @@ public class CommandDeque {
     public synchronized List<AbstractCommand> peek() {
         List<AbstractCommand> commandsToView = new ArrayList<>();
         actionsMap.values().forEach(commandsToView::addAll);
+        commandsToView.addAll(waiting.values());
         return commandsToView;
     }
 
@@ -49,6 +58,7 @@ public class CommandDeque {
     }
 
     public synchronized AbstractCommand pool(){
+        releaseWaitingCommands();
         for (QueueRunType type : runTypes) {
             Deque<AbstractCommand> deque = actionsMap.get(type);
             if (canPoll(deque)) {
@@ -58,6 +68,16 @@ public class CommandDeque {
             }
         }
         return null;
+    }
+
+    private void releaseWaitingCommands() {
+        Set<Map.Entry<LocalDateTime, AbstractCommand>> entries = new HashSet<>(waiting.entrySet());
+        entries.stream()
+                .filter(entry -> LocalDateTime.now().isAfter(entry.getKey()))
+                .forEach(entry -> {
+                    waiting.remove(entry.getKey());
+                    pushToAction(entry.getValue());
+                });
     }
 
     private boolean canPoll(Deque<AbstractCommand> deque) {

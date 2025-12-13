@@ -1,22 +1,28 @@
 package org.enoch.snark.instance.si;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.Debug;
+import org.enoch.snark.config.ConfigurationScheduledTask;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
+import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Service
@@ -25,6 +31,8 @@ public class Core {
 
     private final ApplicationContext applicationContext;
     private final DefaultListableBeanFactory beanFactory;
+    private final ConfigurationScheduledTask configurationScheduledTask;
+    private final CacheEntryRepository cacheEntryRepository;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
     private CommandDeque queue;
@@ -35,6 +43,18 @@ public class Core {
     @Getter
     @Setter
     private static ColonyEntity lastVisited;
+
+    @PostConstruct
+    public void init() {
+        cacheEntryRepository.setUnknownForSuffix(PROCESSING_SUFFIX);
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void loadConfig() throws IOException {
+        PropertiesMap propertiesMap = configurationScheduledTask.loadConfig();
+        if(propertiesMap == null) return;
+        configurationUpdate(propertiesMap);
+    }
 
     public void configurationUpdate(PropertiesMap propertiesMap) {
         for(ModuleMap moduleMap : propertiesMap.modules()) {

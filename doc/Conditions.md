@@ -1,6 +1,31 @@
 ## 🧩 Available Conditions
 
-### 🟦 `RESOURCE_COUNT`
+### `Expression`
+
+**Description:**  
+Checks term and value for operator.
+
+**Parameters:**
+
+| Field | Type         | Description     |
+|--------|--------------|-----------------|
+| `type` | `EXPRESSION` | Term name       |
+| `term` | `String`     | Term name       |
+| `operator` | `String`     | Operator        |
+| `value` | `String`     | Constant value) |
+
+**Example:**
+```json
+{
+  "type": "EXPRESSION",
+  "term": "swarn_module.attack_processing",
+  "operator": "eq",
+  "value": "DONE"
+}
+```
+
+
+### `RESOURCE_COUNT`
 
 **Description:**  
 Checks whether the specified planet has at least the given total amount of resources.
@@ -22,7 +47,7 @@ Checks whether the specified planet has at least the given total amount of resou
 }
 ```
 
-### 🟩 `RESOURCE`
+### `RESOURCE`
 
 **Description:**  
 Checks whether the specified planet has the required resources and optionally defines a reserve amount that must remain untouched.
@@ -46,7 +71,7 @@ Checks whether the specified planet has the required resources and optionally de
 }
 ```
 
-### 🟨 `SHIPS`
+### `SHIPS`
 
 **Description:**  
 Verifies that the specified planet has the required number of ships, and optionally defines how many ships should remain on the planet after the action.
@@ -70,7 +95,7 @@ Verifies that the specified planet has the required number of ships, and optiona
 }
 ```
 
-### 🟥 `ATTACK_NOT_EXPIRED`
+### `ATTACK_NOT_EXPIRED`
 
 **Description:**  
 Checks whether a specified amount of time (in seconds) has passed since a fleet-related event, such as a mission or return.
@@ -95,7 +120,7 @@ Checks whether a specified amount of time (in seconds) has passed since a fleet-
 ```
 
 
-### 🟪 `SPY_NOT_EXPIRED`
+### `SPY_NOT_EXPIRED`
 
 **Description:**  
 Checks whether a specified amount of time (in seconds) has passed since a fleet-related event, such as a mission or return.
@@ -119,7 +144,7 @@ Checks whether a specified amount of time (in seconds) has passed since a fleet-
 }
 ```
 
-### 🟪 `FLEET_SLOT`
+### `FLEET_SLOT`
 
 **Description:**  
 Checks whether the player has at least the required number of free fleet slots available to perform an action.
@@ -139,7 +164,7 @@ Checks whether the player has at least the required number of free fleet slots a
 }
 ```
 
-### 🟫 `NO_MISSIONS`
+### `NO_MISSIONS`
 
 **Description:**  
 Checks whether the specified source planet does **not** have any ongoing missions that would block the action.  

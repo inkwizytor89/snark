@@ -26,13 +26,11 @@ public class ConfigurationScheduledTask {
     public static final String TEMPLATE = "template";
     private static List<ConfigTerm> configs = new ArrayList<>();
 
-    private final Core core;
-
     @Value("${properties:server.properties}")
     private String propertiesPath;
 
-    @Scheduled(fixedDelay = 10000)
-    public void loadConfig() throws IOException {
+//    @Scheduled(fixedDelay = 10000)
+    public PropertiesMap loadConfig() throws IOException {
         List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL);
         List<ConfigTerm> result = new ArrayList<>(globals);
         for (ConfigTerm term : globals)
@@ -41,8 +39,8 @@ public class ConfigurationScheduledTask {
             }
         if (areConfigsChanged(configs, result)) {
             configs = result;
-            core.configurationUpdate(buildPropertiesMap());
-        }
+            return buildPropertiesMap();
+        } else return null;
     }
 
     private boolean areConfigsChanged(List<ConfigTerm> configs, List<ConfigTerm> result) {

@@ -9,6 +9,7 @@ import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.GI;
@@ -21,8 +22,6 @@ import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-
-import java.time.LocalTime;
 
 import static org.enoch.snark.action.command.status.ExecutionIssue.*;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
@@ -149,9 +148,8 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
             }
 
-//        } catch (ShipDoNotExists e) {
-//            e.printStackTrace();
-//            return;
+        } catch (FleetIsCurrentlyInCombatException e) {
+            command.getStatus().setFailed(FLEET_IN_COMBAT);
         } catch (Throwable e) {
             System.err.println(e.getMessage());
             command.getStatus().setFailed(executionIssue);
@@ -159,25 +157,10 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         }
 
         CommandStatus status = command.getStatus();
-
-        if(SUCCESS.equals(status.getStatus())) {
-
-        } else if(RETRY.equals(status.getIssue())) {
+        if(!SUCCESS.equals(status.getStatus())) {
             status.failed();
-            if (status.getFailed() < 6) {
-                status.setStatus(NEW);
-                new WaitingThread(new FollowingAction(command, status.getFailed() * 10L), commandDeque).start();
-            } else {
-                status.setStatus(CRASHED);
-            }
-        } else {
-            status.failed();
-            if (status.getFailed() < 1) {
-                status.setStatus(FAILED);
-                commandDeque.push(command);
-            } else {
-                status.setStatus(CRASHED);
-            }
+            if (status.getFailed() < 2 || (RETRY.equals(status.getIssue()) && status.getFailed() < 4)) commandDeque.pushFailed(command);
+            else status.setStatus(CRASHED);
         }
         Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash());
     }

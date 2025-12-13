@@ -53,7 +53,7 @@ public class ExpeditionThread extends AbstractThread {
     protected void onStep() {
         if (noFreeSlotsForExpedition()) return;
 //        else  pause.update("1S");
-        if (somethingPushed()) return;
+        if (container.anyNotProcessed()) return;
 
         ColonyEntity bestColony;
         List<ColonyEntity> source = getSources(PlanetService.ALL);

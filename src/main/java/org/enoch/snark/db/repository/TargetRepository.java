@@ -32,7 +32,7 @@ public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
                 t.fleetSum = 0
                 AND t.defenseSum = 0
                 AND t.energy IS NOT NULL
-                AND t.energy > 3000
+                AND t.energy > 4000
             )
           )
     """)

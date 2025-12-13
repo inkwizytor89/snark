@@ -6,6 +6,7 @@ import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.TargetRepository;
@@ -20,6 +21,7 @@ import static org.enoch.snark.instance.model.to.Planet.*;
 @RequiredArgsConstructor
 @Data
 public class ConditionContext {
+    private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
     private final TargetRepository targetRepository;
@@ -48,5 +50,9 @@ public class ConditionContext {
 
     private PlanetEntity determinePlanetEntity(Planet planet) {
         return planetService.getPlanetData(planet).planetData();
+    }
+
+    public String getCacheValue(String key) {
+        return cacheEntryRepository.getValue(key);
     }
 }
