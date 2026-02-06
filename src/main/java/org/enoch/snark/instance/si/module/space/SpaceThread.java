@@ -3,6 +3,7 @@ package org.enoch.snark.instance.si.module.space;
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
@@ -54,6 +55,8 @@ public class SpaceThread extends AbstractThread {
                 .sorted(Comparator.comparingInt(a -> a.getKey().galaxy * 1000 + a.getKey().system))
                 .forEach(entry -> pushGalaxyAnalyzeCommandIfNeeded(entry, spyCoordinate));
 
+        List<AbstractCommand> commandList = container.peek();
+        logList("Pushed commands "+commandList.size(), commandList);
         spaceHash = newSpaceHash;
     }
 
@@ -70,7 +73,7 @@ public class SpaceThread extends AbstractThread {
 
 //            log("skipping "+ entry.getKey()+" nothing to spy from "+SPY_COORDINATE+" = "+getNearestConfig(SPY_COORDINATE, "no value"));
         } else {
-            log(command.getSystemView()+" "+command.getSpyPositions().size());
+//            log(command.getSystemView()+" "+command.getSpyPositions().size());
             pushCommand(command);
         }
     }
@@ -101,9 +104,8 @@ public class SpaceThread extends AbstractThread {
         }
         if(map().getConfigBoolean(DEBUG, false)) {
             String spyRangesString = spacedRange.stream().map(SystemViewRange::toString).collect(Collectors.joining(", "));
-            log("spacedRange "+ spacedRange.size()+": "+ spyRangesString);
             long nullCount = galaxyEntityMap.values().stream().filter(Objects::isNull).count();
-            log("SystemView total: "+  galaxyEntityMap.size()+" in that "+ nullCount + " never checked");
+            log(spyRangesString + " - SystemView total "+  galaxyEntityMap.size()+" in that "+ nullCount + " never checked");
         }
         return galaxyEntityMap;
     }
@@ -112,6 +114,7 @@ public class SpaceThread extends AbstractThread {
         expiredTime.update(getNearestConfig(EXPIRED_TIME, "P7D"));
         String newSpaceHash = spaceToProcess();
         if(!DateUtil.isExpired(lastCheck, expiredTime.getValue()) && spaceHash.equals(newSpaceHash)) return null;
+        saveProcessingStatus(IN_PROGRESS_PROCESSING);
         container.create();
         lastCheck = LocalDateTime.now();
         log(newSpaceHash);

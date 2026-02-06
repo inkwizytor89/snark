@@ -95,10 +95,10 @@ public class UpdateThread extends AbstractThread {
     }
 
     public void updateState() {
-        pushCommand(new LoadColoniesCommand()
+        refreshCommand(new LoadColoniesCommand()
                 .hash(threadType +"_LoadColoniesCommand")
                 .setRunType(QueueRunType.MAJOR));
-        pushCommand(new UpdateFleetEventsCommand()
+        refreshCommand(new UpdateFleetEventsCommand()
                 .hash(threadType +"_UpdateFleetEventsCommand")
                 .setRunType(QueueRunType.MAJOR));
     }

@@ -17,7 +17,6 @@ import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 import static org.enoch.snark.instance.si.module.ThreadMap.TRANSPORTER_SMALL_CAPACITY;
 
-//@Data
 @MappedSuperclass
 public abstract class PlanetEntity extends IdEntity{
 
@@ -732,7 +731,7 @@ public abstract class PlanetEntity extends IdEntity{
         ShipsMap located = this.getShipsMap();
         for(Map.Entry<Ship, Long> entry : required.entrySet()) {
             Long requiredCont = required.get(entry.getKey());
-            if(requiredCont.equals(Long.MAX_VALUE)) continue;
+            if(requiredCont.equals(Long.MAX_VALUE) || entry.getValue() <= 0) continue;
             Long locatedCount = located.get(entry.getKey());
             if(locatedCount == null || locatedCount < requiredCont) {
                 return false;

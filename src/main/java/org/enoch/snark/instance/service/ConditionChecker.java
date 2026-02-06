@@ -38,6 +38,8 @@ public class ConditionChecker {
             case ShipsCondition condition -> condition.check(conditionContext);
             case NoMissionsCondition condition -> condition.check(conditionContext);
             case FleetSlotCondition condition -> condition.check(conditionContext);
+            case ExpressionCondition condition -> condition.check(conditionContext);
+            case IsModifiedAfterCondition condition -> condition.check(conditionContext);
             default -> throw new IllegalStateException("Unknown condition " + abstractCondition.getClass().getName());
         };
     }

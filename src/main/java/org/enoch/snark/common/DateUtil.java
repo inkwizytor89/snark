@@ -97,6 +97,11 @@ public class DateUtil {
         else return date.plusSeconds(duration.getSeconds()).isBefore(LocalDateTime.now());
     }
 
+    public static boolean isExpired(LocalDateTime date) {
+        if (date == null) return true;
+        else return LocalDateTime.now().isAfter(date);
+    }
+
     public static boolean lessThanHours(int hour, LocalDateTime updated) {
         LocalDateTime now = LocalDateTime.now();
         return now.minusHours(hour).isBefore(updated);

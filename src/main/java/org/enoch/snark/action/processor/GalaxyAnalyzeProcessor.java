@@ -15,7 +15,7 @@ import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.GalaxyGIR;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.springframework.context.annotation.Scope;
@@ -34,12 +34,12 @@ public class GalaxyAnalyzeProcessor{
     private final TargetRepository targetRepository;
     private final GalaxyRepository galaxyRepository;
 
-    public ExecutionIssue execute(GI gi, GalaxyAnalyzeCommand command) {
-        GalaxyGIR gir = new GalaxyGIR(gi);
+    public ExecutionIssue execute(Wd wd, GalaxyAnalyzeCommand command) {
+        GalaxyGIR gir = new GalaxyGIR(wd);
         Integer galaxy = command.getSystemView().getGalaxy();
         Integer system = command.getSystemView().getSystem();
 
-        ColonyEntity colony = gi.url().openGalaxy(command.getSystemView(), command.getSource());
+        ColonyEntity colony = wd.url().openGalaxy(command.getSystemView(), command.getSource());
         List<TargetEntity> fromDB = targetRepository.findByGalaxyAndSystem(galaxy, system);
         gir.updateGalaxy(command.getSystemView(), fromDB);
 

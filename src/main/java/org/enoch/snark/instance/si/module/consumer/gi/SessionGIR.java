@@ -3,14 +3,13 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.exception.GIException;
-import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.consumer.Credentials;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.WebElement;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.text.HtmlElements.TAG_BUTTON;
 import static org.enoch.snark.instance.si.module.consumer.gi.text.HtmlElements.TAG_INPUT;
@@ -29,30 +28,17 @@ public class SessionGIR extends GraphicalInterfaceReader {
     public static final String GF_COOKIE_CONSENT = "gf-cookie-consent-4449562312";
     public static final String GF_COOKIE_CONSENT_YES = "|7|1";
 
-    SessionGIR(GI gi) {
-        super(gi);
-    }
-
-    public void manageDriver() {
-        wd().manage().window().maximize();
-        wd().manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
-//        wd().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
-//        wd().manage().timeouts().scriptTimeout(Duration.ofSeconds(2));
+    SessionGIR(Wd wd) {
+        super(wd);
     }
 
     public void applyCookies(String lobbyToken) {
 
         // lobby session
-        addCookie(GF_TOKEN_PRODUCTION, lobbyToken);
+        wd.addCookie(GF_TOKEN_PRODUCTION, lobbyToken);
         // cookie consent
-        addCookie(GF_COOKIE_CONSENT, GF_COOKIE_CONSENT_YES);
+        wd.addCookie(GF_COOKIE_CONSENT, GF_COOKIE_CONSENT_YES);
         wd().get(LOBBY_WITH_ACCOUNTS);
-    }
-
-    private void addCookie(String key, String value) {
-        if(value != null)
-            wd().manage().addCookie(new Cookie(key, value,".gameforge.com", "/", null));
-        SleepUtil.pause();
     }
 
     public boolean isCurrentUrlBackToLobby() {
@@ -75,12 +61,12 @@ public class SessionGIR extends GraphicalInterfaceReader {
             try {
                 wd().get(SIGN_IN_PAGE);
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(credentials.login());
-                gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, LOGIN_BUTTON).click();
+                wd.findElement(TAG_INPUT, ID_ATTRIBUTE, LOGIN_INPUT).sendKeys(credentials.login());
+                wd.findElement(TAG_BUTTON, ID_ATTRIBUTE, LOGIN_BUTTON).click();
                 SleepUtil.sleep();
 
-                gi.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(credentials.password());
-                gi.findElement(TAG_BUTTON, ID_ATTRIBUTE, PASSWORD_BUTTON).click();
+                wd.findElement(TAG_INPUT, ID_ATTRIBUTE, PASSWORD_INPUT).sendKeys(credentials.password());
+                wd.findElement(TAG_BUTTON, ID_ATTRIBUTE, PASSWORD_BUTTON).click();
                 SleepUtil.secondsToSleep(20L);
 
                 wd().get(LOBBY_WITH_ACCOUNTS);
@@ -104,27 +90,27 @@ public class SessionGIR extends GraphicalInterfaceReader {
     }
 
     public boolean openServer() {
-        for (int i = 0; i < 3; i++) {
-            try {
-                SleepUtil.secondsToSleep(3L);
+        try {
+            String serverName = wd.getServerName();
+            List<WebElement> webElements = longFetchAll(By.xpath("//div[@role='row']"));
+            System.err.println("serwers count "+webElements.size());
+            webElements.stream()
+                    .filter(webElement -> webElement.getText().contains(serverName))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Could not find server " + serverName))
+                    .findElement(By.tagName("button")).click();
 
-                String serverName = gi.map().getConfig(ThreadMap.SERVER);
-                wd().findElements(By.xpath("//div[@role='row']")).stream()
-                        .filter(webElement -> webElement.getText().contains(serverName))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Could not find server " + serverName))
-                        .findElement(By.tagName("button")).click();
-                SleepUtil.sleep(TimeUnit.SECONDS, 4);
+            getLongWait().until(driver -> driver.getWindowHandles().size() >= 2);
 
-                ArrayList<String> tabs = new ArrayList<>(wd().getWindowHandles());
-                wd().switchTo().window(tabs.size() == 1 ? tabs.get(0) : tabs.get(1));
-                return true;
-            } catch (GIException e) {
-                e.printStackTrace();
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-            SleepUtil.sleep();
+            ArrayList<String> tabs = new ArrayList<>(wd().getWindowHandles());
+            wd().switchTo().window(tabs.size() == 1 ? tabs.get(0) : tabs.get(1));
+
+            getLongWait().until(driver -> !driver.getCurrentUrl().contains("lobby"));
+            return true;
+        } catch (GIException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
         return false;
     }

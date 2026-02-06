@@ -11,7 +11,6 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -32,7 +31,6 @@ public class ExpeditionThread extends AbstractThread {
     public static final ShipsMap DEFAULT_SHIPS = ShipsMap.parse("explorer:1,transporterLarge:2500,battleship:1");
 
     private final FleetRepository fleetRepository;
-    private final FleetDispatcher fleetDispatcher;
 
     @Override
     protected String getThreadType() {
@@ -52,7 +50,7 @@ public class ExpeditionThread extends AbstractThread {
     @Override
     protected void onStep() {
         if (noFreeSlotsForExpedition()) return;
-//        else  pause.update("1S");
+        else pause.update("1S");
         if (container.anyNotProcessed()) return;
 
         ColonyEntity bestColony;
@@ -69,7 +67,7 @@ public class ExpeditionThread extends AbstractThread {
                 throw new RuntimeException("Can not specify any expedition from "+source);
             }
         }
-        pushSingleListCommand(createFleetSendCommand(bestColony, requiredShipMap));
+        refreshSingleListCommand(createFleetSendCommand(bestColony, requiredShipMap));
     }
 
     private ShipsMap specifyShips(ColonyEntity colony, List<ColonyEntity> colonies) {

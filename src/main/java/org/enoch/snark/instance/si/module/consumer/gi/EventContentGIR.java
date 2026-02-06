@@ -3,11 +3,8 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.model.to.FleetPlan;
-import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.to.EventFleet;
-import org.enoch.snark.instance.model.to.FleetPromise;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.openqa.selenium.By;
@@ -23,8 +20,8 @@ import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
 
 public class EventContentGIR extends GraphicalInterfaceReader {
 
-    public EventContentGIR(GI gi) {
-        super(gi);
+    public EventContentGIR(Wd wd) {
+        super(wd);
     }
 
     public boolean recall(SendCommand promise) {
@@ -42,9 +39,9 @@ public class EventContentGIR extends GraphicalInterfaceReader {
             for(WebElement row : toRecall) {
                 row.findElement(By.className("recallFleet")).click();
                 SleepUtil.sleep();
-                wd.findElement(By.id("errorBoxDecisionYes")).click();
+                wd().findElement(By.id("errorBoxDecisionYes")).click();
             }
-            wd.findElement(By.className("event_list")).click();
+            wd().findElement(By.className("event_list")).click();
         } catch (Exception e) {
             System.err.println("Can not load EventFleet "+e.getClass().getName()+" cause:" +e.getMessage());
             e.printStackTrace();
@@ -65,7 +62,7 @@ public class EventContentGIR extends GraphicalInterfaceReader {
         try {
             List<WebElement> tableRows = activateEventTable();
             eventFleets = readTableRows(tableRows);
-            List<WebElement> eventList = wd.findElements(By.className("event_list"));
+            List<WebElement> eventList = wd().findElements(By.className("event_list"));
             if (!eventList.isEmpty()) {
                 eventList.getFirst().click();
             }
@@ -78,19 +75,19 @@ public class EventContentGIR extends GraphicalInterfaceReader {
 
     private List<WebElement> activateEventTable() {
         SleepUtil.pause(3);
-        List<WebElement> eventHeader = wd.findElements(By.id("eventHeader"));
+        List<WebElement> eventHeader = wd().findElements(By.id("eventHeader"));
         if(!eventHeader.isEmpty()) {
             if(eventHeader.get(0).isDisplayed())
-                wd.findElement(By.className("event_list")).click();
+                wd().findElement(By.className("event_list")).click();
         }
-        List<WebElement> event_list = wd.findElements(By.className("event_list"));
+        List<WebElement> event_list = wd().findElements(By.className("event_list"));
         if(event_list.isEmpty()) {
             return new ArrayList<>();
         }
         event_list.get(0).click();
         SleepUtil.sleep();
         List<WebElement> tableRows = null;
-        WebDriverWait wait = new WebDriverWait(wd, Duration.ofSeconds(15));
+        WebDriverWait wait = new WebDriverWait(wd(), Duration.ofSeconds(15));
         WebElement eventContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("eventContent")));
         return wait.until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(eventContent, By.tagName(TR_TAG)));
     }

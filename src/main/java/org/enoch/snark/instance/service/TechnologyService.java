@@ -41,7 +41,7 @@ public class TechnologyService {
             colonyQueues.put(LIFE_FORM_RESEARCH, new QueueMonitor());
             queueMap.put(colony, colonyQueues);
 
-            if(queueMap.size() > 30) {
+            if(queueMap.size() > 99) {
                 throw new RuntimeException("QueueManger leak: too many queue "+queueMap.size());
             }
         }

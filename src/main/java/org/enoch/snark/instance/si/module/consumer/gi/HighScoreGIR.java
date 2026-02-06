@@ -23,15 +23,15 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
     public static final String ECONOMY_AREA = "economy";
     public static final String FLEET_AREA = "fleet";
 
-    public HighScoreGIR(GI gi) {
-        super(gi);
+    public HighScoreGIR(Wd wd) {
+        super(wd);
     }
 
     public void loadHighScore(List<String> areas, Integer maxPages) {
 
         HashMap<String, HighScorePosition> highScore = new HashMap<>();
         for (String page : generatePagesToCheck(maxPages)) {
-            new GIUrl(gi).openHighScore(page);
+            new GIUrl(wd).openHighScore(page);
             for (String area : areas) {
                 update(highScore, area);
             }
@@ -46,10 +46,10 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
     }
 
     private void update(HashMap<String, HighScorePosition> highScore, String area) {
-        wd.findElement(By.id("typeButtons")).findElement(By.id(area)).click();
+        wd().findElement(By.id("typeButtons")).findElement(By.id(area)).click();
         SleepUtil.sleep();
-        final WebElement ranks = wd.findElement(By.id("ranks"));
-        List<WebElement> rankPositions = new WebDriverWait(wd, Duration.ofSeconds(10))
+        final WebElement ranks = wd().findElement(By.id("ranks"));
+        List<WebElement> rankPositions = new WebDriverWait(wd(), Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(ranks, By.tagName(TR_TAG)));
 
         rankPositions = rankPositions.stream()

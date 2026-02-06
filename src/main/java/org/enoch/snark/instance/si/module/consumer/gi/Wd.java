@@ -2,77 +2,73 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.Getter;
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
+import lombok.Setter;
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.GalaxyDAO;
-import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
-import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.exception.GIException;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
-import org.enoch.snark.instance.service.TechnologyService;
-import org.enoch.snark.instance.model.to.SystemView;
 import org.enoch.snark.instance.model.types.ColonyType;
-import org.enoch.snark.instance.si.module.ThreadMap;
-import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.WEBDRIVER_PATH;
-import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.LOBBY_URL;
-
-public class GI {
+public class Wd {
 
     public static final String TECHNOLOGIES = "technologies";
 
     @Getter
-    private final GISession giSession;
-
-    @Getter
     public ChromeDriver webDriver;
 
-    private ConsumerThread consumerThread;
-//    private final PlayerDAO playerDAO;
-//    private final Instance instance;
-//    private final GalaxyDAO galaxyDAO;
-//    private final TargetDAO targetDAO;
-    private final TechnologyService technologyService;
+    @Getter
+    @Setter
+    private String url;
+
+    @Getter
+    @Setter
+    private String hash;
+
+    @Getter
+    @Setter
+    private String serverName;
 
 
-    public GI(ConsumerThread consumerThread) {
-        this.consumerThread = consumerThread;
-        String pathToDriver = map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe");
+    public Wd(String pathToDriver) {
         if(!new File(pathToDriver).exists()) System.err.println("Missing file for driver "+pathToDriver);
         System.setProperty("webdriver.chrome.driver", pathToDriver);
-
-        giSession = new GISession(this);
-
-        technologyService = TechnologyService.getInstance();
-//        instance = Instance.getInstance();
-//        playerDAO = PlayerDAO.getInstance();
-//        galaxyDAO = GalaxyDAO.getInstance();
-//        targetDAO = TargetDAO.getInstance();
+        setupDriver();
     }
 
     public GIUrl url() {
         return new GIUrl(this);
     }
 
-    public void reopenWebDriver() {
-        if(webDriver != null) closeWebDriver();
+    public void reopenWebDriver(String startUrl) {
+        if(!isDriverAlive()) {
+            if (webDriver != null) closeWebDriver();
+            setupDriver();
+        }
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+        webDriver.switchTo().window(tabs.get(0));
+        closeOldsTabs();
+        webDriver.get(startUrl);
+    }
+
+    public boolean isDriverAlive() {
+        try {
+            webDriver.getWindowHandles();
+            return true;
+        } catch (WebDriverException e) {
+            return false;
+        }
+    }
+
+    private void setupDriver() {
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("start-maximized"); // open Browser in maximized mode
@@ -80,12 +76,25 @@ public class GI {
         options.addArguments("--disable-search-engine-choice-screen");
 
         webDriver = new ChromeDriver(options);
+        webDriver.manage().window().maximize();
+    }
 
-        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-        webDriver.switchTo().window(tabs.get(0));
+    public void closeOldsTabs() {
+        String currentWindow = webDriver.getWindowHandle();
 
-        webDriver.get(LOBBY_URL);
-        SleepUtil.sleep();
+        for (String window : webDriver.getWindowHandles()) {
+            if (!window.equals(currentWindow)) {
+                webDriver.switchTo().window(window);
+                webDriver.close();
+            }
+        }
+
+        webDriver.switchTo().window(currentWindow);
+    }
+
+    public void addCookie(String key, String value) {
+        if(value != null)
+            webDriver.manage().addCookie(new Cookie(key, value,".gameforge.com", "/", null));
     }
 
     private void closeWebDriver() {
@@ -340,9 +349,5 @@ public class GI {
     private Long getLong(String input) {
         String resultString = input.replace("Mln", "000000").replace(".", "");
         return Long.parseLong(resultString);
-    }
-
-    public ThreadMap map() {
-        return consumerThread.map();
     }
 }

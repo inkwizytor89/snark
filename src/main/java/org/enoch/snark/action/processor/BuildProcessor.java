@@ -6,7 +6,7 @@ import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.TechnologyGIR;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.service.TechnologyService;
@@ -26,14 +26,14 @@ public class BuildProcessor {
     private final ColonyRepository colonyRepository;
 
     public TechnologyGIR gir;
-    private GI gi;
+    private Wd wd;
 
-    public ExecutionIssue execute(GI gi, BuildCommand command) {
-        this.gi = gi;
-        gir = new TechnologyGIR(gi);
+    public ExecutionIssue execute(Wd wd, BuildCommand command) {
+        this.wd = wd;
+        gir = new TechnologyGIR(wd);
         BuildRequirements requirements = command.requirements;
 
-        ColonyEntity colony = gi.url().openComponent(command.requirements.request.technology.getPage(), command.colony);
+        ColonyEntity colony = wd.url().openComponent(command.requirements.request.technology.getPage(), command.colony);
         colonyRepository.save(colony);
 
         if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return NO_ISSUE;
@@ -56,7 +56,7 @@ public class BuildProcessor {
     }
 
     private void refreshColonyWhenBuildingIsDone(BuildCommand command, BuildRequirements requirements) {
-        colonyRepository.save(gi.url().openComponent(requirements.request.technology.getPage(), command.colony));
+        colonyRepository.save(wd.url().openComponent(requirements.request.technology.getPage(), command.colony));
         Long seconds = gir.updateQueue(command.colony, TechnologyService.BUILDING);
                 if(seconds != null)
                     command.setNext(new OpenPageCommand(requirements.request.technology.getPage(), command.colony)

@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
@@ -9,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 abstract class GraphicalInterfaceReader {
 
@@ -22,13 +24,18 @@ abstract class GraphicalInterfaceReader {
     public static final String ID_ATTRIBUTE = "id";
     public static final String CLASS_ATTRIBUTE = "class";
 
-    protected ChromeDriver wd; // change to wd()
-    protected final GI gi;
+    protected ChromeDriver driver; // change to wd()
+    protected final Wd wd;
+    @Getter
+    private WebDriverWait longWait;
+    @Getter
+    private WebDriverWait wait;
 
-    GraphicalInterfaceReader(GI gi) {
-        this.gi = gi;
-        wd =(ChromeDriver) gi.getWebDriver();
-
+    GraphicalInterfaceReader(Wd wd) {
+        this.wd = wd;
+        this.driver =(ChromeDriver) wd.getWebDriver();
+        wait = new WebDriverWait(this.driver, Duration.ofSeconds(5));
+        longWait = new WebDriverWait(this.driver, Duration.ofSeconds(60));
     }
 
     protected String getText(ChromeDriver wd) {
@@ -63,7 +70,7 @@ abstract class GraphicalInterfaceReader {
     }
 
     public WebElement getIfPresentById(String id, long timeOutInSeconds) {
-        WebDriverWait wait = new WebDriverWait(wd, Duration.ofSeconds(timeOutInSeconds));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOutInSeconds));
         WebElement webElement = null;
         try {
             webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
@@ -83,6 +90,32 @@ abstract class GraphicalInterfaceReader {
     }
 
     public ChromeDriver wd() {
-        return gi.getWebDriver();
+        return wd.getWebDriver();
+    }
+
+    public WebElement fetch(By locator) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    public List<WebElement> fetchAll(By locator) {
+        return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+    }
+
+    public WebElement longFetch (By locator) {
+        return longWait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    public List<WebElement> longFetchAll(By locator) {
+        reloadDriver();
+        return longWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+    }
+
+    private void reloadDriver() {
+        if(!wd().equals(driver)) {
+            System.err.println("reload driver");
+            driver = wd();
+            wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            longWait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        }
     }
 }

@@ -4,7 +4,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.TechnologyGIR;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Planet;
@@ -23,26 +23,26 @@ import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlPage.HIGHS
 
 public class GIUrl {
 
-    private final GI gi;
+    private final Wd wd;
 
-    public GIUrl(GI gi) {
-        this.gi = gi;
+    public GIUrl(Wd wd) {
+        this.wd = wd;
     }
 
     private void openUrl(String url) {
-        gi.getWebDriver().get(url);
+        wd.getWebDriver().get(url);
     }
 
     public void openMessages() {
-        openUrl(new UrlBuilder(gi, MESSAGES).get());
+        openUrl(new UrlBuilder(wd, MESSAGES).get());
     }
 
     public void openHighScore(String site) {
-        openUrl(new UrlBuilder(gi, HIGHSCORE).param(SITE_PARAM, site).get());
+        openUrl(new UrlBuilder(wd, HIGHSCORE).param(SITE_PARAM, site).get());
     }
 
     public ColonyEntity openSendFleetView(ColonyEntity source, Planet target, Mission mission) {
-        openUrl(new UrlBuilder(gi, FLEETDISPATCH)
+        openUrl(new UrlBuilder(wd, FLEETDISPATCH)
                 .param(CP_PARAM, source.cp)
                 .param(GALAXY_PARAM, target.galaxy)
                 .param(SYSTEM_PARAM, target.system)
@@ -53,7 +53,7 @@ public class GIUrl {
 
         updateColony(source);
         loadFleetStatus();
-        gi.updateFleet(source);
+        wd.updateFleet(source);
         return source;
     }
 
@@ -61,7 +61,7 @@ public class GIUrl {
         if(colony == null) {
             colony = Core.getLastVisited();
         }
-        openUrl(new UrlBuilder(gi, GALAXY)
+        openUrl(new UrlBuilder(wd, GALAXY)
                 .param(GALAXY_PARAM, systemView.galaxy)
                 .param(SYSTEM_PARAM, systemView.system)
                 .param(CP_PARAM, colony.cp)
@@ -73,10 +73,10 @@ public class GIUrl {
     }
 
     public void openResearch(PlayerEntity mainPlayer) {
-        openUrl(new UrlBuilder(gi, RESEARCH).get());
+        openUrl(new UrlBuilder(wd, RESEARCH).get());
 
-        gi.updateResearch(mainPlayer);
-        new TechnologyGIR(gi).updateQueue(null, TechnologyService.RESEARCH);
+        wd.updateResearch(mainPlayer);
+        new TechnologyGIR(wd).updateQueue(null, TechnologyService.RESEARCH);
         mainPlayer.updated = LocalDateTime.now();
     }
 
@@ -90,28 +90,28 @@ public class GIUrl {
         }
         if(colony == null)
             System.err.println("yyyyyyyyyy");
-        String url = new UrlBuilder(gi, component).param(CP_PARAM, colony.cp).get();
+        String url = new UrlBuilder(wd, component).param(CP_PARAM, colony.cp).get();
         openUrl(url);
         if(debug) System.err.println("GET URL: "+url);
         Core.setLastVisited(colony);
 
         updateColony(colony);
         if (SUPPLIES.equals(component)) {
-            gi.updateResourcesProducers(colony);
-            new TechnologyGIR(gi).updateQueue(colony, TechnologyService.BUILDING);
-            new TechnologyGIR(gi).updateQueue(colony, TechnologyService.SHIPYARD);
+            wd.updateResourcesProducers(colony);
+            new TechnologyGIR(wd).updateQueue(colony, TechnologyService.BUILDING);
+            new TechnologyGIR(wd).updateQueue(colony, TechnologyService.SHIPYARD);
         } else if (FACILITIES.equals(component)) {
-            gi.updateFacilities(colony);
-            new TechnologyGIR(gi).updateQueue(colony, TechnologyService.BUILDING);
+            wd.updateFacilities(colony);
+            new TechnologyGIR(wd).updateQueue(colony, TechnologyService.BUILDING);
         } else if (LFBUILDINGS.equals(component)) {
-            gi.updateLifeform(colony);
-            new TechnologyGIR(gi).updateQueue(colony, TechnologyService.LIFE_FORM_BUILDINGS);
+            wd.updateLifeform(colony);
+            new TechnologyGIR(wd).updateQueue(colony, TechnologyService.LIFE_FORM_BUILDINGS);
         } else if (FLEETDISPATCH.equals(component)) {
             loadFleetStatus();
-            gi.updateFleet(colony);
+            wd.updateFleet(colony);
         } else if (DEFENSES.equals(component)) {
-            gi.updateDefence(colony);
-            new TechnologyGIR(gi).updateQueue(colony, TechnologyService.SHIPYARD);
+            wd.updateDefence(colony);
+            new TechnologyGIR(wd).updateQueue(colony, TechnologyService.SHIPYARD);
         }
         return colony;
     }
@@ -127,7 +127,7 @@ public class GIUrl {
     public void loadFleetStatus() {
         try {
             Pattern fleetStatusPattern = Pattern.compile("\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)\\D+(\\d+)");
-            final WebElement slotsLabel = gi.getWebDriver().findElement(By.id("slots"));
+            final WebElement slotsLabel = wd.getWebDriver().findElement(By.id("slots"));
             Matcher m = fleetStatusPattern.matcher(slotsLabel.getText());
             if (m.find()) {
                 Navigator.setFleetCount(Integer.parseInt(m.group(1)));
@@ -145,7 +145,7 @@ public class GIUrl {
     }
 
     private void updateColony(ColonyEntity colony) {
-        gi.updateResources(colony);
+        wd.updateResources(colony);
         colony.updated = LocalDateTime.now();
     }
 }

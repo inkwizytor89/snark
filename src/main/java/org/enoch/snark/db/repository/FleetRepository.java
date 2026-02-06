@@ -22,12 +22,22 @@ public interface FleetRepository extends JpaRepository<FleetEntity, Long> {
 
     Optional<FleetEntity> findFirstByHashOrderByUpdatedDesc(String hash);
 
+    @Deprecated
     default boolean isBlockedWithExpiredTime(String hash, String expiry) {
-        Optional<FleetEntity> lastSend = findFirstByHashOrderByUpdatedDesc(hash);
-        if(lastSend.isEmpty()) return false;
+        return findExpiredTime(hash, expiry).isPresent();
+//        Optional<FleetEntity> lastSend = findFirstByHashOrderByUpdatedDesc(hash);
+//        if(lastSend.isEmpty()) return false;
+//
+//        else if (DELAY_TO_FLEET_THERE.equals(expiry)) return LocalDateTime.now().isBefore(lastSend.get().visited);
+//        else if (DELAY_TO_FLEET_BACK.equals(expiry)) return LocalDateTime.now().isBefore(lastSend.get().back);
+//        else return LocalDateTime.now().isBefore(lastSend.get().updated.plusSeconds(new Duration(expiry).getSeconds()));
+    }
 
-        else if (DELAY_TO_FLEET_THERE.equals(expiry)) return LocalDateTime.now().isBefore(lastSend.get().visited);
-        else if (DELAY_TO_FLEET_BACK.equals(expiry)) return LocalDateTime.now().isBefore(lastSend.get().back);
-        else return LocalDateTime.now().isBefore(lastSend.get().updated.plusSeconds(new Duration(expiry).getSeconds()));
+    default Optional<LocalDateTime> findExpiredTime(String hash, String expiryType) {
+        Optional<FleetEntity> lastSend = findFirstByHashOrderByUpdatedDesc(hash);
+        if(lastSend.isEmpty()) return Optional.empty();
+        else if (DELAY_TO_FLEET_THERE.equals(expiryType)) return Optional.of(lastSend.get().visited);
+        else if (DELAY_TO_FLEET_BACK.equals(expiryType)) return Optional.of(lastSend.get().back);
+        else return Optional.of(lastSend.get().updated.plusSeconds(new Duration(expiryType).getSeconds()));
     }
 }

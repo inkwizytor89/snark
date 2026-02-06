@@ -17,7 +17,7 @@ public class TripFinder {
     public static PlanetData prev(PlanetTerm term) {
         int index = currentTripIndex(term);
         List<PlanetData> trip = term.getContext().getTrip();
-        return trip.get((index - 1) %  trip.size());
+        return trip.get((index - 1 + trip.size()) %  trip.size());
     }
 
     public static int currentTripIndex(PlanetTerm term) {

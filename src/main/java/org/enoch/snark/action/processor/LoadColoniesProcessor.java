@@ -11,12 +11,11 @@ import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.BaseGameInfoGIR;
 import org.enoch.snark.instance.model.action.DiffLists;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.DEFENSES;
@@ -37,9 +36,9 @@ public class LoadColoniesProcessor {
     private BaseGameInfoGIR baseGameInfoGIR;
 
     @Transactional
-    public ExecutionIssue execute(GI gi, LoadColoniesCommand command) {
+    public ExecutionIssue execute(Wd wd, LoadColoniesCommand command) {
         try {
-            baseGameInfoGIR = new BaseGameInfoGIR(gi);
+            baseGameInfoGIR = new BaseGameInfoGIR(wd);
             DiffLists<ColonyEntity> diff = new DiffLists<>(colonyRepository.findAll(), baseGameInfoGIR.loadPlanetList());
 
             diff.added().forEach(colony -> {

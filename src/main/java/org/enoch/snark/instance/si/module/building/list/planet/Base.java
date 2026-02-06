@@ -22,8 +22,7 @@ public class Base extends AbstractBuildingList {
                 new BuildRequest(Building.solarPlant, 32),
                 new BuildRequest(Building.metalStorage, 12),
                 new BuildRequest(Building.crystalStorage, 11),
-                new BuildRequest(Building.deuteriumStorage, 10),
-                new BuildRequest(Building.metalStorage, -1)
+                new BuildRequest(Building.deuteriumStorage, 10)
         );
         return create(sourceList);
     }

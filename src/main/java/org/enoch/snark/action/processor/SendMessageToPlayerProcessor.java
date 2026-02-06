@@ -2,7 +2,7 @@ package org.enoch.snark.action.processor;
 
 import org.enoch.snark.action.command.SendMessageToPlayerCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.openqa.selenium.JavascriptExecutor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class SendMessageToPlayerProcessor {
 
-    public ExecutionIssue execute(GI gi, SendMessageToPlayerCommand command ) {
-        gi.webDriver.get(command.herf);
+    public ExecutionIssue execute(Wd wd, SendMessageToPlayerCommand command ) {
+        wd.webDriver.get(command.herf);
 
         //Scroll down till the bottom of the page
-        ((JavascriptExecutor) gi.webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+        ((JavascriptExecutor) wd.webDriver).executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
-        gi.findElement("textarea", "name", "text").sendKeys(command.message);
-        gi.findElement("a", "class", "btn_blue fright send_new_msg").click();
+        wd.findElement("textarea", "name", "text").sendKeys(command.message);
+        wd.findElement("a", "class", "btn_blue fright send_new_msg").click();
 
         return ExecutionIssue.NO_ISSUE;
     }

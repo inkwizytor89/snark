@@ -6,8 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.action.command.status.ExecutionStatus;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -30,20 +29,20 @@ public class CommandProcessor {
     private final FleetSendProcessor fleetSendProcessor;
 
     @Transactional
-    public ExecutionIssue execute(GI gi, AbstractCommand abstractCommand) {
+    public ExecutionIssue execute(Wd wd, AbstractCommand abstractCommand) {
         CommandStatus status = abstractCommand.getStatus();
         status.setStatus(IN_PROGRESS);
         return switch (abstractCommand) {
-            case OpenPageCommand open -> openPageProcessor.execute(gi, open);
-            case BuildCommand build -> buildProcessor.execute(gi, build);
-            case GalaxyAnalyzeCommand galaxyAnalyze -> galaxyAnalyzeProcessor.execute(gi, galaxyAnalyze);
-            case LoadColoniesCommand loadColonies -> loadColoniesProcessor.execute(gi, loadColonies);
-            case ReadMessageCommand readMessage -> readMessageProcessor.execute(gi);
-            case RecallCommand readMessage -> recallProcessor.execute(gi, readMessage);
-            case SendMessageToPlayerCommand command -> sendMessageToPlayerProcessor.execute(gi, command);
-            case UpdateFleetEventsCommand command -> updateFleetEventsProcessor.execute(gi, command);
-            case UpdateResearchCommand command -> updateResearchProcessor.execute(gi, command);
-            case SendCommand command -> fleetSendProcessor.execute(gi, command);
+            case OpenPageCommand open -> openPageProcessor.execute(wd, open);
+            case BuildCommand build -> buildProcessor.execute(wd, build);
+            case GalaxyAnalyzeCommand galaxyAnalyze -> galaxyAnalyzeProcessor.execute(wd, galaxyAnalyze);
+            case LoadColoniesCommand loadColonies -> loadColoniesProcessor.execute(wd, loadColonies);
+            case ReadMessageCommand readMessage -> readMessageProcessor.execute(wd);
+            case RecallCommand readMessage -> recallProcessor.execute(wd, readMessage);
+            case SendMessageToPlayerCommand command -> sendMessageToPlayerProcessor.execute(wd, command);
+            case UpdateFleetEventsCommand command -> updateFleetEventsProcessor.execute(wd, command);
+            case UpdateResearchCommand command -> updateResearchProcessor.execute(wd, command);
+            case SendCommand command -> fleetSendProcessor.execute(wd, command);
             default -> throw new NotImplementedException("Missing processor for "+abstractCommand.getClass().getSimpleName());
         };
 

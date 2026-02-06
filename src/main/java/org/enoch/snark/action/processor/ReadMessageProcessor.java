@@ -17,7 +17,7 @@ import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.SpyReportGIR;
 import org.enoch.snark.instance.model.to.SystemView;
 import org.openqa.selenium.By;
@@ -39,11 +39,11 @@ public class ReadMessageProcessor {
     private final PlayerRepository playerRepository;
     private final MessageRepository messageRepository;
 
-    private GI gi;
+    private Wd wd;
 
-    public ExecutionIssue execute(GI gi) {
-        this.gi = gi;
-        gi.url().openMessages();
+    public ExecutionIssue execute(Wd wd) {
+        this.wd = wd;
+        wd.url().openMessages();
         SleepUtil.secondsToSleep(8L);
 
         List<String> spyReports = loadMessagesLinks();
@@ -53,7 +53,7 @@ public class ReadMessageProcessor {
     }
 
     private List<String> loadMessagesLinks() {
-        final WebDriver chromeDriver = gi.getWebDriver();
+        final WebDriver chromeDriver = wd.getWebDriver();
         final List<WebElement> elements = chromeDriver.findElements(By.tagName("a"));
         List<String> spyReports = new ArrayList<>();
         for (WebElement element : elements) {
@@ -71,7 +71,7 @@ public class ReadMessageProcessor {
                 break;
             }
         }
-        ColonyEntity colony = gi.url().openComponent(OVERVIEW, null);
+        ColonyEntity colony = wd.url().openComponent(OVERVIEW, null);
         colonyRepository.save(colony);
     }
 
@@ -82,7 +82,7 @@ public class ReadMessageProcessor {
         boolean alreadyExists =messageRepository.findByMessageId(messageId).isPresent();
         if(alreadyExists) return false;
 
-        MessageEntity messageEntity = MessageEntity.create(gi.getWebDriver().getPageSource());
+        MessageEntity messageEntity = MessageEntity.create(wd.getWebDriver().getPageSource());
         messageEntity.messageId = messageId;
 //        TargetEntity planet = messageEntity.getPlanet();
 //        if(planet.galaxy == 8 && planet.system== 146 && planet.position == 12) {
@@ -92,7 +92,7 @@ public class ReadMessageProcessor {
         messageRepository.save(messageEntity);
         if(MessageEntity.SPY.equals(messageEntity.type)) {
 
-            SpyReportGIR spyReportGIR = new SpyReportGIR(gi);
+            SpyReportGIR spyReportGIR = new SpyReportGIR(wd);
             TargetEntity spyTarget = spyReportGIR.readTargetFromReport(link);
             if(spyTarget.position == 16) return true;
             MessageService.getInstance().release(spyTarget.toPlanet());

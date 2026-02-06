@@ -11,15 +11,15 @@ import java.util.List;
 
 public class BaseGameInfoGIR extends GraphicalInterfaceReader {
 
-    public BaseGameInfoGIR(GI gi) {
-        super(gi);
+    public BaseGameInfoGIR(Wd wd) {
+        super(wd);
     }
 
     public List<ColonyEntity> loadPlanetList() {
         ArrayList<ColonyEntity> colonyEntities = new ArrayList<>();
 
 //        WebElement myPlanets = wd.findElement(By.id("myPlanets"));
-        List<WebElement> coloniesWebElements = wd.findElement(By.id("planetList")).findElements(By.xpath("*"));
+        List<WebElement> coloniesWebElements = wd().findElement(By.id("planetList")).findElements(By.xpath("*"));
 
         for(WebElement colonyWebElement : coloniesWebElements) {
             ColonyEntity colonyEntity = new ColonyEntity();
@@ -50,7 +50,7 @@ public class BaseGameInfoGIR extends GraphicalInterfaceReader {
             colonyEntities.add(colonyEntity);
         }
 
-        String countColoniesText = wd.findElement(By.id("countColonies")).getText();
+        String countColoniesText = wd().findElement(By.id("countColonies")).getText();
         int expectedColoniesCount = Integer.parseInt(countColoniesText.substring(0, countColoniesText.indexOf("/")).trim());
 
         long actualColoniesCount = colonyEntities.stream().filter(colonyEntity -> colonyEntity.is(ColonyType.PLANET)).count();

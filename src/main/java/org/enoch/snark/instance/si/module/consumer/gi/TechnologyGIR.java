@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.enoch.snark.instance.si.module.consumer.gi.GI.TECHNOLOGIES;
+import static org.enoch.snark.instance.si.module.consumer.gi.Wd.TECHNOLOGIES;
 
 public class TechnologyGIR extends GraphicalInterfaceReader {
 
-    public TechnologyGIR(GI gi) {
-        super(gi);
+    public TechnologyGIR(Wd wd) {
+        super(wd);
     }
 
     public Long updateQueue(ColonyEntity colony, String queueType) {
-        List<WebElement> elements = wd.findElements(By.id(queueType));
+        List<WebElement> elements = wd().findElements(By.id(queueType));
         if(elements.isEmpty()) {
             return null;
         }
@@ -59,7 +59,7 @@ public class TechnologyGIR extends GraphicalInterfaceReader {
     }
 
     public boolean upgradeBuilding(BuildRequirements requirements) {
-        WebElement technologies = wd.findElement(By.id(TECHNOLOGIES));
+        WebElement technologies = wd().findElement(By.id(TECHNOLOGIES));
         WebElement buildingElement = technologies.findElement(By.className(requirements.request.technology.name()));
         Long buildingLevel = getLevel(technologies, requirements.request.technology.name());
         if(buildingLevel >= requirements.request.level) {
@@ -74,11 +74,11 @@ public class TechnologyGIR extends GraphicalInterfaceReader {
     }
 
     public Resources findTechnologyCosts(String technologyName) {
-        WebElement technologies = wd.findElement(By.id(TECHNOLOGIES));
+        WebElement technologies = wd().findElement(By.id(TECHNOLOGIES));
         WebElement buildingIcon = technologies.findElement(By.className(technologyName));
         buildingIcon.click();
         SleepUtil.sleep();
-        WebElement costsWe = wd.findElement(By.className("costs"));
+        WebElement costsWe = wd().findElement(By.className("costs"));
         return new Resources(
                 getCost(costsWe, "metal"),
                 getCost(costsWe, "crystal"),

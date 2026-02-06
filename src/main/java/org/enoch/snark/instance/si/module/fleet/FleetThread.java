@@ -1,8 +1,10 @@
 package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
+import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.TargetRepository;
@@ -17,8 +19,12 @@ import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
@@ -40,6 +46,8 @@ public class FleetThread extends AbstractThread {
     private final TargetRepository targetRepository;
 
     private int size = 0;
+    private HashMap<String, LocalDateTime> blockingMap = new HashMap<>();
+    private String expiredConfig;
 
     @Override
     protected String getThreadType() {
@@ -58,6 +66,7 @@ public class FleetThread extends AbstractThread {
 
     @Override
     protected void onStep() {
+        if(limit > 0 && container.incomingCount()>0) return; // no need to find next if waiting is more than limit
 //        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
@@ -75,9 +84,14 @@ public class FleetThread extends AbstractThread {
                 .build();
 
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);
+
+        Map<String, Boolean> containerToRelease = createMapToRelease();
+        expiredConfig = map.getConfig(EXPIRED_TIME, null);
         for(FleetSendCommand command : fleetSendCommands) {
             command.generateHash(map.name(), "X");
-            if(container.contains(command.getHash())) continue;
+            containerToRelease.remove(command.getHash());
+            if (isBlocked(command)) continue;
+//            if(container.contains(command.getHash())) continue;
 //            logFleetOverview(command);
 
             FleetContext fleetContext = FleetContext.builder()
@@ -91,15 +105,14 @@ public class FleetThread extends AbstractThread {
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
             if(!conditionChecker.fit(conditionsToCheck, command)) continue;
-//conditionChecker.check(conditionsToCheck, command).getClass().getSimpleName() +" "+command.getTarget().getTarget().getResources().count()
-            if (blockExpiredTime(command)) continue;
+//conditionChecker.check(command.getConditions(), command).getClass().getSimpleName() +" "+command.getTarget().getTarget().getResources().count()
+//            if (blockExpiredTime(command)) continue;
 
             if (!map.getConfigBoolean(DRY_RUN, false)) {
                 command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
 
                 Duration recallDuration = map.getDuration(RECALL, null);
                 if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
-                log(command.toString());
                 pushCommand(command);
             }
         }
@@ -109,13 +122,27 @@ public class FleetThread extends AbstractThread {
             System.err.println("Fleets "+map().name()+" in map "+size);
             fleetSendCommands.forEach(fleetSendCommand -> System.err.print(fleetSendCommand+"="+fleetSendCommand.getStatus().getStatus()+", "));
         }
-
+        containerToRelease.keySet().forEach(s -> container.removeKey(s));
     }
 
-    private boolean blockExpiredTime(FleetSendCommand command) {
-        String expiredConfig = map.getConfig(EXPIRED_TIME, null);
+    private Map<String, Boolean> createMapToRelease() {
+        return this.container.peek().stream().map(AbstractCommand::getHash)
+                .collect(Collectors.toMap(s -> s, _ -> Boolean.TRUE));
+    }
+
+    private boolean isBlocked(FleetSendCommand command) {
         if(expiredConfig == null) return false;
-        return fleetRepository.isBlockedWithExpiredTime(command.getHash(), expiredConfig);
+        String hash = command.getHash();
+        if(!blockingMap.containsKey(hash)) blockingMap.put(hash, fleetRepository.findExpiredTime(hash, expiredConfig).orElse(null));
+        LocalDateTime expireDate = blockingMap.get(hash);
+//        boolean isExpired = LocalDateTime.now().isBefore(expireDate);
+        boolean isExpired = DateUtil.isExpired(expireDate);
+        if(isExpired) {
+            blockingMap.remove(hash);
+        }
+//        System.err.println("is isBlocked "+ !isExpired + " command "+hash);
+        return !isExpired;
+//        return fleetRepository.isBlockedWithExpiredTime(command.getHash(), expiredConfig);
     }
 
 //    private void logFleetOverview(FleetSendCommand promise) {

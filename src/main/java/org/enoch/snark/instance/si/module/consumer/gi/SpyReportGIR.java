@@ -15,22 +15,22 @@ import java.util.Optional;
 
 public class SpyReportGIR extends GraphicalInterfaceReader {
 
-    public SpyReportGIR(GI gi) {
-        super(gi);
+    public SpyReportGIR(Wd wd) {
+        super(wd);
     }
 
     public TargetEntity readTargetFromReport(String link) {
-        wd.get(link);
+        wd().get(link);
 
-        String msgTitle = wd.findElement(By.className("msg_title")).getText();
+        String msgTitle = wd().findElement(By.className("msg_title")).getText();
         TargetEntity target = new TargetEntity(extractCoordinateFromTitle(msgTitle));
 
-        if(wd.findElements(By.className("researchSection")).isEmpty()) {
+        if(wd().findElements(By.className("researchSection")).isEmpty()) {
             return target;
         }
         target.lastSpiedOn = LocalDateTime.now();
 
-        List<WebElement> resourceList = wd.findElement(By.className("resourceLootInfo")).findElements(By.tagName("resource-icon"));
+        List<WebElement> resourceList = wd().findElement(By.className("resourceLootInfo")).findElements(By.tagName("resource-icon"));
         target.metal = extractLongFromAriaDescription(resourceList.get(0));
         target.crystal = extractLongFromAriaDescription(resourceList.get(1));
         target.deuterium = extractLongFromAriaDescription(resourceList.get(2));
@@ -66,7 +66,7 @@ public class SpyReportGIR extends GraphicalInterfaceReader {
     }
 
     private List<WebElement> fetchPositionsInSection(String sectionName) {
-        List<WebElement> sectionPositions = wd.findElements(By.className(sectionName));
+        List<WebElement> sectionPositions = wd().findElements(By.className(sectionName));
         if (sectionPositions.isEmpty()) return new ArrayList<>();
         return sectionPositions.get(0).findElements(By.tagName("technology-icon"));
     }

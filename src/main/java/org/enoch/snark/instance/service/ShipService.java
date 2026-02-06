@@ -56,15 +56,20 @@ public class ShipService {
         return result;
     }
 
+    public ShipsMap fromExpressionToValues(ShipsMap requestedShips) {
+        return fromExpressionToValues(requestedShips, FleetContext.builder().build());
+    }
+
     public ShipsMap fromExpressionToValues(ShipsMap requestedShips, FleetContext context) {
-        ColonyEntity source = context.getSource().getColony();
-
         ShipsMap valuedMap = changeExpressionCountsToLong(requestedShips, context);
-        ShipsMap sourceShipsMap = source.getShipsMap();
-        ShipsMap maxToSend = sourceShipsMap.leave(context.getLeaveShipsMap());
 
-        valuedMap = valuedMap.reduce(maxToSend);
-        if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
+        if(context.getSource() != null) {
+            ColonyEntity source = context.getSource().getColony();
+            ShipsMap sourceShipsMap = source.getShipsMap();
+            ShipsMap maxToSend = sourceShipsMap.leave(context.getLeaveShipsMap());
+            valuedMap = valuedMap.reduce(maxToSend);
+            if(ALL_SHIPS.equals(requestedShips)) valuedMap = maxToSend;
+        }
         return valuedMap;
     }
 
@@ -80,7 +85,7 @@ public class ShipService {
                 Long catchFullResources = calculateShipCountForTransport(key, target.getResources());
                 result.put(key, (catchFullResources*76)/100);
             }
-            else result.put(key, value);
+            else if(value > 0) result.put(key, value);
         });
         return result;
     }

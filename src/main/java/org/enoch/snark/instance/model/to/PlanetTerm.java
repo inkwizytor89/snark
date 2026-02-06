@@ -5,8 +5,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-import static org.enoch.snark.instance.service.PlanetService.NEXT;
-import static org.enoch.snark.instance.service.PlanetService.PREV;
+import static org.enoch.snark.instance.service.PlanetService.*;
 
 @Getter
 public class PlanetTerm {
@@ -37,6 +36,12 @@ public class PlanetTerm {
             if(context.getTrip() == null || context.getTrip().isEmpty()) {
                 throw new IllegalStateException("PlanetTerm has no trip for action " + action);
             }
+        }
+        if(SPACE.equals(action)) {
+            planetData = context.getSource().getPlanet();
+        }
+        if(SWAP.equals(action)) {
+            planetData = context.getSource().getPlanet();
         }
     }
 

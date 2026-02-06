@@ -1,30 +1,5 @@
 ## 🧩 Available Conditions
 
-### `Expression`
-
-**Description:**  
-Checks term and value for operator.
-
-**Parameters:**
-
-| Field | Type         | Description     |
-|--------|--------------|-----------------|
-| `type` | `EXPRESSION` | Term name       |
-| `term` | `String`     | Term name       |
-| `operator` | `String`     | Operator        |
-| `value` | `String`     | Constant value) |
-
-**Example:**
-```json
-{
-  "type": "EXPRESSION",
-  "term": "swarn_module.attack_processing",
-  "operator": "eq",
-  "value": "DONE"
-}
-```
-
-
 ### `RESOURCE_COUNT`
 
 **Description:**  
@@ -194,3 +169,52 @@ You can specify which types of missions should be considered as blocking.
   "duration": "1H"
 }
 ```
+### `Expression`
+
+**Description:**  
+Checks term and value for operator.
+
+**Parameters:**
+
+| Field | Type         | Description     |
+|--------|--------------|-----------------|
+| `type` | `EXPRESSION` | Term name       |
+| `term` | `String`     | Term name       |
+| `operator` | `String`     | Operator        |
+| `value` | `String`     | Constant value) |
+
+**Example:**
+```json
+{
+  "type": "EXPRESSION",
+  "term": "swarn_module.attack",
+  "operator": "eq",
+  "value": "DONE"
+}
+```
+### `IS_MODIFIED_AFTER_CONDITION`
+
+**Description:**  
+Checks condition is after for two modified terms.
+
+**Parameters:**
+
+| Field | Type         | Description     |
+|--------|--------------|-----------------|
+| `type` | `IS_MODIFIED_AFTER_CONDITION` | Term name       |
+| `firstTerm` | `String`     | Term name       |
+| `secondTerm` | `String`     | Operator        |
+
+**Example:**
+```json
+{
+  "type": "IS_MODIFIED_AFTER_CONDITION",
+  "firstTerm": "swarn_module.attack",
+  "secondTerm": "swarn_module.move"
+}
+```
+
+
+
+
+

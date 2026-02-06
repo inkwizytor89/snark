@@ -26,7 +26,7 @@ import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.SendFleetGIR;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -60,9 +60,9 @@ public class FleetSendProcessor {
     private final ShipService shipService;
     private final Core core;
 
-    public ExecutionIssue execute(GI gi, SendCommand command) {
-        SendFleetGIR gir = new SendFleetGIR(gi);
-        openSendFleetView(gi, command);
+    public ExecutionIssue execute(Wd wd, SendCommand command) {
+        SendFleetGIR gir = new SendFleetGIR(wd);
+        openSendFleetView(wd, command);
         if(!isValidated(command)) {
             command.getStatus().setSuccess();
             command.getStatus().setIssue(CONDITION_WONT_FIT);
@@ -74,13 +74,14 @@ public class FleetSendProcessor {
         } else {
             shipsMap = shipService.fromExpressionToValues(command.getShipsMap(), command.createFleetContext());
         }
-        gir.selectShips(shipsMap);
+        ShipsMap takenShipMap = gir.selectShips(shipsMap);
         gir.next();
         gir.setSpeed(command.getSpeed());
         gir.fixDoNotWorkingDefaults(command);
         gir.setNewResources(command);
 
         FleetEntity fleet = new FleetEntity(command);
+        fleet.setShips(ALL_SHIPS.equals(takenShipMap) ? command.getSource().getShipsMap() : takenShipMap);
 
         long durationSeconds = gir.parseDurationSecounds().toSecondOfDay() + TIME_BUFFER;
         fleet.start = LocalDateTime.now();
@@ -115,7 +116,7 @@ public class FleetSendProcessor {
 
         updateDelayForAction(command, DELAY_TO_FLEET_THERE, durationSeconds);
         updateDelayForAction(command, DELAY_TO_FLEET_BACK, durationSeconds * 2);
-        reloadColony(gi, command);
+        reloadColony(wd, command);
 
         if (NO_ISSUE.equals(executionIssue)) {
             command.getStatus().setSuccess();
@@ -126,7 +127,7 @@ public class FleetSendProcessor {
                 player.type = TargetEntity.WEAK;
                 playerRepository.save(player);
             } else
-                gi.url().openGalaxy(new SystemView(command.getTarget().getPlanet()), null);
+                wd.url().openGalaxy(new SystemView(command.getTarget().getPlanet()), null);
             command.getStatus().setFailed(executionIssue);
         } else if (CAN_NOT_SENT.equals(executionIssue)) {
 //            Planet target = new Planet(fleet.targetGalaxy, fleet.targetSystem, fleet.targetPosition);
@@ -148,15 +149,15 @@ public class FleetSendProcessor {
     }
 
     @Transactional
-    private void openSendFleetView(GI gi, SendCommand command) {
-        ColonyEntity colony = gi.url().openSendFleetView(command.getSource(), command.getTarget().getPlanet(), command.getMission());
+    private void openSendFleetView(Wd wd, SendCommand command) {
+        ColonyEntity colony = wd.url().openSendFleetView(command.getSource(), command.getTarget().getPlanet(), command.getMission());
         colonyRepository.save(colony);
     }
 
     private boolean isValidated(SendCommand command) {
         List<AbstractCondition> conditions = new ArrayList<>(command.getConditions());
         conditions.add(new FleetSlotCondition(1));
-        conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
+//        conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
         if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new ResourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
 
         AbstractCondition wontFit = conditionChecker.check(conditions, command);
@@ -180,10 +181,10 @@ public class FleetSendProcessor {
     }
 
     @Transactional
-    private void reloadColony(GI gi, SendCommand command) {
+    private void reloadColony(Wd wd, SendCommand command) {
         SleepUtil.pause();
         try {
-            ColonyEntity colony = gi.url().openComponent(FLEETDISPATCH, command.getSource());
+            ColonyEntity colony = wd.url().openComponent(FLEETDISPATCH, command.getSource());
             colonyRepository.save(colony);
         } catch (FleetIsCurrentlyInCombatException e) {
             core.push(new OpenPageCommand(FLEETDISPATCH, command.getSource()));

@@ -89,6 +89,7 @@ public class ThreadMap extends HashMap<String, String> {
     public static final String TRANSPORTER_SMALL_CAPACITY = "transporterSmall";
     public static final String LEAVE_MIN_RESOURCES = "leave_min_resources";
     public static final String PROBE_SWAM_LIMIT = "probe_swam_limit";
+    public static final String STRATEGY = "strategy";
 
     public ThreadMap() {
         super();

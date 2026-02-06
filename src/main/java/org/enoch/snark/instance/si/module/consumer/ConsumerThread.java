@@ -12,7 +12,7 @@ import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -25,6 +25,7 @@ import org.openqa.selenium.WebElement;
 
 import static org.enoch.snark.action.command.status.ExecutionIssue.*;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
 
-    private GI gi;
+    private Wd wd;
     private GISession session;
 
     private Duration restartPause = new Duration("300S");
@@ -61,7 +62,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     public void onStep() {
 
         try {
-            startGiIfNeeded();
             startGiSessionIfNeeded();
             registerDequeIfNeeded();
             Core.isSomethingAttacking = isSomethingAttacking();
@@ -73,23 +73,27 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             System.err.println(e);
         } catch (WebDriverException e) {
             System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
+            System.err.println(e);
         } catch (Throwable e) {
             e.printStackTrace();
         }
         commandDeque.release();
     }
 
-    private void startGiIfNeeded() {
-        if(gi != null) return;
-        gi = new GI(this);
-        session = gi.getGiSession();
-    }
-
     private void startGiSessionIfNeeded() {
+//        startGiIfNeeded();
+        if(session == null) {
+            session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"));
+            wd = session.getWd();
+        }
+        wd.setUrl(map().getConfig(URL, null));
+        wd.setHash(map().getConfig(HASH, null));
+        wd.setServerName(map().getConfig(ThreadMap.SERVER, null));
+
         if(!session.isNeededToRestart()) return;
 
         String cachedLobbyToken = token();
-        String currentLobbyToken = session.reopenServerIfSessionIsOver(this);
+        String currentLobbyToken = session.openNewServerSession(this);
         if(!currentLobbyToken.equals(cachedLobbyToken))
             cacheEntryRepository.setValue(GF_TOKEN_PRODUCTION, currentLobbyToken);
     }
@@ -101,28 +105,16 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 //        commandDeque.push(new ReadMessageCommand());
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
-        getSources(PlanetService.NONE)
+
+        if(!colonyRepository.findAll().isEmpty()) getSources(PlanetService.NONE)
                 .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
                         .sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);
     }
 
-//    private void waitingToOpenServerTab() {
-//        while (!session.isRunning()) {
-//            SleepUtil.pause();
-//        }
-//    }
-
-//    public RunningProcessor updateRunningStatus() {
-//        boolean isOn = Instance.getGlobalMainConfigMap().isOn();
-//        boolean shouldStop = Instance.getGlobalMainConfigMap().getConfig(MODE, "").toLowerCase().contains(STOP);
-//        return runningProcessor.update(isOn, shouldStop)
-//                .logChangedStatus(ConsumerThread.class.getName());
-//    }
-
     private boolean isSomethingAttacking() {
         try {
-            WebElement attack_alert = gi.getWebDriver().findElement(By.id("attack_alert"));
+            WebElement attack_alert = wd.getWebDriver().findElement(By.id("attack_alert"));
             if(attack_alert.getAttribute("class").contains("soon")) {
                 return true;
             }
@@ -137,7 +129,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         command.getStatus().setStatus(IN_PROGRESS);
         ExecutionIssue executionIssue = OTHER;
         try {
-            executionIssue = processor.execute(gi, command);
+            executionIssue = processor.execute(wd, command);
             command.getStatus().setIssue(executionIssue);
             if(NO_ISSUE.equals(executionIssue)) {
                 command.getStatus().setSuccess();
@@ -164,43 +156,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         }
         Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash());
     }
-
-//    public boolean noBlockingHashInQueue(String hash) {
-//        return hash == null || peekQueues().stream()
-//                .filter(command -> command.hash() != null)
-//                .map(AbstractCommand::hash)
-//                .noneMatch(s -> s.equals(hash));
-//    }
-
-//    private boolean noBlockingHashInDb(String hash, LocalDateTime date) {
-//        Long count = FleetDAO.getInstance().hashCount(hash, date);
-//        return count < 1L;
-//    }
-
-//    public boolean noCommands() {
-//        return peekQueues().isEmpty();
-//    }
-//
-//    public boolean notingToPool() {
-//        return noCommands() && FleetDAO.getInstance().findToProcess().isEmpty();
-//    }
-
-//    public synchronized void push(AbstractCommand command) {
-//        if(noBlockingHashInQueue(command.hash()))
-//            commandDeque.pushToAction(command);
-//    }
-
-//    public synchronized void push(AbstractCommand command, LocalDateTime from) {
-//        if(noBlockingHashInQueue(command.hash()) && noBlockingHashInDb(command.hash(), from))
-//            commandDeque.push(command);
-//    }
-
-//    public synchronized List<AbstractCommand> peekQueues() {
-//        List<AbstractCommand> commandsToView = new ArrayList<>();
-//        if (actualProcessedCommand != null) commandsToView.add(actualProcessedCommand);
-//        commandsToView.addAll(commandDeque.peek());
-//        return commandsToView;
-//    }
 
     @Override
     public String login() {

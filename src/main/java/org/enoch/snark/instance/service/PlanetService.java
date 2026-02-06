@@ -96,12 +96,7 @@ public class PlanetService {
             return singletonList(new PlanetData(colonyRepository.byPlanet(swapCoordinate)));
         } else if(planetTerm.getAction().contains(SPACE)) {
             Planet space = planetTerm.getPlanetData().toSpace();
-            TargetEntity spaceTarget = new TargetEntity();
-            spaceTarget.galaxy = space.galaxy;
-            spaceTarget.system = space.system;
-            spaceTarget.position = space.position;
-            spaceTarget.type = space.type;
-            return singletonList(new PlanetData(spaceTarget));
+            return singletonList(new PlanetData(new TargetEntity(space)));
         } else if(planetTerm.getAction().contains(UNKNOWN)) {
             return targetRepository.findAll().stream().filter(target -> target.lastSpiedOn == null).map(PlanetData::new).toList();
         } else if(planetTerm.getAction().contains(FARM)) {

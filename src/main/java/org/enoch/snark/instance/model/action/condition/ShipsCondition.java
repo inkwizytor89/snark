@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.enoch.snark.db.entity.PlanetEntity;
+import org.enoch.snark.instance.model.to.FleetContext;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.ShipService;
 
@@ -27,9 +29,9 @@ public class ShipsCondition extends AbstractCondition {
 
     @Override
     public AbstractCondition check(ConditionContext context) {
-        PlanetEntity colonyEntity = context.planet(planet);
-        ShipsMap valuedMap = context.getShipService().fromExpressionToValues(shipsMap, colonyEntity, leave);
-        boolean isPossible = colonyEntity.hasEnoughShips(valuedMap);
+        PlanetData planetData = context.planetData(planet);
+        ShipsMap valuedMap = context.getShipService().fromExpressionToValues(shipsMap);
+        boolean isPossible = planetData.planetData().hasEnoughShips(valuedMap);
         return isPossible ? null : this;
     }
 }

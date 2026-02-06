@@ -25,8 +25,8 @@ import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 
 public class GalaxyGIR extends GraphicalInterfaceReader {
 
-    public GalaxyGIR(GI gi) {
-        super(gi);
+    public GalaxyGIR(Wd wd) {
+        super(wd);
     }
 
     public void updateGalaxy(SystemView systemView, List<TargetEntity> targets) {

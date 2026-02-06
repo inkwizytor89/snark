@@ -1,5 +1,6 @@
 package org.enoch.snark.action.command;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.Data;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.GalaxyEntity;
@@ -38,6 +39,10 @@ public class GalaxyAnalyzeCommand extends AbstractCommand {
 
     @Override
     public String toString() {
-        return systemView + "_Command";
+        StringBuilder builder = new StringBuilder("GAC_"+systemView);
+        if(source != null) builder.append("_"+source);
+        if(!spyPositions.isEmpty()) builder.append("_SP"+spyPositions.size());
+        if(!StringUtils.isEmpty(spyNew)) builder.append("_"+spyNew);
+        return builder.toString();
     }
 }

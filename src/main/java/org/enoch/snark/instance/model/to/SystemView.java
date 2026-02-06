@@ -34,6 +34,6 @@ public class SystemView {
 
     @Override
     public String toString() {
-        return "SystemView_"+galaxy+"_"+system;
+        return "["+galaxy+":"+system+"]";
     }
 }

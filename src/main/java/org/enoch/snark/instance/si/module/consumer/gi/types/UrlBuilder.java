@@ -1,13 +1,9 @@
 package org.enoch.snark.instance.si.module.consumer.gi.types;
 
 import org.enoch.snark.common.HashDecoder;
-import org.enoch.snark.instance.si.module.consumer.gi.GI;
-import org.enoch.snark.instance.Instance;
+import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 
 import java.util.HashMap;
-
-import static org.enoch.snark.instance.si.module.ThreadMap.HASH;
-import static org.enoch.snark.instance.si.module.ThreadMap.URL;
 
 public class UrlBuilder {
 
@@ -22,18 +18,18 @@ public class UrlBuilder {
     static final String MISSION_PARAM = "mission";
     static final String SITE_PARAM = "site";
 
-    private final GI gi;
+    private final Wd wd;
     private final UrlPage page;
     private UrlComponent component;
     private final HashMap<String,Object> params = new HashMap<>();
 
-    UrlBuilder(GI gi, UrlPage page) {
-        this.gi = gi;
+    UrlBuilder(Wd wd, UrlPage page) {
+        this.wd = wd;
         this.page = page;
     }
 
-    UrlBuilder(GI gi, UrlComponent component) {
-        this.gi = gi;
+    UrlBuilder(Wd wd, UrlComponent component) {
+        this.wd = wd;
         this.page = UrlPage.INGAME;
         this.component = component;
     }
@@ -59,9 +55,9 @@ public class UrlBuilder {
     }
 
     private String getLink() {
-        String config = gi.map().getConfig(URL, null);
+        String config = wd.getUrl();
         if(config == null ) {
-            String hash = gi.map().getConfig(HASH);
+            String hash = wd.getHash();
             config = HashDecoder.parseLink(hash);
         }
         return config + "?";

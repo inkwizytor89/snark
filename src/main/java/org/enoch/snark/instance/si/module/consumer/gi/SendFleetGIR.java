@@ -9,7 +9,6 @@ import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.instance.model.exception.ShipDoNotExists;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.FleetPromise;
@@ -37,8 +36,8 @@ import static org.enoch.snark.instance.si.module.ThreadMap.LEAVE_MIN_RESOURCES;
 
 public class SendFleetGIR extends GraphicalInterfaceReader {
 
-    public SendFleetGIR(GI gi) {
-        super(gi);
+    public SendFleetGIR(Wd wd) {
+        super(wd);
     }
 
     @Deprecated
@@ -49,9 +48,9 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
         if(toWeakPlayer()) return TO_WEAK_PLAYER;
         SleepUtil.pause();
-        final WebElement sendFleet = wd.findElement(By.id("sendFleet"));
+        final WebElement sendFleet = wd().findElement(By.id("sendFleet"));
         try {
-            new WebDriverWait(wd, Duration.ofSeconds(2))
+            new WebDriverWait(wd(), Duration.ofSeconds(2))
                     .until(ExpectedConditions.attributeContains(sendFleet, CLASS_ATTRIBUTE, "on"));
         } catch (TimeoutException e) {
             return CAN_NOT_SENT;
@@ -61,7 +60,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
         WebElement errorBox = getIfPresentById("errorBoxDecision");
         if(errorBox != null && Mission.COLONIZATION.equals(fleet.mission)) {
-            wd.findElement(By.id("errorBoxDecisionYes")).click();
+            wd().findElement(By.id("errorBoxDecisionYes")).click();
             return NO_ISSUE;
         } else if(errorBox != null) {
             //todo change old code
@@ -91,7 +90,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     private void setCustomResources(Resources resources, ColonyEntity source) {
         if(resources.metal != null || resources.crystal != null || resources.deuterium != null) {
-            WebElement resourcesArea = wd.findElement(By.id("resources"));
+            WebElement resourcesArea = wd().findElement(By.id("resources"));
             WebElement metalAmount = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
             WebElement crystalAmount = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
             WebElement deuteriumAmount = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
@@ -106,8 +105,8 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
                 crystalAmount.sendKeys(crystal.toString());
                 metalAmount.sendKeys(metal.toString());
 
-                long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
-                long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
+                long remainingResources = Long.parseLong(wd().findElement(By.id("remainingresources")).getText().replace(".", ""));
+                long maxResources = Long.parseLong(wd().findElement(By.id("maxresources")).getText().replace(".", ""));
 
                 if(remainingResources < maxResources)
                     break;
@@ -116,13 +115,13 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     private void setNewCustomResources(ColonyEntity source, Resources resources, Resources leave) {
-        WebElement resourcesArea = wd.findElement(By.id("resources"));
+        WebElement resourcesArea = wd().findElement(By.id("resources"));
         WebElement metalInput = resourcesArea.findElement(By.xpath("//input[@id='metal']"));
         WebElement crystalInput = resourcesArea.findElement(By.xpath("//input[@id='crystal']"));
         WebElement deuteriumInput = resourcesArea.findElement(By.xpath("//input[@id='deuterium']"));
 
-//        Resources finalLeave = readTransportConsumption().plus(promise.getLeaveResources());
-        Resources transport = toTransport(source, resources, leave);
+        Resources finalLeave = readTransportConsumption().plus(leave);
+        Resources transport = toTransport(source, resources, finalLeave);
         // tu sie zaczyna problem bo jak akcja zostanie powrórzona po błedzie to dalej bedzie problem bo dalej warunek jest spełniony, a przy konsumpci juz nie bedzie
 //        if(transport == null) throw new NotEnoughResources("SendFleet.validateResources not fit for promise "+promise);
 
@@ -132,8 +131,8 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
             crystalInput.sendKeys(transport.crystal.toString());
             metalInput.sendKeys(transport.metal.toString());
 
-            long remainingResources = Long.parseLong(wd.findElement(By.id("remainingresources")).getText().replace(".", ""));
-            long maxResources = Long.parseLong(wd.findElement(By.id("maxresources")).getText().replace(".", ""));
+            long remainingResources = Long.parseLong(wd().findElement(By.id("remainingresources")).getText().replace(".", ""));
+            long maxResources = Long.parseLong(wd().findElement(By.id("maxresources")).getText().replace(".", ""));
 
             if(remainingResources < maxResources)
                 break;
@@ -141,7 +140,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     private void selectAllResources() {
-        wd.findElement(By.id("allresources")).findElement(By.tagName("img")).click();
+        wd().findElement(By.id("allresources")).findElement(By.tagName("img")).click();
     }
 
     public Long rememberToLeaveSome(Resources resources, ColonyEntity source, Long toLeave, ResourceType resource) {
@@ -157,47 +156,47 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     private long readTransportDeuteriumConsumption() {
-        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+        String consumptionInput = wd().findElement(By.id("consumption")).getText().trim();
         return toLong(consumptionInput.split("\\s")[0]);
     }
 
     private Resources readTransportConsumption() {
-        String consumptionInput = wd.findElement(By.id("consumption")).getText().trim();
+        String consumptionInput = wd().findElement(By.id("consumption")).getText().trim();
         return new Resources(0L, 0L, toLong(consumptionInput.split("\\s")[0]));
     }
 
     public void setSpeed(Long speed) {
         if(speed != null) {
-            WebElement element = wd.findElement(By.className("steps"));
+            WebElement element = wd().findElement(By.className("steps"));
             List<WebElement> steps = element.findElements(By.className("step"));
             WebElement speedElement = steps.get(Integer.parseInt(speed.toString()) / 10 - 1);
             speedElement.click();
         }
     }
 
-    public void selectShips(ShipsMap shipsMap) {
+    public ShipsMap selectShips(ShipsMap shipsMap) {
         //Scroll down till the bottom of the page
-        ((JavascriptExecutor) gi.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
-        if(ALL_SHIPS.equals(shipsMap)) {
-            selectAllShips();
-        } else {
-            selectRealShips(shipsMap);
-        }
+        ((JavascriptExecutor) wd.getWebDriver()).executeScript("window.scrollBy(0,document.body.scrollHeight)");
+        if(ALL_SHIPS.equals(shipsMap)) return selectAllShips();
+        else return selectRealShips(shipsMap);
     }
 
-    public void selectAllShips() {
-        wd.findElement(By.id("sendall")).click();
+    public ShipsMap selectAllShips() {
+        wd().findElement(By.id("sendall")).click();
+        return ALL_SHIPS;
     }
 
-    private void selectRealShips(ShipsMap shipsMap) {
+    private ShipsMap selectRealShips(ShipsMap shipsMap) {
+        ShipsMap taken = new ShipsMap();
         for (Map.Entry<Ship, Long> entry : shipsMap.entrySet()) {
             Long value = typeShip(entry.getKey(), entry.getValue());
-//            promise.setShipsMap(ShipsMap.createSingle(entry.getKey(), value));
+            taken.put(entry.getKey(), value);
         }
+        return taken;
     }
 
     private Long typeShip(Ship ship, Long count) {
-        WebElement element = wd.findElement(By.name(ship.name()));
+        WebElement element = wd().findElement(By.name(ship.name()));
         if(!element.isEnabled()) {
             throw new ShipDoNotExists("Missing ships " + ship.name());
         }
@@ -207,19 +206,19 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
 
     public void next() {
         SleepUtil.pause();
-        wd.findElement(By.className("planet-header")).click();
+        wd().findElement(By.className("planet-header")).click();
 
-        final WebElement continueButton = wd.findElement(By.id("continueToFleet2"));
+        final WebElement continueButton = wd().findElement(By.id("continueToFleet2"));
         if(continueButton.getAttribute("class").equals("continue off")) {
             throw new ShipDoNotExists("Can not select ships");
         }
-        Actions actions = new Actions(wd);
+        Actions actions = new Actions(wd());
         actions.moveToElement(continueButton).click().perform();
         SleepUtil.sleep();
     }
 
     public LocalTime parseDurationSecounds() {
-        final String durationString = gi.findElement("span", "id", "duration", "").getText();
+        final String durationString = wd.findElement("span", "id", "duration", "").getText();
         //Text '' could not be parsed at index 0 - popular error, shoud wait for not null time
         return DateUtil.parseDuration(durationString);
     }
@@ -233,14 +232,14 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     }
 
     public boolean toWeakPlayer() {
-        return wd.findElements(By.className("status_abbr_noob")).size() != 0;
+        return wd().findElements(By.className("status_abbr_noob")).size() != 0;
     }
 
     private LocalDateTime parseDate(String dateId) {
-        String dateString = wd.findElement(By.id(dateId)).getText();
+        String dateString = wd().findElement(By.id(dateId)).getText();
         if(dateString.contains("-")) {
             SleepUtil.pause();
-            dateString = wd.findElement(By.id(dateId)).getText();
+            dateString = wd().findElement(By.id(dateId)).getText();
         }
         return DateUtil.parseToLocalDateTime(dateString);
     }
@@ -248,7 +247,7 @@ public class SendFleetGIR extends GraphicalInterfaceReader {
     public void fixDoNotWorkingDefaults(SendCommand command) {
         // spy on position 16
         if(Mission.SPY.equals(command.getMission()) && command.getTarget().getPlanet().position == 16) {
-            wd.findElement(By.id("missionButton6")).click();
+            wd().findElement(By.id("missionButton6")).click();
         }
     }
 }

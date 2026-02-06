@@ -1,6 +1,5 @@
 package org.enoch.snark.db.entity;
 
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.instance.model.to.SystemView;
 
 import jakarta.persistence.Basic;

@@ -3,8 +3,6 @@ package org.enoch.snark.instance.si.module;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static org.enoch.snark.action.command.status.ExecutionIssue.STUCK_IN_QUEUE_IN_PROGRESS_AS_WAITING;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
@@ -87,6 +86,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected void onStart() {
         try {
+            if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
             if(map.containsKey(SOURCE)) {
                 planetService.fromExpression(map.getConfig(SOURCE)).stream()
                                 .map(PlanetData::getColony)
@@ -124,9 +124,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 //                    log(actualState.name()+" pause="+pause);
 
                     onStep();
-                    container.recalculate();
-                    boolean anythingPushed = limitedPush();
-                    if(anythingPushed) log(container.toString());
+                    limitedPush();
                     SleepUtil.sleep(pause);
                 }
                 else SleepUtil.sleep(pause);
@@ -141,17 +139,17 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     private void cacheProcessingStatus() {
-        if(limit < 0) return;
-        String processingStatus;
-        if(container.isEmpty()) processingStatus = DONE_PROCESSING;
-        else if(container.anyNotProcessed()) processingStatus = IN_PROGRESS_PROCESSING;
-        else processingStatus = DONE_PROCESSING;
+        if(limit > 0) if(container.isEmpty()) saveProcessingStatus(DONE_PROCESSING);
+        else if(container.anyNotProcessed()) saveProcessingStatus(IN_PROGRESS_PROCESSING);
+        else saveProcessingStatus(DONE_PROCESSING);
+    }
 
+    protected void saveProcessingStatus(String statusName) {
         String key = map().name() + PROCESSING_SUFFIX;
         String oldValue = cacheEntryRepository.getValue(key);
-        if(!processingStatus.equals(oldValue)) {
-            cacheEntryRepository.setValue(key, processingStatus);
-            Debug.log(this, "SET "+key+" = "+processingStatus +" "+container);
+        if(statusName!= null && !statusName.equals(oldValue)) {
+            cacheEntryRepository.setValue(key, statusName);
+            log("SET " + key + " = " + statusName + " " + container);
         }
     }
 
@@ -192,6 +190,14 @@ public abstract class AbstractThread extends ExecutorImpl {
         Debug.log(this, message);
     }
 
+    protected void logList(String header, Iterable list) {
+        if(map().getConfigBoolean(DEBUG, false)) {
+            StringBuilder stringBuilder = new StringBuilder(header + ": ");
+            list.forEach(command -> stringBuilder.append(command).append(", "));
+            log(stringBuilder.toString());
+        }
+    }
+
     public ThreadMap map() {
         return map;
     }
@@ -205,59 +211,44 @@ public abstract class AbstractThread extends ExecutorImpl {
         return commandsChain.stream().anyMatch(AbstractCommand::notExecuted);
     }
 
-    protected void pushSingleListCommand(AbstractCommand command) {
-        pushCommand(MAIN, command);
-    }
-
     protected void pushCommand(AbstractCommand command) {
         pushCommand(command.getHash(), command);
     }
 
     protected void pushCommand(String key, AbstractCommand command) {
         container.pushCommand(key, command);
-
-        if(NO_LIMIT == limit) {
-            AbstractCommand pooled = container.pool();
-            while(pooled != null) {
-                core.push(pooled);
-                pooled = container.pool();
-            }
-        }
     }
 
-    private boolean limitedPush() {
-        if(limit < 0) return false;
-//container.commandsMap.get(container.inProgress.getFirst())
-        boolean anythingPushed = false;
-        while(container.inProgressCount() < limit && container.incomingCount() > 0) {
-            AbstractCommand pooled = container.pool();
-            core.push(pooled);
-            anythingPushed = true;
-            log("push: "+pooled.getDebugId()+" "+ pooled.getStatus()+" "+pooled);
+    protected void refreshSingleListCommand(AbstractCommand command) {
+        refreshCommand(MAIN, command);
+    }
+
+    protected void refreshCommand(AbstractCommand command) {
+        refreshCommand(command.hash(), command);
+    }
+
+    protected void refreshCommand(String key, AbstractCommand command) {
+        if(container.anyNotProcessed(key)) return;
+        if(container.contains(key)) container.removeKey(key);
+        container.pushCommand(key, command);
+    }
+
+    private void limitedPush() {
+        container.updateMap(IN_PROGRESS);
+        long elementsCountToPool = limit == NO_LIMIT ? container.incomingCount() : limit - container.inProgressCount();
+        if(elementsCountToPool > 0 && container.incomingCount()>0) {
+            List<AbstractCommand> pooledList = container.pool(elementsCountToPool);
+            pooledList.forEach(command -> core.push(command));
+            pooledList.stream()
+                    .filter(command -> WAITING.equals(command.getStatus().getStatus()))
+                    .forEach(command -> {
+                        System.err.println("For limitedPush "+map().name()+" core.push do not put in queue command "+command.hash());
+                        command.getStatus().setStatus(CRASHED);
+                        command.getStatus().setIssue(STUCK_IN_QUEUE_IN_PROGRESS_AS_WAITING);
+                    });
+            container.updateMap(WAITING);
+            logList(container.toString(), pooledList);
         }
-        return anythingPushed;
-//        long inQueueCount = commandsMap.asMap().values().stream()
-//                .filter(list -> !list.isEmpty() && isAnyCommandInQueue(list))
-//                .count();
-//        long start = inQueueCount;
-//        while(inQueueCount < limit) {
-//            Optional<Collection<AbstractCommand>> firstWaitingList = commandsMap.asMap().values().stream()
-//                    .filter(list -> !list.isEmpty() && isWaiting(list))
-//                    .findFirst();
-//            if(firstWaitingList.isEmpty()) break;
-//            AbstractCommand toQueue = firstWaitingList.get().stream().findFirst().get();
-//            System.err.println("AT push: "+toQueue.getDebugId()+" "+ toQueue.getStatus()+" "+toQueue);
-//            core.push(toQueue);
-//            inQueueCount++;
-//        }
-//        long end = inQueueCount;
-//        if(start!=end) {
-//            long executed = commandsMap.asMap().values().stream()
-//                    .filter(list -> !list.isEmpty() && list.stream().findFirst().get().executed())
-//                    .count();
-//            long all = commandsMap.size();
-//            System.err.println("Limited push for "+map().name()+":"+start+" -> "+end+"(inQueueCount: "+inQueueCount+" executed: "+executed+" all: "+all);
-//        }
     }
 
     private boolean isAnyCommandInQueue(Collection<AbstractCommand> cmd) {
