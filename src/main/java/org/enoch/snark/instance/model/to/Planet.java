@@ -3,10 +3,6 @@ package org.enoch.snark.instance.model.to;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.db.dao.ColonyDAO;
-import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.model.action.ColonyPlaner;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import java.util.ArrayList;
@@ -14,7 +10,6 @@ import java.util.List;
 
 import static org.enoch.snark.instance.model.types.ColonyType.MOON;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
-import static org.enoch.snark.instance.si.module.ThreadMap.GALAXY_MAX;
 
 @EqualsAndHashCode
 public class Planet {
@@ -138,20 +133,12 @@ public class Planet {
         return new SystemView(galaxy, system);
     }
 
-    public ColonyEntity toColonyEntity() {
-        return ColonyDAO.getInstance().find(this);
-    }
-
     @Override
     public String toString() {
         return type.code()+getCordinate(galaxy, system, position);
     }
     public String toFileName() {
         return toString().replace(":","_");
-    }
-
-    public ColonyEntity getSimilarColony() {
-        return new ColonyPlaner(ColonyDAO.getInstance().fetchAll()).findSimilar(this);
     }
 
     public boolean is(ColonyType type) {

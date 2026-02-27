@@ -88,4 +88,18 @@ public class CommandDeque {
     public void release() {
         actualProcessedCommand = null;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        actionsMap.forEach((key, value) -> {
+            if (value != null && !value.isEmpty()) {
+                if (sb.length() > 0) sb.append(" | ");
+                sb.append(key).append(": [");
+                sb.append(String.join(", ", value.stream().map(AbstractCommand::hash).toList()));
+                sb.append("]");
+            }
+        });
+        return sb.toString();
+    }
 }

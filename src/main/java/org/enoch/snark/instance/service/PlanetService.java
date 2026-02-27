@@ -7,8 +7,8 @@ import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
-import org.enoch.snark.instance.model.action.find.CustomFinder;
 import org.enoch.snark.instance.model.action.find.TripFinder;
+import org.enoch.snark.instance.model.exception.NoColonyException;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.context.annotation.Scope;
@@ -93,7 +93,12 @@ public class PlanetService {
             return singletonList(TripFinder.prev(planetTerm));
         } else if(planetTerm.getAction().contains(SWAP)) {
             Planet swapCoordinate = planetTerm.getPlanetData().swapType();
-            return singletonList(new PlanetData(colonyRepository.byPlanet(swapCoordinate)));
+            try{
+                return singletonList(new PlanetData(colonyRepository.byPlanet(swapCoordinate)));
+            } catch (NoColonyException e) {
+                System.err.println("PlanetService - no colony found on swap coordinate "+swapCoordinate);
+                return new ArrayList<>();
+            }
         } else if(planetTerm.getAction().contains(SPACE)) {
             Planet space = planetTerm.getPlanetData().toSpace();
             return singletonList(new PlanetData(new TargetEntity(space)));

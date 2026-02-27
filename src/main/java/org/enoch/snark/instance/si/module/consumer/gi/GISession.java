@@ -54,15 +54,19 @@ public class GISession {
     }
 
     public boolean isNeededToRestart() {
-        return !isRunning|| !gir.wd.isDriverAlive() || gir.isCurrentUrlEmpty() || gir.isCurrentUrlBackToLobby();
+        boolean toCheck = !isRunning || !gir.wd.isDriverAlive() || gir.isCurrentUrlEmpty() || gir.isCurrentUrlBackToLobby();
+        if(toCheck) System.err.println("!isRunning "+!isRunning +" !gir.wd.isDriverAlive() "+ !gir.wd.isDriverAlive() +" gir.isCurrentUrlEmpty() "+ gir.isCurrentUrlEmpty()  +" gir.isCurrentUrlBackToLobby() "+ gir.isCurrentUrlBackToLobby());
+        return toCheck;
     }
 
     public String openNewServerSession(Credentials credentials) {
         if (!isRunning) {
+            System.err.println("!isRunning");
             return start(credentials);
         }
 
         if (!gir.wd.isDriverAlive() || gir.isCurrentUrlBackToLobby()) {
+            System.err.println("!gir.wd.isDriverAlive() || gir.isCurrentUrlBackToLobby()");
             isRunning = false;
             System.err.println("before restart sleep " + credentials.restartDuration().getSeconds()+" "+ LocalDateTime.now());
             SleepUtil.sleep(credentials.restartDuration());

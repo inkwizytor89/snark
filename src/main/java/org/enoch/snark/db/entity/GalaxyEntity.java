@@ -51,15 +51,15 @@ public class GalaxyEntity extends IdEntity implements Comparable<GalaxyEntity> {
 //        return Integer.compare(distance(), o.distance());
     }
 
-    private int distance() {
-        List<Planet> cachedPlaned = PlanetCache.get(PLANETS);
-        Optional<Planet> min = cachedPlaned.stream().min(Comparator.comparingInt(this::distance));
-        if(min.isPresent()) {
-            return distance(min.get());
-        } else {
-            return Integer.MAX_VALUE;
-        }
-    }
+//    private int distance() {
+//        List<Planet> cachedPlaned = PlanetCache.get(PLANETS);
+//        Optional<Planet> min = cachedPlaned.stream().min(Comparator.comparingInt(this::distance));
+//        if(min.isPresent()) {
+//            return distance(min.get());
+//        } else {
+//            return Integer.MAX_VALUE;
+//        }
+//    }
 
     private int distance(Planet planet) {
         return Math.abs(planet.galaxy - galaxy) * 1000 + Math.abs(planet.system - system);

@@ -2,7 +2,6 @@ package org.enoch.snark.instance.model.action.filter;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.SendCommand;
-import org.enoch.snark.db.dao.FleetDAO;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
@@ -29,14 +28,14 @@ public class UnusedExpeditionFilter extends AbstractFilter {
 
     private static Map<ColonyEntity, Integer> createExpCountMap() {
         Map<ColonyEntity, Integer> expCount = new HashMap<>();
-        FleetDAO.getInstance().fetchAll().stream()
-                .filter(fleetEntity -> Mission.EXPEDITION.equals(fleetEntity.mission))
-                .filter(fleetEntity -> fleetEntity.visited != null)
-                .filter(fleetEntity -> LocalDate.now().isEqual(fleetEntity.visited.toLocalDate()))
-                .forEach(fleetEntity -> {
-                    expCount.putIfAbsent(fleetEntity.source,0);
-                    expCount.put(fleetEntity.source, expCount.get(fleetEntity.source)+1);
-                });
+//        FleetDAO.getInstance().fetchAll().stream()
+//                .filter(fleetEntity -> Mission.EXPEDITION.equals(fleetEntity.mission))
+//                .filter(fleetEntity -> fleetEntity.visited != null)
+//                .filter(fleetEntity -> LocalDate.now().isEqual(fleetEntity.visited.toLocalDate()))
+//                .forEach(fleetEntity -> {
+//                    expCount.putIfAbsent(fleetEntity.source,0);
+//                    expCount.put(fleetEntity.source, expCount.get(fleetEntity.source)+1);
+//                });
         return expCount;
     }
 }

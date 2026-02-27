@@ -1,7 +1,5 @@
 package org.enoch.snark.instance.si.module.defense;
 
-import org.enoch.snark.instance.Instance;
-
 import java.io.*;
 
 import javax.sound.sampled.AudioFormat;
@@ -13,8 +11,6 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
-import static org.enoch.snark.instance.si.module.defense.DefenseThread.ALARM;
 
 public class AlarmSoundPlayer implements LineListener {
 

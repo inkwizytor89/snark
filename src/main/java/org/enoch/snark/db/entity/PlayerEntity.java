@@ -2,7 +2,6 @@ package org.enoch.snark.db.entity;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.db.dao.PlayerDAO;
 import org.enoch.snark.instance.model.to.HighScorePosition;
 
 import jakarta.persistence.Basic;
@@ -160,6 +159,6 @@ public class PlayerEntity extends IdEntity {
             this.shipsCount = highScorePosition.ships;
         }
         this.updated = LocalDateTime.now();
-        PlayerDAO.getInstance().saveOrUpdate(this);
+//        PlayerDAO.getInstance().saveOrUpdate(this);
     }
 }

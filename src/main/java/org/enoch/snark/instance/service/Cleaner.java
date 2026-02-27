@@ -1,8 +1,6 @@
 package org.enoch.snark.instance.service;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.dao.MessageDAO;
 
 import java.time.LocalDateTime;
 
@@ -28,8 +26,8 @@ public class Cleaner {
                 try {
                     SleepUtil.secondsToSleep(2000);
                     LocalDateTime from = LocalDateTime.now().minusDays(1);
-                    MessageDAO.getInstance().clean(from);
-                    FleetDAO.getInstance().clean(from);
+//                    MessageDAO.getInstance().clean(from);
+//                    FleetDAO.getInstance().clean(from);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

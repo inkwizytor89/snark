@@ -7,6 +7,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.technology.Ship.*;
 import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 
@@ -107,6 +109,7 @@ public class ExpeditionThread extends AbstractThread {
         command.setMission(Mission.EXPEDITION);
         command.setShipsMap(ships);
         command.generateHash(threadType, null);
+//        command.addConditions(singletonList(new ShipsCondition(ships, null, command.getSource().toPlanet())));
         return command;
     }
 

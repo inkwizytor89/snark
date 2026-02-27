@@ -2,16 +2,12 @@ package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.*;
-import org.enoch.snark.common.NumberUtil;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.db.repository.ColonyRepository;
-import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.FleetMovement;
 import org.enoch.snark.instance.service.MessageService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -19,7 +15,6 @@ import org.enoch.snark.instance.si.module.AbstractThread;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.types.FleetDirectionType.THERE;
@@ -111,20 +106,20 @@ public class UpdateThread extends AbstractThread {
 //        cacheEntryDAO.setValue(PROBE_SWAM, probeSwarmColony != null ? probeSwarmColony.toString() : null);
     }
 
-    private void markMainFleet() {
-        ShipsMap noProbe = new ShipsMap();
-        noProbe.put(Ship.espionageProbe, 0L);
-
-        List<Long> fleetCounts = ColonyDAO.getInstance().fetchAll().stream()
-                .map(colony -> colony.getShipsMap().reduce(noProbe).count())
-                .collect(Collectors.toList());
-        events.stream()
-                .filter(eventFleet -> !eventFleet.detailsFleet.trim().isEmpty())
-                .map(event -> NumberUtil.toLong(event.detailsFleet))
-                .collect(Collectors.toCollection(() -> fleetCounts));
-        OptionalLong max = fleetCounts.stream().mapToLong(value -> value).max();
-        if(max.isPresent()) {
-            return;
-        }
-    }
+//    private void markMainFleet() {
+//        ShipsMap noProbe = new ShipsMap();
+//        noProbe.put(Ship.espionageProbe, 0L);
+//
+//        List<Long> fleetCounts = ColonyDAO.getInstance().fetchAll().stream()
+//                .map(colony -> colony.getShipsMap().reduce(noProbe).count())
+//                .collect(Collectors.toList());
+//        events.stream()
+//                .filter(eventFleet -> !eventFleet.detailsFleet.trim().isEmpty())
+//                .map(event -> NumberUtil.toLong(event.detailsFleet))
+//                .collect(Collectors.toCollection(() -> fleetCounts));
+//        OptionalLong max = fleetCounts.stream().mapToLong(value -> value).max();
+//        if(max.isPresent()) {
+//            return;
+//        }
+//    }
 }

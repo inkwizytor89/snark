@@ -1,6 +1,7 @@
 package org.enoch.snark.db.repository;
 
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.instance.model.exception.NoColonyException;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -69,6 +70,6 @@ public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
                 .filter(colony -> planet.position.equals(colony.position))
                 .filter(colony -> planet.type.equals(colony.type))
                 .findFirst();
-        return first.orElseThrow(() -> new RuntimeException(planet+" not known"));
+        return first.orElseThrow(() -> new NoColonyException(planet));
     }
 }

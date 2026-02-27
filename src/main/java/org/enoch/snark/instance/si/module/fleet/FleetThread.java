@@ -7,8 +7,8 @@ import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.FleetRepository;
-import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
@@ -43,7 +43,6 @@ public class FleetThread extends AbstractThread {
     private final ConditionChecker conditionChecker;
     private final PlanetService planetService;
     private final ShipService shipService;
-    private final TargetRepository targetRepository;
 
     private int size = 0;
     private HashMap<String, LocalDateTime> blockingMap = new HashMap<>();
@@ -56,7 +55,7 @@ public class FleetThread extends AbstractThread {
 
     @Override
     protected String defaultPause() {
-        return "1S";
+        return "10S";
     }
 
     @Override
@@ -66,7 +65,7 @@ public class FleetThread extends AbstractThread {
 
     @Override
     protected void onStep() {
-        if(limit > 0 && container.incomingCount()>0) return; // no need to find next if waiting is more than limit
+        if(container.anyNotProcessed()) return; // no need to find next if waiting is more than limit
 //        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
         List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
@@ -104,12 +103,17 @@ public class FleetThread extends AbstractThread {
             if(realShips.isEmpty()) continue;
 
             List<AbstractCondition> conditionsToCheck = new ArrayList<>(command.getConditions());
-            if(!conditionChecker.fit(conditionsToCheck, command)) continue;
+            AbstractCondition check = conditionChecker.check(conditionsToCheck, command);
+            if(check != null) {
+                log(command.getHash()+" don't fit "+check.getClass().getSimpleName());
+            }
+            if(check != null) continue;
 //conditionChecker.check(command.getConditions(), command).getClass().getSimpleName() +" "+command.getTarget().getTarget().getResources().count()
 //            if (blockExpiredTime(command)) continue;
 
             if (!map.getConfigBoolean(DRY_RUN, false)) {
                 command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
+                command.addConditions(singletonList(new ShipsCondition(realShips, command.getLeaveShipsMap(), command.getSource().toPlanet())));
 
                 Duration recallDuration = map.getDuration(RECALL, null);
                 if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());

@@ -1,9 +1,7 @@
 package org.enoch.snark.action.command;
 
-import org.enoch.snark.db.dao.CacheEntryDAO;
 import org.enoch.snark.instance.si.module.consumer.gi.HighScoreGIR;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class UpdateHighScoreCommand extends AbstractCommand {
 
         gir.loadHighScore(getAreas(), maxPages);
 
-        CacheEntryDAO.getInstance().setValue(HIGH_SCORE, LocalDateTime.now().toString());
+//        CacheEntryDAO.getInstance().setValue(HIGH_SCORE, LocalDateTime.now().toString());
         return true;
     }
 

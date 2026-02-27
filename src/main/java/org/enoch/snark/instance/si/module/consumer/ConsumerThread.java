@@ -83,6 +83,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private void startGiSessionIfNeeded() {
 //        startGiIfNeeded();
         if(session == null) {
+            System.err.println("startGiSessionIfNeeded session == null");
             session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"));
             wd = session.getWd();
         }
@@ -154,7 +155,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             if (status.getFailed() < 2 || (RETRY.equals(status.getIssue()) && status.getFailed() < 4)) commandDeque.pushFailed(command);
             else status.setStatus(CRASHED);
         }
-        Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash());
+        Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash()+" <- "+commandDeque.toString());
     }
 
     @Override

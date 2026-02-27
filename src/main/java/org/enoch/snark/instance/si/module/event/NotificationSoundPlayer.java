@@ -1,14 +1,10 @@
 package org.enoch.snark.instance.si.module.event;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.instance.Instance;
-import org.enoch.snark.instance.si.module.defense.DefenseThread;
 
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-
-import static org.enoch.snark.instance.si.module.defense.DefenseThread.ALARM;
 
 public class NotificationSoundPlayer implements LineListener {
 

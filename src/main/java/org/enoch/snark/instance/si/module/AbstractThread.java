@@ -10,8 +10,6 @@ import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
-import org.enoch.snark.db.dao.FleetDAO;
-import org.enoch.snark.db.dao.TargetDAO;
 import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
@@ -59,8 +57,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     private ObjectMapper objectMapper;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
-    protected  FleetDAO fleetDAO;
-    protected  TargetDAO targetDAO;
 
     @Setter
     protected AbstractModule module;
@@ -82,7 +78,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected String getThreadType() {return "";}
 
-    protected String defaultPause() {return "1S";}
+    protected String defaultPause() {return "10S";}
 
     protected void onStart() {
         try {
@@ -107,9 +103,10 @@ public abstract class AbstractThread extends ExecutorImpl {
     public void run() {
         while(isLive) {
             try {
-                if(shouldWaitForDeque()) continue;
-                if(shouldWaitForConditions())
+                if(shouldWaitForDeque() || shouldWaitForConditions()) {
+                    SleepUtil.sleep();
                     continue;
+                }
 
                 RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
                         .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
@@ -123,8 +120,10 @@ public abstract class AbstractThread extends ExecutorImpl {
                     updatePause();
 //                    log(actualState.name()+" pause="+pause);
 
-                    onStep();
-                    limitedPush();
+//                    if(!container.anyNotProcessed())
+                        onStep();
+                    if(container.anyNotProcessed())
+                        limitedPush();
                     SleepUtil.sleep(pause);
                 }
                 else SleepUtil.sleep(pause);

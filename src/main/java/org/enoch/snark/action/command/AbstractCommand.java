@@ -1,12 +1,9 @@
 package org.enoch.snark.action.command;
 
 import lombok.Data;
-import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.status.CommandStatus;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.si.QueueRunType;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +21,6 @@ public abstract class AbstractCommand {
     protected final CommandStatus status;
     private FollowingAction followingAction;
     private QueueRunType runType = NORMAL;
-    protected Instance instance;
     private String hash;
     private final List<String> tags = new ArrayList<>();
 

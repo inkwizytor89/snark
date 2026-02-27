@@ -3,7 +3,6 @@ package org.enoch.snark.instance.model.action;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.Instance;
 import org.enoch.snark.instance.model.to.Planet;
 
 import java.util.*;

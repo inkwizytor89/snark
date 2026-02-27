@@ -1,7 +1,5 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.db.dao.CacheEntryDAO;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,9 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
-
-import static org.enoch.snark.db.entity.CacheEntryEntity.HIGH_SCORE;
 
 public class DateUtil {
 
@@ -83,9 +78,6 @@ public class DateUtil {
         return isExpired(date, 2L, ChronoUnit.HOURS);
     }
 
-    public static boolean isExpired(String cacheEntryKey, long amountToAdd, TemporalUnit unit) {
-        return isExpired(CacheEntryDAO.getInstance().getDate(cacheEntryKey), amountToAdd, unit);
-    }
 
     public static boolean isExpired(LocalDateTime date, long amountToAdd, TemporalUnit unit) {
         if (date == null) return true;

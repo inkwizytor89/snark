@@ -1,7 +1,6 @@
 package org.enoch.snark.db.entity;
 
 import org.enoch.snark.action.command.SendCommand;
-import org.enoch.snark.db.dao.ColonyDAO;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.action.ColonyPlaner;

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -56,7 +55,7 @@ public class ScanThread extends AbstractThread {
     private boolean loadNotScannedTargets() {
         threadPause = 150;
         if(notScanned.isEmpty()) {
-            notScanned = new LinkedList<>(targetDAO.findNotScanned());
+//            notScanned = new LinkedList<>(targetDAO.findNotScanned());
         }
         return !notScanned.isEmpty();
     }
@@ -66,7 +65,7 @@ public class ScanThread extends AbstractThread {
         for (int i = 0; i < 10; i++) {
             if (!notScanned.isEmpty()) {
                 FleetEntity fleet = FleetEntity.createSpyFleet(notScanned.poll());
-                fleetDAO.saveOrUpdate(fleet);
+//                fleetDAO.saveOrUpdate(fleet);
             }
         }
     }

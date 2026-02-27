@@ -162,7 +162,7 @@ public class FleetSendProcessor {
 
         AbstractCondition wontFit = conditionChecker.check(conditions, command);
         if(wontFit != null) {
-            String message = "Condition doesn't fit: " + wontFit;
+            String message = command.hash() + "Condition doesn't fit: " + wontFit;
 //            throw new RuntimeException(message);
             System.err.println(message);
             return false;

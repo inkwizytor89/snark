@@ -94,6 +94,8 @@ public class ReadMessageProcessor {
 
             SpyReportGIR spyReportGIR = new SpyReportGIR(wd);
             TargetEntity spyTarget = spyReportGIR.readTargetFromReport(link);
+            System.err.println("Processing "+spyTarget.toPlanet());
+            System.err.println("Resources "+spyTarget.getResources());
             if(spyTarget.position == 16) return true;
             MessageService.getInstance().release(spyTarget.toPlanet());
             Optional<TargetEntity> targetOptional = targetRepository.find(spyTarget.toPlanet());
@@ -104,7 +106,7 @@ public class ReadMessageProcessor {
             }
             TargetEntity targetEntity = targetOptional.get();
             if(spyTarget.metal == null) { // not enough spy probe
-                targetEntity.player.spyLevel*=2;
+//                targetEntity.player.spyLevel*=2; // out of range bug
                 playerRepository.save(targetEntity.player);
             } else {
                 targetEntity.update(spyTarget);

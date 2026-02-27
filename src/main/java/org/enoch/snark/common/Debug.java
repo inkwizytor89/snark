@@ -2,6 +2,8 @@ package org.enoch.snark.common;
 
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Debug {
 
@@ -11,6 +13,9 @@ public class Debug {
 
     public static void log(ThreadMap threadMap, String message) {
         boolean debug = threadMap.getConfigBoolean(ThreadMap.DEBUG, false);
-        if(debug) System.err.println(threadMap.name()+": "+message);
+        if(debug) {
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            System.err.println(threadMap.name() + " [" + time + "]: " + message);
+        }
     }
 }

@@ -1,8 +1,6 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.enoch.snark.common.SleepUtil;
-import org.enoch.snark.db.dao.PlayerDAO;
-import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.GIUrl;
 import org.enoch.snark.instance.model.to.HighScorePosition;
 import org.openqa.selenium.By;
@@ -39,8 +37,8 @@ public class HighScoreGIR extends GraphicalInterfaceReader {
 
         highScore.values().forEach(highScorePosition -> {
             System.err.println(highScorePosition);
-            PlayerEntity playerEntity = PlayerDAO.getInstance().find(highScorePosition.code);
-            playerEntity.update(highScorePosition);
+//            PlayerEntity playerEntity = PlayerDAO.getInstance().find(highScorePosition.code);
+//            playerEntity.update(highScorePosition);
         });
 
     }

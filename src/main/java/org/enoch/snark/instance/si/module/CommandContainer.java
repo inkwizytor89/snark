@@ -63,7 +63,8 @@ public class CommandContainer {
     }
 
     private void putCommandChain(String key, AbstractCommand command) {
-        if(contains(key)) System.err.println("putCommandChain will overwrite key "+key+" start command "+command);
+        if(incomingMap.containsKey(key) || inProgressMap.containsKey(key))
+            return;
         removeKey(key);
         keySet.add(key);
         while (command != null) {
@@ -135,7 +136,8 @@ public class CommandContainer {
     }
 
     public List<AbstractCommand> peek() {
-        ArrayList<AbstractCommand> result = new ArrayList<>(incomingMap.values());
+        ArrayList<AbstractCommand> result = new ArrayList<>();
+        result.addAll(incomingMap.values());
         result.addAll(inProgressMap.values());
         result.addAll(successMap.values());
         result.addAll(crashMap.values());
