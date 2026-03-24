@@ -24,6 +24,8 @@ import org.enoch.snark.instance.service.PlanetService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,8 @@ public abstract class AbstractThread extends ExecutorImpl {
                 });
             }
         } catch (Throwable throwable) {
-            System.err.println("For "+this.map.get("name")+" onStart skipping");
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            System.err.println("For "+this.map.get("name")+" ["+time+"] onStart skipping");
             throwable.printStackTrace();
         }
     }
@@ -130,11 +133,13 @@ public abstract class AbstractThread extends ExecutorImpl {
                 cacheProcessingStatus();
             } catch (Exception e) {
                 runningProcessor.logChangedStatus("Thread " + map.name(), map);
-                System.err.println(map.name());
+                String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                System.err.println(map.name()+" ["+time+"]");
                 e.printStackTrace();
             }
         }
-        System.err.println("Destroy "+map.name());
+        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        System.err.println("Destroy "+map.name()+" ["+time+"]");
     }
 
     private void cacheProcessingStatus() {
@@ -241,7 +246,8 @@ public abstract class AbstractThread extends ExecutorImpl {
             pooledList.stream()
                     .filter(command -> WAITING.equals(command.getStatus().getStatus()))
                     .forEach(command -> {
-                        System.err.println("For limitedPush "+map().name()+" core.push do not put in queue command "+command.hash());
+                        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                        System.err.println("For limitedPush "+map().name()+" ["+time+"] core.push do not put in queue command "+command.hash());
                         command.getStatus().setStatus(CRASHED);
                         command.getStatus().setIssue(STUCK_IN_QUEUE_IN_PROGRESS_AS_WAITING);
                     });

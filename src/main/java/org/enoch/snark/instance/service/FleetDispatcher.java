@@ -6,6 +6,7 @@ import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.instance.model.expression.Expression;
 import org.enoch.snark.instance.model.to.*;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -31,8 +32,12 @@ public class FleetDispatcher {
                         .trip(fleetPlan.getTrip())
                         .source(colony)
                         .build();
-
-                List<PlanetData> targets = planetService.fromExpression(fleetPlan.getTarget(), fleetContext);
+                List<PlanetData> targets;
+                if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
+                    targets = planetService.fromExpression(new Expression(fleetPlan.getTarget(), fleetContext));
+                } else {
+                    targets = planetService.fromExpression(fleetPlan.getTarget(), fleetContext);
+                }
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
                     command.setSource(colony.getColony());

@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.service;
 
+import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.db.entity.PlanetEntity;
@@ -9,6 +10,7 @@ import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.exception.NoColonyException;
+import org.enoch.snark.instance.model.expression.Expression;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.context.annotation.Scope;
@@ -53,15 +55,40 @@ public class PlanetService {
     public static final int ACTION_INDEX = 0;
     public static final int PLANET_INDEX = 1;
 
+    private final SpelPlanetService spelPlanetService;
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
     private final TargetRepository targetRepository;
+
+    private static ArrayListMultimap<String, PlanetData> expresionCache = ArrayListMultimap.create();
+
+    public List<PlanetData> fromExpression(Expression expression) {
+        if(!expresionCache.containsKey(expression.getValue())) {
+            List<Planet> evaluated = spelPlanetService.evaluate(expression.getValue());
+            String expressionString = evaluated.stream()
+                    .map(Planet::toString)
+                    .collect(Collectors.joining(";"));
+            List<PlanetData> values = fromExpression(expressionString);
+            expresionCache.putAll(expression.getValue(), values);
+
+            System.err.println("Expression \""+expression.getValue()+"\" evaluated and cached as: "+values.stream()
+                    .map(PlanetData::toString)
+                    .collect(Collectors.joining(";")));
+        }
+        return expresionCache.get(expression.getValue());
+    }
 
     public List<PlanetData> fromExpression(String expression) {
         return fromExpression(expression, FleetContext.builder().build());
     }
 
     public List<PlanetData> fromExpression(String expression, FleetContext context) {
+//        if(expression!= null && expression.contains("#")) {
+//            List<Planet> evaluated = spelPlanetService.evaluate(expression);
+//            expression = evaluated.stream()
+//                    .map(Planet::toString)
+//                    .collect(Collectors.joining(";"));
+//        }
         List<PlanetData> planetDataList = new ArrayList<>();
         if(expression == null) return null;
         String[] termExpression = expression.split(TERM_SEPARATOR);
@@ -125,8 +152,15 @@ public class PlanetService {
     }
 
     public PlanetData getPlanetData(Planet planet) {
+        if(planet.position ==16) {
+            return new PlanetData(new TargetEntity(planet));
+        }
         Optional<TargetEntity> targetEntity = targetRepository.find(planet);
         return targetEntity.map(PlanetData::new).orElseGet(() -> new PlanetData(colonyRepository.byPlanet(planet)));
+    }
+
+    public void clearCache() {
+        expresionCache.clear();
     }
 
 }

@@ -2,17 +2,23 @@ package org.enoch.snark.instance.model.to;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.enoch.snark.instance.model.expression.ExpressionContext;
 
 import java.util.List;
 
 @Builder
 @Getter
-public class FleetContext {
+public class FleetContext implements ExpressionContext {
     List<PlanetData> trip;
     PlanetData source;
     PlanetData target;
 
     ShipsMap leaveShipsMap;
+
+    @Override
+    public String getSourceString() {
+        return source.getPlanet().toString();
+    }
 //
 //    public FleetContext(FleetPlan fleetPlan) {
 //        trip = fleetPlan.getTrip();

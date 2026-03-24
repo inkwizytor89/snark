@@ -153,7 +153,8 @@ public class ThreadMap extends HashMap<String, String> {
         try {
             return Integer.parseInt(getConfig(key, defaultValue.toString()));
         } catch (NumberFormatException e) {
-            System.err.println("For "+get(NAME)+" key "+key+" get default value " + defaultValue +
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            System.err.println("For "+get(NAME)+" ["+time+"] key "+key+" get default value " + defaultValue +
                     " because "+e.getMessage());
             return defaultValue;
         }
@@ -175,7 +176,8 @@ public class ThreadMap extends HashMap<String, String> {
             String config = getConfig(key, defaultString);
             return config == null ? null : Long.parseLong(config);
         } catch (NumberFormatException e) {
-            System.err.println("For "+get(NAME)+" key "+key+" get default value " + defaultValue +
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            System.err.println("For "+get(NAME)+" ["+time+"] key "+key+" get default value " + defaultValue +
                     " because "+e.getMessage());
             return defaultValue;
         }
@@ -241,7 +243,8 @@ public class ThreadMap extends HashMap<String, String> {
 
     public String name() {
         if(!this.containsKey(NAME)) {
-            System.err.println("Missing name in ConfigMap");
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            System.err.println("Missing name in ConfigMap ["+time+"]");
             put(NAME, "Missing name in ConfigMap");
         }
         String moduleName = this.get(MODULE);
