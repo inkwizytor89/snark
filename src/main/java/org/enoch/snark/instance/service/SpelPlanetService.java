@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
-import org.enoch.snark.instance.model.expression.planet.Next;
-import org.enoch.snark.instance.model.expression.planet.Prev;
-import org.enoch.snark.instance.model.expression.planet.Space;
-import org.enoch.snark.instance.model.expression.planet.Swap;
+import org.enoch.snark.instance.model.expression.coordinate.*;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.springframework.context.annotation.Scope;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
@@ -66,12 +64,16 @@ public class SpelPlanetService {
      * @return List of PlanetData matching the expression
      */
     public List<Planet> evaluate(String expression) {
+        return evaluate(expression, Map.of());
+    }
+
+    public List<Planet> evaluate(String expression, Map<String, Object> expressionContext) {
         if (expression == null) {
             return null;
         }
 
         try {
-            EvaluationContext context = createEvaluationContext();
+            EvaluationContext context = createEvaluationContext(expressionContext);
             Expression expr = parser.parseExpression(expression);
             Object result = expr.getValue(context);
 
@@ -94,7 +96,7 @@ public class SpelPlanetService {
     /**
      * Create evaluation context with all variables and functions
      */
-    private EvaluationContext createEvaluationContext() {
+    private EvaluationContext createEvaluationContext(Map<String, Object> expressionContext) {
         StandardEvaluationContext context = new StandardEvaluationContext();
 
         // Register value variables
@@ -104,6 +106,7 @@ public class SpelPlanetService {
         context.setVariable(EACH_POSITION, getEachPositionList());
         context.setVariable(NONE, getNoneList());
         cacheEntryRepository.findAll().forEach(entry -> context.setVariable(entry.key, entry.value));
+        context.setVariables(expressionContext);
 
         System.err.println("Registered SpEL variables: " + context.toString());
 
@@ -112,17 +115,29 @@ public class SpelPlanetService {
 
         // Register function methods (they accept Object so they handle List<PlanetData> and String)
         try {
-            Method swapMethod = Swap.class.getDeclaredMethod("execute", String.class);
-            Method spaceMethod = Space.class.getDeclaredMethod("execute", String.class);
-            Method spaceSystemMethod = Space.class.getDeclaredMethod("execute", String.class, String.class);
-            Method nextMethod = Next.class.getDeclaredMethod("execute", String.class, String.class);
-            Method prevMethod = Prev.class.getDeclaredMethod("execute", String.class, String.class);
+            Method planetsMethod = Colonies.class.getDeclaredMethod("planets");
+            context.registerFunction("planets", planetsMethod);
+            Method moonsMethod = Colonies.class.getDeclaredMethod("moons");
+            context.registerFunction("moons", moonsMethod);
+            Method allMethod = Colonies.class.getDeclaredMethod("all");
+            context.registerFunction("all", allMethod);
+            Method allPositionsMethod = Colonies.class.getDeclaredMethod("allPositions");
+            context.registerFunction("all_positions", allPositionsMethod);
+            Method noneMethod = Colonies.class.getDeclaredMethod("none");
+            context.registerFunction("none", noneMethod);
 
+            Method swapMethod = Base.class.getDeclaredMethod("swap", String.class);
             context.registerFunction("swap", swapMethod);
+            Method spaceMethod = Base.class.getDeclaredMethod("space", String.class);
             context.registerFunction("space", spaceMethod);
+            Method spaceSystemMethod = Base.class.getDeclaredMethod("spaceSystem", String.class, String.class);
             context.registerFunction("space_system", spaceSystemMethod);
+
+            Method nextMethod = CycleTrip.class.getDeclaredMethod("next", String.class, String.class);
             context.registerFunction("next", nextMethod);
+            Method prevMethod = CycleTrip.class.getDeclaredMethod("prev", String.class, String.class);
             context.registerFunction("prev", prevMethod);
+
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Failed to register SpEL functions", e);
         }

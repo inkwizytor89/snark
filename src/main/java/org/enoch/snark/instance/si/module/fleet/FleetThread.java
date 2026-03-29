@@ -12,7 +12,7 @@ import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
-import static org.enoch.snark.instance.service.PlanetService.PLANETS;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.PLANETS;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class FleetThread extends AbstractThread {
     private final FleetRepository fleetRepository;
     private final FleetDispatcher fleetDispatcher;
     private final ConditionChecker conditionChecker;
-    private final PlanetService planetService;
+    private final CoordinateExpressionService coordinateExpressionService;
     private final ShipService shipService;
 
     private int size = 0;
@@ -79,7 +79,7 @@ public class FleetThread extends AbstractThread {
                 .resources(map.getConfigResources(RESOURCES, nothing))
                 .leaveResources(map.getConfigResources(LEAVE_RESOURCES, null))
                 .speed(map.getConfigLong(SPEED, null))
-                .trip(planetService.fromExpression(map.getConfig(TRIP, null)))
+                .trip(coordinateExpressionService.fromExpression(map.getConfig(TRIP, null)))
                 .build();
 
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);

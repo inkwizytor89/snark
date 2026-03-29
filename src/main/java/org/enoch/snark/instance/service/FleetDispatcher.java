@@ -3,9 +3,7 @@ package org.enoch.snark.instance.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.expression.Expression;
 import org.enoch.snark.instance.model.to.*;
 import org.springframework.context.annotation.Scope;
@@ -18,7 +16,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 public class FleetDispatcher {
-    private final PlanetService planetService;
+    private final CoordinateExpressionService coordinateExpressionService;
 
     public List<FleetSendCommand> from(FleetPlan fleetPlan) {
         List<FleetSendCommand> list = new ArrayList<>();
@@ -26,7 +24,7 @@ public class FleetDispatcher {
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
 
-            List<PlanetData> colonies = planetService.fromExpression(fleetPlan.getSource());
+            List<PlanetData> colonies = coordinateExpressionService.fromExpression(fleetPlan.getSource());
             for (PlanetData colony : colonies) {
                 FleetContext fleetContext = FleetContext.builder()
                         .trip(fleetPlan.getTrip())
@@ -34,9 +32,9 @@ public class FleetDispatcher {
                         .build();
                 List<PlanetData> targets;
                 if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
-                    targets = planetService.fromExpression(new Expression(fleetPlan.getTarget(), fleetContext));
+                    targets = coordinateExpressionService.fromExpression(new Expression(fleetPlan.getTarget(), fleetContext));
                 } else {
-                    targets = planetService.fromExpression(fleetPlan.getTarget(), fleetContext);
+                    targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
                 }
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();

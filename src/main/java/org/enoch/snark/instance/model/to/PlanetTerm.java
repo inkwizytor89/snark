@@ -3,9 +3,7 @@ package org.enoch.snark.instance.model.to;
 
 import lombok.Getter;
 
-import java.util.List;
-
-import static org.enoch.snark.instance.service.PlanetService.*;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.*;
 
 @Getter
 public class PlanetTerm {

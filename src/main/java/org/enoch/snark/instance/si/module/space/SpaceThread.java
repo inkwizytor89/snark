@@ -11,7 +11,7 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.GalaxyEntity;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.uc.SystemUC;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -80,7 +80,7 @@ public class SpaceThread extends AbstractThread {
 
     private ColonyEntity getSourceForCommand() {
         if(!isNearestConfig(COORDINATE)) return null;
-        List<PlanetData> coordinate = getNearestCoordinate(PlanetService.NONE);
+        List<PlanetData> coordinate = getNearestCoordinate(CoordinateExpressionService.NONE);
         if(coordinate.isEmpty()) return null;
         return colonyRepository.byPlanet(coordinate.getFirst().getPlanet());
     }
@@ -146,7 +146,7 @@ public class SpaceThread extends AbstractThread {
             String coordinateString = getNearestConfig(COORDINATE, StringUtils.EMPTY);
             String rangeString = getNearestConfig(RANGE, StringUtils.EMPTY);
             Integer range = Integer.parseInt(rangeString);
-            List<Planet> coordinateList = planetService.fromExpression(coordinateString).stream().map(PlanetData::getPlanet).toList();
+            List<Planet> coordinateList = coordinateExpressionService.fromExpression(coordinateString).stream().map(PlanetData::getPlanet).toList();
             for(Planet planet : coordinateList) ranges.add(new SystemViewRange(planet.galaxy, new Range<>(planet.system - range, planet.system + range)));
 
         } else {
@@ -181,7 +181,7 @@ public class SpaceThread extends AbstractThread {
         String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
         FleetContext fleetContext = FleetContext.builder().source(planetData).build();
-        List<Planet> spyCoordinate = planetService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
+        List<Planet> spyCoordinate = coordinateExpressionService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
         ArrayListMultimap<SystemView, Planet> spyCoordinateMap = ArrayListMultimap.create();
         spyCoordinate.forEach(planet -> spyCoordinateMap.put(planet.getSystemView(), planet));
         return spyCoordinateMap;

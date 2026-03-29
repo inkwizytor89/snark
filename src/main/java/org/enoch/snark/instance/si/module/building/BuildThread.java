@@ -9,7 +9,7 @@ import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.service.FleetService;
 import org.enoch.snark.instance.model.uc.ResourceUC;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -119,7 +119,7 @@ public class BuildThread extends AbstractThread {
             colonyMap = new HashMap<>();
             buildingList = configList;
         }
-        List<ColonyEntity> planets = new ArrayList<>(this.getSources(PlanetService.PLANETS));
+        List<ColonyEntity> planets = new ArrayList<>(this.getSources(CoordinateExpressionService.PLANETS));
         Util.updateMapKeys(colonyMap, planets, null);
     }
 }

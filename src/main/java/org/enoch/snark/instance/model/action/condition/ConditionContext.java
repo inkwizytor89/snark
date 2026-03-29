@@ -13,7 +13,7 @@ import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.service.ShipService;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ public class ConditionContext {
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
     private final TargetRepository targetRepository;
-    private final PlanetService planetService;
+    private final CoordinateExpressionService coordinateExpressionService;
     private final ShipService shipService;
 
     private SendCommand command;
@@ -58,11 +58,11 @@ public class ConditionContext {
     }
 
     private PlanetEntity determinePlanetEntity(Planet planet) {
-        return planetService.getPlanetData(planet).planetData();
+        return coordinateExpressionService.getPlanetData(planet).planetData();
     }
 
     private PlanetData determinePlanetData(Planet planet) {
-        return planetService.getPlanetData(planet);
+        return coordinateExpressionService.getPlanetData(planet);
     }
 
     public String getCacheValue(String key) {

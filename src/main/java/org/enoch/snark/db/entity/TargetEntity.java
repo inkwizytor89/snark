@@ -140,7 +140,8 @@ public class TargetEntity extends PlanetEntity {
             (long) (this.colonyShip * (50000 + 75000)) +
             (long) (this.recycler * (50000 + 75000)) +
             (long) (this.espionageProbe * (50000 + 75000)) +
-            (long) (this.sat * (50000 + 75000));
+            (long) (this.sat * (50000 + 75000)) +
+            (long) (this.solarSatellite * (50000 + 75000));
     }
     public void calculateDefense() {
         defenseSum =

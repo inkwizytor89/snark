@@ -7,13 +7,12 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.db.repository.FleetRepository;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.Navigator;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
@@ -21,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.model.technology.Ship.*;
 import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 
@@ -56,7 +54,7 @@ public class ExpeditionThread extends AbstractThread {
         if (container.anyNotProcessed()) return;
 
         ColonyEntity bestColony;
-        List<ColonyEntity> source = getSources(PlanetService.ALL);
+        List<ColonyEntity> source = getSources(CoordinateExpressionService.ALL);
         ShipsMap requiredShipMap = map.getShips(DEFAULT_SHIPS);
         if (enoughShipsForAllRequiredExpeditions(source, requiredShipMap)) {
             List<ColonyEntity> possibleColonies = canSendExpeditons(source, requiredShipMap);

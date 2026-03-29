@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")
-public class PlanetService {
+public class CoordinateExpressionService {
 
 
     public static final String PLANETS = "planets";
@@ -62,6 +63,35 @@ public class PlanetService {
 
     private static ArrayListMultimap<String, PlanetData> expresionCache = ArrayListMultimap.create();
 
+    public List<PlanetData> from(String expression) {
+        return from(expression, Map.of());
+    }
+
+    public List<PlanetData> from(String expression, Map<String, Object> expressionContext) {
+        String expressionHash = expressionToHash(expressionContext, expression);
+        if(!expresionCache.containsKey(expressionHash)) {
+            List<Planet> evaluated = spelPlanetService.evaluate(expression, expressionContext);
+            String expressionString = evaluated.stream()
+                    .map(Planet::toString)
+                    .collect(Collectors.joining(";"));
+            List<PlanetData> values = fromExpression(expressionString);
+            expresionCache.putAll(expressionHash, values);
+
+            System.err.println("Expression \""+expression+"\" evaluated and cached as: "+values.stream()
+                    .map(PlanetData::toString)
+                    .collect(Collectors.joining(";")));
+        }
+        return expresionCache.get(expressionHash);
+    }
+
+    private static String expressionToHash(Map<String, Object> expressionContext, String expression) {
+        String expressionHash = expression;
+        for(Map.Entry<String, Object> entry : expressionContext.entrySet())
+            expressionHash = expressionHash.replaceAll(entry.getKey(), entry.getValue().toString());
+        return expressionHash;
+    }
+
+    @Deprecated
     public List<PlanetData> fromExpression(Expression expression) {
         if(!expresionCache.containsKey(expression.getValue())) {
             List<Planet> evaluated = spelPlanetService.evaluate(expression.getValue());

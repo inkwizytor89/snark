@@ -1,8 +1,6 @@
 package org.enoch.snark.instance.model.expression.common;
 
 import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.instance.model.to.PlanetData;
-import org.enoch.snark.instance.model.to.PlanetTerm;
 
 import java.util.List;
 

@@ -7,13 +7,10 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.service.PlanetService.*;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.*;
 
 @Repository
 public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
@@ -60,6 +57,14 @@ public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
     default List<ColonyEntity> coloniesList(String coloniesList) {
         return Planet.fromString(coloniesList).stream()
                 .map(this::byPlanet)
+                .collect(Collectors.toList());
+    }
+
+    default List<ColonyEntity> fromColoniesList(String coloniesList) {
+        List<String> tags = Arrays.asList(coloniesList.split(";"));
+        return findAll().stream()
+                .filter(colony -> tags.stream()
+                        .anyMatch(tag -> colony.tags != null && colony.tags.contains(tag)))
                 .collect(Collectors.toList());
     }
 

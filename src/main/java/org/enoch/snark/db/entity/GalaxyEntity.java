@@ -1,17 +1,12 @@
 package org.enoch.snark.db.entity;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.snark.instance.service.PlanetCache;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.SystemView;
 
 import jakarta.persistence.*;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
-import static org.enoch.snark.instance.service.PlanetService.PLANETS;
+import java.util.Objects;
 
 @Entity
 @Table(name = "galaxy", schema = "public", catalog = "snark")

@@ -195,7 +195,7 @@ public abstract class PlanetEntity extends IdEntity{
 
     @Basic
     @Column(name = "solar_satellite")
-    public Long solarSatellite;
+    public Long solarSatellite = 0L;
 
     @Basic
     @Column(name = "metal_storage")
@@ -533,7 +533,10 @@ public abstract class PlanetEntity extends IdEntity{
             case colonyShip -> colonyShip = value;
             case recycler -> recycler = value;
             case espionageProbe -> espionageProbe = value;
-            case solarSatellite -> solarSatellite = value;
+            case solarSatellite -> {
+                solarSatellite = value;
+                sat = value;
+            }
             default -> System.err.println("Unknown "+ Ship.class.getName()+" "+ship.name()+" with value "+value);
         }
     }

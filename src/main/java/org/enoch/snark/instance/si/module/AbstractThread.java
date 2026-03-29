@@ -20,7 +20,7 @@ import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -54,7 +54,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Autowired
     protected final GalaxyRepository galaxyRepository;
     @Autowired
-    protected final PlanetService planetService;
+    protected final CoordinateExpressionService coordinateExpressionService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -86,7 +86,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         try {
             if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
             if(map.containsKey(SOURCE)) {
-                planetService.fromExpression(map.getConfig(SOURCE)).stream()
+                coordinateExpressionService.fromExpression(map.getConfig(SOURCE)).stream()
                                 .map(PlanetData::getColony)
                                 .forEach(colony -> {
                     if(DateUtil.isExpired2H(colony.updated))
@@ -287,13 +287,13 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected List<ColonyEntity> getSources(String defaultValue) {
         String sourcesCode = map().getSourcesCode(defaultValue);
-        List<PlanetData> planetData = planetService.fromExpression(sourcesCode);
+        List<PlanetData> planetData = coordinateExpressionService.fromExpression(sourcesCode);
         return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
     }
 
     protected List<PlanetData> getNearestCoordinate(String defaultValue) {
         String coordinateCode = getNearestConfig(COORDINATE, defaultValue);
-        return  planetService.fromExpression(coordinateCode);
+        return  coordinateExpressionService.fromExpression(coordinateCode);
     }
 
     protected List<AbstractCondition> getConditions(String configName) {

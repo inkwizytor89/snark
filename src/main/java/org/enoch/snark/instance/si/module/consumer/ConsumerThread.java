@@ -10,7 +10,7 @@ import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
-import org.enoch.snark.instance.service.PlanetService;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
@@ -107,7 +107,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
 
-        if(!colonyRepository.findAll().isEmpty()) getSources(PlanetService.NONE)
+        if(!colonyRepository.findAll().isEmpty()) getSources(CoordinateExpressionService.NONE)
                 .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
                         .sourceHash(this.getClass().getSimpleName())));
         core.register(commandDeque);

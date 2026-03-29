@@ -1,15 +1,14 @@
-package org.enoch.snark.instance.model.expression.planet;
+package org.enoch.snark.instance.model.expression.coordinate;
 
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.Planet;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Swap first two elements operation: [A,B,C] -> [B,A,C]
  */
-public class Space {
+public class Base {
 
     private static ColonyRepository colonyRepository;
 
@@ -17,12 +16,19 @@ public class Space {
         colonyRepository = colonyRepo;
     }
 
+    public static Object swap(String current) {
+        List<Planet> planets = Planet.fromString(current);
 
-    public static Object execute(String current) {
-        return execute(current, "0");
+        return planets.stream()
+                .map(Planet::swapType)
+                .toList();
     }
 
-    public static Object execute(String current, String moveSystem) {
+    public static Object space(String current) {
+        return spaceSystem(current, "0");
+    }
+
+    public static Object spaceSystem(String current, String moveSystem) {
         List<Planet> planets = Planet.fromString(current);
         int i = Integer.parseInt(moveSystem);
         return planets.stream()
