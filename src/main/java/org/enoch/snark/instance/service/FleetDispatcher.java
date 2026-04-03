@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.singletonList;
 
 @RequiredArgsConstructor
 @Component
@@ -32,7 +35,8 @@ public class FleetDispatcher {
                         .build();
                 List<PlanetData> targets;
                 if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
-                    targets = coordinateExpressionService.fromExpression(new Expression(fleetPlan.getTarget(), fleetContext));
+                    Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
+                    targets = coordinateExpressionService.from(fleetPlan.getTarget(), stringObjectMap);
                 } else {
                     targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
                 }

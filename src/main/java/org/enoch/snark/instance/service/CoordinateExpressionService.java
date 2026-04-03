@@ -10,7 +10,6 @@ import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.exception.NoColonyException;
-import org.enoch.snark.instance.model.expression.Expression;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.springframework.context.annotation.Scope;
@@ -56,7 +55,7 @@ public class CoordinateExpressionService {
     public static final int ACTION_INDEX = 0;
     public static final int PLANET_INDEX = 1;
 
-    private final SpelPlanetService spelPlanetService;
+    private final CoordinateSpelService coordinateSpelService;
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
     private final TargetRepository targetRepository;
@@ -70,14 +69,9 @@ public class CoordinateExpressionService {
     public List<PlanetData> from(String expression, Map<String, Object> expressionContext) {
         String expressionHash = expressionToHash(expressionContext, expression);
         if(!expresionCache.containsKey(expressionHash)) {
-            List<Planet> evaluated = spelPlanetService.evaluate(expression, expressionContext);
-            String expressionString = evaluated.stream()
-                    .map(Planet::toString)
-                    .collect(Collectors.joining(";"));
-            List<PlanetData> values = fromExpression(expressionString);
-            expresionCache.putAll(expressionHash, values);
-
-            System.err.println("Expression \""+expression+"\" evaluated and cached as: "+values.stream()
+            List<PlanetData> evaluated = coordinateSpelService.evaluate(expression, expressionContext);
+            expresionCache.putAll(expressionHash, evaluated);
+            System.err.println("Expression \""+expression+"\" evaluated and cached as: "+evaluated.stream()
                     .map(PlanetData::toString)
                     .collect(Collectors.joining(";")));
         }
@@ -91,34 +85,29 @@ public class CoordinateExpressionService {
         return expressionHash;
     }
 
-    @Deprecated
-    public List<PlanetData> fromExpression(Expression expression) {
-        if(!expresionCache.containsKey(expression.getValue())) {
-            List<Planet> evaluated = spelPlanetService.evaluate(expression.getValue());
-            String expressionString = evaluated.stream()
-                    .map(Planet::toString)
-                    .collect(Collectors.joining(";"));
-            List<PlanetData> values = fromExpression(expressionString);
-            expresionCache.putAll(expression.getValue(), values);
-
-            System.err.println("Expression \""+expression.getValue()+"\" evaluated and cached as: "+values.stream()
-                    .map(PlanetData::toString)
-                    .collect(Collectors.joining(";")));
-        }
-        return expresionCache.get(expression.getValue());
-    }
+//    @Deprecated
+//    public List<PlanetData> fromExpression(Expression expression) {
+//        if(!expresionCache.containsKey(expression.getValue())) {
+//            List<PlanetData> evaluated = spelPlanetService.evaluate(expression.getValue());
+//            String expressionString = evaluated.stream()
+//                    .map(Planet::toString)
+//                    .collect(Collectors.joining(";"));
+//            List<PlanetData> values = fromExpression(expressionString);
+//            expresionCache.putAll(expression.getValue(), values);
+//
+//            System.err.println("Expression \""+expression.getValue()+"\" evaluated and cached as: "+values.stream()
+//                    .map(PlanetData::toString)
+//                    .collect(Collectors.joining(";")));
+//        }
+//        return expresionCache.get(expression.getValue());
+//    }
 
     public List<PlanetData> fromExpression(String expression) {
         return fromExpression(expression, FleetContext.builder().build());
     }
 
     public List<PlanetData> fromExpression(String expression, FleetContext context) {
-//        if(expression!= null && expression.contains("#")) {
-//            List<Planet> evaluated = spelPlanetService.evaluate(expression);
-//            expression = evaluated.stream()
-//                    .map(Planet::toString)
-//                    .collect(Collectors.joining(";"));
-//        }
+
         List<PlanetData> planetDataList = new ArrayList<>();
         if(expression == null) return null;
         String[] termExpression = expression.split(TERM_SEPARATOR);

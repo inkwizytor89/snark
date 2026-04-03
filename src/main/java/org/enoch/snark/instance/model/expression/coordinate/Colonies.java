@@ -1,8 +1,6 @@
 package org.enoch.snark.instance.model.expression.coordinate;
 
-import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
-import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 
 import java.util.ArrayList;
@@ -27,30 +25,30 @@ public class Colonies {
         colonyRepository = colonyRepo;
     }
 
-    public static Object planets() {
+    public static List<PlanetData> planets() {
         return colonyRepository.findByCode(PLANETS).stream()
-                .map(PlanetEntity::toString)
+                .map(PlanetData::new)
                 .toList();
     }
-    public static Object moons() {
+    public static List<PlanetData> moons() {
         return colonyRepository.findByCode(MOONS).stream()
-                .map(PlanetEntity::toString)
+                .map(PlanetData::new)
                 .toList();
     }
 
-    public static Object all() {
+    public static List<PlanetData> all() {
         return colonyRepository.findByCode(ALL).stream()
-                .map(PlanetEntity::toString)
+                .map(PlanetData::new)
                 .toList();
     }
 
-    public static Object allPositions() {
+    public static List<PlanetData> allPositions() {
         return colonyRepository.findByCode(EACH_POSITION).stream()
-                .map(PlanetEntity::toString)
+                .map(PlanetData::new)
                 .toList();
     }
 
-    public static Object none() {
+    public static List<PlanetData> none() {
         return new ArrayList<>();
     }
 }
