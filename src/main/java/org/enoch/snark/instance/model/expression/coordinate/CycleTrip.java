@@ -4,6 +4,7 @@ import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.expression.common.Trip;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.service.PlanetDataService;
 
 import java.util.List;
 
@@ -12,10 +13,10 @@ import java.util.List;
  */
 public class CycleTrip {
 
-    private static ColonyRepository colonyRepository;
+    private static PlanetDataService planetDataService;
 
-    public static synchronized void setRepository(ColonyRepository colonyRepo) {
-        colonyRepository = colonyRepo;
+    public static void setRepository(PlanetDataService planetDataService) {
+        CycleTrip.planetDataService = planetDataService;
     }
 
     public static List<PlanetData> next(List<PlanetData> current, String trip) {
@@ -26,9 +27,7 @@ public class CycleTrip {
         List<Planet> configTrip = Planet.fromString(trip);
         int index = Trip.currentTripIndex(Planet.parse(current), configTrip);
         Planet nextPlanet = configTrip.get((index + 1) % configTrip.size());
-        return colonyRepository.fromColoniesList(nextPlanet.toString()).stream()
-                .map(PlanetData::new)
-                .toList();
+        return planetDataService.fetchCoordinates(nextPlanet.toString());
     }
 
     public static List<PlanetData> prev(List<PlanetData> current, String trip) {
@@ -39,9 +38,7 @@ public class CycleTrip {
         List<Planet> configTrip = Planet.fromString(trip);
         int index = Trip.currentTripIndex(Planet.parse(current), configTrip);
         Planet prevPlanet = configTrip.get((configTrip.size() + index - 1) % configTrip.size());
-        return colonyRepository.fromColoniesList(prevPlanet.toString()).stream()
-                .map(PlanetData::new)
-                .toList();
+        return planetDataService.fetchCoordinates(prevPlanet.toString());
     }
 }
 

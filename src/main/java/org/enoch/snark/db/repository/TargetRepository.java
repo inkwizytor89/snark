@@ -52,7 +52,7 @@ public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
         return this.findByGalaxyAndSystemAndPositionAndType(planet.galaxy, planet.system, planet.position, planet.type);
     }
 
-    default List<TargetEntity> findTargetsCloserTo(Planet source, List<Planet> others) {
+    default List<TargetEntity> findFarmsCloserTo(Planet source, List<Planet> others) {
          return farms(source.galaxy).stream()
                 .filter(target -> isCloserToSourceThanOthers(target, source, others))
                 .toList();

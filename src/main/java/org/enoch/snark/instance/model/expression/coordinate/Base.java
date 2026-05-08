@@ -1,10 +1,14 @@
 package org.enoch.snark.instance.model.expression.coordinate;
 
+import org.enoch.snark.db.entity.CacheEntryEntity;
+import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.service.PlanetDataService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -12,10 +16,12 @@ import java.util.stream.Collectors;
  */
 public class Base {
 
-    private static ColonyRepository colonyRepository;
+    private static PlanetDataService planetDataService;
+    private static CacheEntryRepository cacheEntryRepository;
 
-    public static synchronized void setRepository(ColonyRepository colonyRepo) {
-        colonyRepository = colonyRepo;
+    public static void setRepository(PlanetDataService planetDataService, CacheEntryRepository cacheEntryRepository) {
+        Base.planetDataService = planetDataService;
+        Base.cacheEntryRepository = cacheEntryRepository;
     }
 
     public static List<PlanetData> swap(List<PlanetData> coordinateList) {
@@ -29,9 +35,7 @@ public class Base {
                 .map(Planet::swapType)
                 .map(Planet::toString)
                 .collect(java.util.stream.Collectors.joining(";"));
-        return colonyRepository.fromColoniesList(swappedCoordinates).stream()
-                .map(PlanetData::new)
-                .toList();
+        return planetDataService.fetchCoordinates(swappedCoordinates);
     }
 
     public static List<PlanetData> space(List<PlanetData> coordinateList, String moveSystem) {
@@ -50,8 +54,15 @@ public class Base {
                 })
                 .map(Planet::toString)
                 .collect(Collectors.joining(";"));
-        return colonyRepository.fromColoniesList(spaceCoordinates).stream()
-                .map(PlanetData::new)
-                .toList();
+        return planetDataService.fetchCoordinates(spaceCoordinates);
+    }
+
+    public static List<PlanetData> cacheKey(String cacheEntryKey) {
+        Optional<CacheEntryEntity> optionalEntry = cacheEntryRepository.findByKey(cacheEntryKey);
+        if (optionalEntry.isEmpty()) throw new IllegalArgumentException("CoordinateService failure. No cache entry found for key: "+cacheEntryKey);
+        String spaceCoordinates = Planet.fromString(optionalEntry.get().value).stream()
+                .map(Planet::toString)
+                .collect(Collectors.joining(";"));
+        return planetDataService.fetchCoordinates(spaceCoordinates);
     }
 }

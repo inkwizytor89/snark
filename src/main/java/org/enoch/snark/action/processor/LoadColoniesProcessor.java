@@ -8,7 +8,7 @@ import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
-import org.enoch.snark.instance.service.CoordinateExpressionService;
+import org.enoch.snark.instance.service.coordinate.CoordinateSpelService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.BaseGameInfoGIR;
 import org.enoch.snark.instance.model.action.DiffLists;
@@ -34,7 +34,7 @@ public class LoadColoniesProcessor {
     private final Core core;
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
-    private final CoordinateExpressionService coordinateExpressionService;
+    private final CoordinateSpelService coordinateSpelService;
     private BaseGameInfoGIR baseGameInfoGIR;
 
     @Transactional
@@ -51,14 +51,14 @@ public class LoadColoniesProcessor {
                 cpmEntity.ifPresent(colonyEntity -> colonyEntity.cpm = colony.cp);
                 colonyRepository.save(colony);
                 updateColony(colony);
-                coordinateExpressionService.clearCache();
+                coordinateSpelService.clearCache();
             });
 
             diff.removed().forEach(colony -> {
                 System.out.println(LoadColoniesProcessor.class.getSimpleName()+" remove " + colony);
                 fleetRepository.deleteBySource(colony);
                 colonyRepository.delete(colony);
-                coordinateExpressionService.clearCache();
+                coordinateSpelService.clearCache();
             });
 
             if(Core.getLastVisited() == null) {

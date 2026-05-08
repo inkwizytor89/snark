@@ -12,6 +12,7 @@ import org.enoch.snark.instance.model.action.find.TripFinder;
 import org.enoch.snark.instance.model.exception.NoColonyException;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.service.coordinate.CoordinateSpelService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")
+@Deprecated
 public class CoordinateExpressionService {
 
 
@@ -62,21 +64,27 @@ public class CoordinateExpressionService {
 
     private static ArrayListMultimap<String, PlanetData> expresionCache = ArrayListMultimap.create();
 
-    public List<PlanetData> from(String expression) {
-        return from(expression, Map.of());
-    }
-
-    public List<PlanetData> from(String expression, Map<String, Object> expressionContext) {
-        String expressionHash = expressionToHash(expressionContext, expression);
-        if(!expresionCache.containsKey(expressionHash)) {
-            List<PlanetData> evaluated = coordinateSpelService.evaluate(expression, expressionContext);
-            expresionCache.putAll(expressionHash, evaluated);
-            System.err.println("Expression \""+expression+"\" evaluated and cached as: "+evaluated.stream()
-                    .map(PlanetData::toString)
-                    .collect(Collectors.joining(";")));
-        }
-        return expresionCache.get(expressionHash);
-    }
+//    public List<PlanetData> from(String expression) {
+//        return from(expression, Map.of());
+//    }
+//
+//    public List<PlanetData> from(String expression, Map<String, Object> expressionContext) {
+////        if(expression!= null && !expression.contains("#")) {
+////            return colonyRepository.fromColoniesList(expression).stream()
+////                    .map(PlanetData::new)
+////                    .toList();
+////        }
+//
+//        String expressionHash = expressionToHash(expressionContext, expression);
+//        if(!expresionCache.containsKey(expressionHash)) {
+//            List<PlanetData> evaluated = coordinateSpelService.from(expression, expressionContext);
+//            expresionCache.putAll(expressionHash, evaluated);
+//            System.err.println("Expression \""+expression+"\" evaluated and cached as: "+evaluated.stream()
+//                    .map(PlanetData::toString)
+//                    .collect(Collectors.joining(";")));
+//        }
+//        return expresionCache.get(expressionHash);
+//    }
 
     private static String expressionToHash(Map<String, Object> expressionContext, String expression) {
         String expressionHash = expression;
@@ -162,7 +170,7 @@ public class CoordinateExpressionService {
                     .filter(colony -> colony.is(ColonyType.PLANET))
                     .filter(colony -> !colony.equals(finalSource))
                     .toList();
-            return targetRepository.findTargetsCloserTo(source, others).stream().map(PlanetData::new).toList();
+            return targetRepository.findFarmsCloserTo(source, others).stream().map(PlanetData::new).toList();
         } else {
             String value = cacheEntryRepository.getValue(planetTerm.getAction());
             if(value != null) return fromExpression(value);
@@ -170,6 +178,7 @@ public class CoordinateExpressionService {
         }
     }
 
+    @Deprecated
     public PlanetData getPlanetData(Planet planet) {
         if(planet.position ==16) {
             return new PlanetData(new TargetEntity(planet));
@@ -179,6 +188,7 @@ public class CoordinateExpressionService {
     }
 
     public void clearCache() {
+        System.err.println("Clearing expression cache with "+expresionCache.size()+" entries");
         expresionCache.clear();
     }
 

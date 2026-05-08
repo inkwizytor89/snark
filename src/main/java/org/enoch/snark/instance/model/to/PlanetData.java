@@ -30,4 +30,9 @@ public class PlanetData {
     public boolean is() {
         return colony != null || target != null;
     }
+
+    @Override
+    public String toString() {
+        return planet.toString();
+    }
 }

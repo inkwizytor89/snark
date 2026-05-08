@@ -174,7 +174,7 @@ public class SpaceThread extends AbstractThread {
         if(!isNearestConfig(COORDINATE)) return ArrayListMultimap.create();
 
         List<PlanetData> nearestCoordinate = getNearestCoordinate(StringUtils.EMPTY);
-        if(nearestCoordinate.size() > 1) throw new IllegalStateException(map().name()+" required only one coordinate to use "+SPY_COORDINATE+" but was "+getNearestConfig(COORDINATE, StringUtils.EMPTY));
+        if(nearestCoordinate.size() > 1) throw new IllegalStateException(map().name()+" required only one coordinate to use "+SPY_COORDINATE+"was "+getNearestConfig(COORDINATE, StringUtils.EMPTY)+" and found "+nearestCoordinate.size()+" elements: "+nearestCoordinate);
 
         PlanetData planetData = nearestCoordinate.getFirst();
         if(!isNearestConfig(SPY_COORDINATE)) return ArrayListMultimap.create();

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.instance.model.expression.Expression;
 import org.enoch.snark.instance.model.to.*;
+import org.enoch.snark.instance.service.coordinate.CoordinateSpelService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 @Component
 @Scope("prototype")
 public class FleetDispatcher {
-    private final CoordinateExpressionService coordinateExpressionService;
+    private final CoordinateSpelService coordinateExpressionService;
 
     public List<FleetSendCommand> from(FleetPlan fleetPlan) {
         List<FleetSendCommand> list = new ArrayList<>();
@@ -27,19 +27,24 @@ public class FleetDispatcher {
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
 
-            List<PlanetData> colonies = coordinateExpressionService.fromExpression(fleetPlan.getSource());
+            List<PlanetData> colonies;
+//            if(fleetPlan.getSource()!= null && fleetPlan.getSource().contains("#")) {
+                colonies = coordinateExpressionService.nonCached(fleetPlan.getSource());
+//            } else {
+//                colonies = coordinateExpressionService.fromExpression(fleetPlan.getSource());
+//            }
             for (PlanetData colony : colonies) {
                 FleetContext fleetContext = FleetContext.builder()
                         .trip(fleetPlan.getTrip())
                         .source(colony)
                         .build();
                 List<PlanetData> targets;
-                if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
+//                if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
                     Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
-                    targets = coordinateExpressionService.from(fleetPlan.getTarget(), stringObjectMap);
-                } else {
-                    targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
-                }
+                    targets = coordinateExpressionService.nonCached(fleetPlan.getTarget(), stringObjectMap);
+//                } else {
+//                    targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
+//                }
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
                     command.setSource(colony.getColony());
