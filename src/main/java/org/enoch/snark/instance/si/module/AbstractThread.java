@@ -21,6 +21,7 @@ import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
+import org.enoch.snark.instance.service.coordinate.CoordinateSpelService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -53,8 +54,11 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected final ColonyRepository colonyRepository;
     @Autowired
     protected final GalaxyRepository galaxyRepository;
+    @Deprecated
     @Autowired
     protected final CoordinateExpressionService coordinateExpressionService;
+    @Autowired
+    protected final CoordinateSpelService coordinateSpelService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -86,7 +90,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         try {
             if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
             if(map.containsKey(SOURCE)) {
-                coordinateExpressionService.fromExpression(map.getConfig(SOURCE)).stream()
+                coordinateSpelService.nonCached(map.getConfig(SOURCE)).stream()
                                 .map(PlanetData::getColony)
                                 .forEach(colony -> {
                     if(DateUtil.isExpired2H(colony.updated))
@@ -287,13 +291,13 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected List<ColonyEntity> getSources(String defaultValue) {
         String sourcesCode = map().getSourcesCode(defaultValue);
-        List<PlanetData> planetData = coordinateExpressionService.fromExpression(sourcesCode);
+        List<PlanetData> planetData = coordinateSpelService.nonCached(sourcesCode);
         return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
     }
 
     protected List<PlanetData> getNearestCoordinate(String defaultValue) {
         String coordinateCode = getNearestConfig(COORDINATE, defaultValue);
-        return  coordinateExpressionService.fromExpression(coordinateCode);
+        return  coordinateSpelService.nonCached(coordinateCode);
     }
 
     protected List<AbstractCondition> getConditions(String configName) {

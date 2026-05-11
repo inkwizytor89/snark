@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
@@ -146,7 +147,7 @@ public class SpaceThread extends AbstractThread {
             String coordinateString = getNearestConfig(COORDINATE, StringUtils.EMPTY);
             String rangeString = getNearestConfig(RANGE, StringUtils.EMPTY);
             Integer range = Integer.parseInt(rangeString);
-            List<Planet> coordinateList = coordinateExpressionService.fromExpression(coordinateString).stream().map(PlanetData::getPlanet).toList();
+            List<Planet> coordinateList = coordinateSpelService.nonCached(coordinateString).stream().map(PlanetData::getPlanet).toList();
             for(Planet planet : coordinateList) ranges.add(new SystemViewRange(planet.galaxy, new Range<>(planet.system - range, planet.system + range)));
 
         } else {
@@ -180,8 +181,8 @@ public class SpaceThread extends AbstractThread {
         if(!isNearestConfig(SPY_COORDINATE)) return ArrayListMultimap.create();
         String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
-        FleetContext fleetContext = FleetContext.builder().source(planetData).build();
-        List<Planet> spyCoordinate = coordinateExpressionService.fromExpression(spyCoordinateString, fleetContext).stream().map(PlanetData::getPlanet).toList();
+        Map<String, Object> stringObjectMap = Map.of("source", singletonList(planetData));
+        List<Planet> spyCoordinate = coordinateSpelService.nonCached(spyCoordinateString, stringObjectMap).stream().map(PlanetData::getPlanet).toList();
         ArrayListMultimap<SystemView, Planet> spyCoordinateMap = ArrayListMultimap.create();
         spyCoordinate.forEach(planet -> spyCoordinateMap.put(planet.getSystemView(), planet));
         return spyCoordinateMap;
