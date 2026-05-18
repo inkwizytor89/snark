@@ -17,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -35,6 +37,7 @@ public class Core {
     private final CacheEntryRepository cacheEntryRepository;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
+    private List<Communicator> communicatos = new LinkedList<>();
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
@@ -113,6 +116,14 @@ public class Core {
         if(commandDeque == null)
             System.err.println("Unexpected error: "+command);
         commandDeque.push(command);
+    }
+
+    public synchronized void registerCommunicator(Communicator communicator) {
+        communicatos.add(communicator);
+    }
+
+    public synchronized void present(String message) {
+        communicatos.forEach(communicator -> communicator.present(message));
     }
 
 //    public synchronized void push(AbstractCommand command, String action) {

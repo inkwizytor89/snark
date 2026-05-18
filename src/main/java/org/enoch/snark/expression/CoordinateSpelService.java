@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.service.coordinate;
+package org.enoch.snark.expression;
 
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;

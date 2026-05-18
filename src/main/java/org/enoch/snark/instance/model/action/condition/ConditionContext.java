@@ -14,6 +14,7 @@ import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
+import org.enoch.snark.instance.service.PlanetDataService;
 import org.enoch.snark.instance.service.ShipService;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,8 @@ import static org.enoch.snark.instance.model.to.Planet.*;
 @RequiredArgsConstructor
 @Data
 public class ConditionContext {
+
+    private final PlanetDataService planetDataService;
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
     private final FleetRepository fleetRepository;
@@ -48,21 +51,13 @@ public class ConditionContext {
     public PlanetEntity planet(Planet planet) {
         if(SOURCE_TERM.equals(planet)) return command.getSource();
         else if(TARGET_TERM.equals(planet))  return command.getTarget().planetData();
-        else return determinePlanetEntity(planet);
+        else return planetDataService.fetchPlanetData(planet).planetData();
     }
 
     public PlanetData planetData(Planet planet) {
         if(SOURCE_TERM.equals(planet)) return new PlanetData(command.getSource());
         else if(TARGET_TERM.equals(planet))  return command.getTarget();
-        else return determinePlanetData(planet);
-    }
-
-    private PlanetEntity determinePlanetEntity(Planet planet) {
-        return coordinateExpressionService.getPlanetData(planet).planetData();
-    }
-
-    private PlanetData determinePlanetData(Planet planet) {
-        return coordinateExpressionService.getPlanetData(planet);
+        else return planetDataService.fetchPlanetData(planet);
     }
 
     public String getCacheValue(String key) {

@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.service.coordinate;
+package org.enoch.snark.expression;
 
 import org.enoch.snark.instance.model.expression.coordinate.Base;
 import org.enoch.snark.instance.model.expression.coordinate.Colonies;

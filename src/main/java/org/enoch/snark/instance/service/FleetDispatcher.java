@@ -5,7 +5,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.*;
-import org.enoch.snark.instance.service.coordinate.CoordinateSpelService;
+import org.enoch.snark.expression.CoordinateSpelService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
