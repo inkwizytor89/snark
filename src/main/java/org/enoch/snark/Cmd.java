@@ -1,140 +1,136 @@
 package org.enoch.snark;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class Cmd {
 
     /**
      * Przetwarza linię poleceń i wykonuje odpowiednią akcję
      * @param command linia poleceń do przetworzenia
      */
-    public void execute(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            System.out.println("Błąd: Pusta komenda");
-            return;
-        }
+    public String execute(String command) {
+        if (command == null || command.trim().isEmpty())  return "Empty command";
 
         String[] parts = command.trim().split("\\s+");
 
         try {
-            switch (parts[0]) {
+           return  switch (parts[0]) {
                 case "help":
                     handleHelp();
-                    break;
                 case "module":
                     handleModule(parts);
-                    break;
                 case "thread":
                     handleThread(parts);
-                    break;
                 case "config":
                     handleConfig(parts);
-                    break;
                 case "queue":
-                    handleQueue(parts);
-                    break;
+                   handleQueue(parts);
                 default:
-                    System.out.println("Błąd: Nieznana komenda '" + parts[0] + "'. Wpisz 'help' aby zobaczyć dostępne komendy.");
-            }
+                    yield "Błąd: Nieznana komenda '" + parts[0] + "'. Wpisz 'help' aby zobaczyć dostępne komendy.";
+            };
         } catch (Exception e) {
-            System.out.println("Błąd podczas przetwarzania komendy: " + e.getMessage());
+            return "Błąd podczas przetwarzania komendy: " + e.getMessage();
         }
     }
 
     /**
      * Obsługuje komendę 'help'
      */
-    private void handleHelp() {
-        System.out.println("\n=== Dostępne komendy ===");
-        System.out.println("help                           - Wyświetla tę pomoc");
-        System.out.println("module show                    - Wyświetla listę wszystkich modułów");
-        System.out.println("module <name> show             - Wyświetla informacje o konkretnym module");
-        System.out.println("thread show                    - Wyświetla listę wszystkich wątków");
-        System.out.println("thread <name> show             - Wyświetla informacje o konkretnym wątku");
-        System.out.println("config add <param1=val1> ...   - Dodaje konfigurację z parametrami");
-        System.out.println("queue show                     - Wyświetla zawartość kolejki");
-        System.out.println("queue push <command.json>      - Dodaje komendę do kolejki");
-        System.out.println("=============================\n");
+    private String handleHelp() {
+        StringBuilder message = new StringBuilder();
+        message.append("\n=== Dostępne komendy ===");
+        message.append("help                           - Wyświetla tę pomoc");
+        message.append("module show                    - Wyświetla listę wszystkich modułów");
+        message.append("module <name> show             - Wyświetla informacje o konkretnym module");
+        message.append("thread show                    - Wyświetla listę wszystkich wątków");
+        message.append("thread <name> show             - Wyświetla informacje o konkretnym wątku");
+        message.append("config add <param1=val1> ...   - Dodaje konfigurację z parametrami");
+        message.append("queue show                     - Wyświetla zawartość kolejki");
+        message.append("queue push <command.json>      - Dodaje komendę do kolejki");
+        message.append("=============================\n");
+        return message.toString();
     }
 
     /**
      * Obsługuje komendy 'module'
      */
-    private void handleModule(String[] parts) {
+    private String handleModule(String[] parts) {
         if (parts.length < 2) {
-            System.out.println("Błąd: Nieprawidłowa składnia. Użyj: module show lub module <name> show");
-            return;
+            return "Błąd: Nieprawidłowa składnia. Użyj: module show lub module <name> show";
         }
 
+        StringBuilder message = new StringBuilder();
         if ("show".equals(parts[1])) {
             // module show
-            System.out.println("\n=== Lista modułów ===");
-            System.out.println("Moduł: ActionModule");
-            System.out.println("Moduł: AIModule");
-            System.out.println("Moduł: DiscordModule");
-            System.out.println("Moduł: DatabaseModule");
-            System.out.println("====================\n");
+            message.append("\n=== Lista modułów ===");
+            message.append("Moduł: ActionModule");
+            message.append("Moduł: AIModule");
+            message.append("Moduł: DiscordModule");
+            message.append("Moduł: DatabaseModule");
+            message.append("====================\n");
         } else {
             // module <name> show
             if (parts.length >= 3 && "show".equals(parts[2])) {
                 String moduleName = parts[1];
-                System.out.println("\n=== Informacje o module ===");
-                System.out.println("Nazwa: " + moduleName);
-                System.out.println("Status: Aktywny");
-                System.out.println("Wersja: 1.0");
-                System.out.println("===========================\n");
+                message.append("\n=== Informacje o module ===");
+                message.append("Nazwa: ").append(moduleName);
+                message.append("Status: Aktywny");
+                message.append("Wersja: 1.0");
+                message.append("===========================\n");
             } else {
-                System.out.println("Błąd: Nieprawidłowa składnia. Użyj: module <name> show");
+                message.append("Błąd: Nieprawidłowa składnia. Użyj: module <name> show");
             }
         }
+        return message.toString();
     }
 
     /**
      * Obsługuje komendy 'thread'
      */
-    private void handleThread(String[] parts) {
+    private String handleThread(String[] parts) {
         if (parts.length < 2) {
-            System.out.println("Błąd: Nieprawidłowa składnia. Użyj: thread show lub thread <name> show");
-            return;
+            return "Błąd: Nieprawidłowa składnia. Użyj: thread show lub thread <name> show";
         }
-
+        StringBuilder message = new StringBuilder();
         if ("show".equals(parts[1])) {
             // thread show
-            System.out.println("\n=== Lista wątków ===");
-            System.out.println("Wątek: main");
-            System.out.println("Wątek: executor-1");
-            System.out.println("Wątek: scheduler-1");
-            System.out.println("===================\n");
+            message.append("\n=== Lista wątków ===");
+            message.append("Wątek: main");
+            message.append("Wątek: executor-1");
+            message.append("Wątek: scheduler-1");
+            message.append("===================\n");
         } else {
             // thread <name> show
             if (parts.length >= 3 && "show".equals(parts[2])) {
                 String threadName = parts[1];
-                System.out.println("\n=== Informacje o wątku ===");
-                System.out.println("Nazwa: " + threadName);
-                System.out.println("ID: " + threadName.hashCode());
-                System.out.println("Stan: RUNNABLE");
-                System.out.println("===========================\n");
+                message.append("\n=== Informacje o wątku ===");
+                message.append("Nazwa: " + threadName);
+                message.append("ID: " + threadName.hashCode());
+                message.append("Stan: RUNNABLE");
+                message.append("===========================\n");
             } else {
-                System.out.println("Błąd: Nieprawidłowa składnia. Użyj: thread <name> show");
+                message.append("Błąd: Nieprawidłowa składnia. Użyj: thread <name> show");
             }
         }
+        return message.toString();
     }
 
     /**
      * Obsługuje komendy 'config'
      */
-    private void handleConfig(String[] parts) {
+    private String handleConfig(String[] parts) {
         if (parts.length < 2 || !"add".equals(parts[1])) {
-            System.out.println("Błąd: Nieprawidłowa składnia. Użyj: config add <param1=val1> <param2=val2> ...");
-            return;
+            return "Błąd: Nieprawidłowa składnia. Użyj: config add <param1=val1> <param2=val2> ...";
         }
 
         if (parts.length < 3) {
-            System.out.println("Błąd: Brak parametrów do dodania");
-            return;
+            return "Błąd: Brak parametrów do dodania";
         }
 
         // Parsowanie parametrów w formacie key=value
@@ -145,46 +141,48 @@ public class Cmd {
                 String[] keyValue = param.split("=", 2);
                 config.put(keyValue[0], keyValue[1]);
             } else {
-                System.out.println("Ostrzeżenie: Parametr '" + param + "' ma nieprawidłowy format. Oczekiwano: klucz=wartość");
+                return "Ostrzeżenie: Parametr '" + param + "' ma nieprawidłowy format. Oczekiwano: klucz=wartość";
             }
         }
 
-        System.out.println("\n=== Dodana konfiguracja ===");
+        StringBuilder message = new StringBuilder();
+        message.append("\n=== Dodana konfiguracja ===");
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            System.out.println(entry.getKey() + " = " + entry.getValue());
+            message.append(entry.getKey()).append(" = ").append(entry.getValue());
         }
-        System.out.println("============================\n");
+        message.append("============================\n");
+        return message.toString();
     }
 
     /**
      * Obsługuje komendy 'queue'
      */
-    private void handleQueue(String[] parts) {
+    private String handleQueue(String[] parts) {
         if (parts.length < 2) {
-            System.out.println("Błąd: Nieprawidłowa składnia. Użyj: queue show lub queue push <command.json>");
-            return;
+            return "Błąd: Nieprawidłowa składnia. Użyj: queue show lub queue push <command.json>";
         }
 
+        StringBuilder message = new StringBuilder();
         if ("show".equals(parts[1])) {
             // queue show
-            System.out.println("\n=== Zawartość kolejki ===");
-            System.out.println("Liczba elementów: 0");
-            System.out.println("Kolejka jest pusta");
-            System.out.println("======================\n");
+            message.append("\n=== Zawartość kolejki ===");
+            message.append("Liczba elementów: 0");
+            message.append("Kolejka jest pusta");
+            message.append("======================\n");
         } else if ("push".equals(parts[1])) {
             // queue push <command.json>
             if (parts.length < 3) {
-                System.out.println("Błąd: Brak nazwy pliku. Użyj: queue push <command.json>");
-                return;
+                return "Błąd: Brak nazwy pliku. Użyj: queue push <command.json>";
             }
 
             String commandFile = parts[2];
-            System.out.println("\n=== Komenda dodana do kolejki ===");
-            System.out.println("Plik: " + commandFile);
-            System.out.println("Status: Oczekiwanie na przetworzenie");
-            System.out.println("=================================\n");
+            message.append("\n=== Komenda dodana do kolejki ===");
+            message.append("Plik: " + commandFile);
+            message.append("Status: Oczekiwanie na przetworzenie");
+            message.append("=================================\n");
         } else {
-            System.out.println("Błąd: Nieznana operacja na kolejce. Użyj: queue show lub queue push <command.json>");
+            return "Błąd: Nieznana operacja na kolejce. Użyj: queue show lub queue push <command.json>";
         }
+        return message.toString();
     }
 }

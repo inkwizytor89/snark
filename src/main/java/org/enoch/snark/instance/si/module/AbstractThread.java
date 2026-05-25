@@ -21,7 +21,7 @@ import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
-import org.enoch.snark.expression.CoordinateSpelService;
+import org.enoch.snark.expression.coordinate.CoordinateSpelService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -309,4 +309,8 @@ public abstract class AbstractThread extends ExecutorImpl {
         }
     }
 
+    @Override
+    public String toString() {
+        return map().name()+":"+runningProcessor.getActualState();
+    }
 }

@@ -1,11 +1,14 @@
-package org.enoch.snark.expression;
+package org.enoch.snark.expression.coordinate;
 
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
-import org.enoch.snark.instance.model.expression.coordinate.*;
+import org.enoch.snark.expression.coordinate.function.Base;
+import org.enoch.snark.expression.coordinate.function.Colonies;
+import org.enoch.snark.expression.coordinate.function.CycleTrip;
+import org.enoch.snark.expression.coordinate.function.Swarn;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetDataService;
 import org.springframework.context.annotation.Scope;

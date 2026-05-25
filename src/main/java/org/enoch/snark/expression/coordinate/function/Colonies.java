@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.model.expression.coordinate;
+package org.enoch.snark.expression.coordinate.function;
 
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.Planet;

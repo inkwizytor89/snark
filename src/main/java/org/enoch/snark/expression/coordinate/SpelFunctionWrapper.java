@@ -1,9 +1,9 @@
-package org.enoch.snark.expression;
+package org.enoch.snark.expression.coordinate;
 
-import org.enoch.snark.instance.model.expression.coordinate.Base;
-import org.enoch.snark.instance.model.expression.coordinate.Colonies;
-import org.enoch.snark.instance.model.expression.coordinate.CycleTrip;
-import org.enoch.snark.instance.model.expression.coordinate.Swarn;
+import org.enoch.snark.expression.coordinate.function.Base;
+import org.enoch.snark.expression.coordinate.function.Colonies;
+import org.enoch.snark.expression.coordinate.function.CycleTrip;
+import org.enoch.snark.expression.coordinate.function.Swarn;
 import org.enoch.snark.instance.model.to.PlanetData;
 
 import java.util.List;

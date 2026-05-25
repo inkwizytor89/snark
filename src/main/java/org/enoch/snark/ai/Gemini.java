@@ -6,8 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
-import org.enoch.snark.expression.AstExecutor;
-import org.enoch.snark.expression.definition.AstExpression;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.expression.function.AbstractSpelFunction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,14 +19,13 @@ public class Gemini {
 
     @Value("${gemini.api.key}")
     private String geminiApiKey;
-    private final AstExecutor astExecutor;
-
 
     public List<String> transformToSpellFunctions(String message) {
         String prompt = buildPrompt(message);
         String answer = extractContent(call(prompt));
         List<AstExpression> astList = new Gson().fromJson(answer, new TypeToken<List<AstExpression>>(){}.getType());
-        return astList.stream().map(astExecutor::buildExpression).toList();
+        final AstToSpelConverter astExecutor = new AstToSpelConverter();
+        return astList.stream().map(astExecutor::toSpel).toList();
     }
 
     private String buildPrompt(String userMessage) {
@@ -48,7 +46,7 @@ public class Gemini {
 
 
     private String call(String prompt) {
-
+        if(StringUtils.isEmpty(geminiApiKey)) return "missing geminiApiKey to call AI";
         try {
 
             OkHttpClient client = new OkHttpClient();

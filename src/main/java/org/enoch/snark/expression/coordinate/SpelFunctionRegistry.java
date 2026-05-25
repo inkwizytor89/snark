@@ -1,6 +1,9 @@
-package org.enoch.snark.expression;
+package org.enoch.snark.expression.coordinate;
 
-import org.enoch.snark.instance.model.expression.coordinate.*;
+import org.enoch.snark.expression.coordinate.function.Base;
+import org.enoch.snark.expression.coordinate.function.Colonies;
+import org.enoch.snark.expression.coordinate.function.EventFleetFilter;
+import org.enoch.snark.expression.coordinate.function.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;

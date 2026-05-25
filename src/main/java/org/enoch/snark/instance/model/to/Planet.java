@@ -3,6 +3,7 @@ package org.enoch.snark.instance.model.to;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.instance.model.Coordinate;
 import org.enoch.snark.instance.model.types.ColonyType;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import static org.enoch.snark.instance.model.types.ColonyType.MOON;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
 
 @EqualsAndHashCode
-public class Planet {
+public class Planet implements Coordinate {
 
     public static final Integer GALAXY_INDEX = 1;
     public static final Integer SYSTEM_INDEX = 2;
@@ -127,6 +128,11 @@ public class Planet {
 
     public static String getCordinate(Integer galaxy, Integer system, Integer position) {
         return "["+galaxy+":"+system+":"+position+"]";
+    }
+
+    @Override
+    public Planet toCoordinate() {
+        return this;
     }
 
     public SystemView getSystemView() {

@@ -2,7 +2,7 @@ package org.enoch.snark.instance.model.to;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.enoch.snark.instance.model.expression.ExpressionContext;
+import org.enoch.snark.expression.coordinate.ExpressionContext;
 
 import java.util.List;
 

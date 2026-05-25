@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.model.expression.common;
+package org.enoch.snark.expression.coordinate.common;
 
 import org.enoch.snark.instance.model.to.Planet;
 

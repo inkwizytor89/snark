@@ -146,6 +146,10 @@ public class Navigator {
                 .noneMatch(fleet -> mission.equals(fleet.mission));
     }
 
+    public String getStatus() {
+        return "F:"+fleetCount+"/"+fleetMax+" E:"+expeditionCount+"/"+expeditionMax;
+    }
+
     @Override
     public String toString() {
         return eventFleetList.stream().map(event -> event + "\n")

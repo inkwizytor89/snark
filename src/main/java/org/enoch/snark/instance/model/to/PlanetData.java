@@ -4,9 +4,15 @@ import lombok.Data;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.instance.model.Coordinate;
 
 @Data
-public class PlanetData {
+public class PlanetData implements Coordinate {
+    @Override
+    public Planet toCoordinate() {
+        return planet;
+    }
+
     private Planet planet;
     private ColonyEntity colony;
     private TargetEntity target;

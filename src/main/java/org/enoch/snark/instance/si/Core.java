@@ -10,6 +10,7 @@ import org.enoch.snark.config.ConfigurationScheduledTask;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
@@ -37,7 +38,6 @@ public class Core {
     private final CacheEntryRepository cacheEntryRepository;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
-    private List<Communicator> communicatos = new LinkedList<>();
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
@@ -118,12 +118,19 @@ public class Core {
         commandDeque.push(command);
     }
 
-    public synchronized void registerCommunicator(Communicator communicator) {
-        communicatos.add(communicator);
-    }
+    public String status() {
+        StringBuilder threadsStatus = new StringBuilder();
+        for(Entry<String, AbstractModule> moduleEntry : modules.entrySet()) {
+            threadsStatus.append(moduleEntry.getKey()).append(":");
+            for (Entry<String, ThreadMap> threadEntry : moduleEntry.getValue().getModuleMap().entrySet()) {
+                threadsStatus.append(threadEntry.getKey()).append("=").append(threadEntry.getValue().get(TIME)).append(",");
+            }
+            threadsStatus.append(" ");
+        }
+//        List<AbstractThread> threads = modules.values().stream().flatMap(m -> m.getThreadsMap().values().stream()).toList();
+//        for(AbstractThread thread : threads) threadsStatus.append(thread).append(" ");
+        return Navigator.getInstance().getStatus()+" Q:"+commandDeque+"\n"+threadsStatus;
 
-    public synchronized void present(String message) {
-        communicatos.forEach(communicator -> communicator.present(message));
     }
 
 //    public synchronized void push(AbstractCommand command, String action) {

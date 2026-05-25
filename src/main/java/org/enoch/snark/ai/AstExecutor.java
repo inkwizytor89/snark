@@ -2,17 +2,15 @@
 // 7. AST EXECUTOR
 // ================================
 
-package org.enoch.snark.expression;
+package org.enoch.snark.ai;
 
-import org.enoch.snark.expression.definition.AstExpression;
 import org.enoch.snark.expression.function.AbstractSpelFunction;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.stereotype.Component;
 
-@Component
+@Deprecated
 public class AstExecutor {
 
     private final ExpressionParser parser = new SpelExpressionParser();

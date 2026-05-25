@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.model.expression;
+package org.enoch.snark.expression.coordinate;
 
 public interface ExpressionContext {
 

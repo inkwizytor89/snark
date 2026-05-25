@@ -29,6 +29,7 @@ public class ExpeditionThread extends AbstractThread {
 
     public static final String threadType = "expedition";
     public static final ShipsMap DEFAULT_SHIPS = ShipsMap.parse("explorer:1,transporterLarge:2500,battleship:1");
+    public static final String SYSTEM_SHIFT = "system_shift";
 
     private final FleetRepository fleetRepository;
 
@@ -103,7 +104,10 @@ public class ExpeditionThread extends AbstractThread {
     private FleetSendCommand createFleetSendCommand(ColonyEntity bestColony, ShipsMap ships) {
         FleetSendCommand command = new FleetSendCommand();
         command.setSource(bestColony);
-        command.setTarget(new PlanetData(new TargetEntity(bestColony.toPlanet().toSpace())));
+        TargetEntity space = new TargetEntity(bestColony.toPlanet().toSpace());
+        Integer systemShift = map.getConfigInteger(SYSTEM_SHIFT, 0);
+        space.system += systemShift;
+        command.setTarget(new PlanetData(space));
         command.setMission(Mission.EXPEDITION);
         command.setShipsMap(ships);
         command.generateHash(threadType, null);

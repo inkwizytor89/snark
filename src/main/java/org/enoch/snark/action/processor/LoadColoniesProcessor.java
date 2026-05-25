@@ -8,7 +8,7 @@ import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.FleetRepository;
-import org.enoch.snark.expression.CoordinateSpelService;
+import org.enoch.snark.expression.coordinate.CoordinateSpelService;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.module.consumer.gi.BaseGameInfoGIR;
 import org.enoch.snark.instance.model.action.DiffLists;

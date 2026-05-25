@@ -2,7 +2,7 @@
 // 3. AST MODEL
 // ================================
 
-package org.enoch.snark.expression.definition;
+package org.enoch.snark.ai;
 
 import java.util.Map;
 
