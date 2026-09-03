@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.enoch.snark.common.Debug;
+import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.time.TimeScheduler;
 
 import java.util.Map;
@@ -14,7 +15,6 @@ import static org.enoch.snark.instance.si.module.ThreadMap.*;
 @Data
 public class AbstractModule {
 
-    private ModuleMap baseMap;
     private ModuleMap moduleMap;
 
     @Getter
@@ -49,5 +49,10 @@ public class AbstractModule {
 
     public void destroy() {
         threadsMap.values().forEach(AbstractThread::destroy);
+    }
+
+    @Override
+    public String toString() {
+        return mainMap.get("module") + "_"  + timeScheduler.getRunningState();
     }
 }

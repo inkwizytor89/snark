@@ -5,7 +5,6 @@ public enum QueueRunType {
     REFRESH_ACTION, // for refreshing planets - prio is so high to slot required action no block refresh and info that can already sent fleet
     MAJOR, // actions for attacks and checking debris
     NORMAL, // should be for not important action fleet: exp collect transport
-    MINOR, // additional action like farm attack
     SPAM; // no database mas fleet start
     // database mas fleet start
 }

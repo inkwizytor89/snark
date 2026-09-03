@@ -1,5 +1,7 @@
 package org.enoch.snark.common.time;
 
+import org.enoch.snark.common.RunningState;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,10 @@ public class TimePlan  {
         if(activationTimes == null) return true;
         else if(activationTimes.isEmpty()) return false;
         return activationTimes.stream().anyMatch(TimeInterval::isOn);
+    }
+
+    RunningState getRunningState() {
+        return isOn() ? RunningState.ON : RunningState.OFF;
     }
 
     @Override

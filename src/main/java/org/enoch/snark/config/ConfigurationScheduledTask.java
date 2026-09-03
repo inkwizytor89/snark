@@ -29,8 +29,7 @@ public class ConfigurationScheduledTask {
     @Value("${properties:server.properties}")
     private String propertiesPath;
 
-//    @Scheduled(fixedDelay = 10000)
-    public PropertiesMap loadConfig() throws IOException {
+    public List<ConfigTerm>  loadConfig() throws IOException {
         List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL);
         List<ConfigTerm> result = new ArrayList<>(globals);
         for (ConfigTerm term : globals)
@@ -39,7 +38,7 @@ public class ConfigurationScheduledTask {
             }
         if (areConfigsChanged(configs, result)) {
             configs = result;
-            return buildPropertiesMap();
+            return new ArrayList<>(configs);
         } else return null;
     }
 
@@ -49,22 +48,6 @@ public class ConfigurationScheduledTask {
             if (!configs.get(i).getValue().equals(result.get(i).getValue()))
                 return true;
         return false;
-    }
-
-    public static PropertiesMap buildPropertiesMap() {
-        PropertiesMap propertiesMap = new PropertiesMap();
-        for(ConfigTerm term : configs) {
-            propertiesMap.putIfAbsent(term.getModule(), new ModuleMap(term.getModule()));
-            ModuleMap moduleMap = propertiesMap.get(term.getModule());
-
-            moduleMap.putIfAbsent(term.getThread(), new ThreadMap());
-            ThreadMap threadMap = moduleMap.get(term.getThread());
-
-            threadMap.putIfAbsent(ThreadMap.NAME, term.getThread());
-            threadMap.putIfAbsent(ThreadMap.MODULE, term.getModule());
-            threadMap.putIfAbsent(term.getKey(), term.getValue());
-        }
-        return propertiesMap;
     }
 
     private static List<ConfigTerm> loadConfigsFromFile(String propertiesPath, String defaultModule) throws IOException {

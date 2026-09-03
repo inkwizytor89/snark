@@ -95,9 +95,8 @@ public class CommandDeque {
         actionsMap.forEach((key, value) -> {
             if (value != null && !value.isEmpty()) {
                 if (sb.length() > 0) sb.append(" | ");
-                sb.append(key).append(": [");
-                sb.append(String.join(", ", value.stream().map(AbstractCommand::hash).toList()));
-                sb.append("]");
+                sb.append(key.name().charAt(0));
+                sb.append(String.join(",", value.stream().map(AbstractCommand::hash).toList()));
             }
         });
         return sb.toString();

@@ -1,6 +1,7 @@
 package org.enoch.snark.common.time;
 
 import org.enoch.snark.common.Parsable;
+import org.enoch.snark.common.RunningState;
 
 public class TimeScheduler extends Parsable<TimePlan> {
 
@@ -17,8 +18,13 @@ public class TimeScheduler extends Parsable<TimePlan> {
         return getValue().isOn();
     }
 
+    public RunningState getRunningState() {
+
+        return value == null ? RunningState.ON : value.getRunningState();
+    }
+
     @Override
     public String toString() {
-        return value.toString();
+        return getRunningState().name();
     }
 }

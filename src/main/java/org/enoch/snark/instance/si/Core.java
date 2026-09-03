@@ -4,12 +4,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.AbstractCommand;
-import org.enoch.snark.common.Debug;
+import org.enoch.snark.common.RunningState;
 import org.enoch.snark.config.ConfigurationScheduledTask;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
-import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
@@ -18,13 +18,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
-import static org.enoch.snark.action.command.FollowingAction.DELAY_TO_FLEET_BACK;
 import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
@@ -34,8 +34,8 @@ public class Core {
 
     private final ApplicationContext applicationContext;
     private final DefaultListableBeanFactory beanFactory;
-    private final ConfigurationScheduledTask configurationScheduledTask;
     private final CacheEntryRepository cacheEntryRepository;
+//    private final RemotePropertiesMap remotePropertiesMap;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
     private CommandDeque queue;
@@ -52,13 +52,6 @@ public class Core {
         cacheEntryRepository.setUnknownForSuffix(PROCESSING_SUFFIX);
     }
 
-    @Scheduled(fixedDelay = 10000)
-    public void loadConfig() throws IOException {
-        PropertiesMap propertiesMap = configurationScheduledTask.loadConfig();
-        if(propertiesMap == null) return;
-        configurationUpdate(propertiesMap);
-    }
-
     public void configurationUpdate(PropertiesMap propertiesMap) {
         for(ModuleMap moduleMap : propertiesMap.modules()) {
             String moduleName = moduleMap.getName();
@@ -67,15 +60,16 @@ public class Core {
             module.updateMap(moduleMap);
 
             for(ThreadMap threadMap : module.getModuleMap().threads()) {
-                String threadName = threadMap.name();
+                String threadName = threadMap.get(NAME);
                 if(threadName.endsWith(MAIN)) {
                     module.setMainMap(threadMap);
                     continue;
                 }
 
-                AbstractThread thread = registerThreadBeanIfAbsent(threadName, threadMap.getTypeClass());
+                AbstractThread thread = registerThreadBeanIfAbsent(threadMap.name(), threadMap.getTypeClass());
                 thread.updateMap(threadMap);
                 thread.setModule(module);
+                module.getThreadsMap().put(threadName, thread);
                 threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
                 Executors.newSingleThreadExecutor().submit(thread);
             }
@@ -119,17 +113,17 @@ public class Core {
     }
 
     public String status() {
-        StringBuilder threadsStatus = new StringBuilder();
+        List<String> modulesInfo = new ArrayList<>();
         for(Entry<String, AbstractModule> moduleEntry : modules.entrySet()) {
-            threadsStatus.append(moduleEntry.getKey()).append(":");
-            for (Entry<String, ThreadMap> threadEntry : moduleEntry.getValue().getModuleMap().entrySet()) {
-                threadsStatus.append(threadEntry.getKey()).append("=").append(threadEntry.getValue().get(TIME)).append(",");
-            }
-            threadsStatus.append(" ");
+            String threadInModule = moduleEntry.getValue().getThreadsMap().values().stream()
+                    .filter(thread -> RunningState.ON.equals(thread.getActualState()))
+                    .map(thread -> thread.map().get(NAME))
+                    .collect(Collectors.joining(","));
+            if(StringUtils.isNotEmpty(threadInModule)) modulesInfo.add(moduleEntry.getKey()+":"+threadInModule);
         }
-//        List<AbstractThread> threads = modules.values().stream().flatMap(m -> m.getThreadsMap().values().stream()).toList();
-//        for(AbstractThread thread : threads) threadsStatus.append(thread).append(" ");
-        return Navigator.getInstance().getStatus()+" Q:"+commandDeque+"\n"+threadsStatus;
+        return Navigator.getInstance().getStatus()+" "+
+                String.join(" ", modulesInfo)+ "  "+
+                commandDeque;
 
     }
 

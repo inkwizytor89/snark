@@ -1,14 +1,22 @@
 package org.enoch.snark;
 
+import lombok.RequiredArgsConstructor;
+import org.enoch.snark.config.ConfigTerm;
+import org.enoch.snark.instance.si.RemotePropertiesMap;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class Cmd {
+
+    private final RemotePropertiesMap propertiesMap;
+    private Map<String,String> shortcuts =  new HashMap<>() {{
+        put("on", "config add time=on");
+        put("off", "config add time=off");
+    }};
 
     /**
      * Przetwarza linię poleceń i wykonuje odpowiednią akcję
@@ -17,26 +25,44 @@ public class Cmd {
     public String execute(String command) {
         if (command == null || command.trim().isEmpty())  return "Empty command";
 
-        String[] parts = command.trim().split("\\s+");
-
-        try {
-           return  switch (parts[0]) {
-                case "help":
-                    handleHelp();
-                case "module":
-                    handleModule(parts);
-                case "thread":
-                    handleThread(parts);
-                case "config":
-                    handleConfig(parts);
-                case "queue":
-                   handleQueue(parts);
-                default:
-                    yield "Błąd: Nieznana komenda '" + parts[0] + "'. Wpisz 'help' aby zobaczyć dostępne komendy.";
-            };
-        } catch (Exception e) {
-            return "Błąd podczas przetwarzania komendy: " + e.getMessage();
+        // obsługa skrótów: jeśli cała linia to skrót (np. "on"/"off"), zastąp go pełną komendą
+        String trimmed = command.trim();
+        if (shortcuts.containsKey(trimmed)) {
+            String mapped = shortcuts.get(trimmed);
+//            if("on".equals(trimmed))
+//            if("off".equals(trimmed))
+                command = mapped;
         }
+
+        String[] parts = command.trim().split("\\s+");
+        String result;
+        try {
+            String cmd = parts[0];
+            if ("help".equals(cmd)) {
+                result = handleHelp();
+            } else if ("module".equals(cmd)) {
+                result = handleModule(parts);
+            } else if ("thread".equals(cmd)) {
+                result = handleThread(parts);
+            } else if ("config".equals(cmd)) {
+                result = handleConfig(parts);
+            } else if ("queue".equals(cmd)) {
+                result = handleQueue(parts);
+            } else {
+                result = "Błąd: Nieznana komenda '" + parts[0] + "'. Wpisz 'help' aby zobaczyć dostępne komendy.";
+            }
+        } catch (Exception e) {
+            result = "Błąd podczas przetwarzania komendy: " + e.getMessage();
+        }
+
+        // Jeśli oryginalnie wpisany skrót (trimmed) był "on" lub "off", doklej odpowiedni suffix
+        if ("on".equals(trimmed)) {
+            result = result + "\nhttps://tenor.com/view/star-wars-r2d2-beeps-provocatively-annoying-gif-4059356";
+        } else if ("off".equals(trimmed)) {
+            result = result + "\nhttps://tenor.com/view/star-wars-r2d2-fall-tired-exhausted-gif-4778748";
+        }
+
+        return result;
     }
 
     /**
@@ -123,35 +149,40 @@ public class Cmd {
 
     /**
      * Obsługuje komendy 'config'
+     * Wspierane formy:
+     * - config add <value>...     -> wypisuje przekazane wartości (połączone spacją)
+     * - config reset              -> zwraca "reset"
+     * - config show               -> zwraca "all"
+     * - config show <value>...    -> zwraca "show <value...>"
      */
     private String handleConfig(String[] parts) {
-        if (parts.length < 2 || !"add".equals(parts[1])) {
-            return "Błąd: Nieprawidłowa składnia. Użyj: config add <param1=val1> <param2=val2> ...";
+        if (parts.length < 2) {
+            return "Błąd: Nieprawidłowa składnia. Użyj: config add <value> | config reset | config show [value]";
         }
 
-        if (parts.length < 3) {
-            return "Błąd: Brak parametrów do dodania";
+        String op = parts[1];
+        switch (op) {
+            case "add":
+                if (parts.length < 3) {
+                    return "Błąd: Brak wartości do dodania. Użyj: config add <value>";
+                }
+                ConfigTerm config = ConfigTerm.parse(parts[2]);
+                propertiesMap.addRemoteConfig(config);
+                return "added config "+config;
+            case "reset":
+                propertiesMap.resetRemoteConfig();
+                return "reset";
+            case "show":
+                if (parts.length == 2) {
+                    String all = propertiesMap.showConfig("all");
+                    return all;
+                } else {
+                    String configs = propertiesMap.showConfig(parts[2]);
+                    return configs;
+                }
+            default:
+                return "Błąd: Nieznana operacja dla config. Użyj: add | reset | show";
         }
-
-        // Parsowanie parametrów w formacie key=value
-        Map<String, String> config = new HashMap<>();
-        for (int i = 2; i < parts.length; i++) {
-            String param = parts[i];
-            if (param.contains("=")) {
-                String[] keyValue = param.split("=", 2);
-                config.put(keyValue[0], keyValue[1]);
-            } else {
-                return "Ostrzeżenie: Parametr '" + param + "' ma nieprawidłowy format. Oczekiwano: klucz=wartość";
-            }
-        }
-
-        StringBuilder message = new StringBuilder();
-        message.append("\n=== Dodana konfiguracja ===");
-        for (Map.Entry<String, String> entry : config.entrySet()) {
-            message.append(entry.getKey()).append(" = ").append(entry.getValue());
-        }
-        message.append("============================\n");
-        return message.toString();
     }
 
     /**

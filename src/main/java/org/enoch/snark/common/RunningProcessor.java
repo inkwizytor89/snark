@@ -48,4 +48,9 @@ public class RunningProcessor {
         Arrays.asList(objects).forEach(builder::append);
         System.err.println(builder);
     }
+
+    @Override
+    public String toString() {
+        return actualState.name();
+    }
 }

@@ -102,8 +102,8 @@ public class DiscordBotService extends ListenerAdapter {
             expressionsToEvaluate = gemini.transformToSpellFunctions(message);
         }
         for (String expression : expressionsToEvaluate) {
-            sendMessage(event.getChannel().getId(), message + " -> " + expression);
-            cmd.execute(expression);
+            String executed = cmd.execute(expression);
+            sendMessage(event.getChannel().getId(), message + " -> " + expression+ " -> \n" + executed);
         }
     }
 
