@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductor - Instance Manager</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.18.0/css/xterm.css" />
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <main>
+            <div class="workspace">
+                <div class="workspace-top">
+                    <!-- Left Panel: Instances List -->
+                    <div class="left-panel">
+                        <div class="panel-header">
+                            <h2>Instances</h2>
+                            <div class="panel-actions">
+                                <button type="button" class="btn-icon" id="createToggleBtn" title="Create new instance" aria-expanded="false">+</button>
+                                <button type="button" class="btn-icon" id="refreshBtn" title="Refresh list">↻</button>
+                            </div>
+                        </div>
+
+                        <form id="createInstanceForm" class="create-instance-section" hidden>
+                            <h3>Create New Instance</h3>
+                            <label class="create-instance-field-label" for="newInstanceServer">Server</label>
+                            <input type="text" id="newInstanceServer" placeholder="Server" />
+                            <label class="create-instance-field-label" for="newInstanceLogin">Login</label>
+                            <input type="text" id="newInstanceLogin" placeholder="Login" />
+                            <label class="create-instance-checkbox-label">
+                                <input type="checkbox" id="newInstanceUseDatabaseCheckbox" />
+                                Use independent database
+                            </label>
+                            <div id="newInstanceDatabaseNameWrapper" style="display: none;">
+                                <label class="create-instance-field-label" for="newInstanceDatabaseName">Database Name</label>
+                                <input type="text" id="newInstanceDatabaseName" placeholder="Database Name" />
+                            </div>
+                            <label class="create-instance-field-label" for="startTemplateSelect">Start template</label>
+                            <select id="startTemplateSelect"></select>
+                            <button id="createBtn" class="btn-primary" type="submit">Create</button>
+                        </form>
+
+                        <div id="instancesList" class="instances-list">
+                            <div class="loading">Loading instances...</div>
+                        </div>
+                    </div>
+
+                    <div class="details-panel">
+                        <div class="panel-header">
+                            <h2>Instance details</h2>
+                        </div>
+                        <div id="instanceDetails" class="instance-details">
+                            <div class="loading">Select an instance to see details</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workspace-bottom">
+                    <div class="right-panel terminal-panel" id="terminalPanel">
+                        <button type="button" class="btn-icon terminal-toggle" id="toggleTerminalControls" title="Collapse terminal controls" aria-expanded="true">⌄</button>
+                        <div id="terminal" class="terminal"></div>
+                        <div class="command-input terminal-controls" id="terminalControls">
+                            <input type="text" id="commandInput" placeholder="Enter command..." />
+                            <button id="sendBtn" class="btn-primary">Send</button>
+                            <button type="button" class="btn-icon" id="clearTerminal" title="Clear terminal">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="placeholderModal" class="modal-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="placeholderModalTitle">
+            <h3 id="placeholderModalTitle">Set placeholder values</h3>
+            <p id="placeholderModalSubtitle" class="modal-subtitle"></p>
+            <form id="placeholderForm">
+                <div id="placeholderFields" class="placeholder-fields"></div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelPlaceholderBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Apply placeholders</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="configThreadModal" class="modal-overlay" hidden>
+        <div class="modal-card config-modal-card" role="dialog" aria-modal="true" aria-labelledby="configThreadModalTitle">
+            <h3 id="configThreadModalTitle">Add config thread</h3>
+            <p id="configThreadModalSubtitle" class="modal-subtitle"></p>
+            <form id="configThreadForm">
+                <div class="config-modal-layout">
+                    <label class="placeholder-field">
+                        <span>Existing module</span>
+                        <select id="configThreadExistingModule"></select>
+                    </label>
+                    <label class="placeholder-field">
+                        <span>New module</span>
+                        <input type="text" id="configThreadNewModule" placeholder="Enter new module name" />
+                    </label>
+                    <label class="placeholder-field config-modal-thread-field">
+                        <span>Thread</span>
+                        <select id="configThreadSelect"></select>
+                    </label>
+                </div>
+                <div id="configThreadModalMessage" class="config-feedback" hidden></div>
+                <div id="configThreadDefinitionFields" class="config-thread-fields"></div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelConfigThreadBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="saveConfigThreadBtn" class="btn-primary">Save thread</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.18.0/lib/xterm.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
