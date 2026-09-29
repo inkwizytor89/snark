@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.config;
+package org.enoch.conductor.config;
 
 import org.springframework.stereotype.Repository;
 
@@ -33,4 +33,3 @@ public class InstanceConfigStateRepository {
         definitionsByInstance.remove(instanceId);
     }
 }
-

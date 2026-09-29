@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.startproperties;
+package org.enoch.conductor.startproperties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -141,4 +141,3 @@ public class StartPropertiesRepository {
         return templatePath;
     }
 }
-

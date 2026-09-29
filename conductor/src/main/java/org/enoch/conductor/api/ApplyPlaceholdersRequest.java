@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.api;
+package org.enoch.conductor.api;
 
 import java.util.Map;
 
@@ -10,4 +10,3 @@ public record ApplyPlaceholdersRequest(
         Map<String, String> placeholders
 ) {
 }
-

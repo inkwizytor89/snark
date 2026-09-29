@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.config;
+package org.enoch.conductor.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,4 +15,3 @@ public class InstanceConfigDto {
     private boolean temporary;
     private String description;
 }
-

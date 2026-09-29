@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.instance;
+package org.enoch.conductor.instance;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.process;
+package org.enoch.conductor.process;
 
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.InstanceRuntime;

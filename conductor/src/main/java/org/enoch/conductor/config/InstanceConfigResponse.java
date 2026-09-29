@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.config;
+package org.enoch.conductor.config;
 
 import java.util.List;
 
@@ -7,4 +7,3 @@ public record InstanceConfigResponse(
         List<InstanceConfigDto> configs
 ) {
 }
-

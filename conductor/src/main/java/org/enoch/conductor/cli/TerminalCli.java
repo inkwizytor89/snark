@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.cli;
+package org.enoch.conductor.cli;
 
 import org.enoch.conductor.command.CommandMessage;
 import org.enoch.conductor.instance.InstanceProfile;
@@ -164,7 +164,7 @@ public class TerminalCli implements CommandLineRunner {
         output.append(System.lineSeparator())
                 .append("ID\t\t\t\t\t\t\t\t\t\tRUNNING\t\tAUTOSTART\tPID")
                 .append(System.lineSeparator())
-                .append("â”€".repeat(70))
+                .append("─".repeat(70))
                 .append(System.lineSeparator());
 
         for (InstanceProfile profile : profiles) {
@@ -320,7 +320,7 @@ public class TerminalCli implements CommandLineRunner {
         }
 
         System.out.println("\nID\t\t\t\t\t\t\t\tRUNNING\t\tAUTOSTART\tPID");
-        System.out.println("â”€".repeat(70));
+        System.out.println("─".repeat(70));
 
         for (InstanceProfile profile : profiles) {
             boolean isRunning = processService.isRunning(profile.getId());
@@ -398,6 +398,5 @@ public class TerminalCli implements CommandLineRunner {
                 """);
     }
 }
-
 
 

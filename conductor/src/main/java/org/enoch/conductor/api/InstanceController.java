@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.api;
+package org.enoch.conductor.api;
 
 import org.enoch.conductor.config.DeleteInstanceConfigsRequest;
 import org.enoch.conductor.config.InstanceConfigDefinitionsResponse;
@@ -416,4 +416,3 @@ public class InstanceController {
         return ResponseEntity.status(409).body(Map.of("error", message));
     }
 }
-

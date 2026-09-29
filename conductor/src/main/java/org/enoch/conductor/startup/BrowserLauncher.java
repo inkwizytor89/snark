@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.startup;
+package org.enoch.conductor.startup;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -41,4 +41,3 @@ public class BrowserLauncher {
         }
     }
 }
-

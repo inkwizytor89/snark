@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.api;
+package org.enoch.conductor.api;
 
 import org.enoch.conductor.cli.TerminalCli;
 import org.springframework.stereotype.Component;
@@ -86,4 +86,3 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
         System.out.println("[WS][TERMINAL][OUT] sessionId=" + session.getId() + " payload=" + payload);
     }
 }
-

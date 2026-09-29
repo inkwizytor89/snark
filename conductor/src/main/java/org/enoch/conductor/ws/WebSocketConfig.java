@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.ws;
+package org.enoch.conductor.ws;
 
 import org.enoch.conductor.api.TerminalWebSocketHandler;
 import org.springframework.context.annotation.Configuration;

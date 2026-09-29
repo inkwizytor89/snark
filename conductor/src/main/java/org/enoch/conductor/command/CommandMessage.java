@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.command;
+package org.enoch.conductor.command;
 
 import lombok.Data;
 import java.util.Map;

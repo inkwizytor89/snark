@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.config;
+package org.enoch.conductor.config;
 
 import org.enoch.conductor.command.CommandMessage;
 import org.enoch.conductor.ws.WorkerSocketHandler;
@@ -140,4 +140,3 @@ public class InstanceConfigService {
         });
     }
 }
-

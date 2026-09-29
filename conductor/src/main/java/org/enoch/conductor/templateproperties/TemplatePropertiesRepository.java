@@ -1,4 +1,4 @@
-﻿package org.enoch.conductor.templateproperties;
+package org.enoch.conductor.templateproperties;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,4 +51,3 @@ public class TemplatePropertiesRepository {
         return templatesDir;
     }
 }
-
