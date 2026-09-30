@@ -91,16 +91,29 @@ When the application starts, it will automatically launch all instances with `au
 
 ## Start Properties Templates
 
-The application creates a `start-properties/` directory on startup if it does not exist. It also seeds a default `start.properties` template with:
+The application creates a `start-properties/` directory on startup if it does not exist. It also seeds a default `start.properties` template from `src/main/resources/start-properties/start.properties`, for example:
 
 ```properties
 main.time=on
-main.login=<login>
-main.password=<password>
-main.server=<server_name>
+define.fly_points=
+define.transporterSmall=5000
+
+fleet_save_module.main.template=../templates/fleet_save.properties
+sleep_module.main.template=../templates/sleep.properties
+clear_module.main.template=../templates/clean.properties
+build_module.main.template=../templates/build.properties
+expedition_module.main.template=../templates/expedition.properties
+space_module.main.template=../templates/space.properties
+swarn_module.main.template=../templates/swarn.properties
+main.template=../snark/templates/global.properties
+
+consumer.login=<login>
+consumer.password=<password>
+consumer.server=<server_name>
+consumer.url=<url>
 ```
 
-When creating a new instance, pick a template from the UI. Conductor copies it to `server.properties` inside the instance directory and then asks for values for every placeholder before writing the final file.
+When creating a new instance, pick a template from the UI. Conductor copies it to `server.properties` inside the instance directory and then asks for values for every `<placeholder>` found in the template before writing the final file.
 
 ## Template Properties
 
