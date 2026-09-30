@@ -19,12 +19,15 @@ public class ConductorApplication {
         Map<String, Object> defaults = new HashMap<>();
         defaults.put("conductor.instances-dir", "instances");
         defaults.put("conductor.start-properties-dir", "start-properties");
+        defaults.put("conductor.worker", "");
 
         for (String arg : args) {
             if (arg.startsWith("--instances-dir=")) {
                 defaults.put("conductor.instances-dir", arg.substring("--instances-dir=".length()));
             } else if (arg.startsWith("--start-properties-dir=")) {
                 defaults.put("conductor.start-properties-dir", arg.substring("--start-properties-dir=".length()));
+            } else if (arg.startsWith("--worker=")) {
+                defaults.put("conductor.worker", arg.substring("--worker=".length()));
             }
         }
 

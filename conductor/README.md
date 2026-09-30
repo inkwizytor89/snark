@@ -24,6 +24,25 @@ mvn clean package
 
 ## Running the Application
 
+Conductor starts the worker application that actually runs game instances. To make it work reliably, you can tell Conductor which JAR to use by setting the `--worker` argument.
+
+### What is the worker?
+The worker is the Java program that launches and manages a single instance. Conductor is only the manager that decides what to run and monitors it.
+
+### Worker lookup order
+Conductor looks for the worker in this order:
+1. `--worker=/path/to/worker.jar` — the explicit path you provide
+2. Any JAR in the current working directory, except files starting with `conductor`
+3. A JAR in `snark/target`
+4. If nothing is found, it stops with an exception
+
+When the worker is found, Conductor logs the full absolute path used.
+
+### Example
+```bash
+java -jar conductor.jar --worker=/opt/workers/game-worker.jar
+```
+
 ### With Default Instance Directory
 
 The application will store instances in the `instances` directory in the current working directory:
@@ -40,12 +59,6 @@ You can specify a custom directory for storing instances using the `--instances-
 java -jar conductor.jar --instances-dir=/path/to/custom/directory
 ```
 
-For example:
-
-```bash
-java -jar conductor.jar --instances-dir=/data/conductor-instances
-```
-
 ### With Custom Start Properties Directory
 
 You can specify a custom directory for storing start-property templates using the `--start-properties-dir` parameter:
@@ -58,6 +71,7 @@ java -jar conductor.jar --start-properties-dir=/data/start-properties
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
+| `--worker=<path>` | Full path to the worker JAR used to run instances | auto-detect in working dir / `snark/target` |
 | `--instances-dir=<path>` | Path to the directory where instances will be stored | `instances` |
 | `--start-properties-dir=<path>` | Path to the directory where start-property templates are stored | `start-properties` |
 
