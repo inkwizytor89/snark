@@ -1,6 +1,6 @@
 package org.enoch.conductor.ws;
 
-import org.enoch.conductor.command.CommandMessage;
+import org.enoch.common.command.CommandMessage;
 import org.enoch.conductor.config.InstanceConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

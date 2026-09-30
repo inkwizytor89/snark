@@ -1,6 +1,6 @@
 package org.enoch.conductor.config;
 
-import org.enoch.conductor.command.CommandMessage;
+import org.enoch.common.command.CommandMessage;
 import org.enoch.conductor.ws.WorkerSocketHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

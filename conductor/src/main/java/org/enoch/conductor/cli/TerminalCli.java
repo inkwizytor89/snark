@@ -1,6 +1,6 @@
 package org.enoch.conductor.cli;
 
-import org.enoch.conductor.command.CommandMessage;
+import org.enoch.common.command.CommandMessage;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.InstanceRuntime;
 import org.enoch.conductor.instance.ProfileRepository;
@@ -398,5 +398,4 @@ public class TerminalCli implements CommandLineRunner {
                 """);
     }
 }
-
 
