@@ -1,6 +1,7 @@
 package org.enoch.snark.expression.coordinate;
 
 import com.google.common.collect.ArrayListMultimap;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
@@ -34,6 +35,8 @@ import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFI
 @Scope("prototype")
 @SuppressWarnings("FieldCanBeLocal")
 public class CoordinateSpelService {
+
+    public static final String NONE = "none";
 
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
@@ -69,9 +72,8 @@ public class CoordinateSpelService {
     }
 
     public List<PlanetData> nonCached(String expression, Map<String, Object> expressionContext) {
-        if (expression == null) {
-            return null;
-        }
+        if (expression == null) return null;
+        if (NONE.equals(expression)) return new ArrayList<>();
         if(expression.equals(PLANETS)) {
             expression = "#all_planets()";
             System.err.println("Expression \""+PLANETS+"\" replaced with \""+expression+"\"");
