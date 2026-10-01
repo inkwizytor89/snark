@@ -10,6 +10,8 @@ This repository contains a multi-instance Java system composed of three main par
 
 ## Architecture
 
+The `doc` folder contains the project documentation and should be treated as the primary source of design and domain explanations. It describes the architecture, domain rules, and implementation decisions in a structured way so that new contributors can find the relevant information without guessing. The `## Documentation` section is a short index explaining what is documented in more detail in the files inside `doc`.
+
 `common` contains reusable code shared between the modules so the conductor and worker stay aligned on communication contracts and utility behavior.
 
 `conductor` starts, stops, and monitors many independent `snark` instances. Each instance is identified by an `instanceId` and is assigned its own database configuration. Communication between the conductor and worker instances is performed through WebSockets. The conductor is responsible for lifecycle operations and for polling the current status of each instance.
@@ -28,6 +30,21 @@ This repository contains a multi-instance Java system composed of three main par
 All project documentation, code comments, and inline explanations must be written in English.
 
 Keep comments clear, brief, and factual. Do not mix English and Polish in project docs or source comments.
+
+## Documentation
+
+### Domain
+
+- Domain-specific documentation and behaviour definitions for this project are in the `doc/domain` folder; it describes the business rules and domain concepts used by the application.
+
+### Architecture
+
+- Architecture and system-level design notes are in the `doc/architecture` folder; it documents the project structure, component boundaries, and technical design.
+- Action execution flow in conductor: see [doc/decisions/Action in conductor.md](../doc/decisions/Action%20in%20conductor.md). This document explains that the conductor owns the action list and that GUI/terminal actions must pass through the conductor instead of invoking worker logic directly.
+
+### Decisions
+
+- Decision records and implementation constraints are stored in `doc/decisions`; each note describes a design choice, the rationale behind it, and the relevant enforcement rules.
 
 ## Repository guidance
 
