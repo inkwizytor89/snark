@@ -30,6 +30,7 @@ public class DiscordBotService extends ListenerAdapter {
     private final Cmd cmd;
 
     private JDA jda;
+    private boolean missingJdaInfo;
 
     @PostConstruct
     public void init() throws Exception {
@@ -66,7 +67,10 @@ public class DiscordBotService extends ListenerAdapter {
     public void sendMessage(String channelId, String message) {
         // Do nothing if JDA wasn't started or channelId is missing
         if (jda == null) {
-            System.out.println("JDA not initialized - skipping sendMessage");
+            if(!missingJdaInfo) {
+                System.out.println("JDA not initialized - skipping sendMessage");
+                missingJdaInfo = true;
+            }
             return;
         }
         if (channelId == null || channelId.isEmpty()) {
