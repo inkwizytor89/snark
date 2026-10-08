@@ -254,7 +254,7 @@ public abstract class PlanetEntity extends IdEntity{
     @Column(name = "jump_gate")
     public Long jumpGate;
 
-//    Lifeform
+//    Lifeform research is stored per planet, using the same grouped-field pattern.
 
 // Humans
     @Basic

@@ -67,7 +67,7 @@ public class PlayerEntity extends IdEntity {
     @Column(name = "spy_level")
     public Long spyLevel = 4L;
 
-//    Research
+//    Player-scoped research. It is independent from planets.
     @Basic
     @Column(name = "energy_technology")
     public Long energyTechnology;

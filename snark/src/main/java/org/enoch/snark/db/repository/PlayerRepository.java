@@ -11,6 +11,10 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     Optional<PlayerEntity> findFirstByCode(String code);
 
+    /**
+     * Returns the main player controlled by this instance.
+     * The empty code identifies the active account in persisted data.
+     */
     default PlayerEntity mainPlayer() {
         Optional<PlayerEntity> byCode = this.findFirstByCode("");
         if(byCode.isPresent()) return byCode.get();

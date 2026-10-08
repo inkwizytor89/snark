@@ -36,6 +36,7 @@ Keep comments clear, brief, and factual. Do not mix English and Polish in projec
 ### Domain
 
 - Domain-specific documentation and behaviour definitions for this project are in the `doc/domain` folder; it describes the business rules and domain concepts used by the application.
+- Player domain: see [doc/domain/Player.md](../doc/domain/Player.md) for the player model, main player, research ownership, and planet/moon relationships.
 
 ### Architecture
 

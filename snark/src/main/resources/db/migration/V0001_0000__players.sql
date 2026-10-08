@@ -18,7 +18,7 @@ create table players
   spy_level             integer,
   updated    timestamp default now(),
 
-  --Research
+  -- Player-scoped research fields. Lifeform research is stored with planets.
   energy_technology              integer,
   laser_technology               integer,
   ion_technology                 integer,
