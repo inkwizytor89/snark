@@ -24,6 +24,7 @@ public class ShipsMap extends HashMap<Ship, Long> {
     public static final List<ShipsMap> EMPTY_SHIP_WAVE = new ArrayList<>();
 
     @JsonCreator
+    // Parses fleet expressions like transporterLarge:10,explorer:1,battleship:1.
     public static ShipsMap parse(String expression) {
         if(ALL.is(expression)) return ALL_SHIPS;
         if(NONE.is(expression)) return NO_SHIPS;

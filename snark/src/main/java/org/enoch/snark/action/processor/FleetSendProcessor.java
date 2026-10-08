@@ -45,6 +45,9 @@ import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.ATTAC
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.SPY;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 
+/**
+ * Validates a fleet dispatch request, converts ship expressions, and persists the outgoing fleet.
+ */
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")

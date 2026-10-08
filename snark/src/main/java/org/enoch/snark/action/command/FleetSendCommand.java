@@ -16,6 +16,7 @@ public class FleetSendCommand extends AbstractCommand implements SendCommand {
     private Mission mission;
     private Long speed;
 
+    // Fleet composition expressed as ship types and counts.
     private ShipsMap shipsMap;
     private Resources resources;
     private final List<AbstractCondition> conditions = new ArrayList<>();

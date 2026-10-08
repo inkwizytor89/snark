@@ -20,6 +20,7 @@ public class FleetEntity extends IdEntity {
     public static final Long FLEET_SAVE_CODE = 2L;
     public static final Long FLEET_THREAD = 3L;
 
+    // Fleet rows persist a dispatched fleet together with its ship counts and travel metadata.
     @Basic
     @Column(name = "target_galaxy")
     public Integer targetGalaxy;
