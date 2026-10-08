@@ -45,6 +45,7 @@ Keep comments clear, brief, and factual. Do not mix English and Polish in projec
 ### Decisions
 
 - Decision records and implementation constraints are stored in `doc/decisions`; each note describes a design choice, the rationale behind it, and the relevant enforcement rules.
+- Distributed documentation: see [doc/decisions/Distributed documentation.md](../doc/decisions/Distributed%20documentation.md) for the rule that overviews stay brief and point to one detailed source instead of repeating the same content.
 
 ## Repository guidance
 
