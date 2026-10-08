@@ -141,6 +141,7 @@ public class Planet implements Coordinate {
 
     @Override
     public String toString() {
+        // The leading type letter identifies whether this coordinate is a planet, moon, or debris field.
         return type.code()+getCordinate(galaxy, system, position);
     }
     public String toFileName() {

@@ -27,6 +27,7 @@ public class PlanetData implements Coordinate {
         this.target = planet;
     }
 
+    // Keeps the abstract coordinate together with the concrete database-backed entity.
     public PlanetEntity planetData() {
         if(colony != null) return colony;
         if(target != null) return target;

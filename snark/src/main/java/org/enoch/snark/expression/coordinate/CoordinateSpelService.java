@@ -30,6 +30,9 @@ import static org.enoch.snark.instance.model.types.Expression.ALL;
 import static org.enoch.snark.instance.service.CoordinateExpressionService.*;
 import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
 
+/**
+ * Resolves coordinate expressions from configuration text into concrete coordinates or database-backed selections.
+ */
 @RequiredArgsConstructor
 @Component
 @Scope("prototype")
