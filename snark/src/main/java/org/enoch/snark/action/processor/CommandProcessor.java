@@ -32,6 +32,7 @@ public class CommandProcessor {
     public ExecutionIssue execute(Wd wd, AbstractCommand abstractCommand) {
         CommandStatus status = abstractCommand.getStatus();
         status.setStatus(IN_PROGRESS);
+        // Dispatch is centralized here so each command type is handled by one processor.
         return switch (abstractCommand) {
             case OpenPageCommand open -> openPageProcessor.execute(wd, open);
             case BuildCommand build -> buildProcessor.execute(wd, build);

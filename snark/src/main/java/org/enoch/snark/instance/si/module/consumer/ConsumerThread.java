@@ -130,6 +130,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         command.getStatus().setStatus(IN_PROGRESS);
         ExecutionIssue executionIssue = OTHER;
         try {
+            // The consumer thread only pulls from the queue and delegates execution to the processor layer.
             executionIssue = processor.execute(wd, command);
             command.getStatus().setIssue(executionIssue);
             if(NO_ISSUE.equals(executionIssue)) {
