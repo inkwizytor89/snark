@@ -36,6 +36,12 @@ import static org.enoch.snark.action.command.status.ExecutionStatus.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent.FLEETDISPATCH;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
+/**
+ * Base class for all worker threads. Threads run in a loop that checks conditions, generates
+ * commands via onStep(), and pushes them to the core queue. For thread lifecycle, configuration
+ * resolution, and the module grouping pattern, see:
+ * doc/architecture/Thread system.md
+ */
 @NoArgsConstructor(force = true)
 public abstract class AbstractThread extends ExecutorImpl {
 

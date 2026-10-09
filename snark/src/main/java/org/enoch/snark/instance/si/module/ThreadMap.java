@@ -22,6 +22,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Configuration container and accessor for a single thread or module-level config.
+ * Extends HashMap to store thread-specific key-value pairs loaded from property files.
+ * 
+ * Config naming: module.thread.key=value (e.g., attack.source=#cache_key('swarm_nest'))
+ * 
+ * ThreadMap holds recognized config keys (TIME, PAUSE, SOURCE, TARGET, etc.) and provides
+ * type-safe accessors (getConfig, getConfigInteger, getShips, etc.) that return defaults if
+ * a key is not set or is empty.
+ * 
+ * Threads inherit module-level config via AbstractModule.mainMap if the thread-specific
+ * config is not set. See doc/architecture/Thread system.md for configuration resolution.
+ */
 public class ThreadMap extends HashMap<String, String> {
 
     // todo move to properties map

@@ -45,6 +45,7 @@ Keep comments clear, brief, and factual. Do not mix English and Polish in projec
 - Architecture and system-level design notes are in the `doc/architecture` folder; it documents the project structure, component boundaries, and technical design.
 - Action execution flow in conductor: see [doc/decisions/Action in conductor.md](../doc/decisions/Action%20in%20conductor.md). This document explains that the conductor owns the action list and that GUI/terminal actions must pass through the conductor instead of invoking worker logic directly.
 - Action processing in snark: see [doc/architecture/Action processing in snark.md](../doc/architecture/Action%20processing%20in%20snark.md) for the command transfer object, dispatcher, and consumer-thread flow.
+- Thread system: see [doc/architecture/Thread system.md](../doc/architecture/Thread%20system.md) for threads, modules, configuration resolution, and the config property format.
 
 ### Decisions
 

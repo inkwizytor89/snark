@@ -12,6 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
+/**
+ * Container for a group of related threads that share a time schedule and a common
+ * configuration map (mainMap). Threads inherit module-level config and can override it
+ * with their own thread-specific values.
+ * 
+ * When configuration changes, updateMap() recreates threads that are in the new config
+ * and destroys threads that are no longer present.
+ * 
+ * For thread lifecycle, modules, and configuration resolution, see:
+ * doc/architecture/Thread system.md
+ */
 @Data
 public class AbstractModule {
 
