@@ -1,0 +1,133 @@
+package org.enoch.snark.expression.global;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+/**
+ * Registry for SpEL functions available across all domains.
+ * 
+ * This class centralizes registration of all SpEL functions that can be used in expressions.
+ * Functions can come from different domains (coordinates, conditions, resources, etc).
+ * 
+ * To add a new function:
+ * 1. Create a static method in a domain function class (e.g., CoordinateFunctions, ConditionFunctions)
+ * 2. Register it here using context.registerFunction()
+ * 
+ * Example:
+ * <pre>
+ * context.registerFunction("myFunction", MyFunctions.class.getDeclaredMethod("myFunction", String.class));
+ * </pre>
+ */
+@Slf4j
+public class GlobalSpelFunctionRegistry {
+
+    /**
+     * Register all available SpEL functions.
+     *
+     * @param context The StandardEvaluationContext to register functions in
+     * @throws NoSuchMethodException if a method cannot be found (configuration error)
+     */
+    public static void registerFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+        log.debug("Registering SpEL functions");
+
+        // ============ COORDINATE FUNCTIONS ============
+        // These functions return coordinates/planets/moons
+        registerCoordinateFunctions(context);
+
+        // ============ CONDITION FUNCTIONS ============
+        // These functions create AbstractCondition instances
+        registerConditionFunctions(context);
+
+        // ============ RESOURCE FUNCTIONS ============
+        // These functions work with resources
+        registerResourceFunctions(context);
+
+        log.debug("SpEL functions registered successfully");
+    }
+
+    /**
+     * Register coordinate-related functions.
+     * Placeholder for existing coordinate functions.
+     */
+    private static void registerCoordinateFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+        log.debug("Registering coordinate functions");
+        // TODO: Register existing coordinate functions from CoordinateSpelService
+        // Example:
+        // context.registerFunction("all_planets", Colonies.class.getDeclaredMethod("planets"));
+        // context.registerFunction("all_moons", Colonies.class.getDeclaredMethod("moons"));
+    }
+
+    /**
+     * Register condition-related functions.
+     * These functions create condition objects from parameters.
+     */
+    private static void registerConditionFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+        log.debug("Registering condition functions");
+
+        // RESOURCE_COUNT: Check if planet has minimum resources
+        // Usage: #resourceCount({source: 'p[1:2:3]', count: '3m'})
+        context.registerFunction("resourceCount", 
+            ConditionFunctions.class.getDeclaredMethod("resourceCount", java.util.Map.class));
+
+        // RESOURCE: Check resource availability with optional leave amount
+        // Usage: #resource({planet: 'source', have: 'metal:100', leave: 'metal:50'})
+        context.registerFunction("resource", 
+            ConditionFunctions.class.getDeclaredMethod("resource", java.util.Map.class));
+
+        // SHIPS: Check ship availability
+        // Usage: #ships({planet: 'source', need: 'sg:5', leave: 'sg:2'})
+        context.registerFunction("ships", 
+            ConditionFunctions.class.getDeclaredMethod("ships", java.util.Map.class));
+
+        // FLEET_EXPIRED: Wait for fleet to expire
+        // Usage: #fleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '1H'})
+        context.registerFunction("fleetExpired", 
+            ConditionFunctions.class.getDeclaredMethod("fleetExpired", java.util.Map.class));
+
+        // EXPR: Generic expression condition
+        // Usage: #expr({term: 'fuel_level', op: 'eq', value: 'ready'})
+        context.registerFunction("expr", 
+            ConditionFunctions.class.getDeclaredMethod("expr", java.util.Map.class));
+
+        // TECH: Check technology level
+        // Usage: #tech({source: 'source', tech: 'IMPULSE', level: '5'})
+        context.registerFunction("tech", 
+            ConditionFunctions.class.getDeclaredMethod("tech", java.util.Map.class));
+
+        // NO_MISSIONS: Check no missions on planet
+        // Usage: #noMissions({planet: 'source'})
+        context.registerFunction("noMissions", 
+            ConditionFunctions.class.getDeclaredMethod("noMissions", java.util.Map.class));
+
+        // FLEET_SLOT: Check available fleet slots
+        // Usage: #fleetSlot({planet: 'source', required: '5'})
+        context.registerFunction("fleetSlot", 
+            ConditionFunctions.class.getDeclaredMethod("fleetSlot", java.util.Map.class));
+
+        // ATTACK_NOT_EXPIRED: Wait for attack to expire
+        // Usage: #attackNotExpired({target: 'target', timeout: '1H'})
+        context.registerFunction("attackNotExpired", 
+            ConditionFunctions.class.getDeclaredMethod("attackNotExpired", java.util.Map.class));
+
+        // SPY_NOT_EXPIRED: Wait for spy operation to expire
+        // Usage: #spyNotExpired({target: 'target', timeout: '1H'})
+        context.registerFunction("spyNotExpired", 
+            ConditionFunctions.class.getDeclaredMethod("spyNotExpired", java.util.Map.class));
+
+        // IS_MODIFIED_AFTER: Check if data was modified after timestamp
+        // Usage: #modifiedAfter({target: 'source', since: '30M'})
+        context.registerFunction("modifiedAfter", 
+            ConditionFunctions.class.getDeclaredMethod("modifiedAfter", java.util.Map.class));
+    }
+
+    /**
+     * Register resource-related functions.
+     * Placeholder for future resource functions.
+     */
+    private static void registerResourceFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+        log.debug("Registering resource functions");
+        // TODO: Register resource-related functions as needed
+        // Example:
+        // context.registerFunction("totalResources", ResourceFunctions.class.getDeclaredMethod("totalResources", String.class));
+    }
+}
