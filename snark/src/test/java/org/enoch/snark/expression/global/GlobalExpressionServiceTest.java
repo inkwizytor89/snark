@@ -111,7 +111,7 @@ class GlobalExpressionServiceTest {
             assertEquals("FLEET_EXPIRED", result.getType());
             assertEquals("source", result.getParameter("source"));
             assertEquals("TRANSPORT|ATTACK", result.getParameter("missions"));
-            assertEquals(30 * 60 * 1000, result.getParameter("timeoutMs"));
+            assertEquals(30L * 60 * 1000, result.getParameter("timeoutMs"));
         }
 
         @Test
@@ -207,7 +207,7 @@ class GlobalExpressionServiceTest {
             assertNotNull(result);
             assertEquals("ATTACK_NOT_EXPIRED", result.getType());
             assertEquals("target", result.getParameter("target"));
-            assertEquals(60 * 60 * 1000, result.getParameter("timeoutMs"));
+            assertEquals(60L * 60 * 1000, result.getParameter("timeoutMs"));
         }
 
         @Test
@@ -226,7 +226,7 @@ class GlobalExpressionServiceTest {
             assertNotNull(result);
             assertEquals("SPY_NOT_EXPIRED", result.getType());
             assertEquals("target", result.getParameter("target"));
-            assertEquals(60 * 60 * 1000, result.getParameter("timeoutMs")); // default 1H
+            assertEquals(60L * 60 * 1000, result.getParameter("timeoutMs")); // default 1H
         }
 
         @Test
@@ -245,7 +245,7 @@ class GlobalExpressionServiceTest {
             assertNotNull(result);
             assertEquals("IS_MODIFIED_AFTER", result.getType());
             assertEquals("source", result.getParameter("target"));
-            assertEquals(10 * 60 * 1000, result.getParameter("sinceMs"));
+            assertEquals(10L * 60 * 1000, result.getParameter("sinceMs"));
         }
     }
 
