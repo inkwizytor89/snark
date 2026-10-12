@@ -1,334 +1,159 @@
 package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.condition.AttackNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.ExpressionCondition;
+import org.enoch.snark.instance.model.action.condition.FleetExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
+import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
+import org.enoch.snark.instance.model.action.condition.NoMissionsCondition;
+import org.enoch.snark.instance.model.action.condition.ResourceCondition;
+import org.enoch.snark.instance.model.action.condition.ResourceCountCondition;
+import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.condition.SpyNotExpiredCondition;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.Resources;
+import org.enoch.snark.instance.model.to.ShipsMap;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Condition function implementations for SpEL expressions.
- * 
- * These static methods are registered as SpEL functions via {@link GlobalSpelFunctionRegistry}.
- * Each method takes a Map of parameters and returns a condition object (or in this demo, a ConditionDto).
- * 
- * All parameters are passed as a Map with named keys for readability:
- * - Required parameters must be present or an exception is thrown
- * - Optional parameters have default values
- * 
- * Examples:
- * <pre>
- * #resourceCount({source: 'p[1:2:3]', count: '3m'})
- * #ships({planet: 'source', need: 'sg:5', leave: 'sg:2'})
- * #resource({planet: 'target', have: 'metal:100 crystal:50'})
- * #fleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '1H'})
- * </pre>
- * 
- * Note: This is a demo implementation. In production, these would return actual AbstractCondition subclasses.
+ *
+ * These static methods are registered as SpEL functions via {@link GlobalSpelFunctionRegistry}
+ * and return real condition instances used by the runtime.
  */
 @Slf4j
 public class ConditionFunctions {
 
-    /**
-     * Create a RESOURCE_COUNT condition.
-     * 
-     * Checks if a planet has at least a minimum amount of resources.
-     * 
-     * Parameters:
-     * - source (required): Planet identifier (e.g., 'source', 'target', 'p[1:2:3]')
-     * - count (required): Resource count (e.g., '3m', '100k')
-     * 
-     * @param params The parameters map
-     * @return A condition dto (demo version)
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto resourceCount(Map<String, Object> params) {
-        log.debug("Creating resourceCount condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String source = ExpressionParsingUtils.getRequiredParam(params, "source");
-        String count = ExpressionParsingUtils.getRequiredParam(params, "count");
+    public static AbstractCondition hasResourcesCount(Map<String, Object> params) {
+        log.debug("Creating hasResourcesCount condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        source = ExpressionParsingUtils.parsePlanet(source);
-
-        return new ConditionDto("RESOURCE_COUNT")
-            .param("source", source)
-            .param("count", count);
+        String planetValue = firstPresentRequired(params, "planet", "source");
+        String count = firstPresentRequired(params, "count", "resourcesCount");
+        return new ResourceCountCondition(count, parsePlanetValue(planetValue));
     }
 
-    /**
-     * Create a RESOURCE condition.
-     * 
-     * Checks resource availability with optional leave amount.
-     * 
-     * Parameters:
-     * - planet (required): Planet identifier
-     * - have (required): Resources to check (e.g., 'metal:100 crystal:50')
-     * - leave (optional): Resources to leave behind (default: empty)
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto resource(Map<String, Object> params) {
-        log.debug("Creating resource condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String planet = ExpressionParsingUtils.getRequiredParam(params, "planet");
-        String have = ExpressionParsingUtils.getRequiredParam(params, "have");
-        String leave = ExpressionParsingUtils.getOptionalParam(params, "leave", "");
+    public static AbstractCondition hasResources(Map<String, Object> params) {
+        log.debug("Creating hasResources condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        planet = ExpressionParsingUtils.parsePlanet(planet);
-        Map<String, String> haveResources = ExpressionParsingUtils.parseResources(have);
-        Map<String, String> leaveResources = ExpressionParsingUtils.parseResources(leave);
-
-        return new ConditionDto("RESOURCE")
-            .param("planet", planet)
-            .param("have", haveResources)
-            .param("leave", leaveResources);
+        Planet planet = parsePlanetValue(firstPresentRequired(params, "planet", "source"));
+        Resources have = Resources.parse(firstPresentRequired(params, "have", "resources"));
+        Resources leave = Resources.parse(firstPresentOptional(params, "nothing", "leave", "leaveResources"));
+        return new ResourceCondition(planet, have, leave);
     }
 
-    /**
-     * Create a SHIPS condition.
-     * 
-     * Checks ship availability with optional leave amount.
-     * 
-     * Parameters:
-     * - planet (required): Planet identifier
-     * - need (required): Ships needed (e.g., 'sg:5 bc:3')
-     * - leave (optional): Ships to leave (default: empty)
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto ships(Map<String, Object> params) {
-        log.debug("Creating ships condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String planet = ExpressionParsingUtils.getRequiredParam(params, "planet");
-        String need = ExpressionParsingUtils.getRequiredParam(params, "need");
-        String leave = ExpressionParsingUtils.getOptionalParam(params, "leave", "");
+    public static AbstractCondition areShips(Map<String, Object> params) {
+        log.debug("Creating areShips condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        planet = ExpressionParsingUtils.parsePlanet(planet);
-        Map<String, Integer> needShips = ExpressionParsingUtils.parseShipsMap(need);
-        Map<String, Integer> leaveShips = ExpressionParsingUtils.parseShipsMap(leave);
-
-        return new ConditionDto("SHIPS")
-            .param("planet", planet)
-            .param("need", needShips)
-            .param("leave", leaveShips);
+        Planet planet = parsePlanetValue(firstPresentRequired(params, "planet", "source"));
+        ShipsMap need = ShipsMap.parse(firstPresentRequired(params, "need", "shipsMap"));
+        ShipsMap leave = ShipsMap.parse(firstPresentOptional(params, "none", "leave"));
+        return new ShipsCondition(need, leave, planet);
     }
 
-    /**
-     * Create a FLEET_EXPIRED condition.
-     * 
-     * Waits for fleet to expire (missions to complete).
-     * 
-     * Parameters:
-     * - source (required): Planet identifier
-     * - missions (required): Missions to wait for (e.g., 'TRANSPORT|ATTACK|ESPIONAGE')
-     * - timeout (optional): How long to wait (default: '1H')
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto fleetExpired(Map<String, Object> params) {
-        log.debug("Creating fleetExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String source = ExpressionParsingUtils.getRequiredParam(params, "source");
-        String missions = ExpressionParsingUtils.getRequiredParam(params, "missions");
-        String timeout = ExpressionParsingUtils.getOptionalParam(params, "timeout", "1H");
+    public static AbstractCondition isFleetExpired(Map<String, Object> params) {
+        log.debug("Creating isFleetExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        source = ExpressionParsingUtils.parsePlanet(source);
-        long timeoutMs = ExpressionParsingUtils.parseDurationToMillis(timeout);
-
-        return new ConditionDto("FLEET_EXPIRED")
-            .param("source", source)
-            .param("missions", missions)
-            .param("timeoutMs", timeoutMs);
+        Planet source = parsePlanetValue(firstPresentRequired(params, "source", "planet"));
+        String missions = normalizeMissions(firstPresentRequired(params, "missions", "blockingMissions"));
+        String duration = firstPresentOptional(params, "1H", "timeout", "duration");
+        return new FleetExpiredCondition(source, missions, duration);
     }
 
-    /**
-     * Create an EXPR (Expression) condition.
-     * 
-     * Generic expression condition for comparing cache values.
-     * 
-     * Parameters:
-     * - term (required): Variable name in cache (e.g., 'fuel_level')
-     * - op (required): Operator (e.g., 'eq', 'gt', 'lt')
-     * - value (required): Expected value (e.g., 'ready', '5')
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto expr(Map<String, Object> params) {
-        log.debug("Creating expr condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String term = ExpressionParsingUtils.getRequiredParam(params, "term");
-        String op = ExpressionParsingUtils.getRequiredParam(params, "op");
-        String value = ExpressionParsingUtils.getRequiredParam(params, "value");
+    public static AbstractCondition isExpressionTrue(Map<String, Object> params) {
+        log.debug("Creating isExpressionTrue condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        return new ConditionDto("EXPR")
-            .param("term", term)
-            .param("operator", op)
-            .param("value", value);
+        String term = firstPresentRequired(params, "term");
+        String operator = firstPresentRequired(params, "op", "operator");
+        String value = firstPresentRequired(params, "value");
+        return new ExpressionCondition(term, operator, value);
     }
 
-    /**
-     * Create a TECH (Technology) condition.
-     * 
-     * Checks if a planet has a technology at a minimum level.
-     * 
-     * Parameters:
-     * - source (required): Planet identifier
-     * - tech (required): Technology name (e.g., 'IMPULSE', 'COMBUSTION')
-     * - level (required): Minimum technology level (1-15)
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto tech(Map<String, Object> params) {
-        log.debug("Creating tech condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String source = ExpressionParsingUtils.getRequiredParam(params, "source");
-        String tech = ExpressionParsingUtils.getRequiredParam(params, "tech");
-        String level = ExpressionParsingUtils.getRequiredParam(params, "level");
-
-        source = ExpressionParsingUtils.parsePlanet(source);
-        long levelNum = Long.parseLong(level);
-
-        return new ConditionDto("TECH")
-            .param("source", source)
-            .param("technology", tech)
-            .param("level", levelNum);
+    public static AbstractCondition hasTechnology(Map<String, Object> params) {
+        throw new UnsupportedOperationException("hasTechnology is not supported yet because there is no concrete TechnologyCondition implementation");
     }
 
-    /**
-     * Create a NO_MISSIONS condition.
-     * 
-     * Checks that there are no missions on a planet.
-     * 
-     * Parameters:
-     * - planet (required): Planet identifier
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto noMissions(Map<String, Object> params) {
-        log.debug("Creating noMissions condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String planet = ExpressionParsingUtils.getRequiredParam(params, "planet");
-        planet = ExpressionParsingUtils.parsePlanet(planet);
+    public static AbstractCondition hasNoMissions(Map<String, Object> params) {
+        log.debug("Creating hasNoMissions condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        return new ConditionDto("NO_MISSIONS")
-            .param("planet", planet);
+        Planet source = parsePlanetValue(firstPresentRequired(params, "source", "planet"));
+        String missions = normalizeMissions(firstPresentOptional(params, allMissions(), "missions", "blockingMissions"));
+        String duration = firstPresentOptional(params, "1H", "timeout", "duration");
+        return new NoMissionsCondition(source, missions, duration);
     }
 
-    /**
-     * Create a FLEET_SLOT condition.
-     * 
-     * Checks if there are enough available fleet slots.
-     * 
-     * Parameters:
-     * - planet (required): Planet identifier
-     * - required (required): Number of slots needed
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto fleetSlot(Map<String, Object> params) {
-        log.debug("Creating fleetSlot condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String planet = ExpressionParsingUtils.getRequiredParam(params, "planet");
-        String required = ExpressionParsingUtils.getRequiredParam(params, "required");
+    public static AbstractCondition hasFleetSlots(Map<String, Object> params) {
+        log.debug("Creating hasFleetSlots condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        planet = ExpressionParsingUtils.parsePlanet(planet);
-        int requiredSlots = Integer.parseInt(required);
-
-        return new ConditionDto("FLEET_SLOT")
-            .param("planet", planet)
-            .param("required", requiredSlots);
+        Integer freeSlots = Integer.valueOf(firstPresentRequired(params, "freeSlots", "required"));
+        return new FleetSlotCondition(freeSlots);
     }
 
-    /**
-     * Create an ATTACK_NOT_EXPIRED condition.
-     * 
-     * Waits for an attack to expire.
-     * 
-     * Parameters:
-     * - target (required): Target planet identifier
-     * - timeout (optional): How long to wait (default: '1H')
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto attackNotExpired(Map<String, Object> params) {
-        log.debug("Creating attackNotExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String target = ExpressionParsingUtils.getRequiredParam(params, "target");
-        String timeout = ExpressionParsingUtils.getOptionalParam(params, "timeout", "1H");
+    public static AbstractCondition isAttackNotExpired(Map<String, Object> params) {
+        log.debug("Creating isAttackNotExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        target = ExpressionParsingUtils.parsePlanet(target);
-        long timeoutMs = ExpressionParsingUtils.parseDurationToMillis(timeout);
-
-        return new ConditionDto("ATTACK_NOT_EXPIRED")
-            .param("target", target)
-            .param("timeoutMs", timeoutMs);
+        Planet target = parsePlanetValue(firstPresentRequired(params, "target"));
+        Long seconds = ExpressionParsingUtils.parseDurationToSeconds(firstPresentOptional(params, "1H", "timeout", "duration"));
+        return new AttackNotExpiredCondition(seconds, false, target);
     }
 
-    /**
-     * Create a SPY_NOT_EXPIRED condition.
-     * 
-     * Waits for a spy operation to expire.
-     * 
-     * Parameters:
-     * - target (required): Target planet identifier
-     * - timeout (optional): How long to wait (default: '1H')
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto spyNotExpired(Map<String, Object> params) {
-        log.debug("Creating spyNotExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String target = ExpressionParsingUtils.getRequiredParam(params, "target");
-        String timeout = ExpressionParsingUtils.getOptionalParam(params, "timeout", "1H");
+    public static AbstractCondition isSpyNotExpired(Map<String, Object> params) {
+        log.debug("Creating isSpyNotExpired condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        target = ExpressionParsingUtils.parsePlanet(target);
-        long timeoutMs = ExpressionParsingUtils.parseDurationToMillis(timeout);
-
-        return new ConditionDto("SPY_NOT_EXPIRED")
-            .param("target", target)
-            .param("timeoutMs", timeoutMs);
+        Planet target = parsePlanetValue(firstPresentRequired(params, "target"));
+        Long seconds = ExpressionParsingUtils.parseDurationToSeconds(firstPresentOptional(params, "1H", "timeout", "duration"));
+        return new SpyNotExpiredCondition(seconds, false, target);
     }
 
-    /**
-     * Create an IS_MODIFIED_AFTER condition.
-     * 
-     * Checks if data was modified after a certain time.
-     * 
-     * Parameters:
-     * - target (required): Target planet identifier
-     * - since (required): Time duration (e.g., '30M', '1H')
-     * 
-     * @param params The parameters map
-     * @return A condition dto
-     * @throws IllegalArgumentException if required parameters are missing
-     */
-    public static ConditionDto modifiedAfter(Map<String, Object> params) {
-        log.debug("Creating modifiedAfter condition with params: {}", ExpressionParsingUtils.mapToString(params));
-        
-        String target = ExpressionParsingUtils.getRequiredParam(params, "target");
-        String since = ExpressionParsingUtils.getRequiredParam(params, "since");
+    public static AbstractCondition isModifiedAfter(Map<String, Object> params) {
+        log.debug("Creating isModifiedAfter condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
-        target = ExpressionParsingUtils.parsePlanet(target);
-        long sinceMs = ExpressionParsingUtils.parseDurationToMillis(since);
+        String firstTerm = firstPresentRequired(params, "first", "firstTerm");
+        String secondTerm = firstPresentRequired(params, "second", "secondTerm");
+        return new IsModifiedAfterCondition(firstTerm, secondTerm);
+    }
 
-        return new ConditionDto("IS_MODIFIED_AFTER")
-            .param("target", target)
-            .param("sinceMs", sinceMs);
+    private static Planet parsePlanetValue(String value) {
+        Planet planet = Planet.parse(value);
+        if (planet == null) {
+            throw new IllegalArgumentException("Planet value can not be null or blank");
+        }
+        return planet;
+    }
+
+    private static String firstPresentRequired(Map<String, Object> params, String... names) {
+        for (String name : names) {
+            Object value = params.get(name);
+            if (value != null) {
+                return value.toString();
+            }
+        }
+        throw new IllegalArgumentException("Required parameter missing. Expected one of: " + String.join(", ", names));
+    }
+
+    private static String firstPresentOptional(Map<String, Object> params, String defaultValue, String... names) {
+        for (String name : names) {
+            Object value = params.get(name);
+            if (value != null) {
+                return value.toString();
+            }
+        }
+        return defaultValue;
+    }
+
+    private static String normalizeMissions(String missions) {
+        return missions.replace("|", ";");
+    }
+
+    private static String allMissions() {
+        return Arrays.stream(Mission.values())
+                .filter(mission -> !Mission.UNKNOWN.equals(mission))
+                .map(Enum::name)
+                .collect(Collectors.joining(";"));
     }
 }

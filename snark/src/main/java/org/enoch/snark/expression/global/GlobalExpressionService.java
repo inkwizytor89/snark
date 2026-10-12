@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * );
  * 
  * List&lt;AbstractCondition&gt; conditions = expressionService.evaluate(
- *     "#resourceCount({source: 'p[1:2:3]', count: '3m'})",
+ *     "#hasResourcesCount({source: 'p[1:2:3]', count: '3m'})",
  *     Map.of(),
  *     List.class,
  *     Duration.ofMinutes(1)
@@ -91,7 +91,7 @@ public class GlobalExpressionService {
     /**
      * Evaluate a SpEL expression with caching.
      *
-     * @param expression The SpEL expression to evaluate (e.g., "#all_planets()" or "#resourceCount({...})")
+     * @param expression The SpEL expression to evaluate (e.g., "#all_planets()" or "#hasResourcesCount({...})")
      * @param context Variables and context available during evaluation
      * @param returnType Expected return type
      * @param ttl Time-to-live for cache entry

@@ -65,59 +65,59 @@ public class GlobalSpelFunctionRegistry {
         log.debug("Registering condition functions");
 
         // RESOURCE_COUNT: Check if planet has minimum resources
-        // Usage: #resourceCount({source: 'p[1:2:3]', count: '3m'})
-        context.registerFunction("resourceCount", 
-            ConditionFunctions.class.getDeclaredMethod("resourceCount", java.util.Map.class));
+        // Usage: #hasResourcesCount({source: 'p[1:2:3]', count: '3m'})
+        context.registerFunction("hasResourcesCount",
+            ConditionFunctions.class.getDeclaredMethod("hasResourcesCount", java.util.Map.class));
 
         // RESOURCE: Check resource availability with optional leave amount
-        // Usage: #resource({planet: 'source', have: 'metal:100', leave: 'metal:50'})
-        context.registerFunction("resource", 
-            ConditionFunctions.class.getDeclaredMethod("resource", java.util.Map.class));
+        // Usage: #hasResources({planet: 'source', have: 'm100 c50', leave: 'm10'})
+        context.registerFunction("hasResources",
+            ConditionFunctions.class.getDeclaredMethod("hasResources", java.util.Map.class));
 
         // SHIPS: Check ship availability
-        // Usage: #ships({planet: 'source', need: 'sg:5', leave: 'sg:2'})
-        context.registerFunction("ships", 
-            ConditionFunctions.class.getDeclaredMethod("ships", java.util.Map.class));
+        // Usage: #areShips({planet: 'source', need: 'transporterSmall:5,battleship:3', leave: 'transporterSmall:2'})
+        context.registerFunction("areShips",
+            ConditionFunctions.class.getDeclaredMethod("areShips", java.util.Map.class));
 
         // FLEET_EXPIRED: Wait for fleet to expire
-        // Usage: #fleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '1H'})
-        context.registerFunction("fleetExpired", 
-            ConditionFunctions.class.getDeclaredMethod("fleetExpired", java.util.Map.class));
+        // Usage: #isFleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '1H'})
+        context.registerFunction("isFleetExpired",
+            ConditionFunctions.class.getDeclaredMethod("isFleetExpired", java.util.Map.class));
 
         // EXPR: Generic expression condition
-        // Usage: #expr({term: 'fuel_level', op: 'eq', value: 'ready'})
-        context.registerFunction("expr", 
-            ConditionFunctions.class.getDeclaredMethod("expr", java.util.Map.class));
+        // Usage: #isExpressionTrue({term: 'fuel_level', op: 'eq', value: 'ready'})
+        context.registerFunction("isExpressionTrue",
+            ConditionFunctions.class.getDeclaredMethod("isExpressionTrue", java.util.Map.class));
 
         // TECH: Check technology level
-        // Usage: #tech({source: 'source', tech: 'IMPULSE', level: '5'})
-        context.registerFunction("tech", 
-            ConditionFunctions.class.getDeclaredMethod("tech", java.util.Map.class));
+        // Usage reserved for a future concrete TechnologyCondition implementation.
+        context.registerFunction("hasTechnology",
+            ConditionFunctions.class.getDeclaredMethod("hasTechnology", java.util.Map.class));
 
         // NO_MISSIONS: Check no missions on planet
-        // Usage: #noMissions({planet: 'source'})
-        context.registerFunction("noMissions", 
-            ConditionFunctions.class.getDeclaredMethod("noMissions", java.util.Map.class));
+        // Usage: #hasNoMissions({planet: 'source'}) or #hasNoMissions({source: 'source', missions: 'TRANSPORT|ATTACK'})
+        context.registerFunction("hasNoMissions",
+            ConditionFunctions.class.getDeclaredMethod("hasNoMissions", java.util.Map.class));
 
         // FLEET_SLOT: Check available fleet slots
-        // Usage: #fleetSlot({planet: 'source', required: '5'})
-        context.registerFunction("fleetSlot", 
-            ConditionFunctions.class.getDeclaredMethod("fleetSlot", java.util.Map.class));
+        // Usage: #hasFleetSlots({required: '5'})
+        context.registerFunction("hasFleetSlots",
+            ConditionFunctions.class.getDeclaredMethod("hasFleetSlots", java.util.Map.class));
 
         // ATTACK_NOT_EXPIRED: Wait for attack to expire
-        // Usage: #attackNotExpired({target: 'target', timeout: '1H'})
-        context.registerFunction("attackNotExpired", 
-            ConditionFunctions.class.getDeclaredMethod("attackNotExpired", java.util.Map.class));
+        // Usage: #isAttackNotExpired({target: 'target', timeout: '1H'})
+        context.registerFunction("isAttackNotExpired",
+            ConditionFunctions.class.getDeclaredMethod("isAttackNotExpired", java.util.Map.class));
 
         // SPY_NOT_EXPIRED: Wait for spy operation to expire
-        // Usage: #spyNotExpired({target: 'target', timeout: '1H'})
-        context.registerFunction("spyNotExpired", 
-            ConditionFunctions.class.getDeclaredMethod("spyNotExpired", java.util.Map.class));
+        // Usage: #isSpyNotExpired({target: 'target', timeout: '1H'})
+        context.registerFunction("isSpyNotExpired",
+            ConditionFunctions.class.getDeclaredMethod("isSpyNotExpired", java.util.Map.class));
 
         // IS_MODIFIED_AFTER: Check if data was modified after timestamp
-        // Usage: #modifiedAfter({target: 'source', since: '30M'})
-        context.registerFunction("modifiedAfter", 
-            ConditionFunctions.class.getDeclaredMethod("modifiedAfter", java.util.Map.class));
+        // Usage: #isModifiedAfter({first: 'scanCacheKey', second: 'fleetCacheKey'})
+        context.registerFunction("isModifiedAfter",
+            ConditionFunctions.class.getDeclaredMethod("isModifiedAfter", java.util.Map.class));
     }
 
     /**

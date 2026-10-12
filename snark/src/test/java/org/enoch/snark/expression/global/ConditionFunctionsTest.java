@@ -1,264 +1,224 @@
 package org.enoch.snark.expression.global;
 
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.action.condition.AttackNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.ExpressionCondition;
+import org.enoch.snark.instance.model.action.condition.FleetExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
+import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
+import org.enoch.snark.instance.model.action.condition.NoMissionsCondition;
+import org.enoch.snark.instance.model.action.condition.ResourceCondition;
+import org.enoch.snark.instance.model.action.condition.ResourceCountCondition;
+import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.condition.SpyNotExpiredCondition;
+import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Tests for ConditionFunctions.
- */
 @DisplayName("ConditionFunctions Tests")
 class ConditionFunctionsTest {
 
     @Test
     @DisplayName("Should create resourceCount condition")
     void testResourceCountCondition() {
-        ConditionDto result = ConditionFunctions.resourceCount(
-            Map.of("source", "source", "count", "3m")
-        );
+        AbstractCondition result = ConditionFunctions.hasResourcesCount(Map.of("source", "source", "count", "3m"));
 
-        assertNotNull(result);
-        assertEquals("RESOURCE_COUNT", result.getType());
-        assertEquals("source", result.getParameter("source"));
-        assertEquals("3m", result.getParameter("count"));
+        assertInstanceOf(ResourceCountCondition.class, result);
+        ResourceCountCondition condition = (ResourceCountCondition) result;
+        assertEquals("3m", condition.getResourcesCount());
+        assertEquals(Planet.parse("source"), condition.getPlanet());
     }
 
     @Test
     @DisplayName("Should create resource condition with optional leave")
     void testResourceCondition() {
-        ConditionDto result = ConditionFunctions.resource(
-            Map.of(
-                "planet", "target",
-                "have", "metal:100 crystal:50",
-                "leave", "metal:10"
-            )
+        AbstractCondition result = ConditionFunctions.hasResources(
+                Map.of("planet", "target", "have", "m100 c50", "leave", "m10")
         );
 
-        assertNotNull(result);
-        assertEquals("RESOURCE", result.getType());
-        assertEquals("target", result.getParameter("planet"));
-        assertNotNull(result.getParameter("have"));
-        assertNotNull(result.getParameter("leave"));
+        assertInstanceOf(ResourceCondition.class, result);
+        ResourceCondition condition = (ResourceCondition) result;
+        assertEquals(Planet.parse("target"), condition.getPlanet());
+        assertEquals(100L, condition.getResources().metal);
+        assertEquals(50L, condition.getResources().crystal);
+        assertEquals(10L, condition.getLeaveResources().metal);
     }
 
     @Test
     @DisplayName("Should create resource condition without leave")
     void testResourceConditionWithoutLeave() {
-        ConditionDto result = ConditionFunctions.resource(
-            Map.of(
-                "planet", "source",
-                "have", "crystal:50"
-            )
+        AbstractCondition result = ConditionFunctions.hasResources(
+                Map.of("planet", "source", "have", "c50")
         );
 
-        assertNotNull(result);
-        assertEquals("RESOURCE", result.getType());
-        Map<String, String> leaveResources = (Map<String, String>) result.getParameter("leave");
-        assertTrue(leaveResources.isEmpty());
+        assertInstanceOf(ResourceCondition.class, result);
+        ResourceCondition condition = (ResourceCondition) result;
+        assertEquals(0L, condition.getLeaveResources().count());
     }
 
     @Test
     @DisplayName("Should create ships condition")
     void testShipsCondition() {
-        ConditionDto result = ConditionFunctions.ships(
-            Map.of(
-                "planet", "source",
-                "need", "sg:5 bc:3",
-                "leave", "sg:2"
-            )
+        AbstractCondition result = ConditionFunctions.areShips(
+                Map.of("planet", "source", "need", "transporterSmall:5,battleship:3", "leave", "transporterSmall:2")
         );
 
-        assertNotNull(result);
-        assertEquals("SHIPS", result.getType());
-        assertEquals("source", result.getParameter("planet"));
-        assertNotNull(result.getParameter("need"));
-        assertNotNull(result.getParameter("leave"));
+        assertInstanceOf(ShipsCondition.class, result);
+        ShipsCondition condition = (ShipsCondition) result;
+        assertEquals(Planet.parse("source"), condition.getPlanet());
+        assertEquals(5L, condition.getShipsMap().get(Ship.transporterSmall));
+        assertEquals(3L, condition.getShipsMap().get(Ship.battleship));
+        assertEquals(2L, condition.getLeave().get(Ship.transporterSmall));
     }
 
     @Test
     @DisplayName("Should create ships condition without leave")
     void testShipsConditionWithoutLeave() {
-        ConditionDto result = ConditionFunctions.ships(
-            Map.of(
-                "planet", "target",
-                "need", "bc:10"
-            )
+        AbstractCondition result = ConditionFunctions.areShips(
+                Map.of("planet", "target", "need", "battleship:10")
         );
 
-        assertNotNull(result);
-        assertEquals("SHIPS", result.getType());
-        Map<String, Integer> leaveShips = (Map<String, Integer>) result.getParameter("leave");
-        assertTrue(leaveShips.isEmpty());
+        assertInstanceOf(ShipsCondition.class, result);
+        ShipsCondition condition = (ShipsCondition) result;
+        assertSame(org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS, condition.getLeave());
     }
 
     @Test
     @DisplayName("Should create fleetExpired condition")
     void testFleetExpiredCondition() {
-        ConditionDto result = ConditionFunctions.fleetExpired(
-            Map.of(
-                "source", "source",
-                "missions", "TRANSPORT|ATTACK",
-                "timeout", "30M"
-            )
+        AbstractCondition result = ConditionFunctions.isFleetExpired(
+                Map.of("source", "source", "missions", "TRANSPORT|ATTACK", "timeout", "30M")
         );
 
-        assertNotNull(result);
-        assertEquals("FLEET_EXPIRED", result.getType());
-        assertEquals("source", result.getParameter("source"));
-        assertEquals("TRANSPORT|ATTACK", result.getParameter("missions"));
-        assertEquals(30 * 60 * 1000L, result.getParameter("timeoutMs"));
+        assertInstanceOf(FleetExpiredCondition.class, result);
+        FleetExpiredCondition condition = (FleetExpiredCondition) result;
+        assertEquals(Planet.parse("source"), condition.getSource());
+        assertTrue(condition.getBlockingMissions().contains(Mission.TRANSPORT));
+        assertTrue(condition.getBlockingMissions().contains(Mission.ATTACK));
+        assertEquals(1800L, condition.getDuration().getSeconds());
     }
 
     @Test
     @DisplayName("Should use default timeout for fleetExpired")
     void testFleetExpiredConditionDefaultTimeout() {
-        ConditionDto result = ConditionFunctions.fleetExpired(
-            Map.of(
-                "source", "source",
-                "missions", "TRANSPORT"
-            )
+        FleetExpiredCondition condition = (FleetExpiredCondition) ConditionFunctions.isFleetExpired(
+                Map.of("source", "source", "missions", "TRANSPORT")
         );
 
-        assertNotNull(result);
-        assertEquals(60 * 60 * 1000L, result.getParameter("timeoutMs")); // 1H default
+        assertEquals(3600L, condition.getDuration().getSeconds());
     }
 
     @Test
     @DisplayName("Should create expr condition")
     void testExprCondition() {
-        ConditionDto result = ConditionFunctions.expr(
-            Map.of(
-                "term", "fuel_level",
-                "op", "eq",
-                "value", "ready"
-            )
+        AbstractCondition result = ConditionFunctions.isExpressionTrue(
+                Map.of("term", "fuel_level", "op", "eq", "value", "ready")
         );
 
-        assertNotNull(result);
-        assertEquals("EXPR", result.getType());
-        assertEquals("fuel_level", result.getParameter("term"));
-        assertEquals("eq", result.getParameter("operator"));
-        assertEquals("ready", result.getParameter("value"));
+        assertInstanceOf(ExpressionCondition.class, result);
+        ExpressionCondition condition = (ExpressionCondition) result;
+        assertEquals("fuel_level", condition.getTerm());
+        assertEquals("eq", condition.getOperator());
+        assertEquals("ready", condition.getValue());
     }
 
     @Test
-    @DisplayName("Should create tech condition")
+    @DisplayName("Should reject tech condition until concrete implementation exists")
     void testTechCondition() {
-        ConditionDto result = ConditionFunctions.tech(
-            Map.of(
-                "source", "source",
-                "tech", "IMPULSE",
-                "level", "5"
-            )
+        assertThrows(UnsupportedOperationException.class, () ->
+                ConditionFunctions.hasTechnology(Map.of("source", "source", "tech", "IMPULSE", "level", "5"))
         );
-
-        assertNotNull(result);
-        assertEquals("TECH", result.getType());
-        assertEquals("source", result.getParameter("source"));
-        assertEquals("IMPULSE", result.getParameter("technology"));
-        assertEquals(5L, result.getParameter("level"));
     }
 
     @Test
     @DisplayName("Should create noMissions condition")
     void testNoMissionsCondition() {
-        ConditionDto result = ConditionFunctions.noMissions(
-            Map.of("planet", "target")
-        );
+        AbstractCondition result = ConditionFunctions.hasNoMissions(Map.of("planet", "target"));
 
-        assertNotNull(result);
-        assertEquals("NO_MISSIONS", result.getType());
-        assertEquals("target", result.getParameter("planet"));
+        assertInstanceOf(NoMissionsCondition.class, result);
+        NoMissionsCondition condition = (NoMissionsCondition) result;
+        assertEquals(Planet.parse("target"), condition.getSource());
+        assertFalse(condition.getBlockingMissions().isEmpty());
+        assertEquals(3600L, condition.getDuration().getSeconds());
     }
 
     @Test
     @DisplayName("Should create fleetSlot condition")
     void testFleetSlotCondition() {
-        ConditionDto result = ConditionFunctions.fleetSlot(
-            Map.of(
-                "planet", "source",
-                "required", "5"
-            )
-        );
+        AbstractCondition result = ConditionFunctions.hasFleetSlots(Map.of("required", "5"));
 
-        assertNotNull(result);
-        assertEquals("FLEET_SLOT", result.getType());
-        assertEquals("source", result.getParameter("planet"));
-        assertEquals(5, result.getParameter("required"));
+        assertInstanceOf(FleetSlotCondition.class, result);
+        assertEquals(5, ((FleetSlotCondition) result).getFreeSlots());
     }
 
     @Test
     @DisplayName("Should create attackNotExpired condition")
     void testAttackNotExpiredCondition() {
-        ConditionDto result = ConditionFunctions.attackNotExpired(
-            Map.of(
-                "target", "target",
-                "timeout", "1H"
-            )
+        AbstractCondition result = ConditionFunctions.isAttackNotExpired(
+                Map.of("target", "target", "timeout", "1H")
         );
 
-        assertNotNull(result);
-        assertEquals("ATTACK_NOT_EXPIRED", result.getType());
-        assertEquals("target", result.getParameter("target"));
-        assertEquals(60 * 60 * 1000L, result.getParameter("timeoutMs"));
+        assertInstanceOf(AttackNotExpiredCondition.class, result);
+        AttackNotExpiredCondition condition = (AttackNotExpiredCondition) result;
+        assertEquals(Planet.parse("target"), condition.getTarget());
+        assertEquals(3600L, condition.getSeconds());
+        assertFalse(condition.getIs());
     }
 
     @Test
     @DisplayName("Should use default timeout for attackNotExpired")
     void testAttackNotExpiredDefaultTimeout() {
-        ConditionDto result = ConditionFunctions.attackNotExpired(
-            Map.of("target", "target")
+        AttackNotExpiredCondition condition = (AttackNotExpiredCondition) ConditionFunctions.isAttackNotExpired(
+                Map.of("target", "target")
         );
 
-        assertNotNull(result);
-        assertEquals(60 * 60 * 1000L, result.getParameter("timeoutMs")); // 1H default
+        assertEquals(3600L, condition.getSeconds());
+        assertFalse(condition.getIs());
     }
 
     @Test
     @DisplayName("Should create spyNotExpired condition")
     void testSpyNotExpiredCondition() {
-        ConditionDto result = ConditionFunctions.spyNotExpired(
-            Map.of(
-                "target", "target",
-                "timeout", "30M"
-            )
+        AbstractCondition result = ConditionFunctions.isSpyNotExpired(
+                Map.of("target", "target", "timeout", "30M")
         );
 
-        assertNotNull(result);
-        assertEquals("SPY_NOT_EXPIRED", result.getType());
-        assertEquals("target", result.getParameter("target"));
-        assertEquals(30 * 60 * 1000L, result.getParameter("timeoutMs"));
+        assertInstanceOf(SpyNotExpiredCondition.class, result);
+        SpyNotExpiredCondition condition = (SpyNotExpiredCondition) result;
+        assertEquals(Planet.parse("target"), condition.getTarget());
+        assertEquals(1800L, condition.getSeconds());
+        assertFalse(condition.getIs());
     }
 
     @Test
     @DisplayName("Should use default timeout for spyNotExpired")
     void testSpyNotExpiredDefaultTimeout() {
-        ConditionDto result = ConditionFunctions.spyNotExpired(
-            Map.of("target", "target")
+        SpyNotExpiredCondition condition = (SpyNotExpiredCondition) ConditionFunctions.isSpyNotExpired(
+                Map.of("target", "target")
         );
 
-        assertNotNull(result);
-        assertEquals(60 * 60 * 1000L, result.getParameter("timeoutMs")); // 1H default
+        assertEquals(3600L, condition.getSeconds());
+        assertFalse(condition.getIs());
     }
 
     @Test
     @DisplayName("Should create modifiedAfter condition")
     void testModifiedAfterCondition() {
-        ConditionDto result = ConditionFunctions.modifiedAfter(
-            Map.of(
-                "target", "source",
-                "since", "10M"
-            )
+        AbstractCondition result = ConditionFunctions.isModifiedAfter(
+                Map.of("first", "scanFinished", "second", "fleetSent")
         );
 
-        assertNotNull(result);
-        assertEquals("IS_MODIFIED_AFTER", result.getType());
-        assertEquals("source", result.getParameter("target"));
-        assertEquals(10 * 60 * 1000L, result.getParameter("sinceMs"));
+        assertInstanceOf(IsModifiedAfterCondition.class, result);
+        IsModifiedAfterCondition condition = (IsModifiedAfterCondition) result;
+        assertEquals("scanFinished", condition.getFirstTerm());
+        assertEquals("fleetSent", condition.getSecondTerm());
     }
 
     @Nested
@@ -269,17 +229,15 @@ class ConditionFunctionsTest {
         @DisplayName("Should throw on missing required parameter")
         void testMissingRequiredParameter() {
             assertThrows(IllegalArgumentException.class, () ->
-                ConditionFunctions.resourceCount(Map.of("source", "source"))
+                    ConditionFunctions.hasResourcesCount(Map.of("source", "source"))
             );
         }
 
         @Test
         @DisplayName("Should throw on invalid planet format")
         void testInvalidPlanetFormat() {
-            assertThrows(IllegalArgumentException.class, () ->
-                ConditionFunctions.resourceCount(
-                    Map.of("source", "invalid_planet", "count", "3m")
-                )
+            assertThrows(IllegalStateException.class, () ->
+                    ConditionFunctions.hasResourcesCount(Map.of("source", "invalid_planet", "count", "3m"))
             );
         }
 
@@ -287,27 +245,9 @@ class ConditionFunctionsTest {
         @DisplayName("Should throw on invalid duration format")
         void testInvalidDurationFormat() {
             assertThrows(IllegalArgumentException.class, () ->
-                ConditionFunctions.fleetExpired(
-                    Map.of(
-                        "source", "source",
-                        "missions", "TRANSPORT",
-                        "timeout", "invalid"
+                    ConditionFunctions.isFleetExpired(
+                            Map.of("source", "source", "missions", "TRANSPORT", "timeout", "invalid")
                     )
-                )
-            );
-        }
-
-        @Test
-        @DisplayName("Should throw on invalid technology level")
-        void testInvalidTechLevel() {
-            assertThrows(NumberFormatException.class, () ->
-                ConditionFunctions.tech(
-                    Map.of(
-                        "source", "source",
-                        "tech", "IMPULSE",
-                        "level", "not_a_number"
-                    )
-                )
             );
         }
     }
