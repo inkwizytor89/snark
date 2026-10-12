@@ -111,7 +111,7 @@ public class ExpeditionThread extends AbstractThread {
         command.setMission(Mission.EXPEDITION);
         command.setShipsMap(ships);
         command.generateHash(threadType, null);
-//        command.addConditions(singletonList(new ShipsCondition(ships, null, command.getSource().toPlanet())));
+//        command.addConditions(singletonList(new AreShipsCondition(ships, null, command.getSource().toPlanet())));
         return command;
     }
 

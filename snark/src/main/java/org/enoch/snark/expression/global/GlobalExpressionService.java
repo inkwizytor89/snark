@@ -1,6 +1,7 @@
 package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -9,6 +10,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -182,6 +185,54 @@ public class GlobalExpressionService {
     }
 
     /**
+     * Evaluate a condition configuration expression into concrete conditions.
+     *
+     * Supports a single condition expression or multiple conditions separated by a top-level pipe.
+     * Pipes inside quoted values or nested structures are preserved.
+     *
+     * @param expression condition expression, e.g.
+     *                   "#hasResourcesCount({source: 'source', count: '3m'}) | #areShips({planet: 'source', need: 'transporterSmall:5'})"
+     * @param context evaluation context
+     * @return parsed condition list
+     */
+    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context) {
+        return evaluateConditions(expression, context, SHORT_TTL, "conditions");
+    }
+
+    /**
+     * Evaluate a condition configuration expression into concrete conditions with configurable cache settings.
+     */
+    @SuppressWarnings("unchecked")
+    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context, Duration ttl, String domain) {
+        if (expression == null || expression.isBlank() || "[]".equals(expression.trim())) {
+            return List.of();
+        }
+
+        String trimmedExpression = expression.trim();
+        if (trimmedExpression.startsWith("[")) {
+            throw new IllegalStateException("JSON condition arrays are not supported by GlobalExpressionService. Use SpEL condition expressions instead: " + trimmedExpression);
+        }
+
+        String cacheKey = generateCacheKey(domain + ":list", trimmedExpression, context);
+        CacheEntry<?> cachedEntry = cache.get(cacheKey);
+        if (cachedEntry != null && !cachedEntry.isExpired()) {
+            log.debug("Cache hit for condition list '{}' in domain '{}'", trimmedExpression, domain);
+            return (List<AbstractCondition>) cachedEntry.value;
+        }
+        if (cachedEntry != null) {
+            cache.remove(cacheKey);
+        }
+
+        List<AbstractCondition> result = splitTopLevelConditions(trimmedExpression).stream()
+                .filter(part -> !part.isBlank())
+                .map(part -> evaluate(part.trim(), context, AbstractCondition.class, ttl, domain + ":item"))
+                .toList();
+
+        cache.put(cacheKey, new CacheEntry<>(result, ttl.toMillis(), domain + ":list"));
+        return result;
+    }
+
+    /**
      * Invalidate all cache entries for a specific domain.
      *
      * @param domain The domain to invalidate (e.g., "coordinates", "conditions")
@@ -236,6 +287,45 @@ public class GlobalExpressionService {
             .orElse("");
 
         return domain + ":" + expression + ":" + contextStr.hashCode();
+    }
+
+    private List<String> splitTopLevelConditions(String expression) {
+        List<String> parts = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int roundDepth = 0;
+        int curlyDepth = 0;
+        int squareDepth = 0;
+        boolean inSingleQuote = false;
+        boolean inDoubleQuote = false;
+
+        for (int i = 0; i < expression.length(); i++) {
+            char currentChar = expression.charAt(i);
+
+            if (currentChar == '\'' && !inDoubleQuote) {
+                inSingleQuote = !inSingleQuote;
+            } else if (currentChar == '"' && !inSingleQuote) {
+                inDoubleQuote = !inDoubleQuote;
+            } else if (!inSingleQuote && !inDoubleQuote) {
+                if (currentChar == '(') roundDepth++;
+                else if (currentChar == ')') roundDepth--;
+                else if (currentChar == '{') curlyDepth++;
+                else if (currentChar == '}') curlyDepth--;
+                else if (currentChar == '[') squareDepth++;
+                else if (currentChar == ']') squareDepth--;
+                else if (currentChar == '|' && roundDepth == 0 && curlyDepth == 0 && squareDepth == 0) {
+                    parts.add(current.toString().trim());
+                    current.setLength(0);
+                    continue;
+                }
+            }
+
+            current.append(currentChar);
+        }
+
+        if (!current.isEmpty()) {
+            parts.add(current.toString().trim());
+        }
+        return parts;
     }
 
     /**

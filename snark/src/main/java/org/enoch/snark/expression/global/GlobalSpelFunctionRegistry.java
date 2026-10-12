@@ -90,7 +90,7 @@ public class GlobalSpelFunctionRegistry {
             ConditionFunctions.class.getDeclaredMethod("isExpressionTrue", java.util.Map.class));
 
         // TECH: Check technology level
-        // Usage reserved for a future concrete TechnologyCondition implementation.
+        // Usage reserved for a future concrete HasTechnologyCondition implementation.
         context.registerFunction("hasTechnology",
             ConditionFunctions.class.getDeclaredMethod("hasTechnology", java.util.Map.class));
 

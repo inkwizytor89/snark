@@ -7,12 +7,12 @@ import org.enoch.snark.db.entity.PlanetEntity;
 import org.enoch.snark.instance.model.to.Planet;
 
 @Getter
-public class ResourceCountCondition extends AbstractCondition {
+public class HasResourcesCountCondition extends AbstractCondition {
     private final String resourcesCount;
     private final Planet planet;
 
     @JsonCreator
-    public ResourceCountCondition(
+    public HasResourcesCountCondition(
             @JsonProperty("resourcesCount") String resourcesCount,
             @JsonProperty("planet") Planet planet
     ) {

@@ -8,7 +8,7 @@ import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
@@ -113,7 +113,7 @@ public class FleetThread extends AbstractThread {
 
             if (!map.getConfigBoolean(DRY_RUN, false)) {
                 command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
-                command.addConditions(singletonList(new ShipsCondition(realShips, command.getLeaveShipsMap(), command.getSource().toPlanet())));
+                command.addConditions(singletonList(new AreShipsCondition(realShips, command.getLeaveShipsMap(), command.getSource().toPlanet())));
 
                 Duration recallDuration = map.getDuration(RECALL, null);
                 if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());

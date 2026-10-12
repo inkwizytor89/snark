@@ -2,16 +2,16 @@ package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.AttackNotExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.ExpressionCondition;
-import org.enoch.snark.instance.model.action.condition.FleetExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
+import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
+import org.enoch.snark.instance.model.action.condition.HasFleetSlotsCondition;
+import org.enoch.snark.instance.model.action.condition.HasNoMissionsCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCountCondition;
+import org.enoch.snark.instance.model.action.condition.IsAttackNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsExpressionTrueCondition;
+import org.enoch.snark.instance.model.action.condition.IsFleetExpiredCondition;
 import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
-import org.enoch.snark.instance.model.action.condition.NoMissionsCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCountCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
-import org.enoch.snark.instance.model.action.condition.SpyNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsSpyNotExpiredCondition;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -35,7 +35,7 @@ public class ConditionFunctions {
 
         String planetValue = firstPresentRequired(params, "planet", "source");
         String count = firstPresentRequired(params, "count", "resourcesCount");
-        return new ResourceCountCondition(count, parsePlanetValue(planetValue));
+        return new HasResourcesCountCondition(count, parsePlanetValue(planetValue));
     }
 
     public static AbstractCondition hasResources(Map<String, Object> params) {
@@ -44,7 +44,7 @@ public class ConditionFunctions {
         Planet planet = parsePlanetValue(firstPresentRequired(params, "planet", "source"));
         Resources have = Resources.parse(firstPresentRequired(params, "have", "resources"));
         Resources leave = Resources.parse(firstPresentOptional(params, "nothing", "leave", "leaveResources"));
-        return new ResourceCondition(planet, have, leave);
+        return new HasResourcesCondition(planet, have, leave);
     }
 
     public static AbstractCondition areShips(Map<String, Object> params) {
@@ -53,7 +53,7 @@ public class ConditionFunctions {
         Planet planet = parsePlanetValue(firstPresentRequired(params, "planet", "source"));
         ShipsMap need = ShipsMap.parse(firstPresentRequired(params, "need", "shipsMap"));
         ShipsMap leave = ShipsMap.parse(firstPresentOptional(params, "none", "leave"));
-        return new ShipsCondition(need, leave, planet);
+        return new AreShipsCondition(need, leave, planet);
     }
 
     public static AbstractCondition isFleetExpired(Map<String, Object> params) {
@@ -62,7 +62,7 @@ public class ConditionFunctions {
         Planet source = parsePlanetValue(firstPresentRequired(params, "source", "planet"));
         String missions = normalizeMissions(firstPresentRequired(params, "missions", "blockingMissions"));
         String duration = firstPresentOptional(params, "1H", "timeout", "duration");
-        return new FleetExpiredCondition(source, missions, duration);
+        return new IsFleetExpiredCondition(source, missions, duration);
     }
 
     public static AbstractCondition isExpressionTrue(Map<String, Object> params) {
@@ -71,11 +71,11 @@ public class ConditionFunctions {
         String term = firstPresentRequired(params, "term");
         String operator = firstPresentRequired(params, "op", "operator");
         String value = firstPresentRequired(params, "value");
-        return new ExpressionCondition(term, operator, value);
+        return new IsExpressionTrueCondition(term, operator, value);
     }
 
     public static AbstractCondition hasTechnology(Map<String, Object> params) {
-        throw new UnsupportedOperationException("hasTechnology is not supported yet because there is no concrete TechnologyCondition implementation");
+        throw new UnsupportedOperationException("hasTechnology is not supported yet because there is no concrete HasTechnologyCondition implementation");
     }
 
     public static AbstractCondition hasNoMissions(Map<String, Object> params) {
@@ -84,14 +84,14 @@ public class ConditionFunctions {
         Planet source = parsePlanetValue(firstPresentRequired(params, "source", "planet"));
         String missions = normalizeMissions(firstPresentOptional(params, allMissions(), "missions", "blockingMissions"));
         String duration = firstPresentOptional(params, "1H", "timeout", "duration");
-        return new NoMissionsCondition(source, missions, duration);
+        return new HasNoMissionsCondition(source, missions, duration);
     }
 
     public static AbstractCondition hasFleetSlots(Map<String, Object> params) {
         log.debug("Creating hasFleetSlots condition with params: {}", ExpressionParsingUtils.mapToString(params));
 
         Integer freeSlots = Integer.valueOf(firstPresentRequired(params, "freeSlots", "required"));
-        return new FleetSlotCondition(freeSlots);
+        return new HasFleetSlotsCondition(freeSlots);
     }
 
     public static AbstractCondition isAttackNotExpired(Map<String, Object> params) {
@@ -99,7 +99,7 @@ public class ConditionFunctions {
 
         Planet target = parsePlanetValue(firstPresentRequired(params, "target"));
         Long seconds = ExpressionParsingUtils.parseDurationToSeconds(firstPresentOptional(params, "1H", "timeout", "duration"));
-        return new AttackNotExpiredCondition(seconds, false, target);
+        return new IsAttackNotExpiredCondition(seconds, false, target);
     }
 
     public static AbstractCondition isSpyNotExpired(Map<String, Object> params) {
@@ -107,7 +107,7 @@ public class ConditionFunctions {
 
         Planet target = parsePlanetValue(firstPresentRequired(params, "target"));
         Long seconds = ExpressionParsingUtils.parseDurationToSeconds(firstPresentOptional(params, "1H", "timeout", "duration"));
-        return new SpyNotExpiredCondition(seconds, false, target);
+        return new IsSpyNotExpiredCondition(seconds, false, target);
     }
 
     public static AbstractCondition isModifiedAfter(Map<String, Object> params) {

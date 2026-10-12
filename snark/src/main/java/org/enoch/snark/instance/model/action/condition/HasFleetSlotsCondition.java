@@ -6,11 +6,11 @@ import lombok.Getter;
 import org.enoch.snark.instance.service.Navigator;
 
 @Getter
-public class FleetSlotCondition extends AbstractCondition {
+public class HasFleetSlotsCondition extends AbstractCondition {
     private final int freeSlots;
 
     @JsonCreator
-    public FleetSlotCondition(
+    public HasFleetSlotsCondition(
             @JsonProperty("freeSlots") Integer freeSlots
     ) {
         this.freeSlots = freeSlots;

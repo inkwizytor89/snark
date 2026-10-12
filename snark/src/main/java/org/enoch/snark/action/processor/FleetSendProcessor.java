@@ -15,9 +15,8 @@ import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
+import org.enoch.snark.instance.model.action.condition.HasFleetSlotsCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCondition;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.model.to.SystemView;
@@ -159,9 +158,9 @@ public class FleetSendProcessor {
 
     private boolean isValidated(SendCommand command) {
         List<AbstractCondition> conditions = new ArrayList<>(command.getConditions());
-        conditions.add(new FleetSlotCondition(1));
-//        conditions.add(new ShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
-        if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new ResourceCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
+        conditions.add(new HasFleetSlotsCondition(1));
+//        conditions.add(new org.enoch.snark.instance.model.action.condition.AreShipsCondition(command.getShipsMap(), command.getLeaveShipsMap(), command.getSource().toPlanet()));
+        if(!ResourceUC.isAbstractOrNull(command.getResources())) conditions.add(new HasResourcesCondition(command.getSource().toPlanet(), command.getResources(), command.getLeaveResources()));
 
         AbstractCondition wontFit = conditionChecker.check(conditions, command);
         if(wontFit != null) {

@@ -1,8 +1,5 @@
 package org.enoch.snark.instance.si.module;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +19,7 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.expression.coordinate.CoordinateSpelService;
+import org.enoch.snark.expression.global.GlobalExpressionService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,7 +64,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Autowired
     protected final CoordinateSpelService coordinateSpelService;
     @Autowired
-    private ObjectMapper objectMapper;
+    protected final GlobalExpressionService globalExpressionService;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
 
@@ -308,11 +306,7 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected List<AbstractCondition> getConditions(String configName) {
         String configJson = map().getConfig(configName, "[]");
-        try {
-            return objectMapper.readValue(configJson, new TypeReference<>() {});
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return globalExpressionService.evaluateConditions(configJson, Map.of());
     }
 
     @Override

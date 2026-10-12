@@ -17,14 +17,14 @@ import java.util.List;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.convertMissions;
 
 @Getter
-public class FleetExpiredCondition extends AbstractCondition {
+public class HasNoMissionsCondition extends AbstractCondition {
 
     private final Planet source;
     private final List<Mission> blockingMissions;
     private final Duration duration;
 
     @JsonCreator
-    public FleetExpiredCondition(
+    public HasNoMissionsCondition(
             @JsonProperty("source") Planet source,
             @JsonProperty("blockingMissions") String blockingMissions,
             @JsonProperty("duration") @Nullable String duration

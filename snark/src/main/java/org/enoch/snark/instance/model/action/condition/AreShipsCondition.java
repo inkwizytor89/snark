@@ -11,13 +11,13 @@ import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.service.ShipService;
 
 @Getter
-public class ShipsCondition extends AbstractCondition {
+public class AreShipsCondition extends AbstractCondition {
     private final ShipsMap shipsMap;
     private final ShipsMap leave;
     private final Planet planet;
 
     @JsonCreator
-    public ShipsCondition(
+    public AreShipsCondition(
             @JsonProperty("shipsMap") ShipsMap shipsMap,
             @JsonProperty("leave") ShipsMap leave,
             @JsonProperty("planet") Planet planet

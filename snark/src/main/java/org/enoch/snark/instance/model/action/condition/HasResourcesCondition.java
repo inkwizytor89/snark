@@ -12,13 +12,13 @@ import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.uc.ResourceUC.toTransport;
 
 @Getter
-public class ResourceCondition extends AbstractCondition {
+public class HasResourcesCondition extends AbstractCondition {
     private final Planet planet;
     private final Resources resources;
     private final Resources leaveResources;
 
     @JsonCreator
-    public ResourceCondition(
+    public HasResourcesCondition(
             @JsonProperty("planet") Planet planet,
             @JsonProperty("resources") Resources resources,
             @JsonProperty("leaveResources") Resources leaveResources

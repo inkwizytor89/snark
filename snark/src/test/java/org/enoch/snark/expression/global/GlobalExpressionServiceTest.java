@@ -1,16 +1,16 @@
 package org.enoch.snark.expression.global;
 
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.AttackNotExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.ExpressionCondition;
-import org.enoch.snark.instance.model.action.condition.FleetExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
+import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
+import org.enoch.snark.instance.model.action.condition.HasFleetSlotsCondition;
+import org.enoch.snark.instance.model.action.condition.HasNoMissionsCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCountCondition;
+import org.enoch.snark.instance.model.action.condition.IsAttackNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsExpressionTrueCondition;
+import org.enoch.snark.instance.model.action.condition.IsFleetExpiredCondition;
 import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
-import org.enoch.snark.instance.model.action.condition.NoMissionsCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCountCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
-import org.enoch.snark.instance.model.action.condition.SpyNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsSpyNotExpiredCondition;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
@@ -50,8 +50,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(ResourceCountCondition.class, result);
-            ResourceCountCondition condition = (ResourceCountCondition) result;
+            assertInstanceOf(HasResourcesCountCondition.class, result);
+            HasResourcesCountCondition condition = (HasResourcesCountCondition) result;
             assertEquals("3m", condition.getResourcesCount());
             assertEquals(Planet.parse("source"), condition.getPlanet());
         }
@@ -67,8 +67,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(ResourceCondition.class, result);
-            ResourceCondition condition = (ResourceCondition) result;
+            assertInstanceOf(HasResourcesCondition.class, result);
+            HasResourcesCondition condition = (HasResourcesCondition) result;
             assertEquals(Planet.parse("target"), condition.getPlanet());
             assertEquals(100L, condition.getResources().metal);
             assertEquals(10L, condition.getLeaveResources().metal);
@@ -85,8 +85,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(ShipsCondition.class, result);
-            ShipsCondition condition = (ShipsCondition) result;
+            assertInstanceOf(AreShipsCondition.class, result);
+            AreShipsCondition condition = (AreShipsCondition) result;
             assertEquals(5L, condition.getShipsMap().get(Ship.transporterSmall));
             assertSame(org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS, condition.getLeave());
         }
@@ -102,8 +102,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(FleetExpiredCondition.class, result);
-            FleetExpiredCondition condition = (FleetExpiredCondition) result;
+            assertInstanceOf(IsFleetExpiredCondition.class, result);
+            IsFleetExpiredCondition condition = (IsFleetExpiredCondition) result;
             assertEquals(Planet.parse("source"), condition.getSource());
             assertTrue(condition.getBlockingMissions().contains(Mission.TRANSPORT));
             assertTrue(condition.getBlockingMissions().contains(Mission.ATTACK));
@@ -121,8 +121,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(ExpressionCondition.class, result);
-            ExpressionCondition condition = (ExpressionCondition) result;
+            assertInstanceOf(IsExpressionTrueCondition.class, result);
+            IsExpressionTrueCondition condition = (IsExpressionTrueCondition) result;
             assertEquals("fuel_level", condition.getTerm());
             assertEquals("eq", condition.getOperator());
             assertEquals("ready", condition.getValue());
@@ -153,8 +153,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(NoMissionsCondition.class, result);
-            NoMissionsCondition condition = (NoMissionsCondition) result;
+            assertInstanceOf(HasNoMissionsCondition.class, result);
+            HasNoMissionsCondition condition = (HasNoMissionsCondition) result;
             assertEquals(Planet.parse("target"), condition.getSource());
             assertFalse(condition.getBlockingMissions().isEmpty());
         }
@@ -170,8 +170,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(FleetSlotCondition.class, result);
-            assertEquals(5, ((FleetSlotCondition) result).getFreeSlots());
+            assertInstanceOf(HasFleetSlotsCondition.class, result);
+            assertEquals(5, ((HasFleetSlotsCondition) result).getFreeSlots());
         }
 
         @Test
@@ -185,8 +185,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(AttackNotExpiredCondition.class, result);
-            AttackNotExpiredCondition condition = (AttackNotExpiredCondition) result;
+            assertInstanceOf(IsAttackNotExpiredCondition.class, result);
+            IsAttackNotExpiredCondition condition = (IsAttackNotExpiredCondition) result;
             assertEquals(Planet.parse("target"), condition.getTarget());
             assertEquals(3600L, condition.getSeconds());
             assertFalse(condition.getIs());
@@ -203,8 +203,8 @@ class GlobalExpressionServiceTest {
                     "conditions"
             );
 
-            assertInstanceOf(SpyNotExpiredCondition.class, result);
-            SpyNotExpiredCondition condition = (SpyNotExpiredCondition) result;
+            assertInstanceOf(IsSpyNotExpiredCondition.class, result);
+            IsSpyNotExpiredCondition condition = (IsSpyNotExpiredCondition) result;
             assertEquals(Planet.parse("target"), condition.getTarget());
             assertEquals(3600L, condition.getSeconds());
             assertFalse(condition.getIs());
@@ -225,6 +225,32 @@ class GlobalExpressionServiceTest {
             IsModifiedAfterCondition condition = (IsModifiedAfterCondition) result;
             assertEquals("scanFinished", condition.getFirstTerm());
             assertEquals("fleetSent", condition.getSecondTerm());
+        }
+
+        @Test
+        @DisplayName("Should evaluate multiple conditions from single expression")
+        void testConditionListExpression() {
+            var conditions = expressionService.evaluateConditions(
+                    "#hasResourcesCount({source: 'source', count: '3m'}) | #areShips({planet: 'source', need: 'transporterSmall:5'})",
+                    Map.of()
+            );
+
+            assertEquals(2, conditions.size());
+            assertInstanceOf(HasResourcesCountCondition.class, conditions.get(0));
+            assertInstanceOf(AreShipsCondition.class, conditions.get(1));
+        }
+
+        @Test
+        @DisplayName("Should not split on pipe inside missions value")
+        void testConditionListWithPipeInsideValue() {
+            var conditions = expressionService.evaluateConditions(
+                    "#isFleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '30M'}) | #hasFleetSlots({required: '1'})",
+                    Map.of()
+            );
+
+            assertEquals(2, conditions.size());
+            assertInstanceOf(IsFleetExpiredCondition.class, conditions.get(0));
+            assertInstanceOf(HasFleetSlotsCondition.class, conditions.get(1));
         }
     }
 
@@ -361,7 +387,7 @@ class GlobalExpressionServiceTest {
                     AbstractCondition.class
             );
 
-            assertInstanceOf(ResourceCountCondition.class, result);
+            assertInstanceOf(HasResourcesCountCondition.class, result);
             assertEquals(0, expressionService.getCacheSize());
         }
 

@@ -3,7 +3,7 @@ package org.enoch.snark.instance.service;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
@@ -38,7 +38,7 @@ public class FleetService {
         command.setTarget(new PlanetData(to));
         command.setMission(Mission.TRANSPORT);
         command.setShipsMap(transportShipsMap);
-        command.addConditions(singletonList(new ResourceCondition(from.toPlanet(), resources, leave)));
+        command.addConditions(singletonList(new HasResourcesCondition(from.toPlanet(), resources, leave)));
         command.setLeaveResources(leave);
         command.setResources(needed);
         command.generateHash(null, needed.toString());

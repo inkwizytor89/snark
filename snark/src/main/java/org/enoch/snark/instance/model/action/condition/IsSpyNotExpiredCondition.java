@@ -10,10 +10,10 @@ import org.enoch.snark.instance.model.to.Planet;
 import java.time.temporal.ChronoUnit;
 
 @Getter
-public class SpyNotExpiredCondition extends ExpiredCondition {
+public class IsSpyNotExpiredCondition extends ExpiredCondition {
 
     @JsonCreator
-    public SpyNotExpiredCondition(
+    public IsSpyNotExpiredCondition(
             @JsonProperty("seconds") Long seconds,
             @JsonProperty("is") Boolean is,
             @JsonProperty("target") Planet target

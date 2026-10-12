@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
-public class ExpressionCondition extends AbstractCondition {
+public class IsExpressionTrueCondition extends AbstractCondition {
     private final String term;
     private final String operator;
     private final String value;
 
     @JsonCreator
-    public ExpressionCondition(
+    public IsExpressionTrueCondition(
             @JsonProperty("term") String term,
             @JsonProperty("operator") String operator,
             @JsonProperty("value") String value

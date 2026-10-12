@@ -1,16 +1,16 @@
 package org.enoch.snark.expression.global;
 
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.action.condition.AttackNotExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.ExpressionCondition;
-import org.enoch.snark.instance.model.action.condition.FleetExpiredCondition;
-import org.enoch.snark.instance.model.action.condition.FleetSlotCondition;
+import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
+import org.enoch.snark.instance.model.action.condition.HasFleetSlotsCondition;
+import org.enoch.snark.instance.model.action.condition.HasNoMissionsCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCondition;
+import org.enoch.snark.instance.model.action.condition.HasResourcesCountCondition;
+import org.enoch.snark.instance.model.action.condition.IsAttackNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsExpressionTrueCondition;
+import org.enoch.snark.instance.model.action.condition.IsFleetExpiredCondition;
 import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
-import org.enoch.snark.instance.model.action.condition.NoMissionsCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCondition;
-import org.enoch.snark.instance.model.action.condition.ResourceCountCondition;
-import org.enoch.snark.instance.model.action.condition.ShipsCondition;
-import org.enoch.snark.instance.model.action.condition.SpyNotExpiredCondition;
+import org.enoch.snark.instance.model.action.condition.IsSpyNotExpiredCondition;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
@@ -30,8 +30,8 @@ class ConditionFunctionsTest {
     void testResourceCountCondition() {
         AbstractCondition result = ConditionFunctions.hasResourcesCount(Map.of("source", "source", "count", "3m"));
 
-        assertInstanceOf(ResourceCountCondition.class, result);
-        ResourceCountCondition condition = (ResourceCountCondition) result;
+        assertInstanceOf(HasResourcesCountCondition.class, result);
+        HasResourcesCountCondition condition = (HasResourcesCountCondition) result;
         assertEquals("3m", condition.getResourcesCount());
         assertEquals(Planet.parse("source"), condition.getPlanet());
     }
@@ -43,8 +43,8 @@ class ConditionFunctionsTest {
                 Map.of("planet", "target", "have", "m100 c50", "leave", "m10")
         );
 
-        assertInstanceOf(ResourceCondition.class, result);
-        ResourceCondition condition = (ResourceCondition) result;
+        assertInstanceOf(HasResourcesCondition.class, result);
+        HasResourcesCondition condition = (HasResourcesCondition) result;
         assertEquals(Planet.parse("target"), condition.getPlanet());
         assertEquals(100L, condition.getResources().metal);
         assertEquals(50L, condition.getResources().crystal);
@@ -58,8 +58,8 @@ class ConditionFunctionsTest {
                 Map.of("planet", "source", "have", "c50")
         );
 
-        assertInstanceOf(ResourceCondition.class, result);
-        ResourceCondition condition = (ResourceCondition) result;
+        assertInstanceOf(HasResourcesCondition.class, result);
+        HasResourcesCondition condition = (HasResourcesCondition) result;
         assertEquals(0L, condition.getLeaveResources().count());
     }
 
@@ -70,8 +70,8 @@ class ConditionFunctionsTest {
                 Map.of("planet", "source", "need", "transporterSmall:5,battleship:3", "leave", "transporterSmall:2")
         );
 
-        assertInstanceOf(ShipsCondition.class, result);
-        ShipsCondition condition = (ShipsCondition) result;
+        assertInstanceOf(AreShipsCondition.class, result);
+        AreShipsCondition condition = (AreShipsCondition) result;
         assertEquals(Planet.parse("source"), condition.getPlanet());
         assertEquals(5L, condition.getShipsMap().get(Ship.transporterSmall));
         assertEquals(3L, condition.getShipsMap().get(Ship.battleship));
@@ -85,8 +85,8 @@ class ConditionFunctionsTest {
                 Map.of("planet", "target", "need", "battleship:10")
         );
 
-        assertInstanceOf(ShipsCondition.class, result);
-        ShipsCondition condition = (ShipsCondition) result;
+        assertInstanceOf(AreShipsCondition.class, result);
+        AreShipsCondition condition = (AreShipsCondition) result;
         assertSame(org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS, condition.getLeave());
     }
 
@@ -97,8 +97,8 @@ class ConditionFunctionsTest {
                 Map.of("source", "source", "missions", "TRANSPORT|ATTACK", "timeout", "30M")
         );
 
-        assertInstanceOf(FleetExpiredCondition.class, result);
-        FleetExpiredCondition condition = (FleetExpiredCondition) result;
+        assertInstanceOf(IsFleetExpiredCondition.class, result);
+        IsFleetExpiredCondition condition = (IsFleetExpiredCondition) result;
         assertEquals(Planet.parse("source"), condition.getSource());
         assertTrue(condition.getBlockingMissions().contains(Mission.TRANSPORT));
         assertTrue(condition.getBlockingMissions().contains(Mission.ATTACK));
@@ -108,7 +108,7 @@ class ConditionFunctionsTest {
     @Test
     @DisplayName("Should use default timeout for fleetExpired")
     void testFleetExpiredConditionDefaultTimeout() {
-        FleetExpiredCondition condition = (FleetExpiredCondition) ConditionFunctions.isFleetExpired(
+        IsFleetExpiredCondition condition = (IsFleetExpiredCondition) ConditionFunctions.isFleetExpired(
                 Map.of("source", "source", "missions", "TRANSPORT")
         );
 
@@ -122,8 +122,8 @@ class ConditionFunctionsTest {
                 Map.of("term", "fuel_level", "op", "eq", "value", "ready")
         );
 
-        assertInstanceOf(ExpressionCondition.class, result);
-        ExpressionCondition condition = (ExpressionCondition) result;
+        assertInstanceOf(IsExpressionTrueCondition.class, result);
+        IsExpressionTrueCondition condition = (IsExpressionTrueCondition) result;
         assertEquals("fuel_level", condition.getTerm());
         assertEquals("eq", condition.getOperator());
         assertEquals("ready", condition.getValue());
@@ -142,8 +142,8 @@ class ConditionFunctionsTest {
     void testNoMissionsCondition() {
         AbstractCondition result = ConditionFunctions.hasNoMissions(Map.of("planet", "target"));
 
-        assertInstanceOf(NoMissionsCondition.class, result);
-        NoMissionsCondition condition = (NoMissionsCondition) result;
+        assertInstanceOf(HasNoMissionsCondition.class, result);
+        HasNoMissionsCondition condition = (HasNoMissionsCondition) result;
         assertEquals(Planet.parse("target"), condition.getSource());
         assertFalse(condition.getBlockingMissions().isEmpty());
         assertEquals(3600L, condition.getDuration().getSeconds());
@@ -154,8 +154,8 @@ class ConditionFunctionsTest {
     void testFleetSlotCondition() {
         AbstractCondition result = ConditionFunctions.hasFleetSlots(Map.of("required", "5"));
 
-        assertInstanceOf(FleetSlotCondition.class, result);
-        assertEquals(5, ((FleetSlotCondition) result).getFreeSlots());
+        assertInstanceOf(HasFleetSlotsCondition.class, result);
+        assertEquals(5, ((HasFleetSlotsCondition) result).getFreeSlots());
     }
 
     @Test
@@ -165,8 +165,8 @@ class ConditionFunctionsTest {
                 Map.of("target", "target", "timeout", "1H")
         );
 
-        assertInstanceOf(AttackNotExpiredCondition.class, result);
-        AttackNotExpiredCondition condition = (AttackNotExpiredCondition) result;
+        assertInstanceOf(IsAttackNotExpiredCondition.class, result);
+        IsAttackNotExpiredCondition condition = (IsAttackNotExpiredCondition) result;
         assertEquals(Planet.parse("target"), condition.getTarget());
         assertEquals(3600L, condition.getSeconds());
         assertFalse(condition.getIs());
@@ -175,7 +175,7 @@ class ConditionFunctionsTest {
     @Test
     @DisplayName("Should use default timeout for attackNotExpired")
     void testAttackNotExpiredDefaultTimeout() {
-        AttackNotExpiredCondition condition = (AttackNotExpiredCondition) ConditionFunctions.isAttackNotExpired(
+        IsAttackNotExpiredCondition condition = (IsAttackNotExpiredCondition) ConditionFunctions.isAttackNotExpired(
                 Map.of("target", "target")
         );
 
@@ -190,8 +190,8 @@ class ConditionFunctionsTest {
                 Map.of("target", "target", "timeout", "30M")
         );
 
-        assertInstanceOf(SpyNotExpiredCondition.class, result);
-        SpyNotExpiredCondition condition = (SpyNotExpiredCondition) result;
+        assertInstanceOf(IsSpyNotExpiredCondition.class, result);
+        IsSpyNotExpiredCondition condition = (IsSpyNotExpiredCondition) result;
         assertEquals(Planet.parse("target"), condition.getTarget());
         assertEquals(1800L, condition.getSeconds());
         assertFalse(condition.getIs());
@@ -200,7 +200,7 @@ class ConditionFunctionsTest {
     @Test
     @DisplayName("Should use default timeout for spyNotExpired")
     void testSpyNotExpiredDefaultTimeout() {
-        SpyNotExpiredCondition condition = (SpyNotExpiredCondition) ConditionFunctions.isSpyNotExpired(
+        IsSpyNotExpiredCondition condition = (IsSpyNotExpiredCondition) ConditionFunctions.isSpyNotExpired(
                 Map.of("target", "target")
         );
 

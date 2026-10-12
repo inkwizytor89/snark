@@ -31,14 +31,14 @@ public class ConditionChecker {
     public AbstractCondition check(AbstractCondition abstractCondition, SendCommand command) {
         conditionContext.setCommand(command);
         return switch (abstractCondition) {
-            case ResourceCondition condition -> condition.check(conditionContext);
-            case ResourceCountCondition condition -> condition.check(conditionContext);
-            case SpyNotExpiredCondition condition -> condition.check(conditionContext);
-            case AttackNotExpiredCondition condition -> condition.check(conditionContext);
-            case ShipsCondition condition -> condition.check(conditionContext);
-            case NoMissionsCondition condition -> condition.check(conditionContext);
-            case FleetSlotCondition condition -> condition.check(conditionContext);
-            case ExpressionCondition condition -> condition.check(conditionContext);
+            case HasResourcesCondition condition -> condition.check(conditionContext);
+            case HasResourcesCountCondition condition -> condition.check(conditionContext);
+            case IsSpyNotExpiredCondition condition -> condition.check(conditionContext);
+            case IsAttackNotExpiredCondition condition -> condition.check(conditionContext);
+            case AreShipsCondition condition -> condition.check(conditionContext);
+            case HasNoMissionsCondition condition -> condition.check(conditionContext);
+            case HasFleetSlotsCondition condition -> condition.check(conditionContext);
+            case IsExpressionTrueCondition condition -> condition.check(conditionContext);
             case IsModifiedAfterCondition condition -> condition.check(conditionContext);
             default -> throw new IllegalStateException("Unknown condition " + abstractCondition.getClass().getName());
         };
