@@ -18,12 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Global expression evaluation service with TTL-based caching.
  * 
- * Provides unified SpEL parsing and evaluation for different domains (coordinates, conditions, resources, etc).
+ * Provides unified SpEL parsing and evaluation.
  * Supports:
- * - TTL-based cache with domain-specific TTL values
+ * - TTL-based caching
  * - Function registration via {@link GlobalSpelFunctionRegistry}
  * - Expression evaluation with automatic caching
- * - Cache invalidation by domain
+ * - Cache invalidation
  * 
  * Usage:
  * <pre>
@@ -49,7 +49,7 @@ public class GlobalExpressionService {
     private final ExpressionParser parser;
     private final Map<String, CacheEntry<?>> cache;
     
-    // Default TTL values for different domains
+    // Default TTL values for expression caching
     public static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
     public static final Duration SHORT_TTL = Duration.ofMinutes(1);
 
@@ -60,12 +60,10 @@ public class GlobalExpressionService {
         final T value;
         final long createdAtMs;
         final long ttlMs;
-        final String domain;
 
-        CacheEntry(T value, long ttlMs, String domain) {
+        CacheEntry(T value, long ttlMs) {
             this.value = value;
             this.ttlMs = ttlMs;
-            this.domain = domain;
             this.createdAtMs = System.currentTimeMillis();
         }
 
@@ -102,58 +100,43 @@ public class GlobalExpressionService {
      * @throws IllegalStateException if expression evaluation fails
      */
     public <T> T evaluate(String expression, Map<String, Object> context, Class<T> returnType, Duration ttl) {
-        return evaluate(expression, context, returnType, ttl, "default");
-    }
-
-    /**
-     * Evaluate a SpEL expression with caching in a specific domain.
-     *
-     * @param expression The SpEL expression to evaluate
-     * @param context Variables and context available during evaluation
-     * @param returnType Expected return type
-     * @param ttl Time-to-live for cache entry
-     * @param domain Domain name for cache invalidation (e.g., "coordinates", "conditions", "resources")
-     * @return Evaluated result, cached for the given TTL
-     * @throws IllegalStateException if expression evaluation fails
-     */
-    public <T> T evaluate(String expression, Map<String, Object> context, Class<T> returnType, Duration ttl, String domain) {
         if (expression == null || expression.isBlank()) {
             throw new IllegalArgumentException("Expression cannot be null or empty");
         }
 
-        String cacheKey = generateCacheKey(domain, expression, context);
+        String cacheKey = generateCacheKey(expression, context, returnType);
 
         // Check if cached entry exists and is not expired
         if (cache.containsKey(cacheKey)) {
             CacheEntry<?> entry = cache.get(cacheKey);
             if (!entry.isExpired()) {
-                log.debug("Cache hit for expression '{}' in domain '{}' (remaining TTL: {}ms)", 
-                    expression, domain, entry.remainingTtlMs());
+                log.debug("Cache hit for expression '{}' (remaining TTL: {}ms)",
+                    expression, entry.remainingTtlMs());
                 return (T) entry.value;
             } else {
                 // Remove expired entry
                 cache.remove(cacheKey);
-                log.debug("Expired cache entry removed for '{}' in domain '{}'", expression, domain);
+                log.debug("Expired cache entry removed for '{}'", expression);
             }
         }
 
         // Evaluate and cache
         try {
-            log.debug("Evaluating expression '{}' in domain '{}'", expression, domain);
+            log.debug("Evaluating expression '{}'", expression);
             EvaluationContext spelContext = createEvaluationContext(context);
             Expression parsedExpr = parser.parseExpression(expression);
             T result = (T) parsedExpr.getValue(spelContext);
 
             // Store in cache
-            CacheEntry<T> entry = new CacheEntry<>(result, ttl.toMillis(), domain);
+            CacheEntry<T> entry = new CacheEntry<>(result, ttl.toMillis());
             cache.put(cacheKey, entry);
-            log.debug("Expression '{}' evaluated and cached in domain '{}' with TTL {}ms", 
-                expression, domain, ttl.toMillis());
+            log.debug("Expression '{}' evaluated and cached with TTL {}ms",
+                expression, ttl.toMillis());
 
             return result;
 
         } catch (Exception e) {
-            log.error("Failed to evaluate expression '{}' in domain '{}'", expression, domain, e);
+            log.error("Failed to evaluate expression '{}'", expression, e);
             throw new IllegalStateException("Failed to evaluate SpEL expression: " + expression, e);
         }
     }
@@ -196,14 +179,14 @@ public class GlobalExpressionService {
      * @return parsed condition list
      */
     public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context) {
-        return evaluateConditions(expression, context, SHORT_TTL, "conditions");
+        return evaluateConditions(expression, context, SHORT_TTL);
     }
 
     /**
      * Evaluate a condition configuration expression into concrete conditions with configurable cache settings.
      */
     @SuppressWarnings("unchecked")
-    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context, Duration ttl, String domain) {
+    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context, Duration ttl) {
         if (expression == null || expression.isBlank() || "[]".equals(expression.trim())) {
             return List.of();
         }
@@ -213,10 +196,10 @@ public class GlobalExpressionService {
             throw new IllegalStateException("JSON condition arrays are not supported by GlobalExpressionService. Use SpEL condition expressions instead: " + trimmedExpression);
         }
 
-        String cacheKey = generateCacheKey(domain + ":list", trimmedExpression, context);
+        String cacheKey = generateCacheKey(trimmedExpression, context, List.class);
         CacheEntry<?> cachedEntry = cache.get(cacheKey);
         if (cachedEntry != null && !cachedEntry.isExpired()) {
-            log.debug("Cache hit for condition list '{}' in domain '{}'", trimmedExpression, domain);
+            log.debug("Cache hit for condition list '{}'", trimmedExpression);
             return (List<AbstractCondition>) cachedEntry.value;
         }
         if (cachedEntry != null) {
@@ -225,25 +208,11 @@ public class GlobalExpressionService {
 
         List<AbstractCondition> result = splitTopLevelConditions(trimmedExpression).stream()
                 .filter(part -> !part.isBlank())
-                .map(part -> evaluate(part.trim(), context, AbstractCondition.class, ttl, domain + ":item"))
+                .map(part -> evaluate(part.trim(), context, AbstractCondition.class, ttl))
                 .toList();
 
-        cache.put(cacheKey, new CacheEntry<>(result, ttl.toMillis(), domain + ":list"));
+        cache.put(cacheKey, new CacheEntry<>(result, ttl.toMillis()));
         return result;
-    }
-
-    /**
-     * Invalidate all cache entries for a specific domain.
-     *
-     * @param domain The domain to invalidate (e.g., "coordinates", "conditions")
-     */
-    public void invalidateByDomain(String domain) {
-        int removedCount = (int) cache.entrySet().stream()
-            .filter(e -> domain.equals(e.getValue().domain))
-            .peek(e -> cache.remove(e.getKey()))
-            .count();
-        
-        log.info("Invalidated {} cache entries for domain '{}'", removedCount, domain);
     }
 
     /**
@@ -266,27 +235,21 @@ public class GlobalExpressionService {
      * Get cache statistics (for monitoring/debugging).
      */
     public String getCacheStats() {
-        return String.format("Cache size: %d entries, domains: %s",
-            cache.size(),
-            cache.values().stream()
-                .map(e -> e.domain)
-                .distinct()
-                .toList()
-        );
+        return String.format("Cache size: %d entries", cache.size());
     }
 
     /**
      * Generate cache key from expression and context.
      */
-    private String generateCacheKey(String domain, String expression, Map<String, Object> context) {
-        // Create a deterministic hash from domain, expression, and context
+    private String generateCacheKey(String expression, Map<String, Object> context, Class<?> returnType) {
+        // Include the return type so values with different shapes do not share a cache entry.
         String contextStr = context.entrySet().stream()
             .sorted(Map.Entry.comparingByKey())
             .map(e -> e.getKey() + "=" + e.getValue())
             .reduce((a, b) -> a + ";" + b)
             .orElse("");
 
-        return domain + ":" + expression + ":" + contextStr.hashCode();
+        return returnType.getName() + ":" + expression + ":" + contextStr.hashCode();
     }
 
     private List<String> splitTopLevelConditions(String expression) {

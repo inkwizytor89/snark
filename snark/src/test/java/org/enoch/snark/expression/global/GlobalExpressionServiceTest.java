@@ -46,8 +46,7 @@ class GlobalExpressionServiceTest {
                     "#hasResourcesCount({source: 'source', count: '3m'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(HasResourcesCountCondition.class, result);
@@ -63,8 +62,7 @@ class GlobalExpressionServiceTest {
                     "#hasResources({planet: 'target', have: 'm100 c50', leave: 'm10'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(HasResourcesCondition.class, result);
@@ -81,8 +79,7 @@ class GlobalExpressionServiceTest {
                     "#areShips({planet: 'source', need: 'transporterSmall:5,battleship:3'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(AreShipsCondition.class, result);
@@ -98,8 +95,7 @@ class GlobalExpressionServiceTest {
                     "#isFleetExpired({source: 'source', missions: 'TRANSPORT|ATTACK', timeout: '30M'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(IsFleetExpiredCondition.class, result);
@@ -117,8 +113,7 @@ class GlobalExpressionServiceTest {
                     "#isExpressionTrue({term: 'fuel_level', op: 'eq', value: 'ready'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(IsExpressionTrueCondition.class, result);
@@ -136,8 +131,7 @@ class GlobalExpressionServiceTest {
                             "#hasTechnology({source: 'source', tech: 'IMPULSE', level: '5'})",
                             Map.of(),
                             AbstractCondition.class,
-                            Duration.ofMinutes(10),
-                            "conditions"
+                            Duration.ofMinutes(10)
                     )
             );
         }
@@ -149,8 +143,7 @@ class GlobalExpressionServiceTest {
                     "#hasNoMissions({planet: 'target'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(HasNoMissionsCondition.class, result);
@@ -166,8 +159,7 @@ class GlobalExpressionServiceTest {
                     "#hasFleetSlots({required: '5'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(HasFleetSlotsCondition.class, result);
@@ -181,8 +173,7 @@ class GlobalExpressionServiceTest {
                     "#isAttackNotExpired({target: 'target', timeout: '1H'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(IsAttackNotExpiredCondition.class, result);
@@ -199,8 +190,7 @@ class GlobalExpressionServiceTest {
                     "#isSpyNotExpired({target: 'target'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(IsSpyNotExpiredCondition.class, result);
@@ -217,8 +207,7 @@ class GlobalExpressionServiceTest {
                     "#isModifiedAfter({first: 'scanFinished', second: 'fleetSent'})",
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertInstanceOf(IsModifiedAfterCondition.class, result);
@@ -269,8 +258,7 @@ class GlobalExpressionServiceTest {
                     expr,
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertEquals(1, expressionService.getCacheSize());
@@ -279,8 +267,7 @@ class GlobalExpressionServiceTest {
                     expr,
                     Map.of(),
                     AbstractCondition.class,
-                    Duration.ofMinutes(10),
-                    "conditions"
+                    Duration.ofMinutes(10)
             );
 
             assertEquals(1, expressionService.getCacheSize());
@@ -290,8 +277,8 @@ class GlobalExpressionServiceTest {
         @Test
         @DisplayName("Should not cache different expressions")
         void testNoCacheForDifferentExpressions() {
-            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
-            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '5m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
+            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
+            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '5m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
 
             assertEquals(2, expressionService.getCacheSize());
         }
@@ -301,9 +288,26 @@ class GlobalExpressionServiceTest {
         void testCachingWithContext() {
             String expr = "#hasResourcesCount({source: 'source', count: '3m'})";
 
-            expressionService.evaluate(expr, Map.of("param", "value1"), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
-            expressionService.evaluate(expr, Map.of("param", "value2"), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
+            expressionService.evaluate(expr, Map.of("param", "value1"), AbstractCondition.class, Duration.ofMinutes(10));
+            expressionService.evaluate(expr, Map.of("param", "value2"), AbstractCondition.class, Duration.ofMinutes(10));
 
+            assertEquals(2, expressionService.getCacheSize());
+        }
+
+        @Test
+        @DisplayName("Should keep cached condition and condition-list values separate")
+        void testConditionAndConditionListUseSeparateCacheEntries() {
+            String expression = "#hasResourcesCount({source: 'source', count: '3m'})";
+
+            AbstractCondition condition = expressionService.evaluate(
+                    expression,
+                    Map.of(),
+                    AbstractCondition.class,
+                    Duration.ofMinutes(10)
+            );
+            var conditions = expressionService.evaluateConditions(expression, Map.of());
+
+            assertSame(condition, conditions.get(0));
             assertEquals(2, expressionService.getCacheSize());
         }
     }
@@ -313,22 +317,10 @@ class GlobalExpressionServiceTest {
     class InvalidationTests {
 
         @Test
-        @DisplayName("Should invalidate by domain")
-        void testInvalidateByDomain() {
-            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
-            expressionService.evaluate("#areShips({planet: 'source', need: 'transporterSmall:5'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "coordinates");
-
-            assertEquals(2, expressionService.getCacheSize());
-
-            expressionService.invalidateByDomain("conditions");
-            assertEquals(1, expressionService.getCacheSize());
-        }
-
-        @Test
         @DisplayName("Should invalidate all")
         void testInvalidateAll() {
-            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
-            expressionService.evaluate("#areShips({planet: 'source', need: 'transporterSmall:5'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
+            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
+            expressionService.evaluate("#areShips({planet: 'source', need: 'transporterSmall:5'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
 
             assertEquals(2, expressionService.getCacheSize());
 
@@ -345,7 +337,7 @@ class GlobalExpressionServiceTest {
         @DisplayName("Should throw on null expression")
         void testNullExpression() {
             assertThrows(IllegalArgumentException.class, () ->
-                    expressionService.evaluate(null, Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions")
+                    expressionService.evaluate(null, Map.of(), AbstractCondition.class, Duration.ofMinutes(10))
             );
         }
 
@@ -353,7 +345,7 @@ class GlobalExpressionServiceTest {
         @DisplayName("Should throw on empty expression")
         void testEmptyExpression() {
             assertThrows(IllegalArgumentException.class, () ->
-                    expressionService.evaluate("", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions")
+                    expressionService.evaluate("", Map.of(), AbstractCondition.class, Duration.ofMinutes(10))
             );
         }
 
@@ -361,7 +353,7 @@ class GlobalExpressionServiceTest {
         @DisplayName("Should throw on invalid SpEL expression")
         void testInvalidExpression() {
             assertThrows(IllegalStateException.class, () ->
-                    expressionService.evaluate("#nonExistentFunction({param: 'value'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions")
+                    expressionService.evaluate("#nonExistentFunction({param: 'value'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10))
             );
         }
 
@@ -369,7 +361,7 @@ class GlobalExpressionServiceTest {
         @DisplayName("Should throw on missing required parameter")
         void testMissingRequiredParameter() {
             assertThrows(IllegalStateException.class, () ->
-                    expressionService.evaluate("#hasResourcesCount({source: 'source'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions")
+                    expressionService.evaluate("#hasResourcesCount({source: 'source'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10))
             );
         }
     }
@@ -396,7 +388,7 @@ class GlobalExpressionServiceTest {
         void testNoCachedDoesNotInterfere() {
             String expr = "#hasResourcesCount({source: 'source', count: '3m'})";
 
-            expressionService.evaluate(expr, Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
+            expressionService.evaluate(expr, Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
             assertEquals(1, expressionService.getCacheSize());
 
             expressionService.evaluateNoCached(expr, Map.of(), AbstractCondition.class);
@@ -411,8 +403,8 @@ class GlobalExpressionServiceTest {
         @Test
         @DisplayName("Should report cache stats")
         void testCacheStats() {
-            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "conditions");
-            expressionService.evaluate("#areShips({planet: 'source', need: 'transporterSmall:5'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10), "coordinates");
+            expressionService.evaluate("#hasResourcesCount({source: 'source', count: '3m'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
+            expressionService.evaluate("#areShips({planet: 'source', need: 'transporterSmall:5'})", Map.of(), AbstractCondition.class, Duration.ofMinutes(10));
 
             String stats = expressionService.getCacheStats();
             assertNotNull(stats);
