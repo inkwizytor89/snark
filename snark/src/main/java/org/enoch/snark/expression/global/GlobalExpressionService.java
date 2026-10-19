@@ -10,7 +10,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,15 +29,13 @@ import java.util.Map;
  * List&lt;PlanetData&gt; coords = expressionService.evaluate(
  *     "#all_planets()",
  *     Map.of(),
- *     List.class,
- *     Duration.ofMinutes(10)
+ *     List.class
  * );
  * 
  * List&lt;AbstractCondition&gt; conditions = expressionService.evaluate(
  *     "#hasResourcesCount({source: 'p[1:2:3]', count: '3m'})",
  *     Map.of(),
- *     List.class,
- *     Duration.ofMinutes(1)
+ *     List.class
  * );
  * </pre>
  */
@@ -49,10 +46,6 @@ public class GlobalExpressionService {
     private final ExpressionParser parser;
     private final GlobalExpressionCache cache;
     
-    // Default TTL values for expression caching
-    public static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
-    public static final Duration SHORT_TTL = Duration.ofMinutes(1);
-
     public GlobalExpressionService() {
         this(new GlobalExpressionCache());
     }
@@ -69,11 +62,10 @@ public class GlobalExpressionService {
      * @param expression The SpEL expression to evaluate (e.g., "#all_planets()" or "#hasResourcesCount({...})")
      * @param context Variables and context available during evaluation
      * @param returnType Expected return type
-     * @param ttl Time-to-live for cache entry
-     * @return Evaluated result, cached for the given TTL
+     * @return Evaluated result, cached for 50 seconds
      * @throws IllegalStateException if expression evaluation fails
      */
-    public <T> T evaluate(String expression, Map<String, Object> context, Class<T> returnType, Duration ttl) {
+    public <T> T evaluate(String expression, Map<String, Object> context, Class<T> returnType) {
         if (expression == null || expression.isBlank()) {
             throw new IllegalArgumentException("Expression cannot be null or empty");
         }
@@ -96,9 +88,9 @@ public class GlobalExpressionService {
             T result = (T) parsedExpr.getValue(spelContext);
 
             // Store in cache
-            cache.put(cacheKey, result, ttl, expression);
+            cache.put(cacheKey, result, expression);
             log.debug("Expression '{}' evaluated and cached with TTL {}ms",
-                expression, ttl.toMillis());
+                expression, GlobalExpressionCache.CACHE_TTL.toMillis());
 
             return result;
 
@@ -145,15 +137,8 @@ public class GlobalExpressionService {
      * @param context evaluation context
      * @return parsed condition list
      */
-    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context) {
-        return evaluateConditions(expression, context, SHORT_TTL);
-    }
-
-    /**
-     * Evaluate a condition configuration expression into concrete conditions with configurable cache settings.
-     */
     @SuppressWarnings("unchecked")
-    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context, Duration ttl) {
+    public List<AbstractCondition> evaluateConditions(String expression, Map<String, Object> context) {
         if (expression == null || expression.isBlank() || "[]".equals(expression.trim())) {
             return List.of();
         }
@@ -177,10 +162,10 @@ public class GlobalExpressionService {
                 .map(String::trim)
                 .toList();
         List<AbstractCondition> result = conditionExpressions.stream()
-                .map(part -> evaluate(part, context, AbstractCondition.class, ttl))
+                .map(part -> evaluate(part, context, AbstractCondition.class))
                 .toList();
 
-        cache.put(cacheKey, result, ttl, conditionExpressions.toArray(String[]::new));
+        cache.put(cacheKey, result, conditionExpressions.toArray(String[]::new));
         return result;
     }
 

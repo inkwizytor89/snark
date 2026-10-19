@@ -15,6 +15,8 @@ import java.util.Set;
 @Component
 public class GlobalExpressionCache {
 
+    public static final Duration CACHE_TTL = Duration.ofSeconds(50);
+
     private final Map<String, List<CacheEntry<?>>> entriesByKey = new HashMap<>();
 
     static final class CacheEntry<T> {
@@ -41,7 +43,7 @@ public class GlobalExpressionCache {
         return findValidEntry(key);
     }
 
-    public synchronized void put(String key, Object value, Duration ttl, String... invalidationKeys) {
+    public synchronized void put(String key, Object value, String... invalidationKeys) {
         removeEntriesForKey(key);
 
         Set<String> keys = new LinkedHashSet<>();
@@ -52,7 +54,7 @@ public class GlobalExpressionCache {
             }
         }
 
-        CacheEntry<?> entry = new CacheEntry<>(value, Instant.now().plus(ttl), List.copyOf(keys));
+        CacheEntry<?> entry = new CacheEntry<>(value, Instant.now().plus(CACHE_TTL), List.copyOf(keys));
         for (String entryKey : entry.keys) {
             entriesByKey.computeIfAbsent(entryKey, ignored -> new ArrayList<>()).add(entry);
         }
