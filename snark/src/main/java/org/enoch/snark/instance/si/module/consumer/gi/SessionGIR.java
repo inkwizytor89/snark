@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.common.HashDecoder;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.si.module.consumer.Credentials;
@@ -91,6 +92,15 @@ public class SessionGIR extends GraphicalInterfaceReader {
 
     public boolean openServer() {
         try {
+            if(wd.getHash() != null && !wd.getHash().isEmpty()) {
+                String decoded = HashDecoder.decode(wd.getHash());
+                String[] serverDetails = decoded.split(";", 2);
+                if (serverDetails.length != 2 || serverDetails[0].isBlank() || serverDetails[1].isBlank()) {
+                    throw new IllegalArgumentException("Incorrect server hash: " + decoded);
+                }
+                wd.setServerName(serverDetails[0]);
+                wd.setUrl(serverDetails[1]);
+            }
             String serverName = wd.getServerName();
             List<WebElement> webElements = longFetchAll(By.xpath("//div[@role='row']"));
             System.err.println("serwers count "+webElements.size());

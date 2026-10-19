@@ -14,11 +14,11 @@ public class HashDecoder {
         System.out.println("decode: "+decode);
     }
 
-    private static String encode(String input) {
+    public static String encode(String input) {
         return Hex.encodeHexString(input.getBytes());
     }
 
-    private static String decode(String input) {
+    public static String decode(String input) {
         try {
             return new String(Hex.decodeHex(input));
         } catch (DecoderException e) {

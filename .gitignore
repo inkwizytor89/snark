@@ -38,3 +38,5 @@ hs_err_pid*
 /chromedriver.exe
 /workspace/
 /tools/
+/snark/snark.mv.db
+/snark/snark.trace.db

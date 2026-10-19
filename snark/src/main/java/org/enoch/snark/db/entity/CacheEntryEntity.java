@@ -17,11 +17,11 @@ public class CacheEntryEntity extends IdEntity {
     public LocalDateTime created = LocalDateTime.now();
 
     @Basic
-    @Column(name = "key")
+    @Column(name = "\"key\"")
     public String key;
 
     @Basic
-    @Column(name = "value")
+    @Column(name = "\"value\"")
     public String value;
 
     public Long getLong() {

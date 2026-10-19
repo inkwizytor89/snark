@@ -32,6 +32,7 @@ public class ConfigEntity {
     @Column(name = "config_key")
     private String key;
 
+    @Column(name = "\"value\"")
     private String value;
 
     public ConfigEntity(ConfigTerm configTerm) {
