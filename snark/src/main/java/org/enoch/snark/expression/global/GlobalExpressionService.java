@@ -2,6 +2,7 @@ package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -13,7 +14,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Global expression evaluation service with TTL-based caching.
@@ -47,46 +47,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GlobalExpressionService {
 
     private final ExpressionParser parser;
-    private final Map<String, CacheEntry<?>> cache;
+    private final GlobalExpressionCache cache;
     
     // Default TTL values for expression caching
     public static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
     public static final Duration SHORT_TTL = Duration.ofMinutes(1);
 
-    /**
-     * Internal cache entry wrapper with TTL support.
-     */
-    static class CacheEntry<T> {
-        final T value;
-        final long createdAtMs;
-        final long ttlMs;
-
-        CacheEntry(T value, long ttlMs) {
-            this.value = value;
-            this.ttlMs = ttlMs;
-            this.createdAtMs = System.currentTimeMillis();
-        }
-
-        /**
-         * Check if this cache entry has expired.
-         */
-        boolean isExpired() {
-            long elapsedMs = System.currentTimeMillis() - createdAtMs;
-            return elapsedMs > ttlMs;
-        }
-
-        /**
-         * Get remaining time until expiration in milliseconds.
-         */
-        long remainingTtlMs() {
-            long elapsedMs = System.currentTimeMillis() - createdAtMs;
-            return Math.max(0, ttlMs - elapsedMs);
-        }
+    public GlobalExpressionService() {
+        this(new GlobalExpressionCache());
     }
 
-    public GlobalExpressionService() {
+    @Autowired
+    public GlobalExpressionService(GlobalExpressionCache cache) {
         this.parser = new SpelExpressionParser();
-        this.cache = new ConcurrentHashMap<>();
+        this.cache = cache;
     }
 
     /**
@@ -106,17 +80,11 @@ public class GlobalExpressionService {
 
         String cacheKey = generateCacheKey(expression, context, returnType);
 
-        // Check if cached entry exists and is not expired
-        if (cache.containsKey(cacheKey)) {
-            CacheEntry<?> entry = cache.get(cacheKey);
-            if (!entry.isExpired()) {
-                log.debug("Cache hit for expression '{}' (remaining TTL: {}ms)",
-                    expression, entry.remainingTtlMs());
-                return (T) entry.value;
-            } else {
-                // Remove expired entry
-                cache.remove(cacheKey);
-                log.debug("Expired cache entry removed for '{}'", expression);
+        if (cache.containsValid(cacheKey)) {
+            GlobalExpressionCache.CacheEntry<?> entry = cache.get(cacheKey);
+            if (entry != null) {
+                log.debug("Cache hit for expression '{}'", expression);
+                return returnType.cast(entry.value);
             }
         }
 
@@ -128,8 +96,7 @@ public class GlobalExpressionService {
             T result = (T) parsedExpr.getValue(spelContext);
 
             // Store in cache
-            CacheEntry<T> entry = new CacheEntry<>(result, ttl.toMillis());
-            cache.put(cacheKey, entry);
+            cache.put(cacheKey, result, ttl, expression);
             log.debug("Expression '{}' evaluated and cached with TTL {}ms",
                 expression, ttl.toMillis());
 
@@ -197,21 +164,23 @@ public class GlobalExpressionService {
         }
 
         String cacheKey = generateCacheKey(trimmedExpression, context, List.class);
-        CacheEntry<?> cachedEntry = cache.get(cacheKey);
-        if (cachedEntry != null && !cachedEntry.isExpired()) {
-            log.debug("Cache hit for condition list '{}'", trimmedExpression);
-            return (List<AbstractCondition>) cachedEntry.value;
-        }
-        if (cachedEntry != null) {
-            cache.remove(cacheKey);
+        if (cache.containsValid(cacheKey)) {
+            GlobalExpressionCache.CacheEntry<?> cachedEntry = cache.get(cacheKey);
+            if (cachedEntry != null) {
+                log.debug("Cache hit for condition list '{}'", trimmedExpression);
+                return (List<AbstractCondition>) cachedEntry.value;
+            }
         }
 
-        List<AbstractCondition> result = splitTopLevelConditions(trimmedExpression).stream()
+        List<String> conditionExpressions = splitTopLevelConditions(trimmedExpression).stream()
                 .filter(part -> !part.isBlank())
-                .map(part -> evaluate(part.trim(), context, AbstractCondition.class, ttl))
+                .map(String::trim)
+                .toList();
+        List<AbstractCondition> result = conditionExpressions.stream()
+                .map(part -> evaluate(part, context, AbstractCondition.class, ttl))
                 .toList();
 
-        cache.put(cacheKey, new CacheEntry<>(result, ttl.toMillis()));
+        cache.put(cacheKey, result, ttl, conditionExpressions.toArray(String[]::new));
         return result;
     }
 
@@ -219,23 +188,30 @@ public class GlobalExpressionService {
      * Invalidate all cache entries.
      */
     public void invalidateAll() {
-        int size = cache.size();
-        cache.clear();
+        int size = cache.clearAll();
         log.info("Cleared {} cache entries", size);
+    }
+
+    /**
+     * Invalidate all cache entries associated with a key.
+     */
+    public void invalidateByKey(String key) {
+        int removedCount = cache.invalidateByKey(key);
+        log.info("Invalidated {} cache entries for key '{}'", removedCount, key);
     }
 
     /**
      * Get current cache size (for monitoring/debugging).
      */
     public int getCacheSize() {
-        return cache.size();
+        return cache.getSize();
     }
 
     /**
      * Get cache statistics (for monitoring/debugging).
      */
     public String getCacheStats() {
-        return String.format("Cache size: %d entries", cache.size());
+        return String.format("Cache size: %d entries", cache.getSize());
     }
 
     /**

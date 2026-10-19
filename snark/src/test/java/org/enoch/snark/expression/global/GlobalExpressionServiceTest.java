@@ -310,6 +310,20 @@ class GlobalExpressionServiceTest {
             assertSame(condition, conditions.get(0));
             assertEquals(2, expressionService.getCacheSize());
         }
+
+        @Test
+        @DisplayName("Should invalidate condition lists through their member expression key")
+        void testInvalidateByExpressionKey() {
+            String firstExpression = "#hasResourcesCount({source: 'source', count: '3m'})";
+            String secondExpression = "#areShips({planet: 'source', need: 'transporterSmall:5'})";
+
+            expressionService.evaluateConditions(firstExpression + " | " + secondExpression, Map.of());
+            assertEquals(3, expressionService.getCacheSize());
+
+            expressionService.invalidateByKey(firstExpression);
+
+            assertEquals(1, expressionService.getCacheSize());
+        }
     }
 
     @Nested
