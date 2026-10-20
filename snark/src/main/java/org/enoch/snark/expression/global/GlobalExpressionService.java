@@ -203,14 +203,18 @@ public class GlobalExpressionService {
      * Generate cache key from expression and context.
      */
     private String generateCacheKey(String expression, Map<String, Object> context, Class<?> returnType) {
-        // Include the return type so values with different shapes do not share a cache entry.
-        String contextStr = context.entrySet().stream()
+        String contextKey = context.entrySet().stream()
             .sorted(Map.Entry.comparingByKey())
-            .map(e -> e.getKey() + "=" + e.getValue())
-            .reduce((a, b) -> a + ";" + b)
-            .orElse("");
+            .map(entry -> encodeCacheKeyPart(entry.getKey())
+                + encodeCacheKeyPart(entry.getValue() == null ? "null" : entry.getValue().getClass().getName())
+                + encodeCacheKeyPart(String.valueOf(entry.getValue())))
+            .reduce("", String::concat);
 
-        return returnType.getName() + ":" + expression + ":" + contextStr.hashCode();
+        return returnType.getName() + ":" + expression + ":context:" + contextKey;
+    }
+
+    private String encodeCacheKeyPart(String value) {
+        return value.length() + ":" + value;
     }
 
     private List<String> splitTopLevelConditions(String expression) {

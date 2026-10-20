@@ -278,11 +278,13 @@ class GlobalExpressionServiceTest {
         @Test
         @DisplayName("Should handle different contexts")
         void testCachingWithContext() {
-            String expr = "#hasResourcesCount({source: 'source', count: '3m'})";
+            String expr = "#param";
 
-            expressionService.evaluate(expr, Map.of("param", "value1"), AbstractCondition.class);
-            expressionService.evaluate(expr, Map.of("param", "value2"), AbstractCondition.class);
+            String firstResult = expressionService.evaluate(expr, Map.of("param", "Aa"), String.class);
+            String secondResult = expressionService.evaluate(expr, Map.of("param", "BB"), String.class);
 
+            assertEquals("Aa", firstResult);
+            assertEquals("BB", secondResult);
             assertEquals(2, expressionService.getCacheSize());
         }
 
