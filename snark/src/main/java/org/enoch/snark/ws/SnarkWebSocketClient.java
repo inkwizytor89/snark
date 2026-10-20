@@ -8,6 +8,7 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -25,13 +26,18 @@ public class SnarkWebSocketClient {
     private final OkHttpClient okHttpClient = new OkHttpClient();
     private final String managerUrl;
     private final String instanceId;
+    private final Core core;
 
     private volatile WebSocket webSocket;
+    private volatile String registrationRequestId;
+    private volatile boolean registered;
 
     public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
-                                @Value("${instanceId:${spring.application.name:snark}}") String instanceId) {
+                                @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
+                                Core core) {
         this.managerUrl = managerUrl == null ? "" : managerUrl.trim();
         this.instanceId = instanceId == null || instanceId.isBlank() ? "snark" : instanceId.trim();
+        this.core = core;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -88,6 +94,24 @@ public class SnarkWebSocketClient {
         return response;
     }
 
+    CommandMessage buildStatusResponse(CommandMessage incoming) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:status");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(Map.of(
+                "instanceId", instanceId,
+                "state", "running",
+                "message", core.status(),
+                "hostname", resolveHostname(),
+                "version", resolveVersion()
+        ));
+        return response;
+    }
+
     String toResponseType(String incomingType) {
         if (incomingType == null || incomingType.isBlank()) {
             return "response:unknown";
@@ -115,7 +139,10 @@ public class SnarkWebSocketClient {
         try {
             String json = objectMapper.writeValueAsString(message);
             System.out.println("[WS][OUT] " + json);
-            socket.send(json);
+            if (!socket.send(json)) {
+                System.err.println("[WS][ERROR] WebSocket rejected outgoing message type=" + message.getType()
+                        + " id=" + message.getId());
+            }
         } catch (Exception e) {
             System.err.println("[WS][ERROR] Failed to send message: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -160,7 +187,9 @@ public class SnarkWebSocketClient {
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
             System.out.println("[WS][OPEN] managerUrl=" + managerUrl + " instanceId=" + instanceId);
-            sendAndLog(webSocket, buildRegistrationMessage());
+            CommandMessage registration = buildRegistrationMessage();
+            registrationRequestId = registration.getId();
+            sendAndLog(webSocket, registration);
         }
 
         @Override
@@ -168,7 +197,33 @@ public class SnarkWebSocketClient {
             System.out.println("[WS][IN] " + text);
             try {
                 CommandMessage incoming = objectMapper.readValue(text, CommandMessage.class);
-                sendAndLog(webSocket, buildEchoResponse(incoming));
+                if ("response:register".equals(incoming.getType())
+                        && registrationRequestId != null
+                        && registrationRequestId.equals(incoming.getId())
+                        && incoming.getStatus() == 200) {
+                    registered = true;
+                    System.out.println("[WS][REGISTERED] instanceId=" + instanceId);
+                } else if ("error:register".equals(incoming.getType())
+                        && registrationRequestId != null
+                        && registrationRequestId.equals(incoming.getId())) {
+                    registered = false;
+                    System.err.println("[WS][REGISTRATION][ERROR] instanceId=" + instanceId
+                            + " message=" + incoming.getError());
+                } else if ("response:register".equals(incoming.getType())
+                        || "error:register".equals(incoming.getType())) {
+                    System.err.println("[WS][REGISTRATION][ERROR] Ignoring uncorrelated registration response");
+                } else if (isRequest(incoming)
+                        && (!"conductor".equals(incoming.getFrom()) || !instanceId.equals(incoming.getTo()))) {
+                    System.err.println("[WS][REJECTED] Request is not addressed from conductor to " + instanceId);
+                } else if ("request:status".equals(incoming.getType()) && registered) {
+                    sendAndLog(webSocket, buildStatusResponse(incoming));
+                } else if (isRequest(incoming) && registered) {
+                    sendAndLog(webSocket, buildEchoResponse(incoming));
+                } else if (isRequest(incoming)) {
+                    System.err.println("[WS][REJECTED] Request received before registration acknowledgement");
+                } else {
+                    System.out.println("[WS][IGNORED] Non-request message type=" + incoming.getType());
+                }
             } catch (Exception e) {
                 System.err.println("[WS][ERROR] Failed to parse incoming message: " + e.getMessage());
                 e.printStackTrace(System.err);
@@ -178,16 +233,19 @@ public class SnarkWebSocketClient {
 
         @Override
         public void onClosing(WebSocket webSocket, int code, String reason) {
+            registered = false;
             System.out.println("[WS][CLOSING] code=" + code + " reason=" + reason);
         }
 
         @Override
         public void onClosed(WebSocket webSocket, int code, String reason) {
+            registered = false;
             System.out.println("[WS][CLOSED] code=" + code + " reason=" + reason);
         }
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+            registered = false;
             System.err.println("[WS][FAILURE] managerUrl=" + managerUrl + " instanceId=" + instanceId
                     + " message=" + t.getMessage());
             if (response != null) {
@@ -195,5 +253,9 @@ public class SnarkWebSocketClient {
             }
             t.printStackTrace(System.err);
         }
+    }
+
+    private boolean isRequest(CommandMessage message) {
+        return message.getType() != null && message.getType().startsWith("request:");
     }
 }

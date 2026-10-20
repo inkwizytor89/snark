@@ -141,25 +141,40 @@ public class InstanceController {
 
         if (running) {
             long previousUpdateAt = processService.getLastStatusUpdatedAt(id);
+            boolean requestSent = false;
             try {
-                processService.requestStatus(id);
+                requestSent = processService.requestStatus(id);
             } catch (Exception e) {
                 System.err.println("Failed to request status for instance " + id + ": " + e.getMessage());
+                status.put("statusMessage", "Status request failed: " + e.getMessage());
             }
 
-            long deadline = System.currentTimeMillis() + 300;
-            while (System.currentTimeMillis() < deadline
-                    && processService.getLastStatusUpdatedAt(id) <= previousUpdateAt) {
-                try {
-                    Thread.sleep(25);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+            if (requestSent) {
+                long deadline = System.currentTimeMillis() + 300;
+                while (System.currentTimeMillis() < deadline
+                        && processService.getLastStatusUpdatedAt(id) <= previousUpdateAt) {
+                    try {
+                        Thread.sleep(25);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+                if (processService.getLastStatusUpdatedAt(id) <= previousUpdateAt) {
+                    status.put("statusMessage", "Timed out waiting for a status response from the instance.");
+                }
+            } else {
+                if (!status.containsKey("statusMessage")) {
+                    status.put("statusMessage", "WebSocket is not connected; status is unavailable.");
                 }
             }
         }
 
-        status.put("statusMessage", processService.getLastStatusMessage(id));
+        if (!status.containsKey("statusMessage")) {
+            status.put("statusMessage", processService.getLastStatusMessage(id));
+        }
+        status.put("webSocketConnected", processService.isWorkerConnected(id));
+        status.put("statusUpdatedAt", processService.getLastStatusUpdatedAt(id));
 
         return ResponseEntity.ok(status);
     }

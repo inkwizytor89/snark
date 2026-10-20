@@ -154,6 +154,10 @@ public class ProcessService {
         return workerSocketHandler.getLastStatusUpdatedAt(id);
     }
 
+    public boolean isWorkerConnected(String id) {
+        return workerSocketHandler.isRegistered(id);
+    }
+
     /**
      * Gets all running runtimes.
      */
