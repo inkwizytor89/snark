@@ -140,11 +140,12 @@ function initApp() {
     }
 
     function getInstanceStatusText(inst) {
-        if (inst.serverStatus && inst.serverStatus.navigatorStatus) {
+        const navigatorStatus = inst.serverStatus && inst.serverStatus.navigatorStatus;
+        if (navigatorStatus && navigatorStatus.fleetStatus) {
             if (!inst.serverStatus.activeThreads?.length && !inst.serverStatus.commandDeque) {
-                return inst.serverStatus.navigatorStatus;
+                return navigatorStatus.fleetStatus;
             }
-            return `Navigator: ${inst.serverStatus.navigatorStatus}`;
+            return `Navigator: ${navigatorStatus.fleetStatus}`;
         }
 
         if (inst.statusMessage && String(inst.statusMessage).trim()) {
@@ -367,6 +368,9 @@ function initApp() {
         const pidText = inst.pid && inst.pid !== -1 ? inst.pid : '-';
         const statusText = getInstanceStatusText(inst);
         const serverStatus = inst.serverStatus;
+        const navigatorLastUpdate = serverStatus && serverStatus.navigatorStatus
+            ? formatStatusTime(serverStatus.navigatorStatus.lastUpdate)
+            : '';
         const activeThreads = serverStatus && serverStatus.activeThreads.length
             ? serverStatus.activeThreads.join('\n')
             : '-';
@@ -395,7 +399,7 @@ function initApp() {
                     <span class="detail-value ${propertiesClass}">${escapeHtml(propertiesText)}</span>
                 </div>
                 <div class="detail-item detail-item-wide">
-                    <span class="detail-label">Latest status</span>
+                    <span class="detail-label">Latest status${navigatorLastUpdate ? ` (${navigatorLastUpdate})` : ''}</span>
                     <span class="detail-value">${escapeHtml(statusText)}</span>
                 </div>
                 <div class="detail-item detail-item-wide">
@@ -412,6 +416,17 @@ function initApp() {
                 </div>
             </div>
         `;
+    }
+
+    function formatStatusTime(timestamp) {
+        if (!timestamp) {
+            return '';
+        }
+        const time = timestamp.split('T')[1];
+        if (!time || !/^\d{2}:\d{2}:\d{2}/.test(time)) {
+            return '';
+        }
+        return time.substring(0, 8);
     }
 
     function renderConfigsTab(inst) {

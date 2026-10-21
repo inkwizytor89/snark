@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ServerStatus {
 
-    private String navigatorStatus;
+    private NavigatorStatus navigatorStatus;
     private List<String> activeThreads;
     private String commandDeque;
     private String notifications;

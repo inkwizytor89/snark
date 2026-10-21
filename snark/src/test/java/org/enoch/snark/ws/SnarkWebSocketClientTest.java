@@ -2,12 +2,15 @@ package org.enoch.snark.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.snark.instance.si.Core;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,8 +64,9 @@ class SnarkWebSocketClientTest {
 
     @Test
     void shouldBuildStatusResponseWithRuntimeStatus() {
+        LocalDateTime lastUpdate = LocalDateTime.of(2026, 10, 21, 12, 34, 56);
         when(core.status()).thenReturn(new ServerStatus(
-                "F:0/1 E:0/0",
+                new NavigatorStatus("F:0/1 E:0/0", lastUpdate),
                 java.util.List.of("global:consumer"),
                 "Nhash",
                 "global.consumer\nfailure\nstack trace"
@@ -82,13 +86,19 @@ class SnarkWebSocketClientTest {
         assertEquals(200, response.getStatus());
         assertEquals("running", ((Map<?, ?>) response.getPayload()).get("state"));
         ServerStatus status = (ServerStatus) ((Map<?, ?>) response.getPayload()).get("serverStatus");
-        assertEquals("F:0/1 E:0/0", status.getNavigatorStatus());
+        assertEquals("F:0/1 E:0/0", status.getNavigatorStatus().getFleetStatus());
+        assertEquals(lastUpdate, status.getNavigatorStatus().getLastUpdate());
         assertEquals(java.util.List.of("global:consumer"), status.getActiveThreads());
         assertEquals("Nhash", status.getCommandDeque());
         assertEquals("global.consumer\nfailure\nstack trace", status.getNotifications());
 
-        JsonNode json = new ObjectMapper().valueToTree(response);
-        assertEquals("F:0/1 E:0/0", json.path("payload").path("serverStatus").path("navigatorStatus").asText());
+        JsonNode json = new ObjectMapper().findAndRegisterModules()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .valueToTree(response);
+        assertEquals("F:0/1 E:0/0", json.path("payload").path("serverStatus")
+                .path("navigatorStatus").path("fleetStatus").asText());
+        assertEquals("2026-10-21T12:34:56", json.path("payload").path("serverStatus")
+                .path("navigatorStatus").path("lastUpdate").asText());
         assertEquals("Nhash", json.path("payload").path("serverStatus").path("commandDeque").asText());
     }
 }

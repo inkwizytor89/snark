@@ -1,10 +1,12 @@
 package org.enoch.conductor.ws;
 
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.conductor.config.InstanceConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -23,7 +25,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     private static final long STATUS_REQUEST_TIMEOUT_MILLIS = 60_000L;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final Map<String, WebSocketSession> workers = new ConcurrentHashMap<>();
     private final Map<String, ServerStatus> lastStatuses = new ConcurrentHashMap<>();
@@ -191,7 +195,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     public String getLastStatusMessage(String workerId) {
         ServerStatus status = lastStatuses.get(workerId);
-        return status == null ? null : status.getNavigatorStatus();
+        return status == null || status.getNavigatorStatus() == null
+                ? null
+                : status.getNavigatorStatus().getFleetStatus();
     }
 
     public long getLastStatusUpdatedAt(String workerId) {
@@ -269,7 +275,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         if (serverStatusNode.isMissingNode() && payload.path("message").isTextual()
                 && !payload.path("message").asText().isBlank()) {
             lastStatuses.put(instanceId, new ServerStatus(
-                    payload.path("message").asText(),
+                    new NavigatorStatus(payload.path("message").asText(), null),
                     List.of(),
                     "",
                     ""
@@ -304,7 +310,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     private boolean isValidServerStatus(JsonNode status) {
         if (!status.isObject()
-                || status.path("navigatorStatus").asText("").isBlank()
+                || !status.path("navigatorStatus").isObject()
+                || status.path("navigatorStatus").path("fleetStatus").asText("").isBlank()
+                || !status.path("navigatorStatus").path("lastUpdate").isTextual()
                 || !status.path("commandDeque").isTextual()
                 || !status.path("notifications").isTextual()
                 || !status.path("activeThreads").isArray()) {

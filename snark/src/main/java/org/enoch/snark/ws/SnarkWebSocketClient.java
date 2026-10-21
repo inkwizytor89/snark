@@ -1,6 +1,7 @@
 package org.enoch.snark.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.annotation.PreDestroy;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -22,7 +23,9 @@ import java.util.UUID;
 @Component
 public class SnarkWebSocketClient {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private final OkHttpClient okHttpClient = new OkHttpClient();
     private final String managerUrl;
     private final String instanceId;
