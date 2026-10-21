@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module;
 
 import jakarta.annotation.PostConstruct;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
@@ -23,6 +24,9 @@ import org.enoch.snark.expression.global.GlobalExpressionService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -41,6 +45,7 @@ import static org.enoch.snark.instance.si.module.ThreadMap.*;
  * doc/architecture/Thread system.md
  */
 @NoArgsConstructor(force = true)
+@Slf4j
 public abstract class AbstractThread extends ExecutorImpl {
 
     public static final long NO_LIMIT = -1L;
@@ -79,6 +84,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected Long limit = NO_LIMIT;
 
     protected CommandContainer container = new CommandContainer();
+    private Map<String, String> notification = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -141,9 +147,16 @@ public abstract class AbstractThread extends ExecutorImpl {
                 cacheProcessingStatus();
             } catch (Exception e) {
                 runningProcessor.logChangedStatus("Thread " + map.name(), map);
-                String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                System.err.println(map.name()+" ["+time+"]");
-                e.printStackTrace();
+                String message = e.getMessage();
+                if (!notification.containsKey(message)) {
+                    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    StringWriter stackTrace = new StringWriter();
+                    e.printStackTrace(new PrintWriter(stackTrace));
+                    String details = "Thread " + map.name() + " [" + time + "]" +
+                            System.lineSeparator() + stackTrace;
+                    notification.put(message, details);
+                    log.warn(notification.get(message));
+                }
             }
         }
         String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -184,6 +197,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     public void updateMap(ThreadMap map) {
         timeScheduler.update(map.getConfig(TIME, OFF));
         this.map = map;
+        notification.clear();
     }
 
     public RunningState getActualState() {
