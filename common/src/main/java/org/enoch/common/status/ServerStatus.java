@@ -15,4 +15,5 @@ public class ServerStatus {
     private List<String> activeThreads;
     private String commandDeque;
     private String notifications;
+    private CoordinatesStatus coordinates;
 }

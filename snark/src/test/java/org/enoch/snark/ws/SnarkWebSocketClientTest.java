@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.ColonyStatus;
+import org.enoch.common.status.CoordinatesStatus;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.snark.instance.si.Core;
@@ -69,7 +71,10 @@ class SnarkWebSocketClientTest {
                 new NavigatorStatus("F:0/1 E:0/0", lastUpdate),
                 java.util.List.of("global:consumer"),
                 "Nhash",
-                "global.consumer\nfailure\nstack trace"
+                "global.consumer\nfailure\nstack trace",
+                new CoordinatesStatus(1, 1, java.util.List.of(new ColonyStatus(
+                        "p[1:2:3]", 100L, 200L, 300L, 400L, Map.of("battleship", 5L)
+                )))
         ));
         CommandMessage incoming = new CommandMessage();
         incoming.setId("status-123");
@@ -91,6 +96,10 @@ class SnarkWebSocketClientTest {
         assertEquals(java.util.List.of("global:consumer"), status.getActiveThreads());
         assertEquals("Nhash", status.getCommandDeque());
         assertEquals("global.consumer\nfailure\nstack trace", status.getNotifications());
+        assertEquals(1, status.getCoordinates().getPlanetCount());
+        assertEquals(1, status.getCoordinates().getMoonCount());
+        assertEquals("p[1:2:3]", status.getCoordinates().getColonies().getFirst().getCoordinate());
+        assertEquals(5L, status.getCoordinates().getColonies().getFirst().getShips().get("battleship"));
 
         JsonNode json = new ObjectMapper().findAndRegisterModules()
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -100,5 +109,8 @@ class SnarkWebSocketClientTest {
         assertEquals("2026-10-21T12:34:56", json.path("payload").path("serverStatus")
                 .path("navigatorStatus").path("lastUpdate").asText());
         assertEquals("Nhash", json.path("payload").path("serverStatus").path("commandDeque").asText());
+        assertEquals(1, json.path("payload").path("serverStatus").path("coordinates").path("planetCount").asInt());
+        assertEquals(5, json.path("payload").path("serverStatus").path("coordinates")
+                .path("colonies").get(0).path("ships").path("battleship").asInt());
     }
 }

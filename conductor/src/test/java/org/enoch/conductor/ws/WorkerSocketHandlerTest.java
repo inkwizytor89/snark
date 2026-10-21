@@ -78,7 +78,10 @@ class WorkerSocketHandlerTest {
                  "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","state":"running",
                  "serverStatus":{"navigatorStatus":{"fleetStatus":"Runtime is healthy","lastUpdate":"2026-10-21T12:34:56"},
                  "activeThreads":["global:consumer"],
-                 "commandDeque":"Nhash","notifications":"global.consumer\\nfailure\\nstack trace"}}}
+                 "commandDeque":"Nhash","notifications":"global.consumer\\nfailure\\nstack trace",
+                 "coordinates":{"planetCount":1,"moonCount":1,"colonies":[
+                 {"coordinate":"p[1:2:3]","metal":100,"crystal":200,"deuterium":300,"energy":400,
+                 "ships":{"battleship":5}}]}}}}
                 """.replace("${requestId}", requestJson.path("id").asText()));
 
         assertEquals("Runtime is healthy", handler.getLastStatusMessage("worker#1"));
@@ -88,6 +91,10 @@ class WorkerSocketHandlerTest {
         assertEquals("global:consumer", serverStatus.getActiveThreads().get(0));
         assertEquals("Nhash", serverStatus.getCommandDeque());
         assertEquals("global.consumer\nfailure\nstack trace", serverStatus.getNotifications());
+        assertEquals(1, serverStatus.getCoordinates().getPlanetCount());
+        assertEquals(1, serverStatus.getCoordinates().getMoonCount());
+        assertEquals("p[1:2:3]", serverStatus.getCoordinates().getColonies().getFirst().getCoordinate());
+        assertEquals(5L, serverStatus.getCoordinates().getColonies().getFirst().getShips().get("battleship"));
         assertTrue(handler.getLastStatusUpdatedAt("worker#1") > 0);
     }
 

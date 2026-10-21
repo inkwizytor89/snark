@@ -278,7 +278,8 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                     new NavigatorStatus(payload.path("message").asText(), null),
                     List.of(),
                     "",
-                    ""
+                    "",
+                    null
             ));
             updateStatusTimestamp(instanceId);
             return;

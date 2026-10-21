@@ -56,7 +56,7 @@ The conductor sends `request:status` with a unique ID, `from: "conductor"`, `to`
 | `hostname` | Worker host name. |
 | `version` | Worker version. |
 
-The `serverStatus` object contains `navigatorStatus`, `activeThreads`, `commandDeque`, and `notifications`. `navigatorStatus` contains `fleetStatus` and `lastUpdate` (an ISO-8601 local date-time). During rolling upgrades, the conductor also accepts the previous `payload.message` string and exposes it as the Navigator fleet status until the worker is upgraded. The conductor accepts status only when the response ID matches an outstanding status request, the response comes from the session registered for the matching `from` identity, and `to` is `conductor`. Missing or malformed status data is not a successful status update.
+The `serverStatus` object contains `navigatorStatus`, `activeThreads`, `commandDeque`, `notifications`, and `coordinates`. `navigatorStatus` contains `fleetStatus` and `lastUpdate` (an ISO-8601 local date-time). `coordinates` contains planet and moon counts plus a colony list with coordinate, resource, energy, and ship-count data. During rolling upgrades, the conductor also accepts the previous `payload.message` string and exposes it as the Navigator fleet status until the worker is upgraded. The conductor accepts status only when the response ID matches an outstanding status request, the response comes from the session registered for the matching `from` identity, and `to` is `conductor`. Missing or malformed status data is not a successful status update.
 
 ## Compatibility and tests
 

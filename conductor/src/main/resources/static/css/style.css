@@ -385,6 +385,37 @@ main {
     gap: 14px;
 }
 
+.coordinates-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.coordinates-colonies {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.coordinate-colony {
+    background: rgba(30, 30, 46, 0.65);
+    border: 1px solid #404060;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.coordinate-colony-title {
+    color: #00d4ff;
+    font-size: 14px;
+    margin: 0 0 12px;
+}
+
+.coordinate-colony-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
 .detail-tab-toolbar {
     display: flex;
     justify-content: space-between;

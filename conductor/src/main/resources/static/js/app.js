@@ -355,13 +355,72 @@ function initApp() {
                 </div>
                 <div class="detail-tabs">
                     <button type="button" class="detail-tab ${activeDetailsTab === 'overview' ? 'is-active' : ''}" data-detail-tab="overview">Overview</button>
+                    <button type="button" class="detail-tab ${activeDetailsTab === 'coordinates' ? 'is-active' : ''}" data-detail-tab="coordinates">Coordinates</button>
                     <button type="button" class="detail-tab ${activeDetailsTab === 'configs' ? 'is-active' : ''}" data-detail-tab="configs">Configs</button>
                 </div>
                 <div class="detail-tab-panel">
-                    ${activeDetailsTab === 'configs' ? renderConfigsTab(inst) : renderOverviewTab(inst)}
+                    ${activeDetailsTab === 'configs'
+                        ? renderConfigsTab(inst)
+                        : activeDetailsTab === 'coordinates'
+                            ? renderCoordinatesTab(inst)
+                            : renderOverviewTab(inst)}
                 </div>
             </div>
         `;
+    }
+
+    function renderCoordinatesTab(inst) {
+        const coordinates = inst.serverStatus && inst.serverStatus.coordinates;
+        if (!coordinates) {
+            return '<div class="loading">Coordinate data is not available yet</div>';
+        }
+
+        const colonies = coordinates.colonies || [];
+        const colonyItems = colonies.length
+            ? colonies.map((colony) => {
+                const ships = colony.ships && Object.keys(colony.ships).length
+                    ? Object.entries(colony.ships)
+                        .map(([ship, count]) => `${ship}: ${formatCoordinateValue(count)}`)
+                        .join('\n')
+                    : '-';
+                return `
+                    <article class="coordinate-colony">
+                        <h3 class="coordinate-colony-title">${escapeHtml(colony.coordinate || '-')}</h3>
+                        <div class="coordinate-colony-details">
+                            <div>
+                                <span class="detail-label">Resources</span>
+                                <span class="detail-value">Metal: ${escapeHtml(formatCoordinateValue(colony.metal))}</span>
+                                <span class="detail-value">Crystal: ${escapeHtml(formatCoordinateValue(colony.crystal))}</span>
+                                <span class="detail-value">Deuterium: ${escapeHtml(formatCoordinateValue(colony.deuterium))}</span>
+                                <span class="detail-value">Energy: ${escapeHtml(formatCoordinateValue(colony.energy))}</span>
+                            </div>
+                            <div>
+                                <span class="detail-label">Ships</span>
+                                <span class="detail-value">${escapeHtml(ships)}</span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('')
+            : '<div class="loading">No colonies found</div>';
+
+        return `
+            <div class="coordinates-summary">
+                <div class="detail-item">
+                    <span class="detail-label">Planets</span>
+                    <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.planetCount))}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Moons</span>
+                    <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.moonCount))}</span>
+                </div>
+            </div>
+            <div class="coordinates-colonies">${colonyItems}</div>
+        `;
+    }
+
+    function formatCoordinateValue(value) {
+        return value === null || value === undefined ? '-' : String(value);
     }
 
     function renderOverviewTab(inst) {
