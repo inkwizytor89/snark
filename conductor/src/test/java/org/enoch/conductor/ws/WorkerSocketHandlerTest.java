@@ -2,6 +2,7 @@ package org.enoch.conductor.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.enoch.common.status.ServerStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -49,7 +50,8 @@ class WorkerSocketHandlerTest {
         TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
         String uncorrelatedStatus = """
                 {"id":"status-1","type":"response:status","from":"worker#1","to":"conductor",
-                 "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","state":"running","message":"Unsolicited status"}}
+                 "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","state":"running",
+                 "serverStatus":{"navigatorStatus":"Unsolicited status","activeThreads":[],"commandDeque":"","notifications":""}}}
                 """;
         testHandler.receive(session, uncorrelatedStatus);
         assertNull(handler.getLastStatusMessage("worker#1"));
@@ -71,10 +73,45 @@ class WorkerSocketHandlerTest {
         assertNull(handler.getLastStatusMessage("worker#1"));
         testHandler.receive(session, """
                 {"id":"${requestId}","type":"response:status","from":"worker#1","to":"conductor",
-                 "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","state":"running","message":"Runtime is healthy"}}
+                 "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","state":"running",
+                 "serverStatus":{"navigatorStatus":"Runtime is healthy","activeThreads":["global:consumer"],
+                 "commandDeque":"Nhash","notifications":"global.consumer\\nfailure\\nstack trace"}}}
                 """.replace("${requestId}", requestJson.path("id").asText()));
 
         assertEquals("Runtime is healthy", handler.getLastStatusMessage("worker#1"));
+        ServerStatus serverStatus = handler.getLastServerStatus("worker#1");
+        assertEquals("Runtime is healthy", serverStatus.getNavigatorStatus());
+        assertEquals("global:consumer", serverStatus.getActiveThreads().get(0));
+        assertEquals("Nhash", serverStatus.getCommandDeque());
+        assertEquals("global.consumer\nfailure\nstack trace", serverStatus.getNotifications());
+        assertTrue(handler.getLastStatusUpdatedAt("worker#1") > 0);
+    }
+
+    @Test
+    void shouldAcceptLegacyStatusResponseDuringWorkerUpgrade() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        WebSocketSession session = openSession();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        testHandler.receive(session, """
+                {"id":"registration-1","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+        clearInvocations(session);
+        assertTrue(handler.requestStatus("worker#1"));
+        ArgumentCaptor<TextMessage> request = ArgumentCaptor.forClass(TextMessage.class);
+        verify(session).sendMessage(request.capture());
+        String requestId = mapper.readTree(request.getValue().getPayload()).path("id").asText();
+
+        testHandler.receive(session, """
+                {"id":"%s","type":"response:status","from":"worker#1","to":"conductor",
+                 "timestamp":2,"status":200,
+                 "payload":{"instanceId":"worker#1","state":"running","message":"F:0/1 E:0/0"}}
+                """.formatted(requestId));
+
+        ServerStatus status = handler.getLastServerStatus("worker#1");
+        assertEquals("F:0/1 E:0/0", status.getNavigatorStatus());
+        assertTrue(status.getActiveThreads().isEmpty());
+        assertEquals("", status.getCommandDeque());
         assertTrue(handler.getLastStatusUpdatedAt("worker#1") > 0);
     }
 

@@ -1,6 +1,7 @@
 package org.enoch.conductor.ws;
 
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.ServerStatus;
 import org.enoch.conductor.config.InstanceConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +12,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +26,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper = new ObjectMapper();
 
     private final Map<String, WebSocketSession> workers = new ConcurrentHashMap<>();
-    private final Map<String, String> lastStatusMessages = new ConcurrentHashMap<>();
+    private final Map<String, ServerStatus> lastStatuses = new ConcurrentHashMap<>();
     private final Map<String, Long> lastStatusUpdatedAt = new ConcurrentHashMap<>();
     private final Map<String, PendingStatusRequest> pendingStatusRequests = new ConcurrentHashMap<>();
     
@@ -81,7 +84,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
         if (instanceId != null) {
             workers.remove(instanceId, session);
-            lastStatusMessages.remove(instanceId);
+            lastStatuses.remove(instanceId);
             lastStatusUpdatedAt.remove(instanceId);
             pendingStatusRequests.entrySet().removeIf(entry -> instanceId.equals(entry.getValue().instanceId()));
             if (instanceConfigService != null) {
@@ -109,7 +112,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
 
         WebSocketSession previousSession = workers.put(instanceId, session);
-        lastStatusMessages.remove(instanceId);
+        lastStatuses.remove(instanceId);
         lastStatusUpdatedAt.remove(instanceId);
         pendingStatusRequests.entrySet().removeIf(entry -> instanceId.equals(entry.getValue().instanceId()));
         if (previousSession != null && previousSession != session) {
@@ -182,9 +185,13 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         return true;
     }
 
-    public String getLastStatusMessage(String workerId) {
+    public ServerStatus getLastServerStatus(String workerId) {
+        return lastStatuses.get(workerId);
+    }
 
-        return lastStatusMessages.get(workerId);
+    public String getLastStatusMessage(String workerId) {
+        ServerStatus status = lastStatuses.get(workerId);
+        return status == null ? null : status.getNavigatorStatus();
     }
 
     public long getLastStatusUpdatedAt(String workerId) {
@@ -252,18 +259,63 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
 
         JsonNode payload = json.path("payload");
-        String statusMessage = payload.path("message").asText("");
-        if (!payload.isObject()
-                || !instanceId.equals(payload.path("instanceId").asText(""))
-                || statusMessage.isBlank()) {
+        JsonNode serverStatusNode = payload.path("serverStatus");
+        if (!payload.isObject() || !instanceId.equals(payload.path("instanceId").asText(""))) {
             System.err.println("[WS][WORKER][REJECTED] Malformed status response instanceId=" + instanceId
                     + " requestId=" + requestId);
             return;
         }
 
-        lastStatusMessages.put(instanceId, statusMessage);
+        if (serverStatusNode.isMissingNode() && payload.path("message").isTextual()
+                && !payload.path("message").asText().isBlank()) {
+            lastStatuses.put(instanceId, new ServerStatus(
+                    payload.path("message").asText(),
+                    List.of(),
+                    "",
+                    ""
+            ));
+            updateStatusTimestamp(instanceId);
+            return;
+        }
+
+        if (!isValidServerStatus(serverStatusNode)) {
+            List<String> statusFields = new ArrayList<>();
+            serverStatusNode.fieldNames().forEachRemaining(statusFields::add);
+            System.err.println("[WS][WORKER][REJECTED] Malformed status response instanceId=" + instanceId
+                    + " requestId=" + requestId + " serverStatusType=" + serverStatusNode.getNodeType()
+                    + " serverStatusFields=" + statusFields);
+            return;
+        }
+
+        try {
+            lastStatuses.put(instanceId, mapper.treeToValue(serverStatusNode, ServerStatus.class));
+        } catch (Exception e) {
+            System.err.println("[WS][WORKER][REJECTED] Invalid server status instanceId=" + instanceId
+                    + " requestId=" + requestId + ": " + e.getMessage());
+            return;
+        }
+        updateStatusTimestamp(instanceId);
+    }
+
+    private void updateStatusTimestamp(String instanceId) {
         lastStatusUpdatedAt.compute(instanceId, (ignored, previous) ->
                 Math.max(System.currentTimeMillis(), previous == null ? 0 : previous + 1));
+    }
+
+    private boolean isValidServerStatus(JsonNode status) {
+        if (!status.isObject()
+                || status.path("navigatorStatus").asText("").isBlank()
+                || !status.path("commandDeque").isTextual()
+                || !status.path("notifications").isTextual()
+                || !status.path("activeThreads").isArray()) {
+            return false;
+        }
+        for (JsonNode thread : status.path("activeThreads")) {
+            if (!thread.isTextual()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void removeExpiredStatusRequests() {

@@ -1,6 +1,9 @@
 package org.enoch.snark.ws;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.ServerStatus;
 import org.enoch.snark.instance.si.Core;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +61,12 @@ class SnarkWebSocketClientTest {
 
     @Test
     void shouldBuildStatusResponseWithRuntimeStatus() {
-        when(core.status()).thenReturn("F:0/1 E:0/0 global:consumer");
+        when(core.status()).thenReturn(new ServerStatus(
+                "F:0/1 E:0/0",
+                java.util.List.of("global:consumer"),
+                "Nhash",
+                "global.consumer\nfailure\nstack trace"
+        ));
         CommandMessage incoming = new CommandMessage();
         incoming.setId("status-123");
         incoming.setType("request:status");
@@ -73,6 +81,14 @@ class SnarkWebSocketClientTest {
         assertEquals("conductor", response.getTo());
         assertEquals(200, response.getStatus());
         assertEquals("running", ((Map<?, ?>) response.getPayload()).get("state"));
-        assertEquals("F:0/1 E:0/0 global:consumer", ((Map<?, ?>) response.getPayload()).get("message"));
+        ServerStatus status = (ServerStatus) ((Map<?, ?>) response.getPayload()).get("serverStatus");
+        assertEquals("F:0/1 E:0/0", status.getNavigatorStatus());
+        assertEquals(java.util.List.of("global:consumer"), status.getActiveThreads());
+        assertEquals("Nhash", status.getCommandDeque());
+        assertEquals("global.consumer\nfailure\nstack trace", status.getNotifications());
+
+        JsonNode json = new ObjectMapper().valueToTree(response);
+        assertEquals("F:0/1 E:0/0", json.path("payload").path("serverStatus").path("navigatorStatus").asText());
+        assertEquals("Nhash", json.path("payload").path("serverStatus").path("commandDeque").asText());
     }
 }

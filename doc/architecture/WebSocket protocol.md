@@ -52,11 +52,11 @@ The conductor sends `request:status` with a unique ID, `from: "conductor"`, `to`
 |---|---|
 | `instanceId` | The responding instance ID. |
 | `state` | Worker state; currently `running` when the response is produced. |
-| `message` | Human-readable runtime summary for the conductor GUI. |
+| `serverStatus` | Structured server status containing Navigator status, active threads, command deque, and aggregated thread notifications. |
 | `hostname` | Worker host name. |
 | `version` | Worker version. |
 
-The conductor accepts status only when the response ID matches an outstanding status request, the response comes from the session registered for the matching `from` identity, and `to` is `conductor`. It stores `payload.message` as the GUI status. Missing or malformed status data is not a successful status update.
+The `serverStatus` object contains `navigatorStatus`, `activeThreads`, `commandDeque`, and `notifications`. During rolling upgrades, the conductor also accepts the previous `payload.message` string and exposes it as the Navigator status until the worker is upgraded. The conductor accepts status only when the response ID matches an outstanding status request, the response comes from the session registered for the matching `from` identity, and `to` is `conductor`. Missing or malformed status data is not a successful status update.
 
 ## Compatibility and tests
 

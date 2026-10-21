@@ -33,7 +33,7 @@ public class UpdateFleetEventsProcessor {
 
         List<EventFleet> eventFleetList = new EventContentGIR(wd).readEventFleet();
         Navigator.getInstance().informAboutEventFleets(eventFleetList);
-        discordBotService.sendMessage(core.status());
+        discordBotService.sendMessage(core.status().toString());
         return ExecutionIssue.NO_ISSUE;
     }
 

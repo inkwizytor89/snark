@@ -4,6 +4,7 @@ import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.InstanceRuntime;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.ws.WorkerSocketHandler;
+import org.enoch.common.status.ServerStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -148,6 +149,10 @@ public class ProcessService {
 
     public String getLastStatusMessage(String id) {
         return workerSocketHandler.getLastStatusMessage(id);
+    }
+
+    public ServerStatus getLastServerStatus(String id) {
+        return workerSocketHandler.getLastServerStatus(id);
     }
 
     public long getLastStatusUpdatedAt(String id) {

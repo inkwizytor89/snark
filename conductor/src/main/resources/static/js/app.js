@@ -140,6 +140,13 @@ function initApp() {
     }
 
     function getInstanceStatusText(inst) {
+        if (inst.serverStatus && inst.serverStatus.navigatorStatus) {
+            if (!inst.serverStatus.activeThreads?.length && !inst.serverStatus.commandDeque) {
+                return inst.serverStatus.navigatorStatus;
+            }
+            return `Navigator: ${inst.serverStatus.navigatorStatus}`;
+        }
+
         if (inst.statusMessage && String(inst.statusMessage).trim()) {
             return inst.statusMessage;
         }
@@ -219,6 +226,7 @@ function initApp() {
                     running: status.running,
                     pid: status.pid,
                     statusMessage: status.statusMessage,
+                    serverStatus: status.serverStatus,
                     properties: status.properties,
                     autoStart: status.autoStart
                 };
@@ -358,6 +366,13 @@ function initApp() {
     function renderOverviewTab(inst) {
         const pidText = inst.pid && inst.pid !== -1 ? inst.pid : '-';
         const statusText = getInstanceStatusText(inst);
+        const serverStatus = inst.serverStatus;
+        const activeThreads = serverStatus && serverStatus.activeThreads.length
+            ? serverStatus.activeThreads.join('\n')
+            : '-';
+        const notifications = serverStatus && serverStatus.notifications
+            ? serverStatus.notifications
+            : '-';
         const propertiesText = inst.properties ? inst.properties : 'Properties file not found';
         const propertiesClass = inst.properties ? '' : 'detail-value-error';
 
@@ -382,6 +397,18 @@ function initApp() {
                 <div class="detail-item detail-item-wide">
                     <span class="detail-label">Latest status</span>
                     <span class="detail-value">${escapeHtml(statusText)}</span>
+                </div>
+                <div class="detail-item detail-item-wide">
+                    <span class="detail-label">Active threads</span>
+                    <span class="detail-value">${escapeHtml(activeThreads)}</span>
+                </div>
+                <div class="detail-item detail-item-wide">
+                    <span class="detail-label">Command deque</span>
+                    <span class="detail-value">${escapeHtml(serverStatus ? serverStatus.commandDeque : '-')}</span>
+                </div>
+                <div class="detail-item detail-item-wide">
+                    <span class="detail-label">Notifications</span>
+                    <span class="detail-value">${escapeHtml(notifications)}</span>
                 </div>
             </div>
         `;
@@ -1029,6 +1056,7 @@ function initApp() {
                 running: status.running,
                 pid: status.pid,
                 statusMessage: status.statusMessage,
+                serverStatus: status.serverStatus,
                 autoStart: status.autoStart,
                 properties: status.properties
             } : inst));

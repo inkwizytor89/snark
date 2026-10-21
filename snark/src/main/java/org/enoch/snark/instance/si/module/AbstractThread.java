@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -84,7 +85,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected Long limit = NO_LIMIT;
 
     protected CommandContainer container = new CommandContainer();
-    private Map<String, String> notification = new HashMap<>();
+    private final Map<String, String> notification = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -147,7 +148,7 @@ public abstract class AbstractThread extends ExecutorImpl {
                 cacheProcessingStatus();
             } catch (Exception e) {
                 runningProcessor.logChangedStatus("Thread " + map.name(), map);
-                String message = e.getMessage();
+                String message = Objects.toString(e.getMessage(), "");
                 if (!notification.containsKey(message)) {
                     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     StringWriter stackTrace = new StringWriter();
@@ -226,6 +227,10 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     public ThreadMap map() {
         return map;
+    }
+
+    public Map<String, String> getNotifications() {
+        return Map.copyOf(notification);
     }
 
     protected boolean alreadyWaiting(String key) {

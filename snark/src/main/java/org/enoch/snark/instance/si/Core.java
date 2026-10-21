@@ -4,9 +4,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.RunningState;
+import org.enoch.common.status.ServerStatus;
 import org.enoch.snark.config.ConfigurationScheduledTask;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
@@ -112,19 +111,25 @@ public class Core {
         commandDeque.push(command);
     }
 
-    public String status() {
-        List<String> modulesInfo = new ArrayList<>();
-        for(Entry<String, AbstractModule> moduleEntry : modules.entrySet()) {
-            String threadInModule = moduleEntry.getValue().getThreadsMap().values().stream()
+    public ServerStatus status() {
+        List<String> activeThreads = new ArrayList<>();
+        List<String> notifications = new ArrayList<>();
+        for(Map.Entry<String, AbstractModule> moduleEntry : modules.entrySet()) {
+            moduleEntry.getValue().getThreadsMap().values().stream()
                     .filter(thread -> RunningState.ON.equals(thread.getActualState()))
-                    .map(thread -> thread.map().get(NAME))
-                    .collect(Collectors.joining(","));
-            if(StringUtils.isNotEmpty(threadInModule)) modulesInfo.add(moduleEntry.getKey()+":"+threadInModule);
+                    .map(thread -> moduleEntry.getKey() + ":" + thread.map().get(NAME))
+                    .forEach(activeThreads::add);
+            moduleEntry.getValue().getThreadsMap().values().forEach(thread ->
+                    thread.getNotifications().forEach((key, value) -> notifications.add(
+                            thread.map().name() + System.lineSeparator() + key +
+                                    System.lineSeparator() + value)));
         }
-        return Navigator.getInstance().getStatus()+" "+
-                String.join(" ", modulesInfo)+ "  "+
-                commandDeque;
-
+        return new ServerStatus(
+                Navigator.getInstance().getStatus(),
+                activeThreads,
+                commandDeque == null ? "" : commandDeque.toString(),
+                String.join(System.lineSeparator() + System.lineSeparator(), notifications)
+        );
     }
 
 //    public synchronized void push(AbstractCommand command, String action) {

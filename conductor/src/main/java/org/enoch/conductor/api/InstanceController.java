@@ -55,7 +55,7 @@ public class InstanceController {
                     item.put("running", running);
                     var runtime = processService.getRuntime(profile.getId());
                     item.put("pid", runtime != null ? runtime.getPid() : null);
-                    item.put("statusMessage", processService.getLastStatusMessage(profile.getId()));
+                    item.put("serverStatus", processService.getLastServerStatus(profile.getId()));
                     return item;
                 })
                 .toList();
@@ -175,6 +175,7 @@ public class InstanceController {
         }
         status.put("webSocketConnected", processService.isWorkerConnected(id));
         status.put("statusUpdatedAt", processService.getLastStatusUpdatedAt(id));
+        status.put("serverStatus", processService.getLastServerStatus(id));
 
         return ResponseEntity.ok(status);
     }

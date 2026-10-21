@@ -105,7 +105,7 @@ public class SnarkWebSocketClient {
         response.setPayload(Map.of(
                 "instanceId", instanceId,
                 "state", "running",
-                "message", core.status(),
+                "serverStatus", core.status(),
                 "hostname", resolveHostname(),
                 "version", resolveVersion()
         ));
