@@ -136,15 +136,19 @@ instances/
 ├── instance-1/
 │   ├── config.json      # Instance configuration
 │   ├── server.properties
+│   ├── snark.mv.db     # H2 database for this instance
 │   ├── logs/            # Application logs
 │   └── data/            # Instance data
 ├── instance-2/
 │   ├── config.json
 │   ├── server.properties
+│   ├── snark.mv.db     # Separate H2 database for this instance
 │   ├── logs/
 │   └── data/
 └── ...
 ```
+
+For instances using H2, Conductor sets the database file path to the instance directory, next to `config.json` and `server.properties`. Each instance therefore has an isolated `snark.mv.db` file. Instances configured with `databaseName` use PostgreSQL instead.
 
 ```
 start-properties/

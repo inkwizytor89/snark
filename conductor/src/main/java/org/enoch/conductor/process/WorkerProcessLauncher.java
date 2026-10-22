@@ -31,6 +31,9 @@ public class WorkerProcessLauncher {
 
         if (profile.getDatabaseName() != null && !profile.getDatabaseName().isBlank()) {
             command.add("-Ddatabase-name=" + profile.getDatabaseName().trim());
+        } else {
+            Path databaseFile = instanceDir.resolve("snark").toAbsolutePath().normalize();
+            command.add("-Ddatabase-file=" + databaseFile);
         }
 
         command.add("-Dproperties=" + propertiesPath);
