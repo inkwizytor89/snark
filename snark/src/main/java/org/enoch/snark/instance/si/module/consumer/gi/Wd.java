@@ -72,8 +72,13 @@ public class Wd {
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("start-maximized"); // open Browser in maximized mode
-        options.addArguments("disable-infobars"); // disabling infobars
+//        options.addArguments("disable-infobars"); // disabling infobars
         options.addArguments("--disable-search-engine-choice-screen");
+
+        options.setExperimentalOption(
+                "excludeSwitches",
+                List.of("enable-automation")
+        );
 
         webDriver = new ChromeDriver(options);
         webDriver.manage().window().maximize();
