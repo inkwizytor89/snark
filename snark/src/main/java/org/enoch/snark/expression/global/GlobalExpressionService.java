@@ -1,8 +1,18 @@
 package org.enoch.snark.expression.global;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.TargetRepository;
+import org.enoch.snark.expression.coordinate.function.Base;
+import org.enoch.snark.expression.coordinate.function.Colonies;
+import org.enoch.snark.expression.coordinate.function.CycleTrip;
+import org.enoch.snark.expression.coordinate.function.Swarn;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.service.PlanetDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -39,22 +49,29 @@ import java.util.Map;
  * );
  * </pre>
  */
+@RequiredArgsConstructor
 @Component
+@Scope("prototype")
 @Slf4j
 public class GlobalExpressionService {
 
-    private final ExpressionParser parser;
+    private final ExpressionParser parser = new SpelExpressionParser();
     private final GlobalExpressionCache cache;
-    
-    public GlobalExpressionService() {
-        this(new GlobalExpressionCache());
-    }
 
-    @Autowired
-    public GlobalExpressionService(GlobalExpressionCache cache) {
-        this.parser = new SpelExpressionParser();
-        this.cache = cache;
-    }
+    private final CacheEntryRepository cacheEntryRepository;
+    private final ColonyRepository colonyRepository;
+    private final TargetRepository targetRepository;
+    private final PlanetDataService planetDataService;
+    
+//    public GlobalExpressionService() {
+//        this(new GlobalExpressionCache());
+//    }
+//
+//    @Autowired
+//    public GlobalExpressionService(GlobalExpressionCache cache) {
+//        this.parser = new SpelExpressionParser();
+//        this.cache = cache;
+//    }
 
     /**
      * Evaluate a SpEL expression with caching.
@@ -261,9 +278,16 @@ public class GlobalExpressionService {
      */
     private EvaluationContext createEvaluationContext(Map<String, Object> context) {
         StandardEvaluationContext spelContext = new StandardEvaluationContext();
+        cacheEntryRepository.findAll().forEach(entry -> spelContext.setVariable(entry.key, convertToVariable(entry.value, context)));
         
         // Add all provided variables
         context.forEach((key, value) -> spelContext.setVariable(key, value));
+
+        Colonies.setRepository(colonyRepository);
+        Colonies.setRepository(planetDataService);
+        Base.setRepository(planetDataService, cacheEntryRepository);
+        CycleTrip.setRepository(planetDataService);
+        Swarn.setRepository(planetDataService);
 
         // Register all SpEL functions
         try {
@@ -274,5 +298,13 @@ public class GlobalExpressionService {
         }
 
         return spelContext;
+    }
+
+    private Object convertToVariable(Object value, Map<String, Object> expressionContext) {
+        if(value instanceof String stringValue) {
+            if(!stringValue.contains("#")) return value;
+            return evaluate(stringValue, expressionContext, Object.class);
+        }
+        return value;
     }
 }

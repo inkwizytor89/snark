@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.expression.global.GlobalExpressionService;
 import org.enoch.snark.instance.model.to.*;
-import org.enoch.snark.expression.coordinate.CoordinateSpelService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 @Component
 @Scope("prototype")
 public class FleetDispatcher {
-    private final CoordinateSpelService coordinateExpressionService;
+    private final GlobalExpressionService globalExpressionService;
 
     public List<FleetSendCommand> from(FleetPlan fleetPlan) {
         List<FleetSendCommand> list = new ArrayList<>();
@@ -29,7 +29,7 @@ public class FleetDispatcher {
 
             List<PlanetData> colonies;
 //            if(fleetPlan.getSource()!= null && fleetPlan.getSource().contains("#")) {
-                colonies = coordinateExpressionService.nonCached(fleetPlan.getSource());
+                colonies = globalExpressionService.evaluate(fleetPlan.getSource(), Map.of(), List.class);
 //            } else {
 //                colonies = coordinateExpressionService.fromExpression(fleetPlan.getSource());
 //            }
@@ -41,7 +41,7 @@ public class FleetDispatcher {
                 List<PlanetData> targets;
 //                if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
                     Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
-                    targets = coordinateExpressionService.nonCached(fleetPlan.getTarget(), stringObjectMap);
+                    targets = globalExpressionService.evaluate(fleetPlan.getTarget(), stringObjectMap, List.class);
 //                } else {
 //                    targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
 //                }
