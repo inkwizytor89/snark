@@ -14,9 +14,9 @@ The `doc` folder contains the project documentation and should be treated as the
 
 `common` contains reusable code shared between the modules so the conductor and worker stay aligned on communication contracts and utility behavior.
 
-`conductor` starts, stops, and monitors many independent `snark` instances. Each instance is identified by an `instanceId` and is assigned its own database configuration. Communication between the conductor and worker instances is performed through WebSockets. The conductor is responsible for lifecycle operations and for polling the current status of each instance.
+`conductor` starts, stops, and monitors many independent `snark` instances. Each instance is identified by an `instanceId` and is assigned its own database configuration. Communication between the conductor and worker instances is performed through WebSockets. The conductor owns lifecycle operations, requests status when needed, and accepts bounded status updates from connected instances.
 
-`snark` is a single instance of the worker. It follows the task/configuration assigned by the conductor. If a database is provided to the instance, it uses that database. Otherwise, it creates and uses its own local H2 database. `snark` is a passive runtime component: it reacts to commands and status requests coming from the conductor.
+`snark` is a single instance of the worker. It follows the task/configuration assigned by the conductor. If a database is provided to the instance, it uses that database. Otherwise, it creates and uses its own local H2 database. It reacts to conductor commands and status requests and publishes a compact status summary while connected.
 
 ## Operating model
 
@@ -46,6 +46,7 @@ Keep comments clear, brief, and factual. Do not mix English and Polish in projec
 - Action execution flow in conductor: see [doc/decisions/Action in conductor.md](../doc/decisions/Action%20in%20conductor.md). This document explains that the conductor owns the action list and that GUI/terminal actions must pass through the conductor instead of invoking worker logic directly.
 - Action processing in snark: see [doc/architecture/Action processing in snark.md](../doc/architecture/Action%20processing%20in%20snark.md) for the command transfer object, dispatcher, and consumer-thread flow.
 - Conductor-worker WebSocket contract: see [doc/architecture/WebSocket protocol.md](../doc/architecture/WebSocket%20protocol.md) for message envelopes, registration, status responses, and compatibility rules.
+- Status communication implementation and follow-up: see [doc/architecture/Status communication evolution plan.md](../doc/architecture/Status%20communication%20evolution%20plan.md) for bounded status summaries, pushed updates, colony pagination, and remaining migration work.
 - Thread system: see [doc/architecture/Thread system.md](../doc/architecture/Thread%20system.md) for threads, modules, configuration resolution, and the config property format.
 
 ### Decisions

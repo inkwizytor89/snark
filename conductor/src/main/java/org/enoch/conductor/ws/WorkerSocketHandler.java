@@ -3,6 +3,7 @@ package org.enoch.conductor.ws;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
+import org.enoch.common.status.StatusDetails;
 import org.enoch.conductor.config.InstanceConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,12 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class WorkerSocketHandler extends TextWebSocketHandler {
 
     private static final long STATUS_REQUEST_TIMEOUT_MILLIS = 60_000L;
+    private static final int MAX_MESSAGE_BYTES = 16 * 1024;
+    private static final int MAX_STATUS_DETAIL_PAGE_SIZE = 25;
 
     private final ObjectMapper mapper = new ObjectMapper()
             .findAndRegisterModules()
@@ -32,7 +38,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> workers = new ConcurrentHashMap<>();
     private final Map<String, ServerStatus> lastStatuses = new ConcurrentHashMap<>();
     private final Map<String, Long> lastStatusUpdatedAt = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastStatusRevisions = new ConcurrentHashMap<>();
     private final Map<String, PendingStatusRequest> pendingStatusRequests = new ConcurrentHashMap<>();
+    private final Map<String, PendingStatusDetailsRequest> pendingStatusDetailsRequests = new ConcurrentHashMap<>();
     
     private InstanceConfigService instanceConfigService;
 
@@ -47,6 +55,13 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        int messageBytes = message.getPayload().getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        if (messageBytes > MAX_MESSAGE_BYTES) {
+            System.err.println("[WS][WORKER][REJECTED] Oversized message sessionId=" + session.getId()
+                    + " bytes=" + messageBytes + " limit=" + MAX_MESSAGE_BYTES);
+            session.close(CloseStatus.TOO_BIG_TO_PROCESS);
+            return;
+        }
         logIncoming(session, message.getPayload());
 
         JsonNode json = mapper.readTree(message.getPayload());
@@ -65,8 +80,12 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        if (isStatusMessage(type)) {
-            storeStatusResponse(registeredInstanceId, json);
+        if ("update:status".equals(type)) {
+            storeStatusUpdate(registeredInstanceId, session, json);
+        } else if (isStatusMessage(type)) {
+            storeStatusResponse(registeredInstanceId, session, json);
+        } else if ("response:status:details".equals(type) || "error:status:details".equals(type)) {
+            storeStatusDetailsResponse(registeredInstanceId, session, json);
         }
 
         if (isConfigResponse(type) && instanceConfigService != null) {
@@ -90,7 +109,16 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             workers.remove(instanceId, session);
             lastStatuses.remove(instanceId);
             lastStatusUpdatedAt.remove(instanceId);
+            lastStatusRevisions.remove(instanceId);
             pendingStatusRequests.entrySet().removeIf(entry -> instanceId.equals(entry.getValue().instanceId()));
+            pendingStatusDetailsRequests.entrySet().removeIf(entry -> {
+                if (instanceId.equals(entry.getValue().instanceId())) {
+                    entry.getValue().result().completeExceptionally(
+                            new IllegalStateException("Instance disconnected before status details arrived"));
+                    return true;
+                }
+                return false;
+            });
             if (instanceConfigService != null) {
                 instanceConfigService.clearInstanceState(instanceId);
                 instanceConfigService.cancelPendingRequests(instanceId);
@@ -118,7 +146,16 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         WebSocketSession previousSession = workers.put(instanceId, session);
         lastStatuses.remove(instanceId);
         lastStatusUpdatedAt.remove(instanceId);
+        lastStatusRevisions.remove(instanceId);
         pendingStatusRequests.entrySet().removeIf(entry -> instanceId.equals(entry.getValue().instanceId()));
+        pendingStatusDetailsRequests.entrySet().removeIf(entry -> {
+            if (instanceId.equals(entry.getValue().instanceId())) {
+                entry.getValue().result().completeExceptionally(
+                        new IllegalStateException("Instance session was replaced before status details arrived"));
+                return true;
+            }
+            return false;
+        });
         if (previousSession != null && previousSession != session) {
             try {
                 previousSession.close(CloseStatus.NORMAL);
@@ -178,7 +215,8 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         msg.setStatus(100);
 
         String json = mapper.writeValueAsString(msg);
-        pendingStatusRequests.put(msg.getId(), new PendingStatusRequest(workerId, System.currentTimeMillis()));
+        pendingStatusRequests.put(msg.getId(),
+                new PendingStatusRequest(workerId, session.getId(), System.currentTimeMillis()));
         logOutgoing(session, workerId, json);
         try {
             session.sendMessage(new TextMessage(json));
@@ -187,6 +225,41 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             throw e;
         }
         return true;
+    }
+
+    public StatusDetails requestStatusDetails(String workerId, int offset, int limit) throws Exception {
+        if (offset < 0 || limit < 1 || limit > MAX_STATUS_DETAIL_PAGE_SIZE) {
+            throw new IllegalArgumentException("Status details require offset >= 0 and limit between 1 and 25");
+        }
+        WebSocketSession session = workers.get(workerId);
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("Instance is offline");
+        }
+
+        CommandMessage request = new CommandMessage();
+        request.setId(UUID.randomUUID().toString());
+        request.setType("request:status:details");
+        request.setFrom("conductor");
+        request.setTo(workerId);
+        request.setTimestamp(System.currentTimeMillis());
+        request.setStatus(100);
+        request.setPayload(Map.of("offset", offset, "limit", limit));
+        CompletableFuture<StatusDetails> result = new CompletableFuture<>();
+        pendingStatusDetailsRequests.put(request.getId(),
+                new PendingStatusDetailsRequest(workerId, session.getId(), offset, limit, result));
+        String json = mapper.writeValueAsString(request);
+        logOutgoing(session, workerId, json);
+        try {
+            session.sendMessage(new TextMessage(json));
+            return result.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new IllegalStateException("Timed out waiting for status details from instance " + workerId, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw e;
+        } finally {
+            pendingStatusDetailsRequests.remove(request.getId());
+        }
     }
 
     public ServerStatus getLastServerStatus(String workerId) {
@@ -251,11 +324,13 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         return "response:status".equals(type);
     }
 
-    private void storeStatusResponse(String instanceId, JsonNode json) {
+    private void storeStatusResponse(String instanceId, WebSocketSession session, JsonNode json) {
         String requestId = json.path("id").asText("");
         PendingStatusRequest pending = pendingStatusRequests.remove(requestId);
         if (pending == null
                 || !instanceId.equals(pending.instanceId())
+                || !pending.sessionId().equals(session.getId())
+                || workers.get(instanceId) != session
                 || !instanceId.equals(json.path("from").asText(""))
                 || !"conductor".equals(json.path("to").asText(""))
                 || json.path("status").asInt() != 200) {
@@ -295,13 +370,107 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
 
         try {
-            lastStatuses.put(instanceId, mapper.treeToValue(serverStatusNode, ServerStatus.class));
+            ServerStatus status = mapper.treeToValue(serverStatusNode, ServerStatus.class);
+            long revision = payload.path("revision").asLong(-1);
+            if (revision >= 0 && !applyRevision(instanceId, revision)) {
+                return;
+            }
+            lastStatuses.put(instanceId, status);
         } catch (Exception e) {
             System.err.println("[WS][WORKER][REJECTED] Invalid server status instanceId=" + instanceId
                     + " requestId=" + requestId + ": " + e.getMessage());
             return;
         }
         updateStatusTimestamp(instanceId);
+    }
+
+    private void storeStatusUpdate(String instanceId, WebSocketSession session, JsonNode json) {
+        String messageId = json.path("id").asText("");
+        JsonNode payload = json.path("payload");
+        JsonNode serverStatusNode = payload.path("serverStatus");
+        long revision = payload.path("revision").asLong(-1);
+        if (workers.get(instanceId) != session
+                || messageId.isBlank()
+                || !instanceId.equals(json.path("from").asText(""))
+                || !"conductor".equals(json.path("to").asText(""))
+                || json.path("status").asInt() != 200
+                || !payload.isObject()
+                || !instanceId.equals(payload.path("instanceId").asText(""))
+                || revision < 0
+                || !isValidServerStatus(serverStatusNode)) {
+            System.err.println("[WS][WORKER][REJECTED] Malformed or unauthorized status update instanceId="
+                    + instanceId + " messageId=" + messageId);
+            return;
+        }
+        try {
+            ServerStatus status = mapper.treeToValue(serverStatusNode, ServerStatus.class);
+            if (!applyRevision(instanceId, revision)) {
+                return;
+            }
+            lastStatuses.put(instanceId, status);
+            updateStatusTimestamp(instanceId);
+        } catch (Exception e) {
+            System.err.println("[WS][WORKER][REJECTED] Invalid status update instanceId=" + instanceId
+                    + " messageId=" + messageId + ": " + e.getMessage());
+        }
+    }
+
+    private boolean applyRevision(String instanceId, long revision) {
+        final boolean[] applied = {false};
+        lastStatusRevisions.compute(instanceId, (ignored, previous) -> {
+            if (previous == null || revision > previous) {
+                applied[0] = true;
+                return revision;
+            }
+            return previous;
+        });
+        if (!applied[0]) {
+            System.out.println("[WS][WORKER][IGNORED] Stale status revision instanceId=" + instanceId
+                    + " revision=" + revision);
+        }
+        return applied[0];
+    }
+
+    private void storeStatusDetailsResponse(String instanceId, WebSocketSession session, JsonNode json) {
+        String requestId = json.path("id").asText("");
+        PendingStatusDetailsRequest pending = pendingStatusDetailsRequests.get(requestId);
+        WebSocketSession currentSession = workers.get(instanceId);
+        if (pending == null || !instanceId.equals(pending.instanceId())
+                || currentSession == null || currentSession != session
+                || !pending.sessionId().equals(session.getId())
+                || !instanceId.equals(json.path("from").asText(""))
+                || !"conductor".equals(json.path("to").asText(""))) {
+            System.err.println("[WS][WORKER][REJECTED] Unmatched status details response instanceId="
+                    + instanceId + " requestId=" + requestId);
+            return;
+        }
+        if ("error:status:details".equals(json.path("type").asText())) {
+            pending.result().completeExceptionally(new IllegalStateException(
+                    json.path("error").asText("Worker rejected the status details request")));
+            return;
+        }
+        if (json.path("status").asInt() != 200
+                || !instanceId.equals(json.path("payload").path("instanceId").asText(""))) {
+            pending.result().completeExceptionally(new IllegalStateException("Malformed status details response"));
+            return;
+        }
+        try {
+            StatusDetails details = mapper.treeToValue(
+                    json.path("payload").path("details"), StatusDetails.class);
+            if (details.offset() < 0 || details.limit() != pending.requestedLimit()
+                    || details.offset() != pending.requestedOffset()
+                    || details.limit() > MAX_STATUS_DETAIL_PAGE_SIZE
+                    || details.total() < 0
+                    || details.planetCount() < 0
+                    || details.moonCount() < 0
+                    || details.colonies() == null
+                    || details.colonies().size() > details.limit()) {
+                throw new IllegalArgumentException("Status details page failed validation");
+            }
+            pending.result().complete(details);
+        } catch (Exception e) {
+            pending.result().completeExceptionally(e);
+        }
     }
 
     private void updateStatusTimestamp(String instanceId) {
@@ -339,6 +508,11 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || "response:config:delete".equals(type);
     }
 
-    private record PendingStatusRequest(String instanceId, long requestedAt) {
+    private record PendingStatusRequest(String instanceId, String sessionId, long requestedAt) {
+    }
+
+    private record PendingStatusDetailsRequest(String instanceId, String sessionId,
+                                               int requestedOffset, int requestedLimit,
+                                               CompletableFuture<StatusDetails> result) {
     }
 }

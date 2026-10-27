@@ -17,31 +17,31 @@ public class CommandContainer {
     protected ListMultimap<String, AbstractCommand> successMap = ArrayListMultimap.create();
     protected ListMultimap<String, AbstractCommand> crashMap = ArrayListMultimap.create();
 
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return keySet.isEmpty();
     }
 
-    public boolean contains(String chainKey) {
+    public synchronized boolean contains(String chainKey) {
         return keySet.contains(chainKey);
     }
 
-    public int inProgressCount() {
+    public synchronized int inProgressCount() {
         return inProgressMap.size();
     }
 
-    public int incomingCount() {
+    public synchronized int incomingCount() {
         return incomingMap.size();
     }
 
-    public int size() {
+    public synchronized int size() {
         return keySet.size();
     }
 
-    public boolean anyNotProcessed() {
+    public synchronized boolean anyNotProcessed() {
         return !incomingMap.isEmpty() || !inProgressMap.isEmpty();
     }
 
-    public boolean anyNotProcessed(String chainKey) {
+    public synchronized boolean anyNotProcessed(String chainKey) {
         return incomingMap.containsKey(chainKey) || inProgressMap.containsKey(chainKey);
     }
 
@@ -49,7 +49,7 @@ public class CommandContainer {
         return commandList.stream().allMatch(AbstractCommand::executed);
     }
 
-    public void create() {
+    public synchronized void create() {
         keySet = new HashSet<>();
         incomingMap = ArrayListMultimap.create();
         inProgressMap = ArrayListMultimap.create();
@@ -57,7 +57,7 @@ public class CommandContainer {
         crashMap = ArrayListMultimap.create();
     }
 
-    public void pushCommand(String key, AbstractCommand command) {
+    public synchronized void pushCommand(String key, AbstractCommand command) {
         if (command == null) return;
         putCommandChain(key, command);
     }
@@ -76,7 +76,7 @@ public class CommandContainer {
         }
     }
 
-    public void removeKey(String key) {
+    public synchronized void removeKey(String key) {
         keySet.remove(key);
         incomingMap.removeAll(key);
         inProgressMap.removeAll(key);
@@ -84,16 +84,15 @@ public class CommandContainer {
         crashMap.removeAll(key);
     }
 
-    public List<AbstractCommand> pool(Long size) {
-        List<AbstractCommand> pooledList = incomingMap.asMap().values().stream()
+    public synchronized List<AbstractCommand> pool(Long size) {
+        return incomingMap.asMap().values().stream()
                 .filter(list -> !list.isEmpty())
                 .map(list -> list.stream().findFirst().get())
                 .limit(size)
                 .toList();
-        return pooledList;
     }
 
-    public void updateMap(ExecutionStatus processingStatus) {
+    public synchronized void updateMap(ExecutionStatus processingStatus) {
         Map<String, ExecutionStatus> toChange = new HashMap<>();
         ListMultimap<String, AbstractCommand> processingMap = chooseMap(processingStatus);
         processingMap.asMap().entrySet().stream().forEach(entry -> {
@@ -135,7 +134,7 @@ public class CommandContainer {
         else throw new IllegalStateException("Can not choose map for ExecutionStatus "+processingStatus);
     }
 
-    public List<AbstractCommand> peek() {
+    public synchronized List<AbstractCommand> peek() {
         ArrayList<AbstractCommand> result = new ArrayList<>();
         result.addAll(incomingMap.values());
         result.addAll(inProgressMap.values());
@@ -145,7 +144,7 @@ public class CommandContainer {
     }
 
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "all " + size() + "(incomingMap:" + incomingMap.size() + " inProgressMap:" + inProgressMap.size() + " successMap:" + successMap.size() + " crashMap:" + crashMap.size() +")";
     }
 }

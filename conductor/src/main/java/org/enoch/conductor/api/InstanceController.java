@@ -10,6 +10,7 @@ import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
 import org.enoch.conductor.startproperties.StartPropertiesRepository;
 import org.enoch.conductor.startproperties.StartPropertyTemplate;
+import org.enoch.common.status.StatusDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -178,6 +179,32 @@ public class InstanceController {
         status.put("serverStatus", processService.getLastServerStatus(id));
 
         return ResponseEntity.ok(status);
+    }
+
+    @GetMapping("/{id}/status/colonies")
+    public ResponseEntity<?> getInstanceStatusColonies(@PathVariable String id,
+                                                       @RequestParam(defaultValue = "0") int offset,
+                                                       @RequestParam(defaultValue = "25") int limit) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (offset < 0 || limit < 1 || limit > 25) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", "offset must be non-negative and limit must be between 1 and 25"
+            ));
+        }
+        try {
+            StatusDetails details = processService.requestStatusDetails(id, offset, limit);
+            return ResponseEntity.ok(details);
+        } catch (IllegalStateException e) {
+            String message = e.getMessage() == null ? "Status details request failed" : e.getMessage();
+            return ResponseEntity.status(message.startsWith("Timed out") ? 504 : 409)
+                    .body(Map.of("error", message));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "Failed to fetch status details: " + e.getMessage()
+            ));
+        }
     }
 
     @PostMapping

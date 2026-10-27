@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.status.ColonyStatus;
-import org.enoch.common.status.CoordinatesStatus;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
+import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.instance.si.Core;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SnarkWebSocketClientTest {
 
@@ -67,14 +68,12 @@ class SnarkWebSocketClientTest {
     @Test
     void shouldBuildStatusResponseWithRuntimeStatus() {
         LocalDateTime lastUpdate = LocalDateTime.of(2026, 10, 21, 12, 34, 56);
-        when(core.status()).thenReturn(new ServerStatus(
+        when(core.statusSummary()).thenReturn(new ServerStatus(
                 new NavigatorStatus("F:0/1 E:0/0", lastUpdate),
                 java.util.List.of("global:consumer"),
                 "Nhash",
                 "global.consumer\nfailure\nstack trace",
-                new CoordinatesStatus(1, 1, java.util.List.of(new ColonyStatus(
-                        "p[1:2:3]", 100L, 200L, 300L, 400L, Map.of("battleship", 5L)
-                )))
+                null
         ));
         CommandMessage incoming = new CommandMessage();
         incoming.setId("status-123");
@@ -96,10 +95,7 @@ class SnarkWebSocketClientTest {
         assertEquals(java.util.List.of("global:consumer"), status.getActiveThreads());
         assertEquals("Nhash", status.getCommandDeque());
         assertEquals("global.consumer\nfailure\nstack trace", status.getNotifications());
-        assertEquals(1, status.getCoordinates().getPlanetCount());
-        assertEquals(1, status.getCoordinates().getMoonCount());
-        assertEquals("p[1:2:3]", status.getCoordinates().getColonies().getFirst().getCoordinate());
-        assertEquals(5L, status.getCoordinates().getColonies().getFirst().getShips().get("battleship"));
+        assertNull(status.getCoordinates());
 
         JsonNode json = new ObjectMapper().findAndRegisterModules()
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -109,8 +105,49 @@ class SnarkWebSocketClientTest {
         assertEquals("2026-10-21T12:34:56", json.path("payload").path("serverStatus")
                 .path("navigatorStatus").path("lastUpdate").asText());
         assertEquals("Nhash", json.path("payload").path("serverStatus").path("commandDeque").asText());
-        assertEquals(1, json.path("payload").path("serverStatus").path("coordinates").path("planetCount").asInt());
-        assertEquals(5, json.path("payload").path("serverStatus").path("coordinates")
-                .path("colonies").get(0).path("ships").path("battleship").asInt());
+        assertTrue(json.path("payload").path("serverStatus").path("coordinates").isNull());
+    }
+
+    @Test
+    void shouldBuildUnsolicitedStatusUpdateWithRevision() {
+        when(core.statusSummary()).thenReturn(new ServerStatus(
+                new NavigatorStatus("F:0/1 E:0/0", LocalDateTime.of(2026, 10, 21, 12, 34, 56)),
+                java.util.List.of("global:consumer"),
+                "Nhash",
+                "short notification",
+                null
+        ));
+
+        CommandMessage update = client.buildStatusUpdate();
+
+        assertEquals("update:status", update.getType());
+        assertEquals("worker#1", update.getFrom());
+        assertEquals("conductor", update.getTo());
+        assertEquals(200, update.getStatus());
+        assertEquals(1L, ((Map<?, ?>) update.getPayload()).get("revision"));
+    }
+
+    @Test
+    void shouldBuildCorrelatedStatusDetailsResponse() {
+        CommandMessage request = new CommandMessage();
+        request.setId("details-1");
+        request.setType("request:status:details");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+
+        CommandMessage response = client.buildStatusDetailsResponse(request,
+                new StatusDetails(0, 25, 1, 1, 0,
+                        java.util.List.of(new ColonyStatus("p[1:2:3]", 100L, 200L, 300L, 400L,
+                                Map.of("battleship", 5L)))));
+
+        assertEquals("details-1", response.getId());
+        assertEquals("response:status:details", response.getType());
+        assertEquals("worker#1", response.getFrom());
+        assertEquals("conductor", response.getTo());
+        assertEquals(200, response.getStatus());
+        Map<?, ?> payload = (Map<?, ?>) response.getPayload();
+        StatusDetails details = (StatusDetails) payload.get("details");
+        assertEquals(25, details.limit());
+        assertEquals("p[1:2:3]", details.colonies().getFirst().getCoordinate());
     }
 }

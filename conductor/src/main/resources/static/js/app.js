@@ -28,6 +28,7 @@ function initApp() {
     let activeMenuInstanceId = null;
     let pendingInstanceCreation = null;
     let activeDetailsTab = 'overview';
+    const coordinatesState = new Map();
 
     const createSection = document.getElementById('createInstanceForm');
     const createToggleBtn = document.getElementById('createToggleBtn');
@@ -370,12 +371,18 @@ function initApp() {
     }
 
     function renderCoordinatesTab(inst) {
-        const coordinates = inst.serverStatus && inst.serverStatus.coordinates;
-        if (!coordinates) {
-            return '<div class="loading">Coordinate data is not available yet</div>';
-        }
-
-        const colonies = coordinates.colonies || [];
+        const state = coordinatesState.get(inst.id) || { status: 'idle', colonies: [] };
+        const feedback = state.status === 'loading'
+            ? '<div class="loading">Loading planets and moons...</div>'
+            : state.status === 'error'
+                ? `<div class="config-feedback is-error">${escapeHtml(state.error)}</div>`
+                : state.status === 'loaded' && state.colonies.length === 0
+                    ? '<div class="loading">No planets or moons found</div>'
+                    : state.status === 'idle'
+                        ? '<div class="loading">Load coordinate data from the instance to view its planets and moons.</div>'
+                        : '';
+        const coordinates = state.details;
+        const colonies = state.colonies || [];
         const colonyItems = colonies.length
             ? colonies.map((colony) => {
                 const ships = colony.ships && Object.keys(colony.ships).length
@@ -402,21 +409,69 @@ function initApp() {
                     </article>
                 `;
             }).join('')
-            : '<div class="loading">No colonies found</div>';
+            : '';
 
         return `
-            <div class="coordinates-summary">
-                <div class="detail-item">
-                    <span class="detail-label">Planets</span>
-                    <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.planetCount))}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Moons</span>
-                    <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.moonCount))}</span>
+            <div class="detail-tab-toolbar">
+                <span class="detail-tab-caption">Coordinate data is fetched on demand from ${escapeHtml(inst.id)}</span>
+                <div class="detail-tab-actions">
+                    <button type="button" class="btn-primary btn-small" data-coordinates-action="load"
+                        ${!inst.running || state.status === 'loading' ? 'disabled' : ''}>
+                        ${state.status === 'loading' ? 'Loading...' : state.status === 'loaded' ? 'Refresh coordinates' : 'Load coordinates'}
+                    </button>
                 </div>
             </div>
-            <div class="coordinates-colonies">${colonyItems}</div>
+            ${feedback}
+            ${coordinates ? `
+                <div class="coordinates-summary">
+                    <div class="detail-item">
+                        <span class="detail-label">Planets</span>
+                        <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.planetCount))}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Moons</span>
+                        <span class="detail-value">${escapeHtml(formatCoordinateValue(coordinates.moonCount))}</span>
+                    </div>
+                </div>
+                <div class="coordinates-colonies">${colonyItems}</div>
+            ` : ''}
         `;
+    }
+
+    async function loadCoordinates(instanceId) {
+        const currentState = coordinatesState.get(instanceId);
+        if (currentState && currentState.status === 'loading') {
+            return;
+        }
+        coordinatesState.set(instanceId, { status: 'loading', colonies: [] });
+        if (selectedInstance === instanceId && activeDetailsTab === 'coordinates') {
+            renderInstanceDetails();
+        }
+
+        try {
+            const pageSize = 25;
+            const firstPage = await apiRequestJson(
+                `/api/instances/${encodeURIComponent(instanceId)}/status/colonies?offset=0&limit=${pageSize}`
+            );
+            const colonies = [...(Array.isArray(firstPage.colonies) ? firstPage.colonies : [])];
+            for (let offset = pageSize; offset < firstPage.total; offset += pageSize) {
+                const page = await apiRequestJson(
+                    `/api/instances/${encodeURIComponent(instanceId)}/status/colonies?offset=${offset}&limit=${pageSize}`
+                );
+                colonies.push(...(Array.isArray(page.colonies) ? page.colonies : []));
+            }
+            coordinatesState.set(instanceId, {
+                status: 'loaded',
+                details: { ...firstPage, colonies },
+                colonies
+            });
+        } catch (error) {
+            coordinatesState.set(instanceId, { status: 'error', error: error.message, colonies: [] });
+        }
+
+        if (selectedInstance === instanceId && activeDetailsTab === 'coordinates') {
+            renderInstanceDetails();
+        }
     }
 
     function formatCoordinateValue(value) {
@@ -1447,6 +1502,11 @@ function initApp() {
         }
 
         const configAction = e.target.closest('[data-config-action]');
+        const coordinatesAction = e.target.closest('[data-coordinates-action]');
+        if (coordinatesAction) {
+            loadCoordinates(selectedInstance);
+            return;
+        }
         if (!configAction) {
             return;
         }

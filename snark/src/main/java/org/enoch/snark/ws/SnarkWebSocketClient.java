@@ -1,6 +1,7 @@
 package org.enoch.snark.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.annotation.PreDestroy;
 import okhttp3.OkHttpClient;
@@ -9,19 +10,26 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class SnarkWebSocketClient {
+
+    private static final int MAX_MESSAGE_BYTES = 16 * 1024;
+    private static final int MAX_STATUS_DETAIL_PAGE_SIZE = 25;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .findAndRegisterModules()
@@ -30,10 +38,14 @@ public class SnarkWebSocketClient {
     private final String managerUrl;
     private final String instanceId;
     private final Core core;
+    private final AtomicLong statusRevision = new AtomicLong();
 
     private volatile WebSocket webSocket;
     private volatile String registrationRequestId;
     private volatile boolean registered;
+    private volatile boolean connectionOpen;
+    private volatile boolean connecting;
+    private volatile boolean shuttingDown;
 
     public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
                                 @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
@@ -44,9 +56,12 @@ public class SnarkWebSocketClient {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void connect() {
+    public synchronized void connect() {
         if (managerUrl.isBlank()) {
             System.out.println("[WS][SKIP] managerUrl is empty, WebSocket client not started");
+            return;
+        }
+        if (connectionOpen || connecting || shuttingDown) {
             return;
         }
 
@@ -54,12 +69,14 @@ public class SnarkWebSocketClient {
                 .url(managerUrl)
                 .build();
 
+        connecting = true;
         System.out.println("[WS][CONNECTING] managerUrl=" + managerUrl + " instanceId=" + instanceId);
         webSocket = okHttpClient.newWebSocket(request, new WorkerListener());
     }
 
     @PreDestroy
     public void shutdown() {
+        shuttingDown = true;
         WebSocket current = webSocket;
         if (current != null) {
             current.close(1000, "Application shutdown");
@@ -108,10 +125,42 @@ public class SnarkWebSocketClient {
         response.setPayload(Map.of(
                 "instanceId", instanceId,
                 "state", "running",
-                "serverStatus", core.status(),
+                "revision", statusRevision.incrementAndGet(),
+                "serverStatus", core.statusSummary(),
                 "hostname", resolveHostname(),
                 "version", resolveVersion()
         ));
+        return response;
+    }
+
+    CommandMessage buildStatusUpdate() {
+        CommandMessage update = new CommandMessage();
+        update.setId(UUID.randomUUID().toString());
+        update.setType("update:status");
+        update.setFrom(instanceId);
+        update.setTo("conductor");
+        update.setTimestamp(System.currentTimeMillis());
+        update.setStatus(200);
+        update.setPayload(Map.of(
+                "instanceId", instanceId,
+                "state", "running",
+                "revision", statusRevision.incrementAndGet(),
+                "serverStatus", core.statusSummary(),
+                "hostname", resolveHostname(),
+                "version", resolveVersion()
+        ));
+        return update;
+    }
+
+    CommandMessage buildStatusDetailsResponse(CommandMessage incoming, StatusDetails details) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:status:details");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(Map.of("instanceId", instanceId, "details", details));
         return response;
     }
 
@@ -141,6 +190,12 @@ public class SnarkWebSocketClient {
     private void sendAndLog(WebSocket socket, CommandMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
+            int messageBytes = json.getBytes(StandardCharsets.UTF_8).length;
+            if (messageBytes > MAX_MESSAGE_BYTES) {
+                System.err.println("[WS][ERROR] Refusing oversized outgoing message type=" + message.getType()
+                        + " bytes=" + messageBytes + " limit=" + MAX_MESSAGE_BYTES);
+                return;
+            }
             System.out.println("[WS][OUT] " + json);
             if (!socket.send(json)) {
                 System.err.println("[WS][ERROR] WebSocket rejected outgoing message type=" + message.getType()
@@ -149,6 +204,27 @@ public class SnarkWebSocketClient {
         } catch (Exception e) {
             System.err.println("[WS][ERROR] Failed to send message: " + e.getMessage());
             e.printStackTrace(System.err);
+        }
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    public void publishStatusUpdate() {
+        WebSocket current = webSocket;
+        if (registered && current != null) {
+            long queuedBytes = current.queueSize();
+            if (queuedBytes >= MAX_MESSAGE_BYTES) {
+                System.err.println("[WS][STATUS][COALESCED] queuedBytes=" + queuedBytes
+                        + " instanceId=" + instanceId);
+                return;
+            }
+            sendAndLog(current, buildStatusUpdate());
+        }
+    }
+
+    @Scheduled(fixedDelay = 5_000)
+    public void reconnectIfDisconnected() {
+        if (!connectionOpen && !connecting && !shuttingDown && !managerUrl.isBlank()) {
+            connect();
         }
     }
 
@@ -189,6 +265,8 @@ public class SnarkWebSocketClient {
 
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
+            connectionOpen = true;
+            connecting = false;
             System.out.println("[WS][OPEN] managerUrl=" + managerUrl + " instanceId=" + instanceId);
             CommandMessage registration = buildRegistrationMessage();
             registrationRequestId = registration.getId();
@@ -206,6 +284,7 @@ public class SnarkWebSocketClient {
                         && incoming.getStatus() == 200) {
                     registered = true;
                     System.out.println("[WS][REGISTERED] instanceId=" + instanceId);
+                    sendAndLog(webSocket, buildStatusUpdate());
                 } else if ("error:register".equals(incoming.getType())
                         && registrationRequestId != null
                         && registrationRequestId.equals(incoming.getId())) {
@@ -220,6 +299,23 @@ public class SnarkWebSocketClient {
                     System.err.println("[WS][REJECTED] Request is not addressed from conductor to " + instanceId);
                 } else if ("request:status".equals(incoming.getType()) && registered) {
                     sendAndLog(webSocket, buildStatusResponse(incoming));
+                } else if ("request:status:details".equals(incoming.getType()) && registered) {
+                    JsonNode detailsRequest = objectMapper.valueToTree(incoming.getPayload());
+                    int offset = detailsRequest.path("offset").asInt(-1);
+                    int limit = detailsRequest.path("limit").asInt(-1);
+                    if (offset < 0 || limit < 1 || limit > MAX_STATUS_DETAIL_PAGE_SIZE) {
+                        sendAndLog(webSocket, buildRequestError(incoming,
+                                400, "Status details require offset >= 0 and limit between 1 and 25."));
+                    } else {
+                        try {
+                            sendAndLog(webSocket, buildStatusDetailsResponse(
+                                    incoming, core.statusDetails(offset, limit)));
+                        } catch (RuntimeException e) {
+                            System.err.println("[WS][ERROR] Failed to create status details page: " + e.getMessage());
+                            sendAndLog(webSocket, buildRequestError(incoming, 500,
+                                    "Failed to create status details page."));
+                        }
+                    }
                 } else if (isRequest(incoming) && registered) {
                     sendAndLog(webSocket, buildEchoResponse(incoming));
                 } else if (isRequest(incoming)) {
@@ -243,12 +339,20 @@ public class SnarkWebSocketClient {
         @Override
         public void onClosed(WebSocket webSocket, int code, String reason) {
             registered = false;
+            if (SnarkWebSocketClient.this.webSocket == webSocket) {
+                connectionOpen = false;
+                connecting = false;
+            }
             System.out.println("[WS][CLOSED] code=" + code + " reason=" + reason);
         }
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
             registered = false;
+            if (SnarkWebSocketClient.this.webSocket == webSocket) {
+                connectionOpen = false;
+                connecting = false;
+            }
             System.err.println("[WS][FAILURE] managerUrl=" + managerUrl + " instanceId=" + instanceId
                     + " message=" + t.getMessage());
             if (response != null) {
@@ -260,5 +364,17 @@ public class SnarkWebSocketClient {
 
     private boolean isRequest(CommandMessage message) {
         return message.getType() != null && message.getType().startsWith("request:");
+    }
+
+    private CommandMessage buildRequestError(CommandMessage incoming, int status, String errorMessage) {
+        CommandMessage error = new CommandMessage();
+        error.setId(incoming.getId());
+        error.setType("error:status:details");
+        error.setFrom(instanceId);
+        error.setTo(resolveTarget(incoming));
+        error.setTimestamp(System.currentTimeMillis());
+        error.setStatus(status);
+        error.setError(errorMessage);
+        return error;
     }
 }
