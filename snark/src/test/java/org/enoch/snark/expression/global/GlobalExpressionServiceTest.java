@@ -11,27 +11,100 @@ import org.enoch.snark.instance.model.action.condition.IsExpressionTrueCondition
 import org.enoch.snark.instance.model.action.condition.IsFleetExpiredCondition;
 import org.enoch.snark.instance.model.action.condition.IsModifiedAfterCondition;
 import org.enoch.snark.instance.model.action.condition.IsSpyNotExpiredCondition;
+import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.Planet;
+import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.service.PlanetDataService;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DisplayName("GlobalExpressionService Tests")
 class GlobalExpressionServiceTest {
 
     private GlobalExpressionService expressionService;
+    private PlanetDataService planetDataService;
+    private ColonyRepository colonyRepository;
 
     @BeforeEach
     void setUp() {
-        expressionService = new GlobalExpressionService();
+        CacheEntryRepository cacheEntryRepository = mock(CacheEntryRepository.class);
+        colonyRepository = mock(ColonyRepository.class);
+        TargetRepository targetRepository = mock(TargetRepository.class);
+        planetDataService = mock(PlanetDataService.class);
+        when(cacheEntryRepository.findAll()).thenReturn(List.of());
+        expressionService = new GlobalExpressionService(
+                new GlobalExpressionCache(),
+                cacheEntryRepository,
+                colonyRepository,
+                targetRepository,
+                planetDataService
+        );
         expressionService.invalidateAll();
+    }
+
+    @Nested
+    @DisplayName("Coordinate Expression Tests")
+    class CoordinateExpressionTests {
+
+        @Test
+        @DisplayName("Should normalize a colony selector to PlanetData list")
+        void testPlanetSelector() {
+            ColonyEntity colony = mock(ColonyEntity.class);
+            Planet planet = Planet.parse("p[1:2:3]");
+            when(colony.toPlanet()).thenReturn(planet);
+            when(colonyRepository.findByCode("PLANETS")).thenReturn(List.of(colony));
+
+            List<PlanetData> result = expressionService.evaluateCoordinates("planets");
+
+            assertEquals(1, result.size());
+            assertEquals(planet, result.getFirst().getPlanet());
+        }
+
+        @Test
+        @DisplayName("Should normalize a coordinate literal")
+        void testCoordinateLiteral() {
+            PlanetData coordinate = mock(PlanetData.class);
+            when(planetDataService.fetchCoordinates("p[1:2:3]")).thenReturn(List.of(coordinate));
+
+            List<PlanetData> result = expressionService.evaluateCoordinates("p[1:2:3]");
+
+            assertEquals(List.of(coordinate), result);
+            verify(planetDataService).fetchCoordinates("p[1:2:3]");
+        }
+
+        @Test
+        @DisplayName("Should preserve a list returned by an expression")
+        void testListExpression() {
+            PlanetData coordinate = mock(PlanetData.class);
+
+            List<PlanetData> result = expressionService.evaluateCoordinates(
+                    "#source",
+                    Map.of("source", List.of(coordinate))
+            );
+
+            assertEquals(List.of(coordinate), result);
+        }
+
+        @Test
+        @DisplayName("Should resolve no-coordinate selector")
+        void testNoneSelector() {
+            assertEquals(List.of(), expressionService.evaluateCoordinates("none"));
+        }
     }
 
     @Nested

@@ -27,24 +27,10 @@ public class FleetDispatcher {
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
 
-            List<PlanetData> colonies;
-//            if(fleetPlan.getSource()!= null && fleetPlan.getSource().contains("#")) {
-                colonies = globalExpressionService.evaluate(fleetPlan.getSource(), Map.of(), List.class);
-//            } else {
-//                colonies = coordinateExpressionService.fromExpression(fleetPlan.getSource());
-//            }
+            List<PlanetData> colonies = globalExpressionService.evaluateCoordinates(fleetPlan.getSource());
             for (PlanetData colony : colonies) {
-                FleetContext fleetContext = FleetContext.builder()
-                        .trip(fleetPlan.getTrip())
-                        .source(colony)
-                        .build();
-                List<PlanetData> targets;
-//                if(fleetPlan.getTarget()!= null && fleetPlan.getTarget().contains("#")) {
-                    Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
-                    targets = globalExpressionService.evaluate(fleetPlan.getTarget(), stringObjectMap, List.class);
-//                } else {
-//                    targets = coordinateExpressionService.fromExpression(fleetPlan.getTarget(), fleetContext);
-//                }
+                Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
+                List<PlanetData> targets = globalExpressionService.evaluateCoordinates(fleetPlan.getTarget(), stringObjectMap);
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
                     command.setSource(colony.getColony());

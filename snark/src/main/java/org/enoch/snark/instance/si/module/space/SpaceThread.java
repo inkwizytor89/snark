@@ -147,7 +147,7 @@ public class SpaceThread extends AbstractThread {
             String coordinateString = getNearestConfig(COORDINATE, StringUtils.EMPTY);
             String rangeString = getNearestConfig(RANGE, StringUtils.EMPTY);
             Integer range = Integer.parseInt(rangeString);
-            List<Planet> coordinateList = coordinateSpelService.nonCached(coordinateString).stream().map(PlanetData::getPlanet).toList();
+            List<Planet> coordinateList = globalExpressionService.evaluateCoordinates(coordinateString).stream().map(PlanetData::getPlanet).toList();
             for(Planet planet : coordinateList) ranges.add(new SystemViewRange(planet.galaxy, new Range<>(planet.system - range, planet.system + range)));
 
         } else {
@@ -182,7 +182,7 @@ public class SpaceThread extends AbstractThread {
         String spyCoordinateString = getNearestConfig(SPY_COORDINATE, StringUtils.EMPTY);
 
         Map<String, Object> stringObjectMap = Map.of("source", singletonList(planetData));
-        List<Planet> spyCoordinate = coordinateSpelService.nonCached(spyCoordinateString, stringObjectMap).stream().map(PlanetData::getPlanet).toList();
+        List<Planet> spyCoordinate = globalExpressionService.evaluateCoordinates(spyCoordinateString, stringObjectMap).stream().map(PlanetData::getPlanet).toList();
         ArrayListMultimap<SystemView, Planet> spyCoordinateMap = ArrayListMultimap.create();
         spyCoordinate.forEach(planet -> spyCoordinateMap.put(planet.getSystemView(), planet));
         return spyCoordinateMap;

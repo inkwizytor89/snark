@@ -1,7 +1,15 @@
 package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.snark.expression.coordinate.SpelFunctionWrapper;
+import org.enoch.snark.expression.coordinate.function.Base;
+import org.enoch.snark.expression.coordinate.function.Colonies;
+import org.enoch.snark.expression.coordinate.function.EventFleetFilter;
+import org.enoch.snark.expression.coordinate.function.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Registry for SpEL functions available across all domains.
@@ -45,16 +53,36 @@ public class GlobalSpelFunctionRegistry {
         log.debug("SpEL functions registered successfully");
     }
 
-    /**
-     * Register coordinate-related functions.
-     * Placeholder for existing coordinate functions.
-     */
-    private static void registerCoordinateFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+    /** Register coordinate-related functions. */
+    public static void registerCoordinateFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
         log.debug("Registering coordinate functions");
-        // TODO: Register existing coordinate functions from CoordinateSpelService
-        // Example:
-        // context.registerFunction("all_planets", Colonies.class.getDeclaredMethod("planets"));
-        // context.registerFunction("all_moons", Colonies.class.getDeclaredMethod("moons"));
+        context.registerFunction("test", Test.class.getDeclaredMethod("test", String.class));
+
+        context.registerFunction("all_planets", Colonies.class.getDeclaredMethod("planets"));
+        context.registerFunction("planets", SpelFunctionWrapper.class.getDeclaredMethod("planets", Object.class));
+        context.registerFunction("all_moons", Colonies.class.getDeclaredMethod("moons"));
+        context.registerFunction("moons", SpelFunctionWrapper.class.getDeclaredMethod("moons", Object.class));
+
+        context.registerFunction("all", Colonies.class.getDeclaredMethod("all"));
+        context.registerFunction("none", Colonies.class.getDeclaredMethod("none"));
+        context.registerFunction("allPositionsFunc", Colonies.class.getDeclaredMethod("allPositions"));
+        context.registerFunction("all_positions", Colonies.class.getDeclaredMethod("allPositions"));
+
+        context.registerFunction("swap", SpelFunctionWrapper.class.getDeclaredMethod("swap", Object.class));
+        context.registerFunction("farm", SpelFunctionWrapper.class.getDeclaredMethod("farm", Object.class));
+        context.registerFunction("next", SpelFunctionWrapper.class.getDeclaredMethod("next", Object.class, String.class));
+        context.registerFunction("prev", SpelFunctionWrapper.class.getDeclaredMethod("prev", Object.class, String.class));
+        context.registerFunction("space", SpelFunctionWrapper.class.getDeclaredMethod("space", Object.class, String.class));
+
+        context.registerFunction("swapStr", Base.class.getDeclaredMethod("swap", String.class));
+        context.registerFunction("swapFunc", Base.class.getDeclaredMethod("swap", List.class));
+        context.registerFunction("spaceStr", Base.class.getDeclaredMethod("space", String.class, String.class));
+        context.registerFunction("spaceFunc", Base.class.getDeclaredMethod("space", List.class, String.class));
+
+        context.registerFunction("cacheKey", Base.class.getDeclaredMethod("cacheKey", String.class));
+        context.registerFunction("cache_key", Base.class.getDeclaredMethod("cacheKey", String.class));
+        context.registerFunction("eventFilter", EventFleetFilter.class.getDeclaredMethod("filterField", List.class, String.class, Map.class));
+        context.registerFunction("event_filter", EventFleetFilter.class.getDeclaredMethod("filterField", List.class, String.class, Map.class));
     }
 
     /**

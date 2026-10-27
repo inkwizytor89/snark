@@ -10,6 +10,7 @@ import org.enoch.snark.expression.coordinate.function.Colonies;
 import org.enoch.snark.expression.coordinate.function.CycleTrip;
 import org.enoch.snark.expression.coordinate.function.Swarn;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
+import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -23,6 +24,12 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import static org.enoch.snark.instance.service.CoordinateExpressionService.MOONS;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.PLANETS;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.SPACE;
+import static org.enoch.snark.instance.service.CoordinateExpressionService.SWAP;
 
 /**
  * Global expression evaluation service with TTL-based caching.
@@ -36,11 +43,7 @@ import java.util.Map;
  * 
  * Usage:
  * <pre>
- * List&lt;PlanetData&gt; coords = expressionService.evaluate(
- *     "#all_planets()",
- *     Map.of(),
- *     List.class
- * );
+ * List&lt;PlanetData&gt; coords = expressionService.evaluateCoordinates("planets");
  * 
  * List&lt;AbstractCondition&gt; conditions = expressionService.evaluate(
  *     "#hasResourcesCount({source: 'p[1:2:3]', count: '3m'})",
@@ -54,6 +57,9 @@ import java.util.Map;
 @Scope("prototype")
 @Slf4j
 public class GlobalExpressionService {
+
+    private static final Pattern COORDINATE_LITERAL = Pattern.compile(
+            "(?i)^[pmd]\\[\\s*\\d+\\s*:\\s*\\d+\\s*:\\s*\\d+\\s*\\](\\s*;\\s*[pmd]\\[\\s*\\d+\\s*:\\s*\\d+\\s*:\\s*\\d+\\s*\\])*$");
 
     private final ExpressionParser parser = new SpelExpressionParser();
     private final GlobalExpressionCache cache;
@@ -102,7 +108,7 @@ public class GlobalExpressionService {
             log.debug("Evaluating expression '{}'", expression);
             EvaluationContext spelContext = createEvaluationContext(context);
             Expression parsedExpr = parser.parseExpression(expression);
-            T result = (T) parsedExpr.getValue(spelContext);
+            T result = returnType.cast(parsedExpr.getValue(spelContext));
 
             // Store in cache
             cache.put(cacheKey, result, expression);
@@ -135,12 +141,68 @@ public class GlobalExpressionService {
             log.debug("Evaluating expression without cache: '{}'", expression);
             EvaluationContext spelContext = createEvaluationContext(context);
             Expression parsedExpr = parser.parseExpression(expression);
-            return (T) parsedExpr.getValue(spelContext);
+            return returnType.cast(parsedExpr.getValue(spelContext));
 
         } catch (Exception e) {
             log.error("Failed to evaluate expression (no cache): '{}'", expression, e);
             throw new IllegalStateException("Failed to evaluate SpEL expression: " + expression, e);
         }
+    }
+
+    /**
+     * Evaluate a coordinate selector or SpEL expression and normalize it to database-backed coordinates.
+     * Coordinate evaluation is uncached to preserve the dynamic behavior of fleet and colony selectors.
+     */
+    public List<PlanetData> evaluateCoordinates(String expression) {
+        return evaluateCoordinates(expression, Map.of());
+    }
+
+    public List<PlanetData> evaluateCoordinates(String expression, Map<String, Object> context) {
+        if (expression == null) {
+            return null;
+        }
+
+        String normalizedExpression = switch (expression) {
+            case "none" -> null;
+            case PLANETS -> "#all_planets()";
+            case MOONS -> "#all_moons()";
+            case "all" -> "#all_moons()";
+            case "" -> "#allPositionsFunc()";
+            case SPACE -> "#spaceFunc(#source,0)";
+            case SWAP -> "#swapFunc(#source)";
+            default -> expression;
+        };
+        if (normalizedExpression == null) {
+            return List.of();
+        }
+        if (COORDINATE_LITERAL.matcher(normalizedExpression).matches()) {
+            return planetDataService.fetchCoordinates(normalizedExpression);
+        }
+
+        Object result = evaluateNoCached(normalizedExpression, context, Object.class);
+        if (result instanceof String coordinates) {
+            return planetDataService.fetchCoordinates(coordinates);
+        }
+        if (result instanceof PlanetData planetData) {
+            return List.of(planetData);
+        }
+        if (result instanceof List<?> values) {
+            List<PlanetData> coordinates = new ArrayList<>(values.size());
+            for (Object value : values) {
+                if (!(value instanceof PlanetData planetData)) {
+                    throw new IllegalStateException("Coordinate expression '" + expression
+                            + "' returned a list containing "
+                            + (value == null ? "null" : value.getClass().getSimpleName())
+                            + " instead of PlanetData");
+                }
+                coordinates.add(planetData);
+            }
+            return coordinates;
+        }
+
+        throw new IllegalStateException("Coordinate expression '" + expression + "' must return "
+                + "String, PlanetData, or List<PlanetData>, got: "
+                + (result == null ? "null" : result.getClass().getSimpleName()));
     }
 
     /**
@@ -281,7 +343,7 @@ public class GlobalExpressionService {
         cacheEntryRepository.findAll().forEach(entry -> spelContext.setVariable(entry.key, convertToVariable(entry.value, context)));
         
         // Add all provided variables
-        context.forEach((key, value) -> spelContext.setVariable(key, value));
+        context.forEach((key, value) -> spelContext.setVariable(key, convertToVariable(value, context)));
 
         Colonies.setRepository(colonyRepository);
         Colonies.setRepository(planetDataService);

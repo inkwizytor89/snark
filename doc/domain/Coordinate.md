@@ -22,7 +22,7 @@ The main coordinate value object is [`Planet`](../../snark/src/main/java/org/eno
 
 ## Coordinate expressions
 
-[`CoordinateSpelService`](../../snark/src/main/java/org/enoch/snark/expression/coordinate/CoordinateSpelService.java) translates textual configuration into coordinate objects. It also resolves named inputs such as `source` and supports expression-based selection.
+[`GlobalExpressionService`](../../snark/src/main/java/org/enoch/snark/expression/global/GlobalExpressionService.java) evaluates coordinate expressions and normalizes results to database-backed coordinate data. It resolves selectors such as `planets`, `moons`, and `none`, as well as SpEL functions and coordinate literals.
 
 Important selectors include:
 

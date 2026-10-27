@@ -104,7 +104,7 @@ Source and target use coordinate expressions:
 - Database queries: `Colony|SELECT ...`
 - Symbolic: `#source`, `#target`, `#fly_points`
 
-These are resolved by [`CoordinateSpelService`](../../snark/src/main/java/org/enoch/snark/expression/coordinate/CoordinateSpelService.java) at runtime.
+These are resolved by [`GlobalExpressionService`](../../snark/src/main/java/org/enoch/snark/expression/global/GlobalExpressionService.java) at runtime.
 
 ## Configuration example
 
