@@ -49,10 +49,7 @@ public class Wd {
     }
 
     public void reopenWebDriver(String startUrl) {
-        if(!isDriverAlive()) {
-            if (webDriver != null) closeWebDriver();
-            setupDriver();
-        }
+        requireDriverAlive();
         ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
         webDriver.switchTo().window(tabs.get(0));
         closeOldsTabs();
@@ -60,11 +57,36 @@ public class Wd {
     }
 
     public boolean isDriverAlive() {
+        if (webDriver == null) {
+            return false;
+        }
         try {
-            webDriver.getWindowHandles();
-            return true;
+            return !webDriver.getWindowHandles().isEmpty();
         } catch (WebDriverException e) {
             return false;
+        }
+    }
+
+    public void requireDriverAlive() {
+        if (!isDriverAlive()) {
+            throw new BrowserWindowUnavailableException("ChromeDriver has no available browser window");
+        }
+    }
+
+    public boolean hasWindow(String windowHandle) {
+        if (windowHandle == null || !isDriverAlive()) {
+            return false;
+        }
+        try {
+            return webDriver.getWindowHandles().contains(windowHandle);
+        } catch (WebDriverException e) {
+            return false;
+        }
+    }
+
+    public void requireWindow(String windowHandle) {
+        if (!hasWindow(windowHandle)) {
+            throw new BrowserWindowUnavailableException("The active game browser window is no longer available");
         }
     }
 
@@ -102,8 +124,13 @@ public class Wd {
             webDriver.manage().addCookie(new Cookie(key, value,".gameforge.com", "/", null));
     }
 
-    private void closeWebDriver() {
-        webDriver.quit();
+    public void closeWebDriver() {
+        ChromeDriver currentDriver = webDriver;
+        webDriver = null;
+        if (currentDriver == null) {
+            return;
+        }
+        currentDriver.quit();
     }
 
     public WebElement findElement(String tag, String attribute, String value, String unacceptable) {

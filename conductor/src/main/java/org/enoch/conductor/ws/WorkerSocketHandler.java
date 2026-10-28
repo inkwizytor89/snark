@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 
 @Component
 public class WorkerSocketHandler extends TextWebSocketHandler {
@@ -36,6 +37,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final Map<String, WebSocketSession> workers = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastRegisteredAt = new ConcurrentHashMap<>();
     private final Map<String, ServerStatus> lastStatuses = new ConcurrentHashMap<>();
     private final Map<String, Long> lastStatusUpdatedAt = new ConcurrentHashMap<>();
     private final Map<String, Long> lastStatusRevisions = new ConcurrentHashMap<>();
@@ -43,9 +45,17 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private final Map<String, PendingStatusDetailsRequest> pendingStatusDetailsRequests = new ConcurrentHashMap<>();
     
     private InstanceConfigService instanceConfigService;
+    private volatile BiConsumer<String, String> restartRequestHandler = (instanceId, reason) -> {
+        System.err.println("[WS][WORKER][RESTART][UNHANDLED] instanceId=" + instanceId
+                + " reason=" + reason);
+    };
 
     public void setInstanceConfigService(InstanceConfigService service) {
         this.instanceConfigService = service;
+    }
+
+    public void setRestartRequestHandler(BiConsumer<String, String> handler) {
+        this.restartRequestHandler = handler;
     }
 
     @Override
@@ -82,6 +92,8 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
         if ("update:status".equals(type)) {
             storeStatusUpdate(registeredInstanceId, session, json);
+        } else if ("event:restart-required".equals(type)) {
+            handleRestartRequired(registeredInstanceId, session, json);
         } else if (isStatusMessage(type)) {
             storeStatusResponse(registeredInstanceId, session, json);
         } else if ("response:status:details".equals(type) || "error:status:details".equals(type)) {
@@ -96,6 +108,25 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         if (type.equals("LOG")) {
             System.out.println("[WORKER] " + json.path("message").asText(""));
         }
+    }
+
+    private void handleRestartRequired(String instanceId, WebSocketSession session, JsonNode json) {
+        JsonNode payload = json.path("payload");
+        if (workers.get(instanceId) != session
+                || json.path("id").asText("").isBlank()
+                || !instanceId.equals(json.path("from").asText(""))
+                || !"conductor".equals(json.path("to").asText(""))
+                || json.path("status").asInt() != 200
+                || !payload.isObject()
+                || !payload.path("reason").isTextual()
+                || payload.path("reason").asText().isBlank()) {
+            System.err.println("[WS][WORKER][REJECTED] Malformed restart-required event instanceId=" + instanceId);
+            return;
+        }
+
+        String reason = payload.path("reason").asText();
+        System.err.println("[WS][WORKER][RESTART][REQUESTED] instanceId=" + instanceId + " reason=" + reason);
+        restartRequestHandler.accept(instanceId, reason);
     }
 
     @Override
@@ -144,6 +175,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
 
         WebSocketSession previousSession = workers.put(instanceId, session);
+        lastRegisteredAt.put(instanceId, System.currentTimeMillis());
         lastStatuses.remove(instanceId);
         lastStatusUpdatedAt.remove(instanceId);
         lastStatusRevisions.remove(instanceId);
@@ -281,6 +313,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     public boolean isRegistered(String workerId) {
         WebSocketSession session = workers.get(workerId);
         return session != null && session.isOpen();
+    }
+
+    public long getLastRegisteredAt(String workerId) {
+        return lastRegisteredAt.getOrDefault(workerId, 0L);
     }
 
     public void send(String workerId, String json) throws Exception {

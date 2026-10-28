@@ -54,6 +54,7 @@ public class InstanceController {
                     item.put("properties", profile.getProperties());
                     boolean running = processService.isRunning(profile.getId());
                     item.put("running", running);
+                    item.put("state", processService.getState(profile.getId()));
                     var runtime = processService.getRuntime(profile.getId());
                     item.put("pid", runtime != null ? runtime.getPid() : null);
                     item.put("serverStatus", processService.getLastServerStatus(profile.getId()));
@@ -134,6 +135,7 @@ public class InstanceController {
         status.put("id", profile.getId());
         boolean running = processService.isRunning(id);
         status.put("running", running);
+        status.put("state", processService.getState(id));
         status.put("autoStart", profile.isAutoStart());
         status.put("databaseName", profile.getDatabaseName());
         status.put("properties", profile.getProperties());
@@ -175,6 +177,7 @@ public class InstanceController {
             status.put("statusMessage", processService.getLastStatusMessage(id));
         }
         status.put("webSocketConnected", processService.isWorkerConnected(id));
+        status.put("state", processService.getState(id));
         status.put("statusUpdatedAt", processService.getLastStatusUpdatedAt(id));
         status.put("serverStatus", processService.getLastServerStatus(id));
 

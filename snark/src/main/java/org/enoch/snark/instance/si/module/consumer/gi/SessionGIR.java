@@ -7,9 +7,9 @@ import org.enoch.snark.exception.GIException;
 import org.enoch.snark.instance.si.module.consumer.Credentials;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.text.HtmlElements.TAG_BUTTON;
@@ -43,18 +43,17 @@ public class SessionGIR extends GraphicalInterfaceReader {
     }
 
     public boolean isCurrentUrlBackToLobby() {
-        SleepUtil.sleep();
-        return wd().getCurrentUrl().contains("lobby") ;
+        String currentUrl = wd().getCurrentUrl();
+        return currentUrl != null && currentUrl.contains("lobby");
     }
 
     public boolean isCurrentUrlEmpty() {
-        SleepUtil.sleep();
         return wd().getCurrentUrl() == null || wd().getCurrentUrl().isEmpty() ;
     }
 
     public boolean isCurrentUrlLobbyAccount() {
-        SleepUtil.sleep();
-        return wd().getCurrentUrl().contains(LOBBY_WITH_ACCOUNTS);
+        String currentUrl = wd().getCurrentUrl();
+        return currentUrl != null && currentUrl.contains(LOBBY_WITH_ACCOUNTS);
     }
 
     public String signInWithRetry(Credentials credentials) {
@@ -75,6 +74,7 @@ public class SessionGIR extends GraphicalInterfaceReader {
                     return returnLobbyCookie();
                 }
             } catch (Throwable e) {
+                wd.requireDriverAlive();
                 System.err.println(e);
             }
             SleepUtil.sleep();
@@ -91,7 +91,9 @@ public class SessionGIR extends GraphicalInterfaceReader {
     }
 
     public boolean openServer() {
+        String serverWindow = null;
         try {
+            wd.requireDriverAlive();
             if(wd.getHash() != null && !wd.getHash().isEmpty()) {
                 String decoded = HashDecoder.decode(wd.getHash());
                 String[] serverDetails = decoded.split(";", 2);
@@ -104,22 +106,41 @@ public class SessionGIR extends GraphicalInterfaceReader {
             String serverName = wd.getServerName();
             List<WebElement> webElements = longFetchAll(By.xpath("//div[@role='row']"));
             System.err.println("serwers count "+webElements.size());
+            java.util.Set<String> previousWindows = new java.util.HashSet<>(wd().getWindowHandles());
             webElements.stream()
                     .filter(webElement -> webElement.getText().contains(serverName))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Could not find server " + serverName))
                     .findElement(By.tagName("button")).click();
 
-            getLongWait().until(driver -> driver.getWindowHandles().size() >= 2);
+            try {
+                getLongWait().until(driver -> driver.getWindowHandles().stream()
+                        .anyMatch(window -> !previousWindows.contains(window)));
+            } catch (TimeoutException e) {
+                throw new BrowserWindowUnavailableException("The game server browser window did not open", e);
+            }
 
-            ArrayList<String> tabs = new ArrayList<>(wd().getWindowHandles());
-            wd().switchTo().window(tabs.size() == 1 ? tabs.get(0) : tabs.get(1));
+            serverWindow = wd().getWindowHandles().stream()
+                    .filter(window -> !previousWindows.contains(window))
+                    .findFirst()
+                    .orElseThrow(() -> new BrowserWindowUnavailableException(
+                            "Opening the server did not create a browser window"));
+            wd().switchTo().window(serverWindow);
 
             getLongWait().until(driver -> !driver.getCurrentUrl().contains("lobby"));
+            wd.requireDriverAlive();
             return true;
+        } catch (BrowserWindowUnavailableException e) {
+            throw e;
         } catch (GIException e) {
+            if (serverWindow != null && !wd.hasWindow(serverWindow)) {
+                throw new BrowserWindowUnavailableException("The game server browser window was closed", e);
+            }
             e.printStackTrace();
         } catch (Throwable e) {
+            if (serverWindow != null && !wd.hasWindow(serverWindow)) {
+                throw new BrowserWindowUnavailableException("The game server browser window was closed", e);
+            }
             e.printStackTrace();
         }
         return false;

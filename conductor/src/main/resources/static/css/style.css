@@ -273,6 +273,21 @@ main {
     color: #22c55e;
 }
 
+.status-starting {
+    background: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.status-disconnected {
+    background: rgba(249, 115, 22, 0.3);
+    color: #fb923c;
+}
+
+.status-restarting {
+    background: rgba(249, 115, 22, 0.3);
+    color: #fb923c;
+}
+
 .status-stopped {
     background: rgba(239, 68, 68, 0.3);
     color: #ef4444;

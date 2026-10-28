@@ -35,6 +35,8 @@ Modules group related threads together. Each module:
 
 Threads inherit configuration from their module's `mainMap` through [`AbstractModule`](../../snark/src/main/java/org/enoch/snark/instance/si/module/AbstractModule.java). If a thread-specific value is not set, it falls back to the module-level value.
 
+The consumer's ChromeDriver session, lobby pause, and process-level recovery are described in [Instance lifecycle and recovery](Instance%20lifecycle%20and%20recovery.md).
+
 ## Configuration system
 
 Configuration is provided through property files. The naming scheme is:

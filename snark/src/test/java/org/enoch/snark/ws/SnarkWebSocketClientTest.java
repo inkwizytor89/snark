@@ -128,6 +128,20 @@ class SnarkWebSocketClientTest {
     }
 
     @Test
+    void shouldBuildRestartRequiredEvent() throws Exception {
+        CommandMessage event = client.buildRestartRequiredEvent("ChromeDriver window is unavailable");
+
+        assertTrue(event.getId() != null && !event.getId().isBlank());
+        assertEquals("event:restart-required", event.getType());
+        assertEquals("worker#1", event.getFrom());
+        assertEquals("conductor", event.getTo());
+        assertEquals(200, event.getStatus());
+        JsonNode json = new ObjectMapper().valueToTree(event);
+        assertEquals("ChromeDriver window is unavailable",
+                json.path("payload").path("reason").asText());
+    }
+
+    @Test
     void shouldBuildCorrelatedStatusDetailsResponse() {
         CommandMessage request = new CommandMessage();
         request.setId("details-1");

@@ -141,6 +141,19 @@ function initApp() {
     }
 
     function getInstanceStatusText(inst) {
+        if (inst.state === 'starting') {
+            return 'Instance is starting and waiting for its first status update.';
+        }
+        if (inst.state === 'disconnected') {
+            return 'Worker disconnected; conductor is waiting for recovery.';
+        }
+        if (inst.state === 'restarting') {
+            return 'Worker requested a restart; conductor is stopping and relaunching the instance.';
+        }
+        if (inst.state === 'stopped') {
+            return 'Instance is stopped. Start it to receive status updates.';
+        }
+
         const navigatorStatus = inst.serverStatus && inst.serverStatus.navigatorStatus;
         if (navigatorStatus && navigatorStatus.fleetStatus) {
             if (!inst.serverStatus.activeThreads?.length && !inst.serverStatus.commandDeque) {
@@ -153,15 +166,37 @@ function initApp() {
             return inst.statusMessage;
         }
 
-        if (inst.running) {
-            return 'Awaiting the first status update...';
-        }
-
-        return 'Instance is stopped. Start it to receive status updates.';
+        return 'Awaiting the next status update...';
     }
 
     function getInstanceStateLabel(inst) {
-        return inst.running ? 'Running' : 'Stopped';
+        switch (inst.state) {
+            case 'starting':
+                return 'Starting';
+            case 'disconnected':
+                return 'Disconnected';
+            case 'restarting':
+                return 'Restarting';
+            case 'running':
+                return 'Running';
+            default:
+                return 'Stopped';
+        }
+    }
+
+    function getInstanceStateClass(inst) {
+        switch (inst.state) {
+            case 'starting':
+                return 'status-starting';
+            case 'disconnected':
+                return 'status-disconnected';
+            case 'restarting':
+                return 'status-restarting';
+            case 'running':
+                return 'status-running';
+            default:
+                return 'status-stopped';
+        }
     }
 
     function toggleTerminalControls() {
@@ -226,6 +261,7 @@ function initApp() {
                 return {
                     id: inst.id,
                     running: status.running,
+                    state: status.state,
                     pid: status.pid,
                     statusMessage: status.statusMessage,
                     serverStatus: status.serverStatus,
@@ -299,8 +335,8 @@ function initApp() {
                     <div class="instance-header">
                         <div class="instance-title-row">
                             <div class="instance-name">${escapeHtml(inst.id)}</div>
-                            <span class="status-badge ${inst.running ? 'status-running' : 'status-stopped'}">
-                                ${inst.running ? 'Running' : 'Stopped'}
+                            <span class="status-badge ${getInstanceStateClass(inst)}">
+                                ${getInstanceStateLabel(inst)}
                             </span>
                             <span class="instance-pid">PID: ${inst.pid && inst.pid !== -1 ? escapeHtml(inst.pid) : '-'}</span>
                         </div>
@@ -352,7 +388,7 @@ function initApp() {
             <div class="detail-card">
                 <div class="detail-header">
                     <div class="detail-title">${escapeHtml(inst.id)}</div>
-                    <span class="status-badge ${inst.running ? 'status-running' : 'status-stopped'}">${getInstanceStateLabel(inst)}</span>
+                    <span class="status-badge ${getInstanceStateClass(inst)}">${getInstanceStateLabel(inst)}</span>
                 </div>
                 <div class="detail-tabs">
                     <button type="button" class="detail-tab ${activeDetailsTab === 'overview' ? 'is-active' : ''}" data-detail-tab="overview">Overview</button>
@@ -1183,6 +1219,7 @@ function initApp() {
             instances = sortInstances(instances.map((inst) => inst.id === id ? {
                 ...inst,
                 running: status.running,
+                state: status.state,
                 pid: status.pid,
                 statusMessage: status.statusMessage,
                 serverStatus: status.serverStatus,

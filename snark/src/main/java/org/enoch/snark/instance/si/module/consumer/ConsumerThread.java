@@ -1,5 +1,6 @@
 package org.enoch.snark.instance.si.module.consumer;
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.action.command.status.CommandStatus;
@@ -12,8 +13,10 @@ import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.WorkerLifecycle;
 import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.GISession;
+import org.enoch.snark.instance.si.module.consumer.gi.BrowserWindowUnavailableException;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadMap;
@@ -35,6 +38,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private final CommandProcessor processor;
     private final CacheEntryRepository cacheEntryRepository;
+    private final WorkerLifecycle workerLifecycle;
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
@@ -60,7 +64,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @Override
     public void onStep() {
-
         try {
             startGiSessionIfNeeded();
             registerDequeIfNeeded();
@@ -71,17 +74,22 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         } catch (org.openqa.selenium.TimeoutException e) {
             System.err.println("TimeoutException znowu");
             System.err.println(e);
+            terminateIfBrowserWindowWasLost(e);
         } catch (WebDriverException e) {
             System.err.println("WebDriver interrupted "+e.getClass().getName()+": "+e.getMessage());
             System.err.println(e);
+            terminateIfBrowserWindowWasLost(e);
         } catch (Throwable e) {
             e.printStackTrace();
+            terminateIfBrowserWindowWasLost(e);
+        } finally {
+            if (commandDeque != null) {
+                commandDeque.release();
+            }
         }
-        commandDeque.release();
     }
 
     private void startGiSessionIfNeeded() {
-//        startGiIfNeeded();
         if(session == null) {
             System.err.println("startGiSessionIfNeeded session == null");
             session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"));
@@ -97,6 +105,21 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         String currentLobbyToken = session.openNewServerSession(this);
         if(!currentLobbyToken.equals(cachedLobbyToken))
             cacheEntryRepository.setValue(GF_TOKEN_PRODUCTION, currentLobbyToken);
+    }
+
+    private void terminateIfBrowserWindowWasLost(Throwable failure) {
+        if (failure instanceof BrowserWindowUnavailableException
+                || (wd != null && !wd.isDriverAlive())
+                || (session != null && !session.isActiveServerWindowAvailable())) {
+            workerLifecycle.terminate("ConsumerThread lost its ChromeDriver browser window");
+        }
+    }
+
+    @PreDestroy
+    public void closeBrowser() {
+        if (wd != null) {
+            wd.closeWebDriver();
+        }
     }
 
     private void registerDequeIfNeeded() {

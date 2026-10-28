@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -22,13 +23,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
@@ -46,6 +47,7 @@ public class Core {
 //    private final RemotePropertiesMap remotePropertiesMap;
 
     private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
+    private final Map<AbstractThread, ExecutorService> threadExecutors = new ConcurrentHashMap<>();
     private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
@@ -58,6 +60,12 @@ public class Core {
     @PostConstruct
     public void init() {
         cacheEntryRepository.setUnknownForSuffix(PROCESSING_SUFFIX);
+    }
+
+    @PreDestroy
+    public void shutdownThreads() {
+        modules.values().forEach(AbstractModule::destroy);
+        threadExecutors.values().forEach(ExecutorService::shutdownNow);
     }
 
     public void configurationUpdate(PropertiesMap propertiesMap) {
@@ -79,7 +87,15 @@ public class Core {
                 thread.setModule(module);
                 module.getThreadsMap().put(threadName, thread);
                 threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
-                Executors.newSingleThreadExecutor().submit(thread);
+                threadExecutors.computeIfAbsent(thread, configuredThread -> {
+                    ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
+                        Thread workerThread = new Thread(task, "snark-" + configuredThread.map().name());
+                        workerThread.setDaemon(true);
+                        return workerThread;
+                    });
+                    executor.submit(configuredThread);
+                    return executor;
+                });
             }
             // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
         }

@@ -221,6 +221,27 @@ public class SnarkWebSocketClient {
         }
     }
 
+    public void publishRestartRequired(String reason) {
+        WebSocket current = webSocket;
+        if (!registered || current == null || !connectionOpen) {
+            System.err.println("[WS][RESTART][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
+            return;
+        }
+        sendAndLog(current, buildRestartRequiredEvent(reason));
+    }
+
+    CommandMessage buildRestartRequiredEvent(String reason) {
+        CommandMessage message = new CommandMessage();
+        message.setId(UUID.randomUUID().toString());
+        message.setType("event:restart-required");
+        message.setFrom(instanceId);
+        message.setTo("conductor");
+        message.setTimestamp(System.currentTimeMillis());
+        message.setStatus(200);
+        message.setPayload(Map.of("reason", reason));
+        return message;
+    }
+
     @Scheduled(fixedDelay = 5_000)
     public void reconnectIfDisconnected() {
         if (!connectionOpen && !connecting && !shuttingDown && !managerUrl.isBlank()) {

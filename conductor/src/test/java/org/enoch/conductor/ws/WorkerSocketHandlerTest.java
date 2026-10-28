@@ -21,6 +21,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.clearInvocations;
+import java.util.concurrent.atomic.AtomicReference;
 
 class WorkerSocketHandlerTest {
 
@@ -159,6 +160,31 @@ class WorkerSocketHandlerTest {
 
         assertEquals("new status", handler.getLastStatusMessage("worker#1"));
         assertEquals(updatedAt, handler.getLastStatusUpdatedAt("worker#1"));
+    }
+
+    @Test
+    void shouldAcceptRestartRequiredEventOnlyFromRegisteredSession() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        WebSocketSession registeredSession = openSession();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        AtomicReference<String> receivedRequest = new AtomicReference<>();
+        handler.setRestartRequestHandler((instanceId, reason) ->
+                receivedRequest.set(instanceId + ":" + reason));
+        testHandler.receive(registeredSession, """
+                {"id":"registration-1","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+
+        String restartEvent = """
+                {"id":"restart-1","type":"event:restart-required","from":"worker#1","to":"conductor",
+                 "timestamp":2,"status":200,"payload":{"reason":"ChromeDriver window is unavailable"}}
+                """;
+        WebSocketSession staleSession = openSession();
+        testHandler.receive(staleSession, restartEvent);
+        assertNull(receivedRequest.get());
+
+        testHandler.receive(registeredSession, restartEvent);
+        assertEquals("worker#1:ChromeDriver window is unavailable", receivedRequest.get());
     }
 
     @Test
