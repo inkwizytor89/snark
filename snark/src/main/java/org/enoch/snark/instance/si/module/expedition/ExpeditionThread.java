@@ -2,6 +2,8 @@ package org.enoch.snark.instance.si.module.expedition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -32,6 +34,21 @@ public class ExpeditionThread extends AbstractThread {
     public static final String SYSTEM_SHIFT = "system_shift";
 
     private final FleetRepository fleetRepository;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("expedition", threadType, "source", "", false,
+                "Source colony set used for expedition planning."));
+        configs.add(new ConfigDefinition("expedition", threadType, "max_dt", "2500", false,
+                "Maximum transport capacity used for expedition ships."));
+        configs.add(new ConfigDefinition("expedition", threadType, "battle_extension", "true", false,
+                "Whether to include battle ships in expedition groups."));
+        configs.add(new ConfigDefinition("expedition", threadType, SYSTEM_SHIFT, "0", false,
+                "System offset applied to the expedition target."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Sends expeditions to distant systems and balances transport capability.", configs);
+    }
 
     @Override
     protected String getThreadType() {

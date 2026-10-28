@@ -14,6 +14,8 @@ import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -46,6 +48,23 @@ public class DefenseThread extends AbstractThread {
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
     private int nearActionCont;
     private int incomingActionCont;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("defense", threadType, ALARM, "false", false,
+                "Play the alarm sound when hostile fleets are detected near the colony."));
+        configs.add(new ConfigDefinition("defense", threadType, LIMIT, "0", false,
+                "Maximum defensive actions allowed before the thread pauses."));
+        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_TIME, "10S", false,
+                "Sample time value used for defensive calculations and tests."));
+        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_COORDINATE, "", false,
+                "Example coordinate used for defensive examples."));
+        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_ATTACKER_COORDINATE, "", false,
+                "Example coordinate of the attacker used for interception examples."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Monitors enemy fleets and reacts with local defense or retreat actions.", configs);
+    }
 
     @Override
     protected String getThreadType() {

@@ -3,6 +3,8 @@ package org.enoch.snark.instance.si.module.define;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.apache.logging.log4j.util.Strings;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.repository.CacheEntryRepository;
@@ -10,6 +12,7 @@ import org.enoch.snark.db.repository.QueryService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.hibernate.exception.SQLGrammarException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
@@ -23,6 +26,15 @@ public class DefineThread extends AbstractThread {
 
     private final QueryService queryService;
     private final CacheEntryRepository cacheEntryRepository;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("define", threadType, STRATEGY, NOT_NULL_STRATEGY, false,
+                "Strategy used when processing cached values and deciding whether empty results are accepted."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Writes and refreshes cache values derived from configured database queries.", configs);
+    }
 
     @Override
     protected void onStep() {

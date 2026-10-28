@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.si.module.hunting;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
@@ -18,6 +20,13 @@ public class HuntingThread extends AbstractThread {
 //    public HuntingThread(ThreadMap map) {
 //        super(map);
 //    }
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Monitors active players and prioritizes hunt targets based on the current high-score state.", configs);
+    }
 
     @Override
     protected String getThreadType() {

@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.si.module.building;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
@@ -37,6 +39,17 @@ public class BuildThread extends AbstractThread {
     private TechnologyService technologyService  = TechnologyService.getInstance();
     private BuildingCost buildingCost = BuildingCost.getInstance();
     private String buildingList;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("build", threadType, LIST, DEFAULT_LIST, false,
+                "Build list applied on each colony to decide which structures are ordered next."));
+        configs.add(new ConfigDefinition("build", threadType, SWAP_TRANSPORT, "true", false,
+                "Allow resource transport between colonies before building if the local colony is short on materials."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Builds structures from a configured colony build sequence and resource strategy.", configs);
+    }
 
     @Override
     protected String getThreadType() {

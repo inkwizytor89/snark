@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
@@ -45,6 +47,35 @@ public class FleetThread extends AbstractThread {
     private int size = 0;
     private HashMap<String, LocalDateTime> blockingMap = new HashMap<>();
     private String expiredConfig;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("fleet", threadName, SOURCE, "", false,
+                "Source coordinate expression that defines from which colonies fleets are dispatched."));
+        configs.add(new ConfigDefinition("fleet", threadName, TARGET, "", false,
+                "Target coordinate expression used by the fleet plan."));
+        configs.add(new ConfigDefinition("fleet", threadName, MISSION, Mission.STATIONED.name(), false,
+                "Mission assigned to the dispatched fleet."));
+        configs.add(new ConfigDefinition("fleet", threadName, RESOURCES, "", false,
+                "Resources to include in the fleet payload."));
+        configs.add(new ConfigDefinition("fleet", threadName, LEAVE_RESOURCES, "", false,
+                "Resources to leave behind on the origin colony after dispatch."));
+        configs.add(new ConfigDefinition("fleet", threadName, SPEED, "", false,
+                "Fleet speed override used during dispatch."));
+        configs.add(new ConfigDefinition("fleet", threadName, TRIP, "", false,
+                "Trip route expression used to define the fleet path."));
+        configs.add(new ConfigDefinition("fleet", threadName, RECALL, "", false,
+                "Recall delay applied after the fleet is sent."));
+        configs.add(new ConfigDefinition("fleet", threadName, DRY_RUN, "false", false,
+                "Only simulate dispatch planning without sending the fleet."));
+        configs.add(new ConfigDefinition("fleet", threadName, QUEUE, QueueRunType.NORMAL.name(), false,
+                "Queue priority used when the fleet command is scheduled."));
+        configs.add(new ConfigDefinition("fleet", threadName, EXPIRED_TIME, "", false,
+                "Blocking time window used to avoid duplicate fleet dispatches."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadName, "Creates and sends fleet plans according to target, mission, and route configuration.", configs);
+    }
 
     @Override
     protected String getThreadType() {

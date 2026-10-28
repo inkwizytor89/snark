@@ -1,10 +1,11 @@
 package org.enoch.conductor.config;
 
-import org.enoch.common.command.CommandMessage;
-import org.enoch.conductor.ws.WorkerSocketHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import org.enoch.common.command.CommandMessage;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.conductor.ws.WorkerSocketHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class InstanceConfigService {
     private final WorkerSocketHandler workerSocketHandler;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Map<String, CompletableFuture<List<InstanceConfigDto>>> pendingRequests = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<List<ConfigDefinition>>> pendingRequests = new ConcurrentHashMap<>();
     private final Map<String, String> pendingRequestInstances = new ConcurrentHashMap<>();
 
     public InstanceConfigService(InstanceConfigStateRepository stateRepository,
@@ -38,45 +39,45 @@ public class InstanceConfigService {
         workerSocketHandler.setInstanceConfigService(this);
     }
 
-    public List<InstanceConfigDto> fetchConfigs(String instanceId) throws Exception {
-        List<InstanceConfigDto> result = sendConfigRequest(instanceId, "request:config:list");
+    public List<ConfigDefinition> fetchConfigs(String instanceId) throws Exception {
+        List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:list");
         if (result != null) {
             stateRepository.saveConfigs(instanceId, result);
         }
         return result;
     }
 
-    public List<InstanceConfigDto> fetchDefinitions(String instanceId) throws Exception {
-        List<InstanceConfigDto> result = sendConfigRequest(instanceId, "request:config:definitions");
+    public List<ConfigDefinition> fetchDefinitions(String instanceId) throws Exception {
+        List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:definitions");
         if (result != null) {
             stateRepository.saveDefinitions(instanceId, result);
         }
         return result;
     }
 
-    public List<InstanceConfigDto> setConfigs(String instanceId, List<InstanceConfigDto> configs) throws Exception {
-        List<InstanceConfigDto> result = sendConfigRequest(instanceId, "request:config:set", configs);
+    public List<ConfigDefinition> setConfigs(String instanceId, List<ConfigDefinition> configs) throws Exception {
+        List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:set", configs);
         if (result != null) {
             stateRepository.saveConfigs(instanceId, result);
         }
         return result;
     }
 
-    public List<InstanceConfigDto> deleteConfigs(String instanceId, List<InstanceConfigDto> configs) throws Exception {
-        List<InstanceConfigDto> result = sendConfigRequest(instanceId, "request:config:delete", configs);
+    public List<ConfigDefinition> deleteConfigs(String instanceId, List<ConfigDefinition> configs) throws Exception {
+        List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:delete", configs);
         if (result != null) {
             stateRepository.saveConfigs(instanceId, result);
         }
         return result;
     }
 
-    private List<InstanceConfigDto> sendConfigRequest(String instanceId, String type) throws Exception {
+    private List<ConfigDefinition> sendConfigRequest(String instanceId, String type) throws Exception {
         return sendConfigRequest(instanceId, type, null);
     }
 
-    private List<InstanceConfigDto> sendConfigRequest(String instanceId, String type, List<InstanceConfigDto> configs) throws Exception {
+    private List<ConfigDefinition> sendConfigRequest(String instanceId, String type, List<ConfigDefinition> configs) throws Exception {
         String requestId = UUID.randomUUID().toString();
-        CompletableFuture<List<InstanceConfigDto>> future = new CompletableFuture<>();
+        CompletableFuture<List<ConfigDefinition>> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);
         pendingRequestInstances.put(requestId, instanceId);
 
@@ -102,13 +103,13 @@ public class InstanceConfigService {
     }
 
     public void handleConfigResponse(CommandMessage response) {
-        CompletableFuture<List<InstanceConfigDto>> future = pendingRequests.get(response.getId());
+        CompletableFuture<List<ConfigDefinition>> future = pendingRequests.get(response.getId());
         if (future == null) {
             return;
         }
 
         if (response.getStatus() == 200) {
-            List<InstanceConfigDto> configs = extractConfigList(response.getPayload());
+            List<ConfigDefinition> configs = extractConfigList(response.getPayload());
             future.complete(configs);
         } else {
             String errorMsg = response.getError() != null ? response.getError() : "Unknown error";
@@ -117,12 +118,12 @@ public class InstanceConfigService {
     }
 
     @SuppressWarnings("unchecked")
-    private List<InstanceConfigDto> extractConfigList(Object payload) {
+    private List<ConfigDefinition> extractConfigList(Object payload) {
         if (payload == null) {
             return List.of();
         }
 
-        return objectMapper.convertValue(payload, new TypeReference<List<InstanceConfigDto>>() {});
+        return objectMapper.convertValue(payload, new TypeReference<List<ConfigDefinition>>() {});
     }
 
     public void clearInstanceState(String instanceId) {
@@ -132,7 +133,7 @@ public class InstanceConfigService {
     public void cancelPendingRequests(String instanceId) {
         pendingRequestInstances.forEach((requestId, requestInstanceId) -> {
             if (instanceId.equals(requestInstanceId)) {
-                CompletableFuture<List<InstanceConfigDto>> future = pendingRequests.get(requestId);
+                CompletableFuture<List<ConfigDefinition>> future = pendingRequests.get(requestId);
                 if (future != null && !future.isDone()) {
                     future.completeExceptionally(new RuntimeException("Instance disconnected"));
                 }
@@ -140,3 +141,4 @@ public class InstanceConfigService {
         });
     }
 }
+

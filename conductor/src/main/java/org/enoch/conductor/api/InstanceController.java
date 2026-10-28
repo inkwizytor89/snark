@@ -1,7 +1,7 @@
 package org.enoch.conductor.api;
 
 import org.enoch.conductor.config.DeleteInstanceConfigsRequest;
-import org.enoch.conductor.config.InstanceConfigDefinitionsResponse;
+import org.enoch.conductor.config.ConfigDefinitionsResponse;
 import org.enoch.conductor.config.InstanceConfigResponse;
 import org.enoch.conductor.config.InstanceConfigService;
 import org.enoch.conductor.config.UpdateInstanceConfigsRequest;
@@ -408,7 +408,7 @@ public class InstanceController {
 
         try {
             var definitions = instanceConfigService.fetchDefinitions(id);
-            return ResponseEntity.ok(new InstanceConfigDefinitionsResponse(id, definitions));
+            return ResponseEntity.ok(new ConfigDefinitionsResponse(id, definitions));
         } catch (RuntimeException e) {
             return mapConfigException(e);
         }
@@ -462,3 +462,4 @@ public class InstanceController {
         return ResponseEntity.status(409).body(Map.of("error", message));
     }
 }
+

@@ -2,7 +2,12 @@ package org.enoch.snark.instance.si.module.consumer;
 
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.Debug;
@@ -48,6 +53,27 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private Duration restartPause = new Duration("300S");
     private boolean isRunning = true;
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("consumer", threadType, URL, "", false,
+                "Game URL used to start the browser session."));
+        configs.add(new ConfigDefinition("consumer", threadType, HASH, "", false,
+                "Hash identifier for the target server session."));
+        configs.add(new ConfigDefinition("consumer", threadType, SERVER, "", false,
+                "Server code or name used when opening the game session."));
+        configs.add(new ConfigDefinition("consumer", threadType, LOGIN, "", false,
+                "Login name used for the player session."));
+        configs.add(new ConfigDefinition("consumer", threadType, PASSWORD, "", false,
+                "Password used for the player session."));
+        configs.add(new ConfigDefinition("consumer", threadType, WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe", false,
+                "Custom path to the ChromeDriver used by the browser session."));
+        configs.add(new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
+                "How long the session stays alive before a restart is triggered."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
+    }
 
     @Override
     protected boolean shouldWaitForDeque() {

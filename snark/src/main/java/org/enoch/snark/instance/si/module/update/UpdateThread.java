@@ -1,6 +1,8 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.ColonyRepository;
@@ -13,6 +15,7 @@ import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,6 +41,17 @@ public class UpdateThread extends AbstractThread {
     protected void onStart() {
         super.onStart();
         navigator = Navigator.getInstance();
+    }
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("update", threadType, REFRESH, "12M", false,
+                "How often the navigator and colony state should be refreshed."));
+        configs.add(new ConfigDefinition("update", threadType, CHECK_SPY_REPORTS_DURATION, "2M", false,
+                "Interval between checks for new spy reports and message processing."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Refreshes navigator, colony, and message state so other threads operate on a current view of the game.", configs);
     }
 
     @Override

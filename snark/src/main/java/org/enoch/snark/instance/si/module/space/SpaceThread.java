@@ -3,6 +3,8 @@ package org.enoch.snark.instance.si.module.space;
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.common.DateUtil;
@@ -32,6 +34,29 @@ public class SpaceThread extends AbstractThread {
 
     private LocalDateTime lastCheck = LocalDateTime.now();
     private Duration expiredTime = new Duration("P7D");
+
+    @Override
+    public ThreadDefinition threadDefinition() {
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("space", threadType, COORDINATE, "", false,
+                "Center coordinate used when the thread scans a custom galaxy/system slice."));
+        configs.add(new ConfigDefinition("space", threadType, RANGE, "", false,
+                "Distance around the coordinate to include in the space scan."));
+        configs.add(new ConfigDefinition("space", threadType, SPY_COORDINATE, "", false,
+                "Coordinate used as the source of spy positions during galaxy analysis."));
+        configs.add(new ConfigDefinition("space", threadType, SPY_PATTERN, "", false,
+                "Pattern applied when matching spy coordinates inside a scanned system."));
+        configs.add(new ConfigDefinition("space", threadType, GALAXY_MAX, "0", false,
+                "Maximum galaxy number used when scanning the galaxy map."));
+        configs.add(new ConfigDefinition("space", threadType, SYSTEM_MAX, "499", false,
+                "Maximum system number within each galaxy."));
+        configs.add(new ConfigDefinition("space", threadType, WRAP_SYSTEM, "true", false,
+                "Wrap system indexing when the range exceeds the maximum system number."));
+        configs.add(new ConfigDefinition("space", threadType, EXPIRED_TIME, "P7D", false,
+                "Age threshold after which a system record is considered stale and should be rechecked."));
+        configs.addAll(commonConfigDefinitions());
+        return new ThreadDefinition(threadType, "Analyzes space ranges, refreshes galaxy data, and schedules follow-up scan commands.", configs);
+    }
 
     @Override
     protected String getThreadType() {

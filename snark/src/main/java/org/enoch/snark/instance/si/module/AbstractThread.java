@@ -4,6 +4,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
@@ -204,6 +206,31 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     public int getRequestedFleetCount() {
         return 0;
+    }
+
+    public abstract ThreadDefinition threadDefinition();
+
+    protected String threadDescription() {
+        return "Thread behavior for " + getThreadType();
+    }
+
+    protected List<ConfigDefinition> commonConfigDefinitions() {
+        List<ConfigDefinition> definitions = new ArrayList<>();
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.TIME, "", false,
+                "Activation window for the thread. Examples: on, off, 09:00-18:00"));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.PAUSE, "10S", false,
+                "Sleep between loop iterations. Example: 4S, 10M"));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.DEBUG, "false", false,
+                "Enable verbose logging for the thread."));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.COMMAND_LIMIT, "-1", false,
+                "Maximum commands queued per loop. -1 means unlimited."));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.CONDITIONS, "[]", false,
+                "Preconditions that must pass before the thread runs."));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.NAME, "", false,
+                "Logical name of the thread."));
+        definitions.add(new ConfigDefinition("global", "main", ThreadMap.TYPE, "", false,
+                "Thread type used by the runtime."));
+        return definitions;
     }
 
     protected void log(String message) {
