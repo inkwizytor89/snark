@@ -1,6 +1,6 @@
-package org.enoch.snark.expression.coordinate.function;
+package org.enoch.snark.expression.function.list;
 
-import org.enoch.snark.expression.coordinate.common.Trip;
+import org.enoch.snark.expression.function.list.common.Trip;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetDataService;
@@ -40,4 +40,3 @@ public class CycleTrip {
         return planetDataService.fetchCoordinates(prevPlanet.toString());
     }
 }
-

@@ -1,10 +1,11 @@
 package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
-import org.enoch.snark.expression.coordinate.SpelFunctionWrapper;
-import org.enoch.snark.expression.coordinate.function.Base;
-import org.enoch.snark.expression.coordinate.function.Colonies;
-import org.enoch.snark.expression.coordinate.function.EventFleetFilter;
+import org.enoch.snark.expression.function.condition.ConditionFunctions;
+import org.enoch.snark.expression.function.list.Base;
+import org.enoch.snark.expression.function.list.Colonies;
+import org.enoch.snark.expression.function.list.EventFleetFilter;
+import org.enoch.snark.expression.function.list.SpelFunctionWrapper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
@@ -14,10 +15,10 @@ import java.util.Map;
  * Registry for SpEL functions available across all domains.
  * 
  * This class centralizes registration of all SpEL functions that can be used in expressions.
- * Functions can come from different domains (coordinates, conditions, resources, etc).
+ * Function implementations are grouped by their return type under the function package.
  * 
  * To add a new function:
- * 1. Create a static method in a domain function class (e.g., CoordinateFunctions, ConditionFunctions)
+ * 1. Create a static method in a return-type function package
  * 2. Register it here using context.registerFunction()
  * 
  * Example:
