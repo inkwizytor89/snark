@@ -2,6 +2,8 @@
 
 The conductor is the WebSocket server at `/ws`; each snark instance is a client. The `common` module's `CommandMessage` is the envelope used in both directions.
 
+External command interfaces belong to the conductor. Discord commands and optional Gemini-assisted translation are a future concept and are not yet usable; see [Discord commands and Gemini](Discord%20commands%20and%20Gemini.md).
+
 ## Envelope
 
 Every message is a JSON object with these fields:

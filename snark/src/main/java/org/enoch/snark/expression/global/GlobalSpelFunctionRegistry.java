@@ -5,7 +5,6 @@ import org.enoch.snark.expression.coordinate.SpelFunctionWrapper;
 import org.enoch.snark.expression.coordinate.function.Base;
 import org.enoch.snark.expression.coordinate.function.Colonies;
 import org.enoch.snark.expression.coordinate.function.EventFleetFilter;
-import org.enoch.snark.expression.coordinate.function.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
@@ -56,8 +55,6 @@ public class GlobalSpelFunctionRegistry {
     /** Register coordinate-related functions. */
     public static void registerCoordinateFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
         log.debug("Registering coordinate functions");
-        context.registerFunction("test", Test.class.getDeclaredMethod("test", String.class));
-
         context.registerFunction("all_planets", Colonies.class.getDeclaredMethod("planets"));
         context.registerFunction("planets", SpelFunctionWrapper.class.getDeclaredMethod("planets", Object.class));
         context.registerFunction("all_moons", Colonies.class.getDeclaredMethod("moons"));
