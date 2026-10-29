@@ -2,6 +2,7 @@ package org.enoch.snark.expression.function.eventfleet;
 
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.instance.model.to.EventFleet;
+import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
@@ -58,6 +59,10 @@ public final class EventFleetFunctions {
                         || fleet.detailsFleet != null && Long.parseLong(fleet.detailsFleet) < countLessThan)
                 .filter(fleet -> missions == null || missions.contains(fleet.mission))
                 .toList();
+    }
+
+    public static Planet endingPlanet(EventFleet eventFleet) {
+        return Objects.requireNonNull(eventFleet, "eventFleet must not be null").getEndingPlanet();
     }
 
     private static void validateFilterNames(Map<String, ?> filters) {

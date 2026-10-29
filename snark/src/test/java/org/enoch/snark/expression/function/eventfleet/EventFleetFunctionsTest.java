@@ -1,6 +1,7 @@
 package org.enoch.snark.expression.function.eventfleet;
 
 import org.enoch.snark.instance.model.to.EventFleet;
+import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
@@ -60,6 +61,14 @@ class EventFleetFunctionsTest {
         assertThrows(IllegalArgumentException.class, () ->
                 EventFleetFunctions.filter(Map.of("mission", "NOT_A_MISSION"))
         );
+    }
+
+    @Test
+    void returnsEndingPlanetFromEventFleet() {
+        EventFleet fleet = eventFleet(LocalDateTime.now(), false, 1, Mission.TRANSPORT);
+
+        assertEquals(fleet.getEndingPlanet(), EventFleetFunctions.endingPlanet(fleet));
+        assertEquals(Planet.parse("p[1:1:2]"), EventFleetFunctions.endingPlanet(fleet));
     }
 
     private EventFleet eventFleet(LocalDateTime arrivalTime, boolean hostile, long count, Mission mission) {

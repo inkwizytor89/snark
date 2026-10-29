@@ -5,9 +5,13 @@ import org.enoch.snark.expression.function.condition.ConditionFunctions;
 import org.enoch.snark.expression.function.coordinate.Base;
 import org.enoch.snark.expression.function.coordinate.Colonies;
 import org.enoch.snark.expression.function.coordinate.SpelFunctionWrapper;
+import org.enoch.snark.expression.function.eventfleet.EventFleetFunctions;
+import org.enoch.snark.expression.function.list.ListFunctions;
+import org.enoch.snark.instance.model.to.EventFleet;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Registry for SpEL functions available across all domains.
@@ -77,6 +81,14 @@ public class GlobalSpelFunctionRegistry {
 
         context.registerFunction("cacheKey", Base.class.getDeclaredMethod("cacheKey", String.class));
         context.registerFunction("cache_key", Base.class.getDeclaredMethod("cacheKey", String.class));
+
+        context.registerFunction("eventFleetFilter",
+                EventFleetFunctions.class.getDeclaredMethod("filter", Map.class));
+        context.registerFunction("event_fleet_filter",
+                EventFleetFunctions.class.getDeclaredMethod("filter", Map.class));
+        context.registerFunction("first", ListFunctions.class.getDeclaredMethod("first", List.class));
+        context.registerFunction("endingPlanet",
+                EventFleetFunctions.class.getDeclaredMethod("endingPlanet", EventFleet.class));
     }
 
     /**

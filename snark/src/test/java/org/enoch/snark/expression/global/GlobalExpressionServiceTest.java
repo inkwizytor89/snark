@@ -16,8 +16,12 @@ import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
+import org.enoch.snark.instance.model.types.ColonyType;
+import org.enoch.snark.instance.model.types.FleetDirectionType;
+import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.service.PlanetDataService;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +59,33 @@ class GlobalExpressionServiceTest {
                 planetDataService
         );
         expressionService.invalidateAll();
+    }
+
+    @Test
+    @DisplayName("Should evaluate event fleet filter, first, and ending planet functions")
+    void testEventFleetCoordinateFunctions() {
+        EventFleet fleet = new EventFleet();
+        fleet.arrivalTime = java.time.LocalDateTime.now().plusHours(1);
+        fleet.mission = Mission.TRANSPORT;
+        fleet.iconMovement = FleetDirectionType.THERE;
+        fleet.originFleet = ColonyType.PLANET;
+        fleet.coordsOrigin = "[1:1:1]";
+        fleet.destFleet = ColonyType.PLANET;
+        fleet.destCoords = "[1:1:2]";
+        fleet.detailsFleet = "10";
+        Navigator.getInstance().informAboutEventFleets(List.of(fleet));
+
+        try {
+            Planet result = expressionService.evaluateNoCached(
+                    "#endingPlanet(#first(#eventFleetFilter({mission: 'TRANSPORT'})))",
+                    Map.of(),
+                    Planet.class
+            );
+
+            assertEquals(Planet.parse("p[1:1:2]"), result);
+        } finally {
+            Navigator.getInstance().informAboutEventFleets(List.of());
+        }
     }
 
     @Nested
