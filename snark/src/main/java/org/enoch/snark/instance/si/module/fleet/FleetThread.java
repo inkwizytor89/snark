@@ -108,7 +108,7 @@ public class FleetThread extends AbstractThread {
                 .resources(map.getConfigResources(RESOURCES, nothing))
                 .leaveResources(map.getConfigResources(LEAVE_RESOURCES, null))
                 .speed(map.getConfigLong(SPEED, null))
-                .trip(globalExpressionService.evaluateCoordinates(map.getConfig(TRIP, null)))
+                .trip(expressionService.evaluateCoordinates(map.getConfig(TRIP, null)))
                 .build();
 
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);

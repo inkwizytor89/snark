@@ -1,4 +1,4 @@
-package org.enoch.snark.expression.global;
+package org.enoch.snark.expression;
 
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
@@ -37,10 +37,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("GlobalExpressionService Tests")
-class GlobalExpressionServiceTest {
+@DisplayName("ExpressionService Tests")
+class ExpressionServiceTest {
 
-    private GlobalExpressionService expressionService;
+    private ExpressionService expressionService;
     private PlanetDataService planetDataService;
     private ColonyRepository colonyRepository;
 
@@ -51,8 +51,8 @@ class GlobalExpressionServiceTest {
         TargetRepository targetRepository = mock(TargetRepository.class);
         planetDataService = mock(PlanetDataService.class);
         when(cacheEntryRepository.findAll()).thenReturn(List.of());
-        expressionService = new GlobalExpressionService(
-                new GlobalExpressionCache(),
+        expressionService = new ExpressionService(
+                new ExpressionCache(),
                 cacheEntryRepository,
                 colonyRepository,
                 targetRepository,
@@ -342,7 +342,7 @@ class GlobalExpressionServiceTest {
         @Test
         @DisplayName("Should use a fixed 50-second cache TTL")
         void testFixedCacheTtl() {
-            assertEquals(50, GlobalExpressionCache.CACHE_TTL.toSeconds());
+            assertEquals(50, ExpressionCache.CACHE_TTL.toSeconds());
         }
 
         @Test

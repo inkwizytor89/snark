@@ -1,4 +1,4 @@
-package org.enoch.snark.expression.global;
+package org.enoch.snark.expression;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

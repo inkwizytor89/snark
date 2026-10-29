@@ -1,4 +1,4 @@
-package org.enoch.snark.expression.global;
+package org.enoch.snark.expression;
 
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.expression.function.condition.ConditionFunctions;
@@ -29,7 +29,7 @@ import java.util.Map;
  * </pre>
  */
 @Slf4j
-public class GlobalSpelFunctionRegistry {
+public class FunctionRegistry {
 
     /**
      * Register all available SpEL functions.

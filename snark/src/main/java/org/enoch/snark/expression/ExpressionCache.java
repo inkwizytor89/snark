@@ -1,4 +1,4 @@
-package org.enoch.snark.expression.global;
+package org.enoch.snark.expression;
 
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class GlobalExpressionCache {
+public class ExpressionCache {
 
     public static final Duration CACHE_TTL = Duration.ofSeconds(50);
 

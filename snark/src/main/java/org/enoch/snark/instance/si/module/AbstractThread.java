@@ -15,12 +15,12 @@ import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.GalaxyRepository;
+import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
-import org.enoch.snark.expression.global.GlobalExpressionService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,7 +65,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Autowired
     protected final GalaxyRepository galaxyRepository;
     @Autowired
-    protected final GlobalExpressionService globalExpressionService;
+    protected final ExpressionService expressionService;
 
     private RunningProcessor runningProcessor = new RunningProcessor();
 
@@ -96,7 +96,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         try {
             if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
             if(map.containsKey(SOURCE)) {
-                globalExpressionService.evaluateCoordinates(map.getConfig(SOURCE)).stream()
+                expressionService.evaluateCoordinates(map.getConfig(SOURCE)).stream()
                                 .map(PlanetData::getColony)
                                 .forEach(colony -> {
                     if(DateUtil.isExpired2H(colony.updated))
@@ -334,18 +334,18 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     protected List<ColonyEntity> getSources(String defaultValue) {
         String sourcesCode = map().getSourcesCode(defaultValue);
-        List<PlanetData> planetData = globalExpressionService.evaluateCoordinates(sourcesCode);
+        List<PlanetData> planetData = expressionService.evaluateCoordinates(sourcesCode);
         return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
     }
 
     protected List<PlanetData> getNearestCoordinate(String defaultValue) {
         String coordinateCode = getNearestConfig(COORDINATE, defaultValue);
-        return globalExpressionService.evaluateCoordinates(coordinateCode);
+        return expressionService.evaluateCoordinates(coordinateCode);
     }
 
     protected List<AbstractCondition> getConditions(String configName) {
         String configJson = map().getConfig(configName, "[]");
-        return globalExpressionService.evaluateConditions(configJson, Map.of());
+        return expressionService.evaluateConditions(configJson, Map.of());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.enoch.snark.expression.global;
+package org.enoch.snark.expression;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ import static org.enoch.snark.instance.service.CoordinateExpressionService.SWAP;
  * Provides unified SpEL parsing and evaluation.
  * Supports:
  * - TTL-based caching
- * - Function registration via {@link GlobalSpelFunctionRegistry}
+ * - Function registration via {@link FunctionRegistry}
  * - Expression evaluation with automatic caching
  * - Cache invalidation
  * 
@@ -55,13 +55,13 @@ import static org.enoch.snark.instance.service.CoordinateExpressionService.SWAP;
 @Component
 @Scope("prototype")
 @Slf4j
-public class GlobalExpressionService {
+public class ExpressionService {
 
     private static final Pattern COORDINATE_LITERAL = Pattern.compile(
             "(?i)^[pmd]\\[\\s*\\d+\\s*:\\s*\\d+\\s*:\\s*\\d+\\s*\\](\\s*;\\s*[pmd]\\[\\s*\\d+\\s*:\\s*\\d+\\s*:\\s*\\d+\\s*\\])*$");
 
     private final ExpressionParser parser = new SpelExpressionParser();
-    private final GlobalExpressionCache cache;
+    private final ExpressionCache cache;
 
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
@@ -95,7 +95,7 @@ public class GlobalExpressionService {
         String cacheKey = generateCacheKey(expression, context, returnType);
 
         if (cache.containsValid(cacheKey)) {
-            GlobalExpressionCache.CacheEntry<?> entry = cache.get(cacheKey);
+            ExpressionCache.CacheEntry<?> entry = cache.get(cacheKey);
             if (entry != null) {
                 log.debug("Cache hit for expression '{}'", expression);
                 return returnType.cast(entry.value);
@@ -112,7 +112,7 @@ public class GlobalExpressionService {
             // Store in cache
             cache.put(cacheKey, result, expression);
             log.debug("Expression '{}' evaluated and cached with TTL {}ms",
-                expression, GlobalExpressionCache.CACHE_TTL.toMillis());
+                expression, ExpressionCache.CACHE_TTL.toMillis());
 
             return result;
 
@@ -228,7 +228,7 @@ public class GlobalExpressionService {
 
         String cacheKey = generateCacheKey(trimmedExpression, context, List.class);
         if (cache.containsValid(cacheKey)) {
-            GlobalExpressionCache.CacheEntry<?> cachedEntry = cache.get(cacheKey);
+            ExpressionCache.CacheEntry<?> cachedEntry = cache.get(cacheKey);
             if (cachedEntry != null) {
                 log.debug("Cache hit for condition list '{}'", trimmedExpression);
                 return (List<AbstractCondition>) cachedEntry.value;
@@ -352,7 +352,7 @@ public class GlobalExpressionService {
 
         // Register all SpEL functions
         try {
-            GlobalSpelFunctionRegistry.registerFunctions(spelContext);
+            FunctionRegistry.registerFunctions(spelContext);
         } catch (NoSuchMethodException e) {
             log.error("Failed to register SpEL functions", e);
             throw new RuntimeException("Failed to register SpEL functions", e);

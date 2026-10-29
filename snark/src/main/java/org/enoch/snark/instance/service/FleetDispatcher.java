@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.TargetEntity;
-import org.enoch.snark.expression.global.GlobalExpressionService;
+import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.model.to.*;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 @Component
 @Scope("prototype")
 public class FleetDispatcher {
-    private final GlobalExpressionService globalExpressionService;
+    private final ExpressionService expressionService;
 
     public List<FleetSendCommand> from(FleetPlan fleetPlan) {
         List<FleetSendCommand> list = new ArrayList<>();
@@ -27,10 +27,10 @@ public class FleetDispatcher {
         for(ShipsMap shipsWave : fleetPlan.getShipsWaves()) {
             index++;
 
-            List<PlanetData> colonies = globalExpressionService.evaluateCoordinates(fleetPlan.getSource());
+            List<PlanetData> colonies = expressionService.evaluateCoordinates(fleetPlan.getSource());
             for (PlanetData colony : colonies) {
                 Map<String, Object> stringObjectMap = Map.of("source", singletonList(colony));
-                List<PlanetData> targets = globalExpressionService.evaluateCoordinates(fleetPlan.getTarget(), stringObjectMap);
+                List<PlanetData> targets = expressionService.evaluateCoordinates(fleetPlan.getTarget(), stringObjectMap);
                 for(PlanetData target : targets) {
                     FleetSendCommand command = new FleetSendCommand();
                     command.setSource(colony.getColony());
