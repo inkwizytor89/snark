@@ -1,6 +1,6 @@
-package org.enoch.snark.expression.function.list;
+package org.enoch.snark.expression.function.coordinate;
 
-import org.enoch.snark.expression.function.list.common.Trip;
+import org.enoch.snark.expression.function.coordinate.common.Trip;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetDataService;

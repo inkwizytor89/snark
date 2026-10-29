@@ -2,14 +2,12 @@ package org.enoch.snark.expression.global;
 
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.expression.function.condition.ConditionFunctions;
-import org.enoch.snark.expression.function.list.Base;
-import org.enoch.snark.expression.function.list.Colonies;
-import org.enoch.snark.expression.function.list.EventFleetFilter;
-import org.enoch.snark.expression.function.list.SpelFunctionWrapper;
+import org.enoch.snark.expression.function.coordinate.Base;
+import org.enoch.snark.expression.function.coordinate.Colonies;
+import org.enoch.snark.expression.function.coordinate.SpelFunctionWrapper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Registry for SpEL functions available across all domains.
@@ -79,8 +77,6 @@ public class GlobalSpelFunctionRegistry {
 
         context.registerFunction("cacheKey", Base.class.getDeclaredMethod("cacheKey", String.class));
         context.registerFunction("cache_key", Base.class.getDeclaredMethod("cacheKey", String.class));
-        context.registerFunction("eventFilter", EventFleetFilter.class.getDeclaredMethod("filterField", List.class, String.class, Map.class));
-        context.registerFunction("event_filter", EventFleetFilter.class.getDeclaredMethod("filterField", List.class, String.class, Map.class));
     }
 
     /**
