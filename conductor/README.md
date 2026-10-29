@@ -100,7 +100,7 @@ define.transporterSmall=5000
 
 fleet_save_module.main.template=../templates/fleet_save.properties
 sleep_module.main.template=../templates/sleep.properties
-clear_module.main.template=../templates/clean.properties
+clean_module.main.template=../templates/clean.properties
 build_module.main.template=../templates/build.properties
 expedition_module.main.template=../templates/expedition.properties
 space_module.main.template=../templates/space.properties
@@ -157,7 +157,6 @@ start-properties/
 templates/
 ├── build.properties
 ├── clean.properties
-├── clear.properties
 ├── duty.properties
 ├── expedition.properties
 ├── global.properties
