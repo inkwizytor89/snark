@@ -64,6 +64,7 @@ public class ConditionFunctions {
         Planet source = parsePlanetValue(firstPresentRequired(params, "source", "planet"));
         String missions = normalizeMissions(firstPresentRequired(params, "missions", "blockingMissions"));
         String duration = firstPresentOptional(params, "1H", "timeout", "duration");
+        ExpressionParsingUtils.parseDurationToSeconds(duration);
         return new IsFleetExpiredCondition(source, missions, duration);
     }
 

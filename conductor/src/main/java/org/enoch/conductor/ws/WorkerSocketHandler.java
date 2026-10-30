@@ -568,11 +568,15 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private boolean isValidServerStatus(JsonNode status) {
         if (!status.isObject()
                 || !status.path("navigatorStatus").isObject()
-                || status.path("navigatorStatus").path("fleetStatus").asText("").isBlank()
                 || !status.path("navigatorStatus").path("lastUpdate").isTextual()
                 || !status.path("commandDeque").isTextual()
                 || !status.path("notifications").isTextual()
                 || !status.path("activeThreads").isArray()) {
+            return false;
+        }
+        JsonNode navigatorStatus = status.path("navigatorStatus");
+        if (!navigatorStatus.path("fleetCount").canConvertToInt()
+                && !navigatorStatus.path("fleetStatus").isTextual()) {
             return false;
         }
         for (JsonNode thread : status.path("activeThreads")) {

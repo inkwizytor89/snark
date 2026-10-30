@@ -13,7 +13,9 @@ import org.enoch.snark.instance.model.types.FleetDirectionType;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -148,11 +150,19 @@ public class Navigator {
     }
 
     public NavigatorStatus getStatus() {
-        return new NavigatorStatus(getFleetStatus(), lastUpdate);
+        return new NavigatorStatus(fleetCount, fleetMax, expeditionCount, expeditionMax, missionSummary(), lastUpdate);
     }
 
-    private String getFleetStatus() {
-        return "F:"+fleetCount+"/"+fleetMax+" E:"+expeditionCount+"/"+expeditionMax;
+    private Map<String, Long> missionSummary() {
+        if (eventFleetList == null || eventFleetList.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Long> summary = new LinkedHashMap<>();
+        eventFleetList.stream()
+                .filter(fleet -> fleet != null && fleet.mission != null)
+                .collect(Collectors.groupingBy(fleet -> fleet.mission.name(), Collectors.counting()))
+                .forEach(summary::put);
+        return summary;
     }
 
     @Override

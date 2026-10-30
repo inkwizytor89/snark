@@ -185,8 +185,13 @@ public class Core {
         List<String> notificationSummary = notifications;
         if (!includeColonies) {
             navigatorStatus = new org.enoch.common.status.NavigatorStatus(
-                    truncate(navigatorStatus.getFleetStatus(), 128),
-                    navigatorStatus.getLastUpdate());
+                    navigatorStatus.getFleetCount(),
+                    navigatorStatus.getFleetMax(),
+                    navigatorStatus.getExpeditionCount(),
+                    navigatorStatus.getExpeditionMax(),
+                    navigatorStatus.getMissions(),
+                    navigatorStatus.getLastUpdate(),
+                    truncate(navigatorStatus.getFleetStatus(), 256));
             activeThreadSummary = activeThreads.stream()
                     .limit(32)
                     .map(thread -> truncate(thread, 40))

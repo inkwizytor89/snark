@@ -89,6 +89,24 @@ function initApp() {
         return instances.find((inst) => inst.id === selectedInstance) || null;
     }
 
+    function formatNavigatorStatusText(navigatorStatus) {
+        if (!navigatorStatus) {
+            return '';
+        }
+        const fleetCount = navigatorStatus.fleetCount ?? 0;
+        const fleetMax = navigatorStatus.fleetMax ?? 0;
+        const expeditionCount = navigatorStatus.expeditionCount ?? 0;
+        const expeditionMax = navigatorStatus.expeditionMax ?? 0;
+        const baseText = `${fleetCount} / ${fleetMax} ${expeditionCount} / ${expeditionMax}`;
+        const missions = navigatorStatus.missions && typeof navigatorStatus.missions === 'object'
+            ? Object.entries(navigatorStatus.missions)
+                .filter(([_, count]) => Number(count) > 0)
+                .sort(([left], [right]) => left.localeCompare(right))
+                .map(([mission, count]) => `${String(mission).charAt(0)}:${count}`)
+            : [];
+        return missions.length ? `${baseText} ${missions.join(' ')}` : baseText;
+    }
+
     function getInstanceStatusText(inst) {
         if (inst.state === 'starting') {
             return 'Instance is starting and waiting for its first status update.';
@@ -107,11 +125,11 @@ function initApp() {
         }
 
         const navigatorStatus = inst.serverStatus && inst.serverStatus.navigatorStatus;
-        if (navigatorStatus && navigatorStatus.fleetStatus) {
-            if (!inst.serverStatus.activeThreads?.length && !inst.serverStatus.commandDeque) {
-                return navigatorStatus.fleetStatus;
+        if (navigatorStatus) {
+            const formatted = formatNavigatorStatusText(navigatorStatus);
+            if (formatted) {
+                return formatted;
             }
-            return `Navigator: ${navigatorStatus.fleetStatus}`;
         }
 
         if (inst.statusMessage && String(inst.statusMessage).trim()) {
