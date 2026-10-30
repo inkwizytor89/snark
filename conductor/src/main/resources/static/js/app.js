@@ -1,25 +1,8 @@
 function initApp() {
-    if (typeof Terminal === 'undefined') {
-        setTimeout(initApp, 100);
-        return;
-    }
-
-    const term = new Terminal({
-        cursorBlink: true,
-        cursorStyle: 'bar',
-        fontSize: 12,
-        fontFamily: "'Courier New', monospace",
-        theme: {
-            background: '#000000',
-            foreground: '#00d4ff',
-            cursor: '#00d4ff',
-        }
-    });
-
-    const terminalDiv = document.getElementById('terminal');
-    term.open(terminalDiv);
-    term.write('Welcome to Conductor Terminal\r\n');
-    term.write('Ready to execute commands...\r\n\r\n');
+    const term = {
+        write: () => {},
+        clear: () => {},
+    };
 
     let ws;
     let instances = [];
@@ -35,8 +18,6 @@ function initApp() {
     const instancesList = document.getElementById('instancesList');
     const instanceDetails = document.getElementById('instanceDetails');
     const workspace = document.querySelector('.workspace');
-    const terminalPanel = document.getElementById('terminalPanel');
-    const terminalControlsToggle = document.getElementById('toggleTerminalControls');
     const startTemplateSelect = document.getElementById('startTemplateSelect');
     const placeholderModal = document.getElementById('placeholderModal');
     const placeholderForm = document.getElementById('placeholderForm');
@@ -91,38 +72,6 @@ function initApp() {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
-    }
-
-    function initWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        ws = new WebSocket(protocol + '//' + window.location.host + '/ws/terminal');
-
-        ws.onopen = () => {
-            term.write('✓ Terminal connected\r\n');
-        };
-
-        ws.onmessage = (event) => {
-            const message = event.data;
-            if (message.startsWith('OUTPUT: ')) {
-                term.write(message.substring(8) + '\r\n');
-            } else if (message.startsWith('EXIT: ')) {
-                const code = message.substring(6);
-                term.write('\r\n✓ Command exited with code: ' + code + '\r\n');
-            } else if (message.startsWith('ERROR: ')) {
-                term.write('\r\n✗ Error: ' + message.substring(7) + '\r\n');
-            } else {
-                term.write(message + '\r\n');
-            }
-        };
-
-        ws.onerror = (error) => {
-            term.write('\r\n✗ WebSocket error: ' + error + '\r\n');
-        };
-
-        ws.onclose = () => {
-            term.write('\r\n✗ Terminal disconnected\r\n');
-            setTimeout(initWebSocket, 3000);
-        };
     }
 
     function sortInstances(list) {
@@ -197,15 +146,6 @@ function initApp() {
             default:
                 return 'status-stopped';
         }
-    }
-
-    function toggleTerminalControls() {
-        const collapsed = terminalPanel.classList.toggle('is-collapsed');
-        workspace.classList.toggle('is-terminal-collapsed', collapsed);
-        terminalControlsToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        terminalControlsToggle.textContent = collapsed ? '⌃' : '⌄';
-        terminalControlsToggle.title = collapsed ? 'Show terminal' : 'Hide terminal';
-        terminalControlsToggle.setAttribute('aria-label', collapsed ? 'Show terminal' : 'Hide terminal');
     }
 
     function syncConfigStateSelection() {
@@ -1379,20 +1319,6 @@ function initApp() {
         }
     }
 
-    function executeCommand(cmd) {
-        if (!cmd.trim()) {
-            return;
-        }
-
-        term.write('$ ' + cmd + '\r\n');
-
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('START:' + cmd);
-        } else {
-            term.write('✗ Terminal not connected\r\n');
-        }
-    }
-
     async function submitPlaceholderValues(event) {
         event.preventDefault();
 
@@ -1433,26 +1359,11 @@ function initApp() {
         }
     }
 
-    document.getElementById('commandInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const cmd = document.getElementById('commandInput').value;
-            document.getElementById('commandInput').value = '';
-            executeCommand(cmd);
-        }
-    });
-
-    document.getElementById('sendBtn').addEventListener('click', () => {
-        const cmd = document.getElementById('commandInput').value;
-        document.getElementById('commandInput').value = '';
-        executeCommand(cmd);
-    });
-
     document.getElementById('createInstanceForm').addEventListener('submit', createInstance);
     document.getElementById('createToggleBtn').addEventListener('click', toggleCreateForm);
     document.getElementById('placeholderForm').addEventListener('submit', submitPlaceholderValues);
     document.getElementById('cancelPlaceholderBtn').addEventListener('click', closePlaceholderModal);
     document.getElementById('refreshBtn').addEventListener('click', loadInstances);
-    terminalControlsToggle.addEventListener('click', toggleTerminalControls);
     configThreadForm.addEventListener('submit', saveThreadConfigs);
     document.getElementById('cancelConfigThreadBtn').addEventListener('click', closeConfigThreadModal);
 
@@ -1591,11 +1502,6 @@ function initApp() {
         }
     });
 
-    document.getElementById('clearTerminal').addEventListener('click', () => {
-        term.clear();
-    });
-
-    initWebSocket();
     loadStartTemplates();
     loadInstances();
     setInterval(loadInstances, 30000);

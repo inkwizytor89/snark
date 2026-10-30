@@ -29,12 +29,8 @@ main {
 .workspace {
     height: 100%;
     display: grid;
-    grid-template-rows: 4fr 1fr;
+    grid-template-rows: 1fr;
     gap: 10px;
-}
-
-.workspace.is-terminal-collapsed {
-    grid-template-rows: 1fr 44px;
 }
 
 .workspace-top {
@@ -42,15 +38,6 @@ main {
     grid-template-columns: 1fr 4fr;
     gap: 10px;
     min-height: 0;
-}
-
-.workspace-bottom {
-    min-height: 0;
-    display: flex;
-}
-
-.workspace.is-terminal-collapsed .workspace-bottom {
-    min-height: 44px;
 }
 
 .left-panel, .right-panel, .details-panel {
@@ -790,89 +777,6 @@ main {
     flex-direction: column;
 }
 
-.terminal-panel {
-    flex: 1;
-    min-height: 0;
-    position: relative;
-}
-
-.terminal-toggle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    background: rgba(0, 212, 255, 0.15);
-    border: 1px solid rgba(0, 212, 255, 0.35);
-}
-
-.terminal-toggle:hover {
-    background: rgba(0, 212, 255, 0.28);
-}
-
-.terminal-panel .terminal {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-}
-
-.terminal-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 15px;
-    background: rgba(30, 30, 46, 0.9);
-    border-top: 1px solid #404060;
-    border-bottom: 0;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.terminal-panel.is-collapsed .terminal {
-    display: none;
-}
-
-.terminal-panel.is-collapsed .terminal-controls {
-    display: none;
-}
-
-.terminal-panel.is-collapsed {
-    min-height: 44px;
-}
-
-.command-input {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.command-input input {
-    flex: 1;
-    background: rgba(60, 60, 80, 0.6);
-    border: 1px solid #404060;
-    padding: 8px 12px;
-    border-radius: 4px;
-    color: #e0e0e0;
-    font-size: 12px;
-    font-family: 'Courier New', monospace;
-}
-
-.command-input input:focus {
-    outline: none;
-    border-color: #00d4ff;
-    background: rgba(0, 212, 255, 0.1);
-}
-
-.terminal {
-    flex: 1;
-    overflow: hidden;
-    background: #000;
-    min-height: 0;
-}
-
 .btn-primary {
     background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
     color: #000;
@@ -981,17 +885,6 @@ main {
     justify-content: flex-end;
     gap: 8px;
     margin-top: 18px;
-}
-
-/* Xterm customization */
-.xterm {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    padding: 10px;
-}
-
-.xterm-viewport {
-    background-color: #000;
 }
 
 /* Scrollbar styling */

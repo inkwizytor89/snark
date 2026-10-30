@@ -7,16 +7,14 @@ import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
 import org.enoch.conductor.ws.WorkerSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.UUID;
 
 @Component
-public class TerminalCli implements CommandLineRunner {
+public class TerminalCli {
 
     private final ProfileRepository repository;
     private final ProcessService processService;
@@ -32,12 +30,6 @@ public class TerminalCli implements CommandLineRunner {
         this.repository = repository;
         this.processService = processService;
         this.socketHandler = socketHandler;
-    }
-
-    @Override
-    public void run(String... args) {
-
-        new Thread(this::terminalLoop).start();
     }
 
     public String executeCommand(String line) {
@@ -67,31 +59,6 @@ public class TerminalCli implements CommandLineRunner {
         }
     }
 
-    private void terminalLoop() {
-
-        Scanner scanner = new Scanner(System.in);
-
-        while (true) {
-
-            try {
-
-                System.out.print("manager> ");
-
-                String line = scanner.nextLine();
-                if (line == null || line.isBlank()) {
-                    continue;
-                }
-
-                String output = executeCommand(line);
-                if (!output.isBlank()) {
-                    System.out.println(output);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
     private String createCommand(String[] split) throws Exception {
         if (split.length < 4) {
             throw new IllegalArgumentException("Usage: create <login> <password> <server>");
