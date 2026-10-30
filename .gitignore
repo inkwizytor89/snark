@@ -40,3 +40,4 @@ hs_err_pid*
 /tools/
 /snark/snark.mv.db
 /snark/snark.trace.db
+/sounds/
