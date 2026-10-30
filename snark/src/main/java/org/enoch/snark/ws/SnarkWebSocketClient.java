@@ -46,6 +46,8 @@ public class SnarkWebSocketClient {
     private volatile boolean connectionOpen;
     private volatile boolean connecting;
     private volatile boolean shuttingDown;
+    private final AtomicLong stateRevision = new AtomicLong();
+    private volatile String runtimeState = "starting";
 
     public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
                                 @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
@@ -141,15 +143,82 @@ public class SnarkWebSocketClient {
         update.setTo("conductor");
         update.setTimestamp(System.currentTimeMillis());
         update.setStatus(200);
+        String effectiveState = runtimeState;
+        if ("running".equals(effectiveState) || "starting".equals(effectiveState) || "logged_out".equals(effectiveState)) {
+            effectiveState = effectiveState;
+        } else {
+            effectiveState = "running";
+        }
         update.setPayload(Map.of(
                 "instanceId", instanceId,
-                "state", "running",
+                "state", effectiveState,
                 "revision", statusRevision.incrementAndGet(),
                 "serverStatus", core.statusSummary(),
                 "hostname", resolveHostname(),
                 "version", resolveVersion()
         ));
         return update;
+    }
+
+    public void publishLoggedOutState(String retryAtText) {
+        runtimeState = "logged_out";
+        WebSocket current = webSocket;
+        if (!registered || current == null || !connectionOpen) {
+            System.err.println("[WS][LOGGED_OUT][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
+            return;
+        }
+        sendAndLog(current, buildLoggedOutEvent(retryAtText));
+    }
+
+    public void publishStartingState() {
+        runtimeState = "starting";
+        WebSocket current = webSocket;
+        if (!registered || current == null || !connectionOpen) {
+            System.err.println("[WS][STARTING][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
+            return;
+        }
+        sendAndLog(current, buildStateEvent("starting", "Session restart is starting"));
+    }
+
+    public void publishRunningState() {
+        runtimeState = "running";
+        WebSocket current = webSocket;
+        if (!registered || current == null || !connectionOpen) {
+            return;
+        }
+        sendAndLog(current, buildStateEvent("running", "Session resumed"));
+    }
+
+    CommandMessage buildLoggedOutEvent(String retryAtText) {
+        CommandMessage message = new CommandMessage();
+        message.setId(UUID.randomUUID().toString());
+        message.setType("event:logged-out");
+        message.setFrom(instanceId);
+        message.setTo("conductor");
+        message.setTimestamp(System.currentTimeMillis());
+        message.setStatus(200);
+        message.setPayload(Map.of(
+                "state", "logged_out",
+                "retryAt", retryAtText,
+                "reason", "returned_to_lobby"
+        ));
+        return message;
+    }
+
+    private CommandMessage buildStateEvent(String state, String message) {
+        CommandMessage event = new CommandMessage();
+        event.setId(UUID.randomUUID().toString());
+        event.setType("event:state-changed");
+        event.setFrom(instanceId);
+        event.setTo("conductor");
+        event.setTimestamp(System.currentTimeMillis());
+        event.setStatus(200);
+        event.setPayload(Map.of(
+                "state", state,
+                "message", message,
+                "instanceId", instanceId
+        ));
+        return event;
     }
 
     CommandMessage buildStatusDetailsResponse(CommandMessage incoming, StatusDetails details) {

@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.instance.si.module.consumer.Credentials;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.LOBBY_URL;
@@ -12,12 +13,14 @@ public class GISession {
 
     @Getter
     public Wd wd;
+    private final org.enoch.snark.instance.WorkerLifecycle workerLifecycle;
     private SessionGIR gir;
 
     private boolean isRunning;
     private String serverWindowHandle;
 
-    public GISession(String pathToDriver) {
+    public GISession(String pathToDriver, org.enoch.snark.instance.WorkerLifecycle workerLifecycle) {
+        this.workerLifecycle = workerLifecycle;
         this.wd = new Wd(pathToDriver);
         gir = new SessionGIR(wd);
     }
@@ -77,6 +80,10 @@ public class GISession {
         return !isRunning || wd.hasWindow(serverWindowHandle);
     }
 
+    public boolean isCurrentUrlBackToLobby() {
+        return gir.isCurrentUrlBackToLobby();
+    }
+
     public String openNewServerSession(Credentials credentials) {
         wd.requireDriverAlive();
         if (isRunning) {
@@ -90,7 +97,12 @@ public class GISession {
         if (gir.isCurrentUrlBackToLobby()) {
             System.err.println("Server session returned to lobby; waiting before reconnecting");
             isRunning = false;
-            waitBeforeRetry(credentials.restartDuration().getSeconds());
+            long retrySeconds = credentials.restartDuration().getSeconds();
+            LocalDateTime retryAt = LocalDateTime.now().plusSeconds(retrySeconds);
+            String retryText = workerLifecycle.buildRetryMessage(retryAt);
+            workerLifecycle.notifyLoggedOutAndWaiting(retryText);
+            waitBeforeRetry(retrySeconds);
+            workerLifecycle.notifyStarting();
             return start(credentials);
         }
 

@@ -118,7 +118,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private void startGiSessionIfNeeded() {
         if(session == null) {
             System.err.println("startGiSessionIfNeeded session == null");
-            session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"));
+            session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"), workerLifecycle);
             wd = session.getWd();
         }
         wd.setUrl(map().getConfig(URL, null));

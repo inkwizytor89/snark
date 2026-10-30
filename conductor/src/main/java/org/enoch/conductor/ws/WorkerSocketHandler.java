@@ -94,6 +94,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             storeStatusUpdate(registeredInstanceId, session, json);
         } else if ("event:restart-required".equals(type)) {
             handleRestartRequired(registeredInstanceId, session, json);
+        } else if ("event:logged-out".equals(type)) {
+            handleLoggedOut(registeredInstanceId, session, json);
+        } else if ("event:state-changed".equals(type)) {
+            handleStateChanged(registeredInstanceId, session, json);
         } else if (isStatusMessage(type)) {
             storeStatusResponse(registeredInstanceId, session, json);
         } else if ("response:status:details".equals(type) || "error:status:details".equals(type)) {
@@ -127,6 +131,53 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         String reason = payload.path("reason").asText();
         System.err.println("[WS][WORKER][RESTART][REQUESTED] instanceId=" + instanceId + " reason=" + reason);
         restartRequestHandler.accept(instanceId, reason);
+    }
+
+    private void handleLoggedOut(String instanceId, WebSocketSession session, JsonNode json) {
+        JsonNode payload = json.path("payload");
+        if (workers.get(instanceId) != session
+                || json.path("id").asText("").isBlank()
+                || !instanceId.equals(json.path("from").asText(""))
+                || !"conductor".equals(json.path("to").asText(""))
+                || json.path("status").asInt() != 200
+                || !payload.isObject()
+                || !"logged_out".equals(payload.path("state").asText(""))
+                || !payload.path("retryAt").isTextual()
+                || payload.path("retryAt").asText().isBlank()) {
+            System.err.println("[WS][WORKER][REJECTED] Malformed logged-out event instanceId=" + instanceId);
+            return;
+        }
+
+        String retryAt = payload.path("retryAt").asText();
+        System.err.println("[WS][WORKER][LOGGED_OUT] instanceId=" + instanceId + " retryAt=" + retryAt);
+        lastStatuses.put(instanceId, new org.enoch.common.status.ServerStatus(
+                new org.enoch.common.status.NavigatorStatus("Waiting for next attempt at " + retryAt, null),
+                List.of(),
+                "",
+                "",
+                null));
+        lastStatusUpdatedAt.put(instanceId, System.currentTimeMillis());
+    }
+
+    private void handleStateChanged(String instanceId, WebSocketSession session, JsonNode json) {
+        JsonNode payload = json.path("payload");
+        if (workers.get(instanceId) != session
+                || json.path("id").asText("").isBlank()
+                || !instanceId.equals(json.path("from").asText(""))
+                || !"conductor".equals(json.path("to").asText(""))
+                || json.path("status").asInt() != 200
+                || !payload.isObject()
+                || payload.path("state").asText("").isBlank()) {
+            System.err.println("[WS][WORKER][REJECTED] Malformed state-changed event instanceId=" + instanceId);
+            return;
+        }
+
+        String state = payload.path("state").asText();
+        String message = payload.path("message").asText("");
+        if ("starting".equals(state) || "running".equals(state)) {
+            System.err.println("[WS][WORKER][STATE] instanceId=" + instanceId + " state=" + state + " message=" + message);
+            lastStatusUpdatedAt.put(instanceId, System.currentTimeMillis());
+        }
     }
 
     @Override

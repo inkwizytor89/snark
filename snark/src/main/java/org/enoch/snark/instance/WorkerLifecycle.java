@@ -5,6 +5,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.enoch.snark.ws.SnarkWebSocketClient;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,5 +49,21 @@ public class WorkerLifecycle {
             e.printStackTrace(System.err);
             Runtime.getRuntime().halt(1);
         }
+    }
+
+    public void notifyLoggedOutAndWaiting(String retryAt) {
+        webSocketClient.publishLoggedOutState(retryAt);
+    }
+
+    public void notifyStarting() {
+        webSocketClient.publishStartingState();
+    }
+
+    public void notifyRunning() {
+        webSocketClient.publishRunningState();
+    }
+
+    public String buildRetryMessage(LocalDateTime retryAt) {
+        return "Retry at " + retryAt.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
     }
 }

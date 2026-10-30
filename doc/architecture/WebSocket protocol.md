@@ -53,7 +53,7 @@ The conductor may send `request:status` with a unique ID, `from: "conductor"`, `
 | Field | Meaning |
 |---|---|
 | `instanceId` | The responding instance ID. |
-| `state` | Worker state; currently `running` when the response is produced. |
+| `state` | Worker state; for normal updates it is normally `running`, while a lobby-wait pause is reported as `logged_out` together with a retry timestamp. |
 | `revision` | Monotonically increasing status revision for this worker process. |
 | `serverStatus` | Bounded summary containing Navigator status, active threads, command deque, and notifications. It contains no planet or moon data. |
 | `hostname` | Worker host name. |
@@ -66,6 +66,10 @@ The summary contains `navigatorStatus`, `activeThreads`, `commandDeque`, and `no
 ## Restart-required event
 
 When snark encounters a fatal runtime condition that requires a fresh process, it sends an unsolicited `event:restart-required` message on its registered WebSocket session. The message has a unique `id`, `from` set to the instance ID, `to: "conductor"`, `status: 200`, and a payload containing a non-empty `reason`. The conductor accepts it only from the active session registered for that instance, marks the instance `restarting`, then stops the tracked worker process, forcibly terminating it if needed, and relaunches the same profile after a one-second delay. This event is not a request and receives no response. A worker waiting through the configured lobby pause must not send this event; its process and registered WebSocket remain healthy.
+
+## Logged-out / lobby waiting event
+
+When the current game window returns to the lobby and the worker is pausing before attempting the next resume, it sends an unsolicited `event:logged-out` message on its active WebSocket session. The payload contains `state: "logged_out"` and `retryAt` with the next retry time in `HH:mm:ss` format. The conductor treats this as a waiting state rather than as `stopped`; it keeps the instance alive and shows the retry time in the status message. Once the wait is over and `GISession.start()` is triggered again, the worker emits a normal `starting` update and then proceeds to `running` once the first live status arrives. This means the lifecycle order is `logged_out` -> `starting` -> `running`.
 
 ## Paginated colony details
 

@@ -233,6 +233,11 @@ public class ProcessService {
             return "restarting";
         }
 
+        String lastStatusMessage = getLastStatusMessage(id);
+        if (lastStatusMessage != null && lastStatusMessage.startsWith("Waiting for next attempt at ")) {
+            return "logged_out";
+        }
+
         if (workerSocketHandler.isRegistered(id)) {
             runtime.setWorkerRegistered(true);
             runtime.setDisconnectedSince(0);

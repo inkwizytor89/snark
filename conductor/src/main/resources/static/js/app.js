@@ -93,6 +93,9 @@ function initApp() {
         if (inst.state === 'starting') {
             return 'Instance is starting and waiting for its first status update.';
         }
+        if (inst.state === 'logged_out') {
+            return inst.statusMessage || 'Waiting for the next retry.';
+        }
         if (inst.state === 'disconnected') {
             return 'Worker disconnected; conductor is waiting for recovery.';
         }
@@ -122,6 +125,8 @@ function initApp() {
         switch (inst.state) {
             case 'starting':
                 return 'Starting';
+            case 'logged_out':
+                return 'Logged out';
             case 'disconnected':
                 return 'Disconnected';
             case 'restarting':
@@ -137,6 +142,8 @@ function initApp() {
         switch (inst.state) {
             case 'starting':
                 return 'status-starting';
+            case 'logged_out':
+                return 'status-disconnected';
             case 'disconnected':
                 return 'status-disconnected';
             case 'restarting':
@@ -278,7 +285,6 @@ function initApp() {
                             <span class="status-badge ${getInstanceStateClass(inst)}">
                                 ${getInstanceStateLabel(inst)}
                             </span>
-                            <span class="instance-pid">PID: ${inst.pid && inst.pid !== -1 ? escapeHtml(inst.pid) : '-'}</span>
                         </div>
                     </div>
                     <div class="instance-menu-wrapper">
@@ -302,7 +308,6 @@ function initApp() {
                     </div>
                 </div>
                 <div class="instance-status-line">
-                    <span class="status-line-label">Status:</span>
                     <span class="instance-status-message">${escapeHtml(getInstanceStatusText(inst))}</span>
                 </div>
                 <div class="instance-actions">
