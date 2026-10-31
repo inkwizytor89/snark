@@ -179,7 +179,34 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     private boolean shouldWaitForConditions() {
-        return !conditionChecker.fit(getConditions(CONDITIONS), null);
+        String configValue = map().getConfig(CONDITIONS, "[]");
+        return !isConditionSatisfied(configValue);
+    }
+
+    private boolean isConditionSatisfied(String configValue) {
+        if (StringUtils.isBlank(configValue) || "[]".equals(configValue.trim())) {
+            return true;
+        }
+
+        try {
+            List<AbstractCondition> conditions = expressionService.evaluateConditions(configValue, Map.of());
+            if (!conditions.isEmpty()) {
+                return conditionChecker.fit(conditions, null);
+            }
+        } catch (IllegalStateException ignored) {
+            // The config may contain a raw boolean expression (e.g. "#isReady()" or "2 > 1")
+            // rather than a legacy condition list.
+        }
+
+        Object result = expressionService.evaluateNoCached(configValue, Map.of(), Object.class);
+        if (result instanceof Boolean bool) {
+            return bool;
+        }
+        if (result instanceof AbstractCondition condition) {
+            return conditionChecker.check(List.of(condition), null) == null;
+        }
+
+        throw new IllegalStateException("Condition config '" + configValue + "' must resolve to a boolean or AbstractCondition");
     }
 
     private boolean isOn() {
