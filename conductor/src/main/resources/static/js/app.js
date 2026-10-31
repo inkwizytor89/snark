@@ -12,6 +12,7 @@ function initApp() {
     let pendingInstanceCreation = null;
     let activeDetailsTab = 'overview';
     const coordinatesState = new Map();
+    const commandsState = new Map();
 
     const createSection = document.getElementById('createInstanceForm');
     const createToggleBtn = document.getElementById('createToggleBtn');
@@ -360,13 +361,16 @@ function initApp() {
                     <button type="button" class="detail-tab ${activeDetailsTab === 'overview' ? 'is-active' : ''}" data-detail-tab="overview">Overview</button>
                     <button type="button" class="detail-tab ${activeDetailsTab === 'coordinates' ? 'is-active' : ''}" data-detail-tab="coordinates">Coordinates</button>
                     <button type="button" class="detail-tab ${activeDetailsTab === 'configs' ? 'is-active' : ''}" data-detail-tab="configs">Configs</button>
+                    <button type="button" class="detail-tab ${activeDetailsTab === 'commands' ? 'is-active' : ''}" data-detail-tab="commands">Commands</button>
                 </div>
                 <div class="detail-tab-panel">
                     ${activeDetailsTab === 'configs'
                         ? renderConfigsTab(inst)
                         : activeDetailsTab === 'coordinates'
                             ? renderCoordinatesTab(inst)
-                            : renderOverviewTab(inst)}
+                            : activeDetailsTab === 'commands'
+                                ? renderCommandsTab(inst)
+                                : renderOverviewTab(inst)}
                 </div>
             </div>
         `;
@@ -438,6 +442,163 @@ function initApp() {
                 <div class="coordinates-colonies">${colonyItems}</div>
             ` : ''}
         `;
+    }
+
+    function renderCommandsTab(inst) {
+        const state = commandsState.get(inst.id) || {
+            status: 'idle',
+            commands: [],
+            selected: '',
+            values: {},
+            error: '',
+            result: '',
+            submitting: false
+        };
+
+        const selectedCommand = state.commands.find((command) => command.name === state.selected) || state.commands[0] || null;
+        const commandFields = selectedCommand ? selectedCommand.fields || [] : [];
+        const fieldMarkup = commandFields.length
+            ? commandFields.map((field) => {
+                const value = state.values[selectedCommand.name]?.[field.name] ?? '';
+                return `
+                    <label class="command-field">
+                        <span class="command-field-label">${escapeHtml(field.label || field.name)}</span>
+                        <span class="config-description-text">${escapeHtml(field.description || field.format || 'String value')}</span>
+                        <input
+                            type="text"
+                            value="${escapeHtml(value)}"
+                            data-command-field="${escapeHtml(selectedCommand.name)}:${escapeHtml(field.name)}"
+                            placeholder="${escapeHtml(field.example || field.expressionHint || field.format || '')}"
+                            ${state.submitting ? 'disabled' : ''}
+                        />
+                    </label>
+                `;
+            }).join('')
+            : '<div class="loading">Select a command to show fields</div>';
+
+        return `
+            <div class="detail-tab-toolbar">
+                <span class="detail-tab-caption">Available commands for ${escapeHtml(inst.id)}</span>
+                <div class="detail-tab-actions">
+                    <button type="button" class="btn-secondary btn-small" data-command-action="reload" ${state.status === 'loading' || state.submitting ? 'disabled' : ''}>
+                        ${state.status === 'loading' ? 'Loading...' : 'Reload'}
+                    </button>
+                </div>
+            </div>
+            ${state.error ? `<div class="config-feedback is-error">${escapeHtml(state.error)}</div>` : ''}
+            ${state.result ? `<div class="config-feedback is-success">${escapeHtml(state.result)}</div>` : ''}
+            <div class="command-panel">
+                <label class="command-picker">
+                    <span class="command-field-label">Command</span>
+                    <select data-command-select="true" ${state.status === 'loading' || state.submitting ? 'disabled' : ''}>
+                        <option value="">Select command</option>
+                        ${state.commands.map((command) => `
+                            <option value="${escapeHtml(command.name)}" ${command.name === selectedCommand?.name ? 'selected' : ''}>${escapeHtml(command.label || command.name)}</option>
+                        `).join('')}
+                    </select>
+                </label>
+                <div class="command-fields">${fieldMarkup}</div>
+                <button type="button" class="btn-primary" data-command-action="submit" ${!selectedCommand || state.submitting ? 'disabled' : ''}>
+                    ${state.submitting ? 'Submitting...' : 'Submit recipe'}
+                </button>
+            </div>
+        `;
+    }
+
+    async function loadCommands(instanceId) {
+        const state = commandsState.get(instanceId) || {
+            status: 'idle',
+            commands: [],
+            selected: '',
+            values: {},
+            error: '',
+            result: '',
+            submitting: false
+        };
+        state.status = 'loading';
+        state.error = '';
+        commandsState.set(instanceId, state);
+        renderInstanceDetails();
+
+        try {
+            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(instanceId)}/commands`);
+            const commands = Array.isArray(payload.commands) ? payload.commands : [];
+            state.commands = commands;
+            state.selected = commands.some((command) => command.name === state.selected)
+                ? state.selected
+                : (commands[0] ? commands[0].name : '');
+            state.values = state.values || {};
+            commands.forEach((command) => {
+                if (!state.values[command.name]) {
+                    state.values[command.name] = {};
+                }
+            });
+            state.status = 'loaded';
+            state.result = '';
+            commandsState.set(instanceId, state);
+        } catch (error) {
+            state.status = 'error';
+            state.error = error.message;
+            commandsState.set(instanceId, state);
+        }
+        renderInstanceDetails();
+    }
+
+    async function submitCommandRecipe() {
+        const inst = getSelectedInstance();
+        if (!inst) {
+            return;
+        }
+        const state = commandsState.get(inst.id) || {
+            status: 'idle',
+            commands: [],
+            selected: '',
+            values: {},
+            error: '',
+            result: '',
+            submitting: false
+        };
+        const command = state.commands.find((item) => item.name === state.selected) || state.commands[0] || null;
+        if (!command) {
+            state.error = 'No command is selected';
+            commandsState.set(inst.id, state);
+            renderInstanceDetails();
+            return;
+        }
+
+        const values = Object.fromEntries(
+            (command.fields || []).map((field) => {
+                const fieldKey = `${command.name}:${field.name}`;
+                const input = instanceDetails.querySelector(`[data-command-field="${CSS.escape(fieldKey)}"]`);
+                const nextValue = input ? input.value : (state.values[command.name]?.[field.name] ?? '');
+                return [field.name, String(nextValue ?? '')];
+            })
+        );
+
+        state.submitting = true;
+        state.error = '';
+        state.result = '';
+        commandsState.set(inst.id, state);
+        renderInstanceDetails();
+
+        try {
+            const response = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/commands`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commandName: command.name, values })
+            });
+            state.submitting = false;
+            const countText = response && response.generatedCount !== undefined && response.queuedCount !== undefined
+                ? ` (${response.generatedCount} generated, ${response.queuedCount} queued)`
+                : '';
+            state.result = `${response && response.message ? response.message : 'Recipe submitted'}${countText}`;
+            commandsState.set(inst.id, state);
+        } catch (error) {
+            state.submitting = false;
+            state.error = error.message;
+            commandsState.set(inst.id, state);
+        }
+        renderInstanceDetails();
     }
 
     async function loadCoordinates(instanceId) {
@@ -1556,6 +1717,9 @@ function initApp() {
             if (activeDetailsTab === 'configs') {
                 loadConfigs();
             }
+            if (activeDetailsTab === 'commands') {
+                loadCommands(item.dataset.id);
+            }
         }
     });
 
@@ -1567,32 +1731,81 @@ function initApp() {
             if (activeDetailsTab === 'configs') {
                 loadConfigs();
             }
+            if (activeDetailsTab === 'coordinates' && selectedInstance) {
+                loadCoordinates(selectedInstance);
+            }
+            if (activeDetailsTab === 'commands' && selectedInstance) {
+                loadCommands(selectedInstance);
+            }
             return;
         }
 
         const configAction = e.target.closest('[data-config-action]');
         const coordinatesAction = e.target.closest('[data-coordinates-action]');
+        const commandAction = e.target.closest('[data-command-action]');
         if (coordinatesAction) {
             loadCoordinates(selectedInstance);
             return;
         }
-        if (!configAction) {
+        if (commandAction) {
+            if (commandAction.dataset.commandAction === 'reload') {
+                if (selectedInstance) {
+                    loadCommands(selectedInstance);
+                }
+            } else if (commandAction.dataset.commandAction === 'submit') {
+                submitCommandRecipe();
+            }
             return;
         }
-
-        const action = configAction.dataset.configAction;
-        if (action === 'refresh') {
-            loadConfigs(true);
-        } else if (action === 'add-thread') {
-            openAddThreadModal();
-        } else if (action === 'save-row') {
-            saveConfigRow(configAction.dataset.rowKey);
-        } else if (action === 'delete-row') {
-            deleteConfigRow(configAction.dataset.rowKey);
+        if (configAction) {
+            const action = configAction.dataset.configAction;
+            if (action === 'refresh') {
+                loadConfigs(true);
+            } else if (action === 'add-thread') {
+                openAddThreadModal();
+            } else if (action === 'save-row') {
+                saveConfigRow(configAction.dataset.rowKey);
+            } else if (action === 'delete-row') {
+                deleteConfigRow(configAction.dataset.rowKey);
+            }
+            return;
         }
     });
 
+    instanceDetails.addEventListener('change', (e) => {
+        const select = e.target.closest('[data-command-select]');
+        if (!select) {
+            return;
+        }
+        const inst = getSelectedInstance();
+        if (!inst) {
+            return;
+        }
+        const state = commandsState.get(inst.id) || { status: 'idle', commands: [], selected: '', values: {} };
+        state.selected = select.value;
+        state.error = '';
+        state.result = '';
+        commandsState.set(inst.id, state);
+        renderInstanceDetails();
+    });
+
     instanceDetails.addEventListener('input', (e) => {
+        const commandField = e.target.closest('[data-command-field]');
+        if (commandField) {
+            const inst = getSelectedInstance();
+            if (!inst) {
+                return;
+            }
+            const [commandName, fieldName] = String(commandField.dataset.commandField).split(':');
+            const state = commandsState.get(inst.id) || { status: 'idle', commands: [], selected: '', values: {} };
+            if (!state.values[commandName]) {
+                state.values[commandName] = {};
+            }
+            state.values[commandName][fieldName] = commandField.value;
+            commandsState.set(inst.id, state);
+            return;
+        }
+
         const input = e.target.closest('[data-config-input]');
         if (!input) {
             return;

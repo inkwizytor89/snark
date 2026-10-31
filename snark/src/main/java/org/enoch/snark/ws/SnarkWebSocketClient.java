@@ -9,8 +9,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import org.enoch.common.command.CommandCatalogResponse;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.command.CommandSubmitRequest;
+import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -38,6 +42,7 @@ public class SnarkWebSocketClient {
     private final String managerUrl;
     private final String instanceId;
     private final Core core;
+    private final CommandRecipeService commandRecipeService;
     private final AtomicLong statusRevision = new AtomicLong();
 
     private volatile WebSocket webSocket;
@@ -52,9 +57,17 @@ public class SnarkWebSocketClient {
     public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
                                 @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
                                 Core core) {
+        this(managerUrl, instanceId, core, null);
+    }
+
+    public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
+                                @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
+                                Core core,
+                                CommandRecipeService commandRecipeService) {
         this.managerUrl = managerUrl == null ? "" : managerUrl.trim();
         this.instanceId = instanceId == null || instanceId.isBlank() ? "snark" : instanceId.trim();
         this.core = core;
+        this.commandRecipeService = commandRecipeService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -233,6 +246,30 @@ public class SnarkWebSocketClient {
         return response;
     }
 
+    CommandMessage buildCommandCatalogResponse(CommandMessage incoming, CommandCatalogResponse catalog) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:command:catalog");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(catalog == null ? new CommandCatalogResponse() : catalog);
+        return response;
+    }
+
+    CommandMessage buildCommandSubmitResponse(CommandMessage incoming, CommandSubmitResponse result) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:command:submit");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(result == null ? CommandSubmitResponse.builder().message("No result returned").build() : result);
+        return response;
+    }
+
     String toResponseType(String incomingType) {
         if (incomingType == null || incomingType.isBlank()) {
             return "response:unknown";
@@ -406,6 +443,11 @@ public class SnarkWebSocketClient {
                                     "Failed to create status details page."));
                         }
                     }
+                } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
+                    sendAndLog(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
+                } else if ("request:command:submit".equals(incoming.getType()) && registered && commandRecipeService != null) {
+                    CommandSubmitRequest request = objectMapper.convertValue(incoming.getPayload(), CommandSubmitRequest.class);
+                    sendAndLog(webSocket, buildCommandSubmitResponse(incoming, commandRecipeService.submitRecipe(request)));
                 } else if (isRequest(incoming) && registered) {
                     sendAndLog(webSocket, buildEchoResponse(incoming));
                 } else if (isRequest(incoming)) {

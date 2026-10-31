@@ -4,6 +4,7 @@ import org.enoch.common.command.CommandMessage;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.conductor.command.CommandRequestService;
 import org.enoch.conductor.config.InstanceConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private final Map<String, PendingStatusDetailsRequest> pendingStatusDetailsRequests = new ConcurrentHashMap<>();
     
     private InstanceConfigService instanceConfigService;
+    private CommandRequestService instanceCommandService;
     private volatile BiConsumer<String, String> restartRequestHandler = (instanceId, reason) -> {
         System.err.println("[WS][WORKER][RESTART][UNHANDLED] instanceId=" + instanceId
                 + " reason=" + reason);
@@ -52,6 +54,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     public void setInstanceConfigService(InstanceConfigService service) {
         this.instanceConfigService = service;
+    }
+
+    public void setInstanceCommandService(CommandRequestService service) {
+        this.instanceCommandService = service;
     }
 
     public void setRestartRequestHandler(BiConsumer<String, String> handler) {
@@ -107,6 +113,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         if (isConfigResponse(type) && instanceConfigService != null) {
             CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
             instanceConfigService.handleConfigResponse(response);
+        }
+        if (isCommandResponse(type) && instanceCommandService != null) {
+            CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
+            instanceCommandService.handleCommandResponse(response);
         }
 
         if (type.equals("LOG")) {
@@ -205,6 +215,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 instanceConfigService.clearInstanceState(instanceId);
                 instanceConfigService.cancelPendingRequests(instanceId);
             }
+            if (instanceCommandService != null) {
+                instanceCommandService.cancelPendingRequests(instanceId);
+            }
         }
     }
 
@@ -249,6 +262,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             if (instanceConfigService != null) {
                 instanceConfigService.clearInstanceState(instanceId);
                 instanceConfigService.cancelPendingRequests(instanceId);
+            }
+            if (instanceCommandService != null) {
+                instanceCommandService.cancelPendingRequests(instanceId);
             }
         }
         sendRegistrationResponse(session, requestId, sender, instanceId, 200, null);
@@ -597,6 +613,13 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || "response:config:definitions".equals(type)
                 || "response:config:set".equals(type)
                 || "response:config:delete".equals(type);
+    }
+
+    private boolean isCommandResponse(String type) {
+        return "response:command:catalog".equals(type)
+                || "response:command:submit".equals(type)
+                || "error:command:catalog".equals(type)
+                || "error:command:submit".equals(type);
     }
 
     private record PendingStatusRequest(String instanceId, String sessionId, long requestedAt) {

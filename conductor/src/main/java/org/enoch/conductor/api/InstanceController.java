@@ -1,5 +1,9 @@
 package org.enoch.conductor.api;
 
+import org.enoch.common.command.CommandCatalogResponse;
+import org.enoch.common.command.CommandSubmitRequest;
+import org.enoch.common.command.CommandSubmitResponse;
+import org.enoch.conductor.command.CommandRequestService;
 import org.enoch.conductor.config.DeleteInstanceConfigsRequest;
 import org.enoch.conductor.config.ConfigDefinitionsResponse;
 import org.enoch.conductor.config.InstanceConfigResponse;
@@ -31,17 +35,20 @@ public class InstanceController {
     private final ProfileRepository profileRepository;
     private final StartPropertiesRepository startPropertiesRepository;
     private final InstanceConfigService instanceConfigService;
+    private final CommandRequestService commandRequestService;
     private final ConductorSettings conductorSettings;
 
     public InstanceController(ProcessService processService,
                               ProfileRepository profileRepository,
                               StartPropertiesRepository startPropertiesRepository,
                               InstanceConfigService instanceConfigService,
+                              CommandRequestService commandRequestService,
                               ConductorSettings conductorSettings) {
         this.processService = processService;
         this.profileRepository = profileRepository;
         this.startPropertiesRepository = startPropertiesRepository;
         this.instanceConfigService = instanceConfigService;
+        this.commandRequestService = commandRequestService;
         this.conductorSettings = conductorSettings;
     }
 
@@ -289,6 +296,38 @@ public class InstanceController {
             return ResponseEntity.internalServerError().body(Map.of(
                     "error", "Failed to fetch status details: " + e.getMessage()
             ));
+        }
+    }
+
+    @GetMapping("/{id}/commands")
+    public ResponseEntity<CommandCatalogResponse> getAvailableCommands(@PathVariable String id) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            return ResponseEntity.ok(commandRequestService.fetchCatalog(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(CommandCatalogResponse.builder().commands(List.of()).build());
+        }
+    }
+
+    @PostMapping("/{id}/commands")
+    public ResponseEntity<CommandSubmitResponse> submitCommand(@PathVariable String id,
+                                                              @RequestBody CommandSubmitRequest request) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            return ResponseEntity.ok(commandRequestService.submitRecipe(id, request));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(CommandSubmitResponse.builder()
+                            .commandName(request == null ? "" : request.getCommandName())
+                            .generatedCount(0)
+                            .queuedCount(0)
+                            .message(e.getMessage())
+                            .build());
         }
     }
 
