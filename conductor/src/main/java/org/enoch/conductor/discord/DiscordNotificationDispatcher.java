@@ -6,6 +6,7 @@ import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,11 +21,11 @@ public class DiscordNotificationDispatcher {
     private static final Set<String> LAST_SENT = ConcurrentHashMap.newKeySet();
 
     private final ProfileRepository profileRepository;
-    private final DiscordBotService discordBotService;
+    private final ObjectProvider<DiscordBotService> discordBotServiceProvider;
 
-    public DiscordNotificationDispatcher(ProfileRepository profileRepository, DiscordBotService discordBotService) {
+    public DiscordNotificationDispatcher(ProfileRepository profileRepository, ObjectProvider<DiscordBotService> discordBotServiceProvider) {
         this.profileRepository = profileRepository;
-        this.discordBotService = discordBotService;
+        this.discordBotServiceProvider = discordBotServiceProvider;
     }
 
     public void dispatchStatusChange(String instanceId, String stateSummary) {
@@ -60,7 +61,8 @@ public class DiscordNotificationDispatcher {
                 return;
             }
 
-            JDA jda = discordBotService.getJda();
+            DiscordBotService discordBotService = discordBotServiceProvider.getIfAvailable();
+            JDA jda = discordBotService == null ? null : discordBotService.getJda();
             if (jda == null) {
                 LOGGER.warn("discord.bot.notification.failed instanceId={} channelId={} reason=bot_unavailable", instanceId, channelId);
                 return;
