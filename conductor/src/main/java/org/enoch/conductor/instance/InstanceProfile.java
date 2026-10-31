@@ -9,4 +9,5 @@ public class InstanceProfile {
     private boolean autoStart;
     private String databaseName;
     private String properties;
+    private String discordChannelId;
 }

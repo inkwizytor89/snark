@@ -52,6 +52,7 @@ public class InstanceController {
                     item.put("autoStart", profile.isAutoStart());
                     item.put("databaseName", profile.getDatabaseName());
                     item.put("properties", profile.getProperties());
+                    item.put("discordChannelId", profile.getDiscordChannelId());
                     boolean running = processService.isRunning(profile.getId());
                     item.put("running", running);
                     item.put("state", processService.getState(profile.getId()));
@@ -139,6 +140,7 @@ public class InstanceController {
         status.put("autoStart", profile.isAutoStart());
         status.put("databaseName", profile.getDatabaseName());
         status.put("properties", profile.getProperties());
+        status.put("discordChannelId", profile.getDiscordChannelId());
         var runtime = processService.getRuntime(id);
         status.put("pid", runtime != null ? runtime.getPid() : -1);
 
@@ -357,6 +359,68 @@ public class InstanceController {
                 "message", "Auto-start updated",
                 "id", id,
                 "autoStart", profile.isAutoStart()
+        ));
+    }
+
+    @PostMapping("/{id}/discord/channel")
+    public ResponseEntity<Map<String, Object>> assignDiscordChannel(@PathVariable String id,
+                                                                   @RequestBody Map<String, String> request) throws Exception {
+        InstanceProfile profile = profileRepository.findById(id).orElse(null);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String channelId = request == null ? null : request.get("channelId");
+        if (channelId == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "Missing channelId",
+                    "id", id
+            ));
+        }
+
+        String normalized = channelId.trim();
+        if (normalized.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "Discord channel id cannot be empty",
+                    "id", id
+            ));
+        }
+
+        profile.setDiscordChannelId(normalized);
+        profileRepository.save(profile);
+        return ResponseEntity.ok(Map.of(
+                "message", "Discord channel assigned",
+                "id", id,
+                "discordChannelId", normalized
+        ));
+    }
+
+    @DeleteMapping("/{id}/discord/channel")
+    public ResponseEntity<Map<String, Object>> clearDiscordChannel(@PathVariable String id) throws Exception {
+        InstanceProfile profile = profileRepository.findById(id).orElse(null);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        profile.setDiscordChannelId(null);
+        profileRepository.save(profile);
+        return ResponseEntity.ok(Map.of(
+                "message", "Discord channel cleared",
+                "id", id,
+                "discordChannelId", null
+        ));
+    }
+
+    @GetMapping("/{id}/discord/channel")
+    public ResponseEntity<Map<String, Object>> getDiscordChannel(@PathVariable String id) throws Exception {
+        InstanceProfile profile = profileRepository.findById(id).orElse(null);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "id", id,
+                "discordChannelId", profile.getDiscordChannelId()
         ));
     }
 
