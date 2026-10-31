@@ -2,7 +2,7 @@ package org.enoch.conductor.instance;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+import org.enoch.conductor.settings.ConductorSettings;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,15 +20,16 @@ public class ProfileRepository {
     private final ObjectMapper mapper = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-    private final Path instancesDir;
+    private final ConductorSettings conductorSettings;
 
-    public ProfileRepository(@Value("${conductor.instances-dir:instances}") String instancesDirPath) {
-        this.instancesDir = Path.of(instancesDirPath);
+    public ProfileRepository(ConductorSettings conductorSettings) {
+        this.conductorSettings = conductorSettings;
     }
 
     public List<InstanceProfile> loadAll() throws Exception {
 
         List<InstanceProfile> profiles = new ArrayList<>();
+        Path instancesDir = resolveInstancesDir();
 
         if (!Files.exists(instancesDir)) {
             Files.createDirectories(instancesDir);
@@ -65,7 +66,7 @@ public class ProfileRepository {
 
     public void save(InstanceProfile profile) throws Exception {
 
-        Path dir = instancesDir.resolve(profile.getId());
+        Path dir = resolveInstancesDir().resolve(profile.getId());
 
         Files.createDirectories(dir);
         Files.createDirectories(dir.resolve("logs"));
@@ -100,7 +101,7 @@ public class ProfileRepository {
     }
 
     public void delete(String id) throws IOException {
-        Path dir = instancesDir.resolve(id);
+        Path dir = resolveInstancesDir().resolve(id);
 
         if (!Files.exists(dir)) {
             return;
@@ -124,7 +125,11 @@ public class ProfileRepository {
     }
 
     public Path resolveInstanceDir(String id) {
-        return instancesDir.resolve(id);
+        return resolveInstancesDir().resolve(id);
+    }
+
+    public Path resolveInstancesDir() {
+        return Path.of(conductorSettings.getInstancesDir());
     }
 
     private boolean normalizeProperties(InstanceProfile profile, Path instanceDir) throws IOException {

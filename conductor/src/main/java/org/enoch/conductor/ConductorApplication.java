@@ -1,5 +1,6 @@
 package org.enoch.conductor;
 
+import org.enoch.conductor.settings.ConductorSettings;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,27 +13,10 @@ import java.util.Map;
 public class ConductorApplication {
 
     public static void main(String[] args) {
+        Map<String, Object> defaults = new HashMap<>(ConductorSettings.resolveSpringDefaults(args));
+
         SpringApplication application = new SpringApplication(ConductorApplication.class);
-        application.setDefaultProperties(resolveDirectoryDefaults(args));
+        application.setDefaultProperties(defaults);
         application.run(args);
-    }
-
-    private static Map<String, Object> resolveDirectoryDefaults(String[] args) {
-        Map<String, Object> defaults = new HashMap<>();
-        defaults.put("conductor.instances-dir", "instances");
-        defaults.put("conductor.start-properties-dir", "start-properties");
-        defaults.put("conductor.worker", "");
-
-        for (String arg : args) {
-            if (arg.startsWith("--instances-dir=")) {
-                defaults.put("conductor.instances-dir", arg.substring("--instances-dir=".length()));
-            } else if (arg.startsWith("--start-properties-dir=")) {
-                defaults.put("conductor.start-properties-dir", arg.substring("--start-properties-dir=".length()));
-            } else if (arg.startsWith("--worker=")) {
-                defaults.put("conductor.worker", arg.substring("--worker=".length()));
-            }
-        }
-
-        return defaults;
     }
 }

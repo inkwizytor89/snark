@@ -8,6 +8,7 @@ import org.enoch.conductor.config.UpdateInstanceConfigsRequest;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
+import org.enoch.conductor.settings.ConductorSettings;
 import org.enoch.conductor.startproperties.StartPropertiesRepository;
 import org.enoch.conductor.startproperties.StartPropertyTemplate;
 import org.enoch.common.status.StatusDetails;
@@ -30,21 +31,24 @@ public class InstanceController {
     private final ProfileRepository profileRepository;
     private final StartPropertiesRepository startPropertiesRepository;
     private final InstanceConfigService instanceConfigService;
+    private final ConductorSettings conductorSettings;
 
     public InstanceController(ProcessService processService,
                               ProfileRepository profileRepository,
                               StartPropertiesRepository startPropertiesRepository,
-                              InstanceConfigService instanceConfigService) {
+                              InstanceConfigService instanceConfigService,
+                              ConductorSettings conductorSettings) {
         this.processService = processService;
         this.profileRepository = profileRepository;
         this.startPropertiesRepository = startPropertiesRepository;
         this.instanceConfigService = instanceConfigService;
+        this.conductorSettings = conductorSettings;
     }
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listInstances() throws Exception {
         List<InstanceProfile> profiles = profileRepository.loadAll();
-        
+
         List<Map<String, Object>> response = profiles.stream()
                 .map(profile -> {
                     Map<String, Object> item = new HashMap<>();
@@ -64,6 +68,82 @@ public class InstanceController {
                 .toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/settings")
+    public ResponseEntity<Map<String, Object>> getSettings() {
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("browserAutoOpen", conductorSettings.isBrowserAutoOpen());
+        settings.put("instancesDir", conductorSettings.getInstancesDir());
+        settings.put("startPropertiesDir", conductorSettings.getStartPropertiesDir());
+        settings.put("templatesDir", conductorSettings.getTemplatesDir());
+        settings.put("workerJar", conductorSettings.getWorkerJar());
+        settings.put("autoStartIntervalMs", conductorSettings.getInstanceMonitorIntervalMs());
+        settings.put("workerDisconnectTimeoutMs", conductorSettings.getWorkerDisconnectTimeoutMs());
+        settings.put("serverPort", conductorSettings.getServerPort());
+        settings.put("discordBotEnabled", conductorSettings.isDiscordBotEnabled());
+        settings.put("discordBotToken", conductorSettings.getDiscordBotToken());
+        return ResponseEntity.ok(settings);
+    }
+
+    @PostMapping("/settings")
+    public ResponseEntity<Map<String, Object>> saveSettings(@RequestBody Map<String, Object> request) throws IOException {
+        ConductorSettings next = conductorSettings.copy();
+        Object browserAutoOpen = request.get("browserAutoOpen");
+        if (browserAutoOpen != null) {
+            next.setBrowserAutoOpen(Boolean.parseBoolean(String.valueOf(browserAutoOpen)));
+        }
+        Object instancesDir = request.get("instancesDir");
+        if (instancesDir != null && String.valueOf(instancesDir).isBlank() == false) {
+            next.setInstancesDir(String.valueOf(instancesDir).trim());
+        }
+        Object startPropertiesDir = request.get("startPropertiesDir");
+        if (startPropertiesDir != null && String.valueOf(startPropertiesDir).isBlank() == false) {
+            next.setStartPropertiesDir(String.valueOf(startPropertiesDir).trim());
+        }
+        Object templatesDir = request.get("templatesDir");
+        if (templatesDir != null && String.valueOf(templatesDir).isBlank() == false) {
+            next.setTemplatesDir(String.valueOf(templatesDir).trim());
+        }
+        Object workerJar = request.get("workerJar");
+        if (workerJar != null) {
+            next.setWorkerJar(String.valueOf(workerJar).trim());
+        }
+        Object interval = request.get("autoStartIntervalMs");
+        if (interval != null) {
+            next.setInstanceMonitorIntervalMs(Long.parseLong(String.valueOf(interval).trim()));
+        }
+        Object timeout = request.get("workerDisconnectTimeoutMs");
+        if (timeout != null) {
+            next.setWorkerDisconnectTimeoutMs(Long.parseLong(String.valueOf(timeout).trim()));
+        }
+        Object serverPort = request.get("serverPort");
+        if (serverPort != null) {
+            next.setServerPort(Integer.parseInt(String.valueOf(serverPort).trim()));
+        }
+        Object discordBotEnabled = request.get("discordBotEnabled");
+        if (discordBotEnabled != null) {
+            next.setDiscordBotEnabled(Boolean.parseBoolean(String.valueOf(discordBotEnabled)));
+        }
+        Object discordBotToken = request.get("discordBotToken");
+        if (discordBotToken != null) {
+            next.setDiscordBotToken(String.valueOf(discordBotToken).trim());
+        }
+
+        conductorSettings.apply(next);
+        Map<String, Object> saved = new HashMap<>();
+        saved.put("message", "Settings saved");
+        saved.put("browserAutoOpen", conductorSettings.isBrowserAutoOpen());
+        saved.put("instancesDir", conductorSettings.getInstancesDir());
+        saved.put("startPropertiesDir", conductorSettings.getStartPropertiesDir());
+        saved.put("templatesDir", conductorSettings.getTemplatesDir());
+        saved.put("workerJar", conductorSettings.getWorkerJar());
+        saved.put("autoStartIntervalMs", conductorSettings.getInstanceMonitorIntervalMs());
+        saved.put("workerDisconnectTimeoutMs", conductorSettings.getWorkerDisconnectTimeoutMs());
+        saved.put("serverPort", conductorSettings.getServerPort());
+        saved.put("discordBotEnabled", conductorSettings.isDiscordBotEnabled());
+        saved.put("discordBotToken", conductorSettings.getDiscordBotToken());
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/templates")

@@ -17,6 +17,7 @@
                         <div class="panel-header">
                             <h2>Instances</h2>
                             <div class="panel-actions">
+                                <button type="button" class="btn-icon" id="globalSettingsBtn" title="Global settings" aria-label="Open global settings">⚙</button>
                                 <button type="button" class="btn-icon" id="createToggleBtn" title="Create new instance" aria-expanded="false">+</button>
                                 <button type="button" class="btn-icon" id="refreshBtn" title="Refresh list">↻</button>
                             </div>
@@ -98,6 +99,61 @@
                 <div class="modal-actions">
                     <button type="button" id="cancelConfigThreadBtn" class="btn-secondary">Cancel</button>
                     <button type="submit" id="saveConfigThreadBtn" class="btn-primary">Save thread</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="globalSettingsModal" class="modal-overlay" hidden>
+        <div class="modal-card settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="globalSettingsModalTitle">
+            <h3 id="globalSettingsModalTitle">Global settings</h3>
+            <div id="globalSettingsFeedback" class="config-feedback" hidden></div>
+            <form id="globalSettingsForm">
+                <div class="settings-grid">
+                    <label class="placeholder-field">
+                        <span>Auto-open browser</span>
+                        <input type="checkbox" id="settingsBrowserAutoOpen" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Instances directory</span>
+                        <input type="text" id="settingsInstancesDir" placeholder="instances" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Start properties directory</span>
+                        <input type="text" id="settingsStartPropertiesDir" placeholder="start-properties" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Templates directory</span>
+                        <input type="text" id="settingsTemplatesDir" placeholder="templates" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Worker JAR path</span>
+                        <input type="text" id="settingsWorkerJar" placeholder="/path/to/worker.jar" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Monitor interval (ms)</span>
+                        <input type="number" id="settingsMonitorInterval" min="1000" step="1000" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Disconnect timeout (ms)</span>
+                        <input type="number" id="settingsDisconnectTimeout" min="1000" step="1000" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Server port</span>
+                        <input type="number" id="settingsServerPort" min="1" max="65535" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Discord bot enabled</span>
+                        <input type="checkbox" id="settingsDiscordBotEnabled" />
+                    </label>
+                    <label class="placeholder-field">
+                        <span>Discord bot token</span>
+                        <input type="password" id="settingsDiscordBotToken" placeholder="Paste bot token" />
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelGlobalSettingsBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save settings</button>
                 </div>
             </form>
         </div>

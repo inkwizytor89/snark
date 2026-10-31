@@ -14,14 +14,17 @@ import java.net.URISyntaxException;
 public class BrowserLauncher {
 
     private final int serverPort;
+    private final boolean browserAutoOpen;
 
-    public BrowserLauncher(@Value("${server.port:8080}") int serverPort) {
+    public BrowserLauncher(@Value("${server.port:8080}") int serverPort,
+                           @Value("${browser.auto-open:true}") boolean browserAutoOpen) {
         this.serverPort = serverPort;
+        this.browserAutoOpen = browserAutoOpen;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void openDefaultBrowser() {
-        if (GraphicsEnvironment.isHeadless()) {
+        if (!browserAutoOpen || GraphicsEnvironment.isHeadless()) {
             return;
         }
 

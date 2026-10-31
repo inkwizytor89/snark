@@ -613,6 +613,23 @@ main {
     width: min(920px, 100%);
 }
 
+.settings-modal-card {
+    width: min(720px, 100%);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.settings-grid .placeholder-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .config-modal-layout {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -652,6 +669,7 @@ main {
 
     .config-thread-field-card,
     .config-modal-layout,
+    .settings-grid,
     .detail-grid {
         grid-template-columns: 1fr;
     }

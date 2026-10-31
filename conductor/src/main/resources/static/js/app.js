@@ -33,6 +33,9 @@ function initApp() {
     const configThreadModalSubtitle = document.getElementById('configThreadModalSubtitle');
     const configThreadModalMessage = document.getElementById('configThreadModalMessage');
     const saveConfigThreadBtn = document.getElementById('saveConfigThreadBtn');
+    const globalSettingsModal = document.getElementById('globalSettingsModal');
+    const globalSettingsForm = document.getElementById('globalSettingsForm');
+    const globalSettingsFeedback = document.getElementById('globalSettingsFeedback');
 
     const configState = createEmptyConfigState();
 
@@ -893,6 +896,98 @@ function initApp() {
         configState.modalSaving = false;
     }
 
+    function renderGlobalSettingsFeedback(message, type = '') {
+        if (!message) {
+            globalSettingsFeedback.hidden = true;
+            globalSettingsFeedback.textContent = '';
+            globalSettingsFeedback.className = 'config-feedback';
+            return;
+        }
+
+        globalSettingsFeedback.hidden = false;
+        globalSettingsFeedback.textContent = message;
+        globalSettingsFeedback.className = `config-feedback ${type === 'error' ? 'is-error' : 'is-success'}`;
+    }
+
+    async function openGlobalSettings() {
+        try {
+            const response = await fetch('/api/instances/settings');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const settings = await response.json();
+            const fields = {
+                browserAutoOpen: document.getElementById('settingsBrowserAutoOpen'),
+                instancesDir: document.getElementById('settingsInstancesDir'),
+                startPropertiesDir: document.getElementById('settingsStartPropertiesDir'),
+                templatesDir: document.getElementById('settingsTemplatesDir'),
+                workerJar: document.getElementById('settingsWorkerJar'),
+                monitorInterval: document.getElementById('settingsMonitorInterval'),
+                disconnectTimeout: document.getElementById('settingsDisconnectTimeout'),
+                serverPort: document.getElementById('settingsServerPort'),
+                discordBotEnabled: document.getElementById('settingsDiscordBotEnabled'),
+                discordBotToken: document.getElementById('settingsDiscordBotToken')
+            };
+            fields.browserAutoOpen.checked = !!settings.browserAutoOpen;
+            fields.instancesDir.value = settings.instancesDir || '';
+            fields.startPropertiesDir.value = settings.startPropertiesDir || '';
+            fields.templatesDir.value = settings.templatesDir || '';
+            fields.workerJar.value = settings.workerJar || '';
+            fields.monitorInterval.value = settings.autoStartIntervalMs ?? 5000;
+            fields.disconnectTimeout.value = settings.workerDisconnectTimeoutMs ?? 30000;
+            fields.serverPort.value = settings.serverPort ?? 8080;
+            fields.discordBotEnabled.checked = !!settings.discordBotEnabled;
+            fields.discordBotToken.value = settings.discordBotToken || '';
+            renderGlobalSettingsFeedback('');
+            globalSettingsModal.hidden = false;
+        } catch (error) {
+            renderGlobalSettingsFeedback(error.message, 'error');
+            globalSettingsModal.hidden = false;
+        }
+    }
+
+    function closeGlobalSettings() {
+        globalSettingsModal.hidden = true;
+        renderGlobalSettingsFeedback('');
+    }
+
+    async function saveGlobalSettings(event) {
+        event.preventDefault();
+        const payload = {
+            browserAutoOpen: document.getElementById('settingsBrowserAutoOpen').checked,
+            instancesDir: document.getElementById('settingsInstancesDir').value.trim(),
+            startPropertiesDir: document.getElementById('settingsStartPropertiesDir').value.trim(),
+            templatesDir: document.getElementById('settingsTemplatesDir').value.trim(),
+            workerJar: document.getElementById('settingsWorkerJar').value.trim(),
+            autoStartIntervalMs: Number(document.getElementById('settingsMonitorInterval').value),
+            workerDisconnectTimeoutMs: Number(document.getElementById('settingsDisconnectTimeout').value),
+            serverPort: Number(document.getElementById('settingsServerPort').value),
+            discordBotEnabled: document.getElementById('settingsDiscordBotEnabled').checked,
+            discordBotToken: document.getElementById('settingsDiscordBotToken').value.trim()
+        };
+
+        try {
+            const response = await fetch('/api/instances/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const savedSettings = await response.json();
+            renderGlobalSettingsFeedback('Settings saved and applied.', 'success');
+            if (savedSettings.serverPort) {
+                document.getElementById('settingsServerPort').value = savedSettings.serverPort;
+            }
+            setTimeout(() => closeGlobalSettings(), 600);
+        } catch (error) {
+            renderGlobalSettingsFeedback(error.message, 'error');
+        }
+    }
+
     function getAvailableModules() {
         return [...new Map(
             configState.configs.map((config) => [String(config.module ?? ''), normalizeModuleDisplayName(config.module)])
@@ -1387,6 +1482,9 @@ function initApp() {
     document.getElementById('placeholderForm').addEventListener('submit', submitPlaceholderValues);
     document.getElementById('cancelPlaceholderBtn').addEventListener('click', closePlaceholderModal);
     document.getElementById('refreshBtn').addEventListener('click', loadInstances);
+    document.getElementById('globalSettingsBtn').addEventListener('click', openGlobalSettings);
+    document.getElementById('cancelGlobalSettingsBtn').addEventListener('click', closeGlobalSettings);
+    globalSettingsForm.addEventListener('submit', saveGlobalSettings);
     configThreadForm.addEventListener('submit', saveThreadConfigs);
     document.getElementById('cancelConfigThreadBtn').addEventListener('click', closeConfigThreadModal);
 

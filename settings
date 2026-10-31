@@ -1,0 +1,10 @@
+#Conductor global settings
+#Sat Oct 31 11:46:01 CET 2026
+browser.auto-open=true
+conductor.instances-dir=instances
+conductor.instances-monitor-interval=5000
+conductor.start-properties-dir=start-properties
+conductor.templates-dir=templates
+conductor.worker=
+conductor.worker-disconnect-timeout=30000
+server.port=8080
