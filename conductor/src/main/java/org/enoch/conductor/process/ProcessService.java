@@ -1,5 +1,6 @@
 package org.enoch.conductor.process;
 
+import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.InstanceRuntime;
 import org.enoch.conductor.instance.ProfileRepository;
@@ -32,19 +33,22 @@ public class ProcessService {
     private final WorkerSocketHandler workerSocketHandler;
     private final WorkerProcessLauncher workerProcessLauncher;
     private final InstanceLogService instanceLogService;
+    private final DiscordStatusNotifier discordStatusNotifier;
 
     public ProcessService(@Value("${conductor.instances-dir:instances}") String instancesDirPath,
                           @Value("${conductor.worker-disconnect-timeout:30000}") long workerDisconnectTimeoutMillis,
                           ProfileRepository profileRepository,
                           WorkerSocketHandler workerSocketHandler,
                           WorkerProcessLauncher workerProcessLauncher,
-                          InstanceLogService instanceLogService) {
+                          InstanceLogService instanceLogService,
+                          DiscordStatusNotifier discordStatusNotifier) {
         this.instancesDirPath = instancesDirPath;
         this.workerDisconnectTimeoutMillis = workerDisconnectTimeoutMillis;
         this.profileRepository = profileRepository;
         this.workerSocketHandler = workerSocketHandler;
         this.workerProcessLauncher = workerProcessLauncher;
         this.instanceLogService = instanceLogService;
+        this.discordStatusNotifier = discordStatusNotifier;
         this.workerSocketHandler.setRestartRequestHandler(this::requestRestart);
     }
 
@@ -106,6 +110,9 @@ public class ProcessService {
         runtime.setStartedAt(startedAt);
         runtimes.put(profile.getId(), runtime);
         System.out.println("Started instance with id " + profile.getId() + " and pid " + process.pid());
+        if (discordStatusNotifier != null) {
+            discordStatusNotifier.publishLifecycle(profile.getId(), "started");
+        }
     }
 
     /**
@@ -141,6 +148,9 @@ public class ProcessService {
         runtime.setOnline(false);
 
         runtimes.remove(id, runtime);
+        if (discordStatusNotifier != null) {
+            discordStatusNotifier.publishLifecycle(id, "stopped");
+        }
     }
 
     /**
@@ -150,6 +160,9 @@ public class ProcessService {
         managedProfiles.put(profile.getId(), profile);
         restartingInstances.add(profile.getId());
         try {
+            if (discordStatusNotifier != null) {
+                discordStatusNotifier.publishLifecycle(profile.getId(), "restarting");
+            }
             stopRuntime(profile.getId(), runtimes.get(profile.getId()));
             Thread.sleep(1000);
             start(profile);

@@ -46,4 +46,16 @@ class DiscordCommandRouterTest {
         assertTrue(result.render().contains("server#user"));
         assertTrue(result.render().contains("state=running"));
     }
+
+    @Test
+    void shouldReportUnsupportedCommandsAsInactive() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+
+        DiscordCommandResult result = router.handle("restart");
+
+        assertTrue(result.render().contains("inactive"));
+        assertTrue(result.render().contains("not available"));
+    }
 }

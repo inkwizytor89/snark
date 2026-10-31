@@ -465,6 +465,12 @@ public class InstanceController {
                     "id", id
             ));
         }
+        if (!org.enoch.conductor.discord.DiscordChannelValidator.isAllowedForNotification(normalized)) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "Discord channel id is invalid. Expected a numeric Discord channel id.",
+                    "id", id
+            ));
+        }
 
         profile.setDiscordChannelId(normalized);
         profileRepository.save(profile);

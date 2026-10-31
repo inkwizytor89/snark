@@ -37,12 +37,18 @@ public class DiscordCommandResult {
         return new DiscordCommandResult(command, Status.INFO, message, null);
     }
 
+    public boolean isAccepted() {
+        return status == Status.SUCCESS || status == Status.INFO;
+    }
+
     public String render() {
         StringBuilder builder = new StringBuilder();
         builder.append("Command: ").append(command).append(System.lineSeparator());
+        builder.append("Accepted: ").append(isAccepted() ? "yes" : "no").append(System.lineSeparator());
         builder.append("Result: ").append(status.name().toLowerCase()).append(System.lineSeparator());
+        builder.append("Action: ").append(command).append(System.lineSeparator());
         if (message != null && !message.isBlank()) {
-            builder.append("Message: ").append(message).append(System.lineSeparator());
+            builder.append("Summary: ").append(message).append(System.lineSeparator());
         }
         if (details != null && !details.isBlank()) {
             builder.append("Details: ").append(details).append(System.lineSeparator());

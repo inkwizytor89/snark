@@ -44,7 +44,7 @@ class ProcessServiceTest {
 
         ProcessService service = new ProcessService(
                 temporaryDirectory.toString(), 30_000L, profileRepository,
-                workerSocketHandler, launcher, logService);
+                workerSocketHandler, launcher, logService, null);
         service.start(profile);
         when(workerSocketHandler.getLastStatusUpdatedAt(profile.getId()))
                 .thenReturn(service.getRuntime(profile.getId()).getStartedAt() + 1);
@@ -72,7 +72,7 @@ class ProcessServiceTest {
 
         ProcessService service = new ProcessService(
                 temporaryDirectory.toString(), 30_000L, profileRepository,
-                workerSocketHandler, launcher, logService);
+                workerSocketHandler, launcher, logService, null);
         service.start(profile);
         long startedAt = service.getRuntime(profile.getId()).getStartedAt();
         when(workerSocketHandler.getLastStatusUpdatedAt(profile.getId()))
@@ -102,7 +102,7 @@ class ProcessServiceTest {
 
         ProcessService service = new ProcessService(
                 temporaryDirectory.toString(), 30_000L, profileRepository,
-                workerSocketHandler, launcher, logService);
+                workerSocketHandler, launcher, logService, null);
         service.start(profile);
         service.recoverUnexpectedlyStoppedInstances();
 
@@ -131,7 +131,7 @@ class ProcessServiceTest {
 
         ProcessService service = new ProcessService(
                 temporaryDirectory.toString(), 0, profileRepository,
-                workerSocketHandler, launcher, logService);
+                workerSocketHandler, launcher, logService, null);
         service.start(profile);
         service.recoverUnexpectedlyStoppedInstances();
         service.recoverUnexpectedlyStoppedInstances();
@@ -169,7 +169,7 @@ class ProcessServiceTest {
 
         ProcessService service = new ProcessService(
                 temporaryDirectory.toString(), 30_000L, profileRepository,
-                workerSocketHandler, launcher, logService);
+                workerSocketHandler, launcher, logService, null);
         service.start(profile);
 
         assertNotNull(restartHandler.get());
