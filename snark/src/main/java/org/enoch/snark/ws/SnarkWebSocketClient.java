@@ -16,6 +16,7 @@ import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.si.Core;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -60,6 +61,7 @@ public class SnarkWebSocketClient {
         this(managerUrl, instanceId, core, null);
     }
 
+    @Autowired
     public SnarkWebSocketClient(@Value("${managerUrl:}") String managerUrl,
                                 @Value("${instanceId:${spring.application.name:snark}}") String instanceId,
                                 Core core,
