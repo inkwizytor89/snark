@@ -53,18 +53,24 @@ public class DiscordCommandRouter {
 
         if (normalized.contains("help")) {
             return DiscordCommandResult.info("help",
-                    "Available commands: help, get context, show context, set active instance <id>, list instances, start, stop, status");
+                    "Available commands: help, context, set <id>, list, start, stop, status");
         }
 
-        if (normalized.startsWith("get context") || normalized.startsWith("show context")) {
+        if (normalized.equals("context")) {
             return describeContext();
         }
 
         if (normalized.startsWith("set active instance ")) {
-            return setActiveInstance(extractArgument(command, "set active instance"));
+            return DiscordCommandResult.failure("set",
+                    "Use the shortened set command.",
+                    "Use 'set <id>' to choose the active instance.");
         }
 
-        if (normalized.startsWith("list instances")) {
+        if (normalized.startsWith("set ")) {
+            return setActiveInstance(command.substring("set".length()).trim());
+        }
+
+        if (normalized.equals("list")) {
             return listInstances();
         }
 
@@ -83,7 +89,7 @@ public class DiscordCommandRouter {
         if (normalized.startsWith("start ") || normalized.startsWith("stop ") || normalized.startsWith("status ")) {
             return DiscordCommandResult.failure("discord-command",
                     "Instance IDs are not accepted by this command.",
-                    "Set the active instance with 'set active instance <id>', then use start, stop, or status.");
+                    "Set the active instance with 'set <id>', then use start, stop, or status.");
         }
 
         if (normalized.startsWith("set active") || normalized.startsWith("assign") || normalized.startsWith("clear")
@@ -101,7 +107,7 @@ public class DiscordCommandRouter {
     public DiscordCommandResult describeContext() {
         String activeInstanceId = getActiveInstanceId();
         if (activeInstanceId == null || activeInstanceId.isBlank()) {
-            return DiscordCommandResult.info("context", "No active instance is set. Use 'set active instance <instanceId>' to choose one.");
+            return DiscordCommandResult.info("context", "No active instance is set. Use 'set <id>' to choose one.");
         }
 
         try {
@@ -122,21 +128,21 @@ public class DiscordCommandRouter {
 
     public DiscordCommandResult setActiveInstance(String instanceId) {
         if (instanceId == null || instanceId.isBlank()) {
-            return DiscordCommandResult.failure("set active instance", "Missing instance id.", "Use set active instance <instanceId>");
+            return DiscordCommandResult.failure("set", "Missing instance id.", "Use set <id>");
         }
 
         try {
             InstanceProfile profile = profileRepository.findById(instanceId).orElse(null);
             if (profile == null) {
-                LOGGER.warn("discord.bot.command.failed command=set active instance instanceId={} reason=instance_not_found", instanceId);
-                return DiscordCommandResult.failure("set active instance", "Instance not found.", instanceId);
+                LOGGER.warn("discord.bot.command.failed command=set instanceId={} reason=instance_not_found", instanceId);
+                return DiscordCommandResult.failure("set", "Instance not found.", instanceId);
             }
             context.setActiveInstanceId(instanceId);
             LOGGER.info("discord.bot.context.changed instanceId={}", instanceId);
-            return DiscordCommandResult.success("set active instance", "Active instance set to " + instanceId);
+            return DiscordCommandResult.success("set", "Active instance set to " + instanceId);
         } catch (Exception e) {
-            LOGGER.warn("discord.bot.command.failed command=set active instance instanceId={} reason={}", instanceId, e.getMessage(), e);
-            return DiscordCommandResult.failure("set active instance", "Unable to set active instance.", e.getMessage());
+            LOGGER.warn("discord.bot.command.failed command=set instanceId={} reason={}", instanceId, e.getMessage(), e);
+            return DiscordCommandResult.failure("set", "Unable to set active instance.", e.getMessage());
         }
     }
 
@@ -145,7 +151,7 @@ public class DiscordCommandRouter {
             StringBuilder builder = new StringBuilder();
             var profiles = profileRepository.loadAll();
             if (profiles.isEmpty()) {
-                return DiscordCommandResult.info("list instances", "No instances are configured.");
+                return DiscordCommandResult.info("list", "No instances are configured.");
             }
             for (InstanceProfile profile : profiles) {
                 boolean active = profile.getId().equals(context.getActiveInstanceId());
@@ -157,10 +163,10 @@ public class DiscordCommandRouter {
                         .append(active ? " | active" : "")
                         .append(System.lineSeparator());
             }
-            return DiscordCommandResult.info("list instances", builder.toString().trim());
+            return DiscordCommandResult.info("list", builder.toString().trim());
         } catch (Exception e) {
-            LOGGER.warn("discord.bot.command.failed command=list instances reason={}", e.getMessage(), e);
-            return DiscordCommandResult.failure("list instances", "Unable to list instances.", e.getMessage());
+            LOGGER.warn("discord.bot.command.failed command=list reason={}", e.getMessage(), e);
+            return DiscordCommandResult.failure("list", "Unable to list instances.", e.getMessage());
         }
     }
 
@@ -228,19 +234,6 @@ public class DiscordCommandRouter {
         }
     }
 
-    private String extractArgument(String rawMessage, String command) {
-        String trimmed = rawMessage.trim();
-        String prefix = command.trim();
-        if (trimmed.regionMatches(true, 0, prefix, 0, prefix.length())) {
-            String rest = trimmed.substring(prefix.length()).trim();
-            if (rest.startsWith("instance")) {
-                return rest.substring("instance".length()).trim();
-            }
-            return rest;
-        }
-        return null;
-    }
-
     private String getActiveInstanceId() {
         String activeInstanceId = context.getActiveInstanceId();
         if (activeInstanceId == null || activeInstanceId.isBlank()) {
@@ -251,6 +244,6 @@ public class DiscordCommandRouter {
 
     private DiscordCommandResult noActiveInstance(String command) {
         return DiscordCommandResult.failure(command, "No active instance selected.",
-                "Use 'set active instance <id>' to choose the context instance.");
+                "Use 'set <id>' to choose the context instance.");
     }
 }

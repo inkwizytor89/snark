@@ -4,7 +4,7 @@ Discord is a conductor-owned interface. When a bot token and at least one valid 
 
 The bot also routes a limited set of explicit text commands through the conductor. Optional Gemini-assisted natural-language translation is not implemented. Worker operations remain conductor-owned; snark must not connect to Discord or execute Discord commands locally.
 
-`set active instance <id>` selects the context instance. The `start`, `stop`, and `status` commands operate on that context and do not accept an instance ID. `list instances` remains an overview of every configured instance. If no context is selected, the conductor resolves its configured default instance when available.
+`set <id>` selects the context instance. The `context` command displays it, and `list` shows every configured instance. The `start`, `stop`, and `status` commands operate on the selected context and do not accept an instance ID. If no context is selected, the conductor resolves its configured default instance when available.
 
 Gemini-assisted input is not enabled. Any future Gemini output must be validated against the conductor's allowed command schema and must never be treated as an executable expression.
 

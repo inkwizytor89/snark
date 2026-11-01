@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 class DiscordCommandRouterTest {
 
     @Test
-    void shouldSetActiveInstanceAndReportIt() throws Exception {
+    void shouldSetActiveInstanceUsingShortCommandAndReportIt() throws Exception {
         ProfileRepository profileRepository = mock(ProfileRepository.class);
         ProcessService processService = mock(ProcessService.class);
         InstanceProfile profile = new InstanceProfile();
@@ -26,9 +26,9 @@ class DiscordCommandRouterTest {
         when(profileRepository.findById("server#user")).thenReturn(Optional.of(profile));
 
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
-        DiscordCommandResult result = router.handle("set active instance server#user");
+        DiscordCommandResult result = router.handle("set server#user");
 
-        assertTrue(result.render().contains("Command: set active instance"));
+        assertTrue(result.render().contains("Command: set"));
         assertTrue(result.render().contains("Active instance set to server#user"));
     }
 
@@ -40,7 +40,7 @@ class DiscordCommandRouterTest {
         when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
 
-        router.handle("set active instance server#context");
+        router.handle("set server#context");
         DiscordCommandResult result = router.handle("start");
 
         assertTrue(result.render().contains("Start request accepted for instance server#context"));
@@ -55,7 +55,7 @@ class DiscordCommandRouterTest {
         when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
 
-        router.handle("set active instance server#context");
+        router.handle("set server#context");
         DiscordCommandResult result = router.handle("stop");
 
         assertTrue(result.render().contains("Stop request accepted for instance server#context"));
@@ -71,7 +71,7 @@ class DiscordCommandRouterTest {
         when(processService.getState("server#context")).thenReturn("running");
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
 
-        router.handle("set active instance server#context");
+        router.handle("set server#context");
         DiscordCommandResult result = router.handle("status");
 
         assertTrue(result.render().contains("Instance server#context is in state running"));
@@ -103,14 +103,42 @@ class DiscordCommandRouterTest {
         when(processService.getState("server#no-channel")).thenReturn("running");
 
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
-        DiscordCommandResult result = router.handle("list instances");
+        DiscordCommandResult result = router.handle("list");
 
+        assertTrue(result.render().contains("Command: list"));
         assertTrue(result.render().contains("server#running"));
         assertTrue(result.render().contains("server#stopped"));
         assertTrue(result.render().contains("server#no-channel"));
         assertTrue(result.render().contains("state=running"));
         assertTrue(result.render().contains("state=stopped"));
         assertTrue(result.render().contains("discord=none"));
+    }
+
+    @Test
+    void shouldUseContextAsTheContextCommand() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        InstanceProfile profile = profile("server#context", null);
+        when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
+        when(processService.getState("server#context")).thenReturn("running");
+        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+        router.handle("set server#context");
+
+        DiscordCommandResult result = router.handle("context");
+
+        assertTrue(result.render().contains("Command: context"));
+        assertTrue(result.render().contains("Active instance: server#context"));
+    }
+
+    @Test
+    void shouldNotAcceptReplacedLongCommandNames() throws Exception {
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                mock(ProfileRepository.class), mock(ProcessService.class));
+
+        assertTrue(router.handle("list instances").render().contains("Command not recognized"));
+        assertTrue(router.handle("get context").render().contains("Command not recognized"));
+        assertTrue(router.handle("show context").render().contains("Command not recognized"));
+        assertTrue(router.handle("set active instance server#context").render().contains("Use the shortened set command"));
     }
 
     private InstanceProfile profile(String id, String discordChannelId) {
