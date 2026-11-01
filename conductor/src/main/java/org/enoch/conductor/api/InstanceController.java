@@ -529,11 +529,11 @@ public class InstanceController {
 
         profile.setDiscordChannelId(null);
         profileRepository.save(profile);
-        return ResponseEntity.ok(Map.of(
-                "message", "Discord channel cleared",
-                "id", id,
-                "discordChannelId", null
-        ));
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Discord channel cleared");
+        response.put("id", id);
+        response.put("discordChannelId", null);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/discord/channel")
@@ -543,10 +543,10 @@ public class InstanceController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(Map.of(
-                "id", id,
-                "discordChannelId", profile.getDiscordChannelId()
-        ));
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        response.put("discordChannelId", profile.getDiscordChannelId());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -651,4 +651,3 @@ public class InstanceController {
         return ResponseEntity.status(409).body(Map.of("error", message));
     }
 }
-

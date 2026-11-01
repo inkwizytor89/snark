@@ -10,6 +10,7 @@ function initApp() {
     let selectedInstance = null;
     let activeMenuInstanceId = null;
     let pendingInstanceCreation = null;
+    let pendingDiscordChannelInstanceId = null;
     let activeDetailsTab = 'overview';
     const coordinatesState = new Map();
     const commandsState = new Map();
@@ -24,6 +25,12 @@ function initApp() {
     const placeholderForm = document.getElementById('placeholderForm');
     const placeholderFields = document.getElementById('placeholderFields');
     const placeholderModalSubtitle = document.getElementById('placeholderModalSubtitle');
+    const discordChannelModal = document.getElementById('discordChannelModal');
+    const discordChannelForm = document.getElementById('discordChannelForm');
+    const discordChannelModalSubtitle = document.getElementById('discordChannelModalSubtitle');
+    const discordChannelIdInput = document.getElementById('discordChannelIdInput');
+    const discordChannelModalFeedback = document.getElementById('discordChannelModalFeedback');
+    const saveDiscordChannelBtn = document.getElementById('saveDiscordChannelBtn');
 
     const configThreadModal = document.getElementById('configThreadModal');
     const configThreadForm = document.getElementById('configThreadForm');
@@ -323,6 +330,15 @@ function initApp() {
                             <button type="button" class="instance-menu-action" data-action="toggle-autostart" data-id="${escapeHtml(inst.id)}">
                                 ${inst.autoStart ? 'Disable auto-start' : 'Enable auto-start'}
                             </button>
+                            ${inst.discordChannelId ? `
+                                <button type="button" class="instance-menu-action" data-action="clear-discord-channel" data-id="${escapeHtml(inst.id)}">
+                                    Clear Discord channel
+                                </button>
+                            ` : `
+                                <button type="button" class="instance-menu-action" data-action="set-discord-channel" data-id="${escapeHtml(inst.id)}">
+                                    Set Discord channel
+                                </button>
+                            `}
                             <button type="button" class="instance-menu-action danger" data-action="delete" data-id="${escapeHtml(inst.id)}">
                                 Delete instance
                             </button>
@@ -1402,6 +1418,85 @@ function initApp() {
         }
     }
 
+    function openDiscordChannelModal(id) {
+        const instance = instances.find((candidate) => candidate.id === id);
+        if (!instance || instance.discordChannelId) {
+            return;
+        }
+
+        pendingDiscordChannelInstanceId = id;
+        discordChannelModalSubtitle.textContent = `Instance: ${id}`;
+        discordChannelIdInput.value = '';
+        discordChannelModalFeedback.hidden = true;
+        discordChannelModalFeedback.textContent = '';
+        discordChannelModalFeedback.className = 'config-feedback';
+        activeMenuInstanceId = null;
+        renderInstances();
+        discordChannelModal.hidden = false;
+        discordChannelIdInput.focus();
+    }
+
+    function closeDiscordChannelModal() {
+        pendingDiscordChannelInstanceId = null;
+        discordChannelForm.reset();
+        discordChannelModalSubtitle.textContent = '';
+        discordChannelModalFeedback.hidden = true;
+        discordChannelModalFeedback.textContent = '';
+        discordChannelModalFeedback.className = 'config-feedback';
+        saveDiscordChannelBtn.disabled = false;
+        saveDiscordChannelBtn.textContent = 'Save channel';
+        discordChannelModal.hidden = true;
+    }
+
+    async function submitDiscordChannel(event) {
+        event.preventDefault();
+        if (!pendingDiscordChannelInstanceId) {
+            return;
+        }
+
+        saveDiscordChannelBtn.disabled = true;
+        saveDiscordChannelBtn.textContent = 'Saving...';
+        try {
+            const response = await fetch(`/api/instances/${encodeURIComponent(pendingDiscordChannelInstanceId)}/discord/channel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ channelId: discordChannelIdInput.value.trim() })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            term.write(`✓ ${data.message}\r\n`);
+            closeDiscordChannelModal();
+            await loadInstances();
+        } catch (error) {
+            discordChannelModalFeedback.hidden = false;
+            discordChannelModalFeedback.textContent = error.message;
+            discordChannelModalFeedback.className = 'config-feedback is-error';
+            saveDiscordChannelBtn.disabled = false;
+            saveDiscordChannelBtn.textContent = 'Save channel';
+        }
+    }
+
+    async function clearDiscordChannel(id) {
+        try {
+            const response = await fetch(`/api/instances/${encodeURIComponent(id)}/discord/channel`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            term.write(`✓ ${data.message}\r\n`);
+            activeMenuInstanceId = null;
+            await loadInstances();
+        } catch (error) {
+            term.write(`✗ Error: ${error.message}\r\n`);
+        }
+    }
+
     async function deleteInstance(id) {
         const confirmed = window.confirm('Are you sure you want to delete this instance?');
         if (!confirmed) {
@@ -1642,6 +1737,8 @@ function initApp() {
     document.getElementById('createToggleBtn').addEventListener('click', toggleCreateForm);
     document.getElementById('placeholderForm').addEventListener('submit', submitPlaceholderValues);
     document.getElementById('cancelPlaceholderBtn').addEventListener('click', closePlaceholderModal);
+    discordChannelForm.addEventListener('submit', submitDiscordChannel);
+    document.getElementById('cancelDiscordChannelBtn').addEventListener('click', closeDiscordChannelModal);
     document.getElementById('refreshBtn').addEventListener('click', loadInstances);
     document.getElementById('globalSettingsBtn').addEventListener('click', openGlobalSettings);
     document.getElementById('cancelGlobalSettingsBtn').addEventListener('click', closeGlobalSettings);
@@ -1701,6 +1798,10 @@ function initApp() {
             const { action, id } = menuAction.dataset;
             if (action === 'toggle-autostart') {
                 toggleAutoStart(id);
+            } else if (action === 'set-discord-channel') {
+                openDiscordChannelModal(id);
+            } else if (action === 'clear-discord-channel') {
+                clearDiscordChannel(id);
             } else if (action === 'delete') {
                 deleteInstance(id);
             }

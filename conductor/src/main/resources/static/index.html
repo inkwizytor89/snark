@@ -75,6 +75,24 @@
         </div>
     </div>
 
+    <div id="discordChannelModal" class="modal-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="discordChannelModalTitle">
+            <h3 id="discordChannelModalTitle">Set Discord channel</h3>
+            <p id="discordChannelModalSubtitle" class="modal-subtitle"></p>
+            <form id="discordChannelForm">
+                <label class="placeholder-field" for="discordChannelIdInput">
+                    <span>Discord channel ID</span>
+                    <input type="text" id="discordChannelIdInput" inputmode="numeric" autocomplete="off" required />
+                </label>
+                <div id="discordChannelModalFeedback" class="config-feedback" hidden></div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelDiscordChannelBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="saveDiscordChannelBtn" class="btn-primary">Save channel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="configThreadModal" class="modal-overlay" hidden>
         <div class="modal-card config-modal-card" role="dialog" aria-modal="true" aria-labelledby="configThreadModalTitle">
             <h3 id="configThreadModalTitle">Add config thread</h3>
