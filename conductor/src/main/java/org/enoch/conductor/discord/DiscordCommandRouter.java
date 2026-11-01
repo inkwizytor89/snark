@@ -10,9 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Service
 public class DiscordCommandRouter {
@@ -23,10 +28,73 @@ public class DiscordCommandRouter {
     private final ProfileRepository profileRepository;
     private final ProcessService processService;
     private final DiscordCommandContext context = new DiscordCommandContext();
+    private final CommandNode commands = createCommandTree();
 
     public DiscordCommandRouter(ProfileRepository profileRepository, ProcessService processService) {
         this.profileRepository = profileRepository;
         this.processService = processService;
+    }
+
+    private CommandNode createCommandTree() {
+        CommandNode root = new CommandNode(
+                "Available commands: help, ping, context, set <id>, list, start, stop, restart, status, status thread, status deque");
+        root.add("ping", "Replies with pong.",
+                runWithoutArguments(() -> DiscordCommandResult.info("ping", "pong")));
+        root.add("context", "Shows the currently selected instance.",
+                runWithoutArguments(this::describeContext));
+        root.add("set", "Selects the active instance by its ID.", this::setInstanceFromArguments);
+        root.add("list", "Lists all configured instances with their state and Discord channel.",
+                runWithoutArguments(this::listInstances));
+        root.add("start", "Starts the selected instance.", runWithoutArguments(this::startInstance));
+        root.add("stop", "Stops the selected instance.", runWithoutArguments(this::stopInstance));
+        root.add("restart", "Restarts the selected instance.", runWithoutArguments(this::restartInstance));
+
+        CommandNode status = root.add("status", "Shows the selected instance status.", runWithoutArguments(this::statusInstance));
+        status.add("thread", "Lists the active threads of the selected instance.",
+                runWithoutArguments(this::statusThreads));
+        status.add("deque", "Shows the selected instance command deque.",
+                runWithoutArguments(this::statusDeque));
+        root.add("assign", "This command is not available.", this::unsupportedCommand);
+        root.add("clear", "This command is not available.", this::unsupportedCommand);
+        root.add("create", "This command is not available.", arguments -> {
+            if (!arguments.isEmpty() && arguments.get(0).equalsIgnoreCase("instance")) {
+                return DiscordCommandResult.inactive("create instance",
+                        "This command is not available in the current conductor Discord bridge.");
+            }
+            return unknownAction("create " + String.join(" ", arguments));
+        });
+        return root;
+    }
+
+    private DiscordCommandResult setInstanceFromArguments(List<String> arguments) {
+        String instanceId = String.join(" ", arguments);
+        if (instanceId.toLowerCase(Locale.ROOT).startsWith("active instance ")) {
+            return DiscordCommandResult.failure("set",
+                    "Use the shortened set command.",
+                    "Use 'set <id>' to choose the active instance.");
+        }
+        return setActiveInstance(instanceId);
+    }
+
+    private DiscordCommandResult unsupportedCommand(List<String> arguments) {
+        return DiscordCommandResult.inactive(String.join(" ", arguments),
+                "This command is not available in the current conductor Discord bridge.");
+    }
+
+    private DiscordCommandResult instanceArgumentNotAllowed() {
+        return DiscordCommandResult.failure("discord-command",
+                "Instance IDs are not accepted by this command.",
+                "Select the instance with 'set <id>' first.");
+    }
+
+    private Function<List<String>, DiscordCommandResult> runWithoutArguments(
+            Supplier<DiscordCommandResult> action) {
+        return arguments -> {
+            if (!arguments.isEmpty()) {
+                return instanceArgumentNotAllowed();
+            }
+            return action.get();
+        };
     }
 
     public String resolveDefaultActiveInstanceId() {
@@ -53,66 +121,49 @@ public class DiscordCommandRouter {
         }
 
         String command = rawMessage.trim();
-        String normalized = command.toLowerCase(Locale.ROOT);
         LOGGER.info("discord.bot.command.dispatched command={}", command);
+        return dispatch(command);
+    }
 
-        if (normalized.equals("help")) {
-            return DiscordCommandResult.info("help",
-                    "Available commands: help, ping, context, set <id>, list, start, stop, restart, status");
+    private DiscordCommandResult dispatch(String command) {
+        List<String> tokens = new ArrayList<>(List.of(command.split("\\s+")));
+        CommandNode current = commands;
+        if (tokens.get(0).equalsIgnoreCase("help")) {
+            return DiscordCommandResult.info("help", commands.help);
         }
 
-        if (normalized.equals("ping")) {
-            return DiscordCommandResult.info("ping", "pong");
+        for (int index = 0; index < tokens.size(); index++) {
+            String token = tokens.get(index);
+            if (token.equalsIgnoreCase("help")) {
+                return DiscordCommandResult.info("help", current.help);
+            }
+
+            CommandNode child = current.children.get(token.toLowerCase(Locale.ROOT));
+            if (child != null) {
+                current = child;
+                continue;
+            }
+
+            if (!current.children.isEmpty()) {
+                return unknownAction(command);
+            }
+
+            if (current.action != null) {
+                if (tokens.get(tokens.size() - 1).equalsIgnoreCase("help")) {
+                    return DiscordCommandResult.info("help", current.help);
+                }
+                return current.action.apply(tokens.subList(index, tokens.size()));
+            }
+            return unknownAction(command);
         }
 
-        if (normalized.equals("context")) {
-            return describeContext();
+        if (current.action != null) {
+            return current.action.apply(List.of());
         }
+        return unknownAction(command);
+    }
 
-        if (normalized.startsWith("set active instance ")) {
-            return DiscordCommandResult.failure("set",
-                    "Use the shortened set command.",
-                    "Use 'set <id>' to choose the active instance.");
-        }
-
-        if (normalized.startsWith("set ")) {
-            return setActiveInstance(command.substring("set".length()).trim());
-        }
-
-        if (normalized.equals("list")) {
-            return listInstances();
-        }
-
-        if (normalized.equals("start")) {
-            return startInstance();
-        }
-
-        if (normalized.equals("stop")) {
-            return stopInstance();
-        }
-
-        if (normalized.equals("restart")) {
-            return restartInstance();
-        }
-
-        if (normalized.equals("status")) {
-            return statusInstance();
-        }
-
-        if (normalized.startsWith("start ") || normalized.startsWith("stop ")
-                || normalized.startsWith("restart ") || normalized.startsWith("status ")) {
-            return DiscordCommandResult.failure("discord-command",
-                    "Instance IDs are not accepted by this command.",
-                    "Set the active instance with 'set <id>', then use start, stop, restart, or status.");
-        }
-
-        if (normalized.startsWith("set active") || normalized.startsWith("assign") || normalized.startsWith("clear")
-                || normalized.startsWith("create instance")) {
-            LOGGER.warn("discord.bot.command.failed command={} reason=inactive_or_not_supported", command);
-            return DiscordCommandResult.inactive(command,
-                    "This command is not available in the current conductor Discord bridge. Use help to view supported commands.");
-        }
-
+    private DiscordCommandResult unknownAction(String command) {
         LOGGER.warn("discord.bot.command.failed command={} reason=not_recognized", command);
         return DiscordCommandResult.failure("discord-command",
                 "Unknown action: " + command + ". Type help to see the available commands.",
@@ -280,6 +331,50 @@ public class DiscordCommandRouter {
         }
     }
 
+    private DiscordCommandResult statusThreads() {
+        String instanceId = getActiveInstanceId();
+        if (instanceId == null) {
+            return noActiveInstance("status thread");
+        }
+
+        try {
+            if (profileRepository.findById(instanceId).isEmpty()) {
+                LOGGER.warn("discord.bot.command.failed command=status thread instanceId={} reason=active_instance_not_found", instanceId);
+                return DiscordCommandResult.failure("status thread", "Active instance does not exist.", instanceId);
+            }
+            ServerStatus serverStatus = processService.getLastServerStatus(instanceId);
+            List<String> activeThreads = serverStatus == null ? null : serverStatus.getActiveThreads();
+            String threads = activeThreads == null || activeThreads.isEmpty()
+                    ? "-"
+                    : String.join(System.lineSeparator(), activeThreads);
+            return DiscordCommandResult.success("status thread", threads);
+        } catch (Exception e) {
+            LOGGER.warn("discord.bot.command.failed command=status thread instanceId={} reason={}", instanceId, e.getMessage(), e);
+            return DiscordCommandResult.failure("status thread", "Unable to read active threads.", e.getMessage());
+        }
+    }
+
+    private DiscordCommandResult statusDeque() {
+        String instanceId = getActiveInstanceId();
+        if (instanceId == null) {
+            return noActiveInstance("status deque");
+        }
+
+        try {
+            if (profileRepository.findById(instanceId).isEmpty()) {
+                LOGGER.warn("discord.bot.command.failed command=status deque instanceId={} reason=active_instance_not_found", instanceId);
+                return DiscordCommandResult.failure("status deque", "Active instance does not exist.", instanceId);
+            }
+            ServerStatus serverStatus = processService.getLastServerStatus(instanceId);
+            String commandDeque = serverStatus == null ? null : serverStatus.getCommandDeque();
+            return DiscordCommandResult.success("status deque",
+                    commandDeque == null || commandDeque.isBlank() ? "-" : commandDeque);
+        } catch (Exception e) {
+            LOGGER.warn("discord.bot.command.failed command=status deque instanceId={} reason={}", instanceId, e.getMessage(), e);
+            return DiscordCommandResult.failure("status deque", "Unable to read the command deque.", e.getMessage());
+        }
+    }
+
     private String formatNavigatorStatus(String instanceId, NavigatorStatus navigatorStatus) {
         if (navigatorStatus == null) {
             String statusMessage = processService.getLastStatusMessage(instanceId);
@@ -326,5 +421,26 @@ public class DiscordCommandRouter {
     private DiscordCommandResult noActiveInstance(String command) {
         return DiscordCommandResult.failure(command, "No active instance selected.",
                 "Use 'set <id>' to choose the context instance.");
+    }
+
+    private static final class CommandNode {
+        private final String help;
+        private final Map<String, CommandNode> children = new HashMap<>();
+        private final Function<List<String>, DiscordCommandResult> action;
+
+        private CommandNode(String help) {
+            this(help, null);
+        }
+
+        private CommandNode(String help, Function<List<String>, DiscordCommandResult> action) {
+            this.help = help;
+            this.action = action;
+        }
+
+        private CommandNode add(String name, String help, Function<List<String>, DiscordCommandResult> action) {
+            CommandNode child = new CommandNode(help, action);
+            children.put(name, child);
+            return child;
+        }
     }
 }

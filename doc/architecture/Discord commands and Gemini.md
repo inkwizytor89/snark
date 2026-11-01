@@ -4,9 +4,30 @@ Discord is a conductor-owned interface. When a bot token and at least one valid 
 
 The bot also routes a limited set of explicit text commands through the conductor. Optional Gemini-assisted natural-language translation is not implemented. Worker operations remain conductor-owned; snark must not connect to Discord or execute Discord commands locally.
 
-`ping` replies with `pong`. `set <id>` selects the context instance. The `context` command displays it, and `list` shows every configured instance. The `start`, `stop`, `restart`, and `status` commands operate on the selected context and do not accept an instance ID. Lifecycle commands call the conductor's instance process service. If no context is selected, the conductor resolves its configured default instance when available.
+Commands are parsed as a hierarchy of command and action nodes. Each node can define child actions and its own short description; append `help` to the last command/action to display that description. This structure allows future paths such as `<command> <action1> <action2> help` without changing the parsing model. Global `help` lists top-level commands.
 
-For a running instance, `status` reports the same fleet and expedition summary shown in the GUI, followed by its `HH:mm:ss` update time. This response does not include the Discord channel.
+Current command combinations:
+
+| Command | Behavior |
+| --- | --- |
+| `ping` | Replies with `pong`. |
+| `ping help` | Explains `ping`. |
+| `context` | Displays the selected instance. |
+| `context help` | Explains `context`. |
+| `set <id>` | Selects the context instance. |
+| `set help` | Explains `set`. |
+| `list` | Lists all configured instances. |
+| `list help` | Explains `list`. |
+| `start` / `stop` / `restart` | Starts, stops, or restarts the context instance through the conductor process service. |
+| `start help` / `stop help` / `restart help` | Explains the selected lifecycle command. |
+| `status` | Shows the context instance state. For a running instance, it reports the GUI fleet/expedition summary and its `HH:mm:ss` update time, without the Discord channel. |
+| `status help` | Explains `status`. |
+| `status thread` | Lists the active threads exactly as the GUI's “Active threads” field. |
+| `status thread help` | Explains the `status thread` action. |
+| `status deque` | Shows the command deque exactly as the GUI's “Command deque” field. |
+| `status deque help` | Explains the `status deque` action. |
+
+`list` includes every configured instance regardless of its state or Discord channel. If no context is selected, the conductor resolves its configured default instance when available.
 
 Gemini-assisted input is not enabled. Any future Gemini output must be validated against the conductor's allowed command schema and must never be treated as an executable expression.
 

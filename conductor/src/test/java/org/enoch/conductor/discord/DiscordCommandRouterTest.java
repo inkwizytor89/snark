@@ -111,6 +111,50 @@ class DiscordCommandRouterTest {
     }
 
     @Test
+    void shouldListActiveThreadsForContextInstance() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        InstanceProfile profile = profile("server#context", null);
+        when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
+        when(processService.getLastServerStatus("server#context"))
+                .thenReturn(new ServerStatus(null, List.of("NavigatorThread", "FleetThread"), "", "", null));
+        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+        router.handle("set server#context");
+
+        assertEquals("NavigatorThread" + System.lineSeparator() + "FleetThread",
+                router.handle("status thread").render());
+    }
+
+    @Test
+    void shouldShowCommandDequeForContextInstance() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        InstanceProfile profile = profile("server#context", null);
+        when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
+        when(processService.getLastServerStatus("server#context"))
+                .thenReturn(new ServerStatus(null, List.of(), "command A -> command B", "", null));
+        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+        router.handle("set server#context");
+
+        assertEquals("command A -> command B", router.handle("status deque").render());
+    }
+
+    @Test
+    void shouldExplainCommandsAndNestedStatusThreadAction() throws Exception {
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                mock(ProfileRepository.class), mock(ProcessService.class));
+
+        assertTrue(router.handle("list help").render().contains("Lists all configured instances"));
+        assertTrue(router.handle("status help").render().contains("Shows the selected instance status"));
+        assertTrue(router.handle("status thread help").render().contains("Lists the active threads"));
+        assertTrue(router.handle("status deque help").render().contains("Shows the selected instance command deque"));
+        assertTrue(router.handle("set help").render().contains("Selects the active instance"));
+        assertTrue(router.handle("set server#context help").render().contains("Selects the active instance"));
+        assertTrue(router.handle("ping help").render().contains("Replies with pong"));
+        assertTrue(router.handle("status unknown").render().startsWith("Unknown action: status unknown."));
+    }
+
+    @Test
     void shouldRejectInstanceArgumentOnContextCommands() throws Exception {
         ProfileRepository profileRepository = mock(ProfileRepository.class);
         ProcessService processService = mock(ProcessService.class);
@@ -166,10 +210,10 @@ class DiscordCommandRouterTest {
         DiscordCommandRouter router = new DiscordCommandRouter(
                 mock(ProfileRepository.class), mock(ProcessService.class));
 
-        assertTrue(router.handle("list instances").render().startsWith("Unknown action: list instances."));
+        assertTrue(router.handle("list instances").render().contains("Instance IDs are not accepted"));
         assertTrue(router.handle("get context").render().startsWith("Unknown action: get context."));
         assertTrue(router.handle("show context").render().startsWith("Unknown action: show context."));
-        assertTrue(router.handle("set active instance server#context").render().contains("Use the shortened set command"));
+        assertTrue(router.handle("set active instance server#context").render().contains("Use the shortened set command."));
     }
 
     @Test
