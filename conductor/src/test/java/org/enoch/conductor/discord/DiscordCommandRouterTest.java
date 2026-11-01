@@ -3,12 +3,17 @@ package org.enoch.conductor.discord;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
+import org.enoch.common.status.NavigatorStatus;
+import org.enoch.common.status.ServerStatus;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -71,18 +76,38 @@ class DiscordCommandRouterTest {
     }
 
     @Test
-    void shouldReportStatusOfContextInstanceWithoutAnInstanceArgument() throws Exception {
+    void shouldRestartContextInstanceWithoutAnInstanceArgument() throws Exception {
         ProfileRepository profileRepository = mock(ProfileRepository.class);
         ProcessService processService = mock(ProcessService.class);
         InstanceProfile profile = profile("server#context", null);
         when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
+        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+
+        router.handle("set server#context");
+        DiscordCommandResult result = router.handle("restart");
+
+        assertTrue(result.render().contains("Restart request accepted for instance server#context"));
+        verify(processService).restart(profile);
+    }
+
+    @Test
+    void shouldReportStatusOfContextInstanceWithoutAnInstanceArgument() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        InstanceProfile profile = profile("server#context", "987654321098765432");
+        when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
         when(processService.getState("server#context")).thenReturn("running");
+        NavigatorStatus navigatorStatus = new NavigatorStatus(
+                3, 20, 1, 3, Map.of("expedition", 1L), LocalDateTime.of(2026, 11, 1, 21, 44, 5));
+        when(processService.getLastServerStatus("server#context"))
+                .thenReturn(new ServerStatus(navigatorStatus, List.of(), "", "", null));
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
 
         router.handle("set server#context");
         DiscordCommandResult result = router.handle("status");
 
-        assertTrue(result.render().contains("Instance server#context is in state running"));
+        assertEquals("server#context is running. State 3 / 20 1 / 3 e:1 as of 21:44:05.", result.render());
+        assertFalse(result.render().contains("Discord channel"));
     }
 
     @Test
@@ -177,7 +202,7 @@ class DiscordCommandRouterTest {
         ProcessService processService = mock(ProcessService.class);
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
 
-        DiscordCommandResult result = router.handle("restart");
+        DiscordCommandResult result = router.handle("create instance");
 
         assertTrue(result.render().contains("not available"));
     }

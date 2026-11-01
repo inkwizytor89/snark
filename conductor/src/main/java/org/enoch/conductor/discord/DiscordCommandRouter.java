@@ -3,17 +3,22 @@ package org.enoch.conductor.discord;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
+import org.enoch.common.status.NavigatorStatus;
+import org.enoch.common.status.ServerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class DiscordCommandRouter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordCommandRouter.class);
+    private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final ProfileRepository profileRepository;
     private final ProcessService processService;
@@ -53,7 +58,7 @@ public class DiscordCommandRouter {
 
         if (normalized.equals("help")) {
             return DiscordCommandResult.info("help",
-                    "Available commands: help, ping, context, set <id>, list, start, stop, status");
+                    "Available commands: help, ping, context, set <id>, list, start, stop, restart, status");
         }
 
         if (normalized.equals("ping")) {
@@ -86,18 +91,23 @@ public class DiscordCommandRouter {
             return stopInstance();
         }
 
+        if (normalized.equals("restart")) {
+            return restartInstance();
+        }
+
         if (normalized.equals("status")) {
             return statusInstance();
         }
 
-        if (normalized.startsWith("start ") || normalized.startsWith("stop ") || normalized.startsWith("status ")) {
+        if (normalized.startsWith("start ") || normalized.startsWith("stop ")
+                || normalized.startsWith("restart ") || normalized.startsWith("status ")) {
             return DiscordCommandResult.failure("discord-command",
                     "Instance IDs are not accepted by this command.",
-                    "Set the active instance with 'set <id>', then use start, stop, or status.");
+                    "Set the active instance with 'set <id>', then use start, stop, restart, or status.");
         }
 
         if (normalized.startsWith("set active") || normalized.startsWith("assign") || normalized.startsWith("clear")
-                || normalized.startsWith("restart") || normalized.startsWith("create instance")) {
+                || normalized.startsWith("create instance")) {
             LOGGER.warn("discord.bot.command.failed command={} reason=inactive_or_not_supported", command);
             return DiscordCommandResult.inactive(command,
                     "This command is not available in the current conductor Discord bridge. Use help to view supported commands.");
@@ -217,6 +227,27 @@ public class DiscordCommandRouter {
         }
     }
 
+    public DiscordCommandResult restartInstance() {
+        String instanceId = getActiveInstanceId();
+        if (instanceId == null) {
+            return noActiveInstance("restart");
+        }
+
+        try {
+            InstanceProfile profile = profileRepository.findById(instanceId).orElse(null);
+            if (profile == null) {
+                LOGGER.warn("discord.bot.command.failed command=restart instanceId={} reason=active_instance_not_found", instanceId);
+                return DiscordCommandResult.failure("restart", "Active instance does not exist.", instanceId);
+            }
+            processService.restart(profile);
+            LOGGER.info("discord.bot.command.dispatched command=restart instanceId={} result=accepted", instanceId);
+            return DiscordCommandResult.success("restart", "Restart request accepted for instance " + instanceId);
+        } catch (Exception e) {
+            LOGGER.warn("discord.bot.command.failed command=restart instanceId={} reason={}", instanceId, e.getMessage(), e);
+            return DiscordCommandResult.failure("restart", "Restart action failed.", e.getMessage());
+        }
+    }
+
     public DiscordCommandResult statusInstance() {
         String instanceId = getActiveInstanceId();
         if (instanceId == null) {
@@ -230,6 +261,16 @@ public class DiscordCommandRouter {
                 return DiscordCommandResult.failure("status", "Active instance does not exist.", instanceId);
             }
             String state = processService.getState(instanceId);
+            if ("running".equals(state)) {
+                ServerStatus serverStatus = processService.getLastServerStatus(instanceId);
+                NavigatorStatus navigatorStatus = serverStatus == null ? null : serverStatus.getNavigatorStatus();
+                String statusText = formatNavigatorStatus(instanceId, navigatorStatus);
+                String updateTime = navigatorStatus == null || navigatorStatus.getLastUpdate() == null
+                        ? ""
+                        : " as of " + navigatorStatus.getLastUpdate().format(STATUS_TIME_FORMAT);
+                return DiscordCommandResult.success("status",
+                        instanceId + " is running. State " + statusText + updateTime + ".");
+            }
             return DiscordCommandResult.success("status",
                     "Instance " + instanceId + " is in state " + state + ". Discord channel: " +
                             (profile.getDiscordChannelId() == null || profile.getDiscordChannelId().isBlank() ? "none" : profile.getDiscordChannelId()));
@@ -237,6 +278,41 @@ public class DiscordCommandRouter {
             LOGGER.warn("discord.bot.command.failed command=status instanceId={} reason={}", instanceId, e.getMessage(), e);
             return DiscordCommandResult.failure("status", "Status request failed.", e.getMessage());
         }
+    }
+
+    private String formatNavigatorStatus(String instanceId, NavigatorStatus navigatorStatus) {
+        if (navigatorStatus == null) {
+            String statusMessage = processService.getLastStatusMessage(instanceId);
+            return statusMessage == null || statusMessage.isBlank()
+                    ? "Awaiting the next status update..."
+                    : statusMessage;
+        }
+
+        StringBuilder text = new StringBuilder()
+                .append(valueOrZero(navigatorStatus.getFleetCount()))
+                .append(" / ").append(valueOrZero(navigatorStatus.getFleetMax()))
+                .append(' ')
+                .append(valueOrZero(navigatorStatus.getExpeditionCount()))
+                .append(" / ").append(valueOrZero(navigatorStatus.getExpeditionMax()));
+        Map<String, Long> missions = navigatorStatus.getMissions();
+        if (missions != null) {
+            missions.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null && entry.getValue() > 0)
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> {
+                        if (!entry.getKey().isEmpty()) {
+                            text.append(' ')
+                                    .append(entry.getKey().charAt(0))
+                                    .append(':')
+                                    .append(entry.getValue());
+                        }
+                    });
+        }
+        return text.toString();
+    }
+
+    private int valueOrZero(Integer value) {
+        return value == null ? 0 : value;
     }
 
     private String getActiveInstanceId() {
