@@ -42,17 +42,6 @@ public class DiscordCommandResult {
     }
 
     public String render() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Command: ").append(command).append(System.lineSeparator());
-        builder.append("Accepted: ").append(isAccepted() ? "yes" : "no").append(System.lineSeparator());
-        builder.append("Result: ").append(status.name().toLowerCase()).append(System.lineSeparator());
-        builder.append("Action: ").append(command).append(System.lineSeparator());
-        if (message != null && !message.isBlank()) {
-            builder.append("Summary: ").append(message).append(System.lineSeparator());
-        }
-        if (details != null && !details.isBlank()) {
-            builder.append("Details: ").append(details).append(System.lineSeparator());
-        }
-        return builder.toString().trim();
+        return message == null ? "" : message;
     }
 }

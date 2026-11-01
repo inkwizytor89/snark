@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,6 +16,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class DiscordCommandRouterTest {
+
+    @Test
+    void shouldReplyPongToPing() throws Exception {
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                mock(ProfileRepository.class), mock(ProcessService.class));
+
+        assertEquals("pong", router.handle("ping").render());
+    }
 
     @Test
     void shouldSetActiveInstanceUsingShortCommandAndReportIt() throws Exception {
@@ -28,8 +37,7 @@ class DiscordCommandRouterTest {
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
         DiscordCommandResult result = router.handle("set server#user");
 
-        assertTrue(result.render().contains("Command: set"));
-        assertTrue(result.render().contains("Active instance set to server#user"));
+        assertEquals("Active instance set to server#user", result.render());
     }
 
     @Test
@@ -105,7 +113,6 @@ class DiscordCommandRouterTest {
         DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
         DiscordCommandResult result = router.handle("list");
 
-        assertTrue(result.render().contains("Command: list"));
         assertTrue(result.render().contains("server#running"));
         assertTrue(result.render().contains("server#stopped"));
         assertTrue(result.render().contains("server#no-channel"));
@@ -126,7 +133,6 @@ class DiscordCommandRouterTest {
 
         DiscordCommandResult result = router.handle("context");
 
-        assertTrue(result.render().contains("Command: context"));
         assertTrue(result.render().contains("Active instance: server#context"));
     }
 
@@ -135,10 +141,27 @@ class DiscordCommandRouterTest {
         DiscordCommandRouter router = new DiscordCommandRouter(
                 mock(ProfileRepository.class), mock(ProcessService.class));
 
-        assertTrue(router.handle("list instances").render().contains("Command not recognized"));
-        assertTrue(router.handle("get context").render().contains("Command not recognized"));
-        assertTrue(router.handle("show context").render().contains("Command not recognized"));
+        assertTrue(router.handle("list instances").render().startsWith("Unknown action: list instances."));
+        assertTrue(router.handle("get context").render().startsWith("Unknown action: get context."));
+        assertTrue(router.handle("show context").render().startsWith("Unknown action: show context."));
         assertTrue(router.handle("set active instance server#context").render().contains("Use the shortened set command"));
+    }
+
+    @Test
+    void shouldRenderOnlySummaryAndOmitDetails() {
+        DiscordCommandResult result = DiscordCommandResult.failure("test", "Summary text", "Internal details");
+
+        assertEquals("Summary text", result.render());
+    }
+
+    @Test
+    void shouldIncludeUnknownActionAndHelpHint() throws Exception {
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                mock(ProfileRepository.class), mock(ProcessService.class));
+
+        assertEquals(
+                "Unknown action: frobnicate. Type help to see the available commands.",
+                router.handle("frobnicate").render());
     }
 
     private InstanceProfile profile(String id, String discordChannelId) {
@@ -156,7 +179,6 @@ class DiscordCommandRouterTest {
 
         DiscordCommandResult result = router.handle("restart");
 
-        assertTrue(result.render().contains("inactive"));
         assertTrue(result.render().contains("not available"));
     }
 }

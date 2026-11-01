@@ -51,9 +51,13 @@ public class DiscordCommandRouter {
         String normalized = command.toLowerCase(Locale.ROOT);
         LOGGER.info("discord.bot.command.dispatched command={}", command);
 
-        if (normalized.contains("help")) {
+        if (normalized.equals("help")) {
             return DiscordCommandResult.info("help",
-                    "Available commands: help, context, set <id>, list, start, stop, status");
+                    "Available commands: help, ping, context, set <id>, list, start, stop, status");
+        }
+
+        if (normalized.equals("ping")) {
+            return DiscordCommandResult.info("ping", "pong");
         }
 
         if (normalized.equals("context")) {
@@ -101,7 +105,8 @@ public class DiscordCommandRouter {
 
         LOGGER.warn("discord.bot.command.failed command={} reason=not_recognized", command);
         return DiscordCommandResult.failure("discord-command",
-                "Command not recognized.", "Use help to list supported commands.");
+                "Unknown action: " + command + ". Type help to see the available commands.",
+                null);
     }
 
     public DiscordCommandResult describeContext() {
