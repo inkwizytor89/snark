@@ -111,10 +111,7 @@ public class ProcessService {
         runtime.setStartedAt(startedAt);
         runtimes.put(profile.getId(), runtime);
         System.out.println("Started instance with id " + profile.getId() + " and pid " + process.pid());
-        DiscordStatusNotifier discordStatusNotifier = discordStatusNotifierProvider.getIfAvailable();
-        if (discordStatusNotifier != null) {
-            discordStatusNotifier.publishLifecycle(profile.getId(), "started");
-        }
+        publishState(profile.getId(), "starting");
     }
 
     /**
@@ -127,6 +124,10 @@ public class ProcessService {
     }
 
     private void stopRuntime(String id, InstanceRuntime runtime) {
+        stopRuntime(id, runtime, true);
+    }
+
+    private void stopRuntime(String id, InstanceRuntime runtime, boolean notifyStopped) {
 
         if (runtime == null) {
             System.err.println("Instance with id " + id + " is not running");
@@ -150,9 +151,8 @@ public class ProcessService {
         runtime.setOnline(false);
 
         runtimes.remove(id, runtime);
-        DiscordStatusNotifier discordStatusNotifier = discordStatusNotifierProvider.getIfAvailable();
-        if (discordStatusNotifier != null) {
-            discordStatusNotifier.publishLifecycle(id, "stopped");
+        if (notifyStopped) {
+            publishState(id, "stopped");
         }
     }
 
@@ -163,11 +163,8 @@ public class ProcessService {
         managedProfiles.put(profile.getId(), profile);
         restartingInstances.add(profile.getId());
         try {
-            DiscordStatusNotifier discordStatusNotifier = discordStatusNotifierProvider.getIfAvailable();
-            if (discordStatusNotifier != null) {
-                discordStatusNotifier.publishLifecycle(profile.getId(), "restarting");
-            }
-            stopRuntime(profile.getId(), runtimes.get(profile.getId()));
+            publishState(profile.getId(), "restarting");
+            stopRuntime(profile.getId(), runtimes.get(profile.getId()), false);
             Thread.sleep(1000);
             start(profile);
         } finally {
@@ -192,6 +189,7 @@ public class ProcessService {
                         runtime.setOnline(false);
                         runtimes.remove(id, runtime);
                         System.err.println("Worker process exited unexpectedly; restarting instance " + id);
+                        publishState(id, "restarting");
                     }
                     start(profile);
                     continue;
@@ -205,16 +203,27 @@ public class ProcessService {
                     long now = System.currentTimeMillis();
                     if (runtime.getDisconnectedSince() == 0) {
                         runtime.setDisconnectedSince(now);
+                        publishState(id, "disconnected");
                     } else if (now - runtime.getDisconnectedSince() >= workerDisconnectTimeoutMillis) {
                         System.err.println("Worker remained disconnected; restarting instance " + id);
-                        stopRuntime(id, runtime);
-                        start(profile);
+                        restart(profile);
                     }
                 }
+
             } catch (Exception e) {
                 System.err.println("Failed to recover instance " + id + ": " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void publishState(String id, String state) {
+        if (discordStatusNotifierProvider == null) {
+            return;
+        }
+        DiscordStatusNotifier discordStatusNotifier = discordStatusNotifierProvider.getIfAvailable();
+        if (discordStatusNotifier != null) {
+            discordStatusNotifier.publishState(id, state);
         }
     }
 

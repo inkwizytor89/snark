@@ -6,9 +6,11 @@ import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.conductor.command.CommandRequestService;
 import org.enoch.conductor.config.InstanceConfigService;
+import org.enoch.conductor.discord.DiscordStatusNotifier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -47,6 +49,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     
     private InstanceConfigService instanceConfigService;
     private CommandRequestService instanceCommandService;
+    private ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider;
     private volatile BiConsumer<String, String> restartRequestHandler = (instanceId, reason) -> {
         System.err.println("[WS][WORKER][RESTART][UNHANDLED] instanceId=" + instanceId
                 + " reason=" + reason);
@@ -58,6 +61,11 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     public void setInstanceCommandService(CommandRequestService service) {
         this.instanceCommandService = service;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setDiscordStatusNotifierProvider(ObjectProvider<DiscordStatusNotifier> provider) {
+        this.discordStatusNotifierProvider = provider;
     }
 
     public void setRestartRequestHandler(BiConsumer<String, String> handler) {
@@ -167,6 +175,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 "",
                 null));
         lastStatusUpdatedAt.put(instanceId, System.currentTimeMillis());
+        publishState(instanceId, "logged_out");
     }
 
     private void handleStateChanged(String instanceId, WebSocketSession session, JsonNode json) {
@@ -187,6 +196,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         if ("starting".equals(state) || "running".equals(state)) {
             System.err.println("[WS][WORKER][STATE] instanceId=" + instanceId + " state=" + state + " message=" + message);
             lastStatusUpdatedAt.put(instanceId, System.currentTimeMillis());
+            publishState(instanceId, state);
         }
     }
 
@@ -499,6 +509,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || json.path("status").asInt() != 200
                 || !payload.isObject()
                 || !instanceId.equals(payload.path("instanceId").asText(""))
+                || !isNotifiableState(payload.path("state").asText(""))
                 || revision < 0
                 || !isValidServerStatus(serverStatusNode)) {
             System.err.println("[WS][WORKER][REJECTED] Malformed or unauthorized status update instanceId="
@@ -512,10 +523,26 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             }
             lastStatuses.put(instanceId, status);
             updateStatusTimestamp(instanceId);
+            publishState(instanceId, payload.path("state").asText());
         } catch (Exception e) {
             System.err.println("[WS][WORKER][REJECTED] Invalid status update instanceId=" + instanceId
                     + " messageId=" + messageId + ": " + e.getMessage());
         }
+
+    }
+
+    private void publishState(String instanceId, String state) {
+        if (discordStatusNotifierProvider == null) {
+            return;
+        }
+        DiscordStatusNotifier notifier = discordStatusNotifierProvider.getIfAvailable();
+        if (notifier != null) {
+            notifier.publishState(instanceId, state);
+        }
+    }
+
+    private boolean isNotifiableState(String state) {
+        return "starting".equals(state) || "running".equals(state) || "logged_out".equals(state);
     }
 
     private boolean applyRevision(String instanceId, long revision) {

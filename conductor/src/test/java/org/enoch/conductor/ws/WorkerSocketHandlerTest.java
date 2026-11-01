@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -19,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.clearInvocations;
 import java.util.concurrent.atomic.AtomicReference;
@@ -135,6 +138,10 @@ class WorkerSocketHandlerTest {
     @Test
     void shouldAcceptUnsolicitedStatusUpdatesAndIgnoreStaleRevisions() throws Exception {
         WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        ObjectProvider<DiscordStatusNotifier> notifierProvider = mock(ObjectProvider.class);
+        DiscordStatusNotifier notifier = mock(DiscordStatusNotifier.class);
+        when(notifierProvider.getIfAvailable()).thenReturn(notifier);
+        handler.setDiscordStatusNotifierProvider(notifierProvider);
         WebSocketSession session = openSession();
         TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
         testHandler.receive(session, """
@@ -149,6 +156,7 @@ class WorkerSocketHandlerTest {
                  "lastUpdate":"2026-10-21T12:00:00"},"activeThreads":[],"commandDeque":"",
                  "notifications":"","coordinates":{"planetCount":0,"moonCount":0,"colonies":[]}}}}
                 """);
+        verify(notifier).publishState("worker#1", "running");
         long updatedAt = handler.getLastStatusUpdatedAt("worker#1");
         testHandler.receive(session, """
                 {"id":"update-1","type":"update:status","from":"worker#1","to":"conductor",
@@ -158,6 +166,7 @@ class WorkerSocketHandlerTest {
                  "notifications":"","coordinates":{"planetCount":0,"moonCount":0,"colonies":[]}}}}
                 """);
 
+        verify(notifier, times(1)).publishState("worker#1", "running");
         assertEquals("new status", handler.getLastStatusMessage("worker#1"));
         assertEquals(updatedAt, handler.getLastStatusUpdatedAt("worker#1"));
     }

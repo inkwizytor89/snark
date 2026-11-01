@@ -1102,7 +1102,6 @@ function initApp() {
                 monitorInterval: document.getElementById('settingsMonitorInterval'),
                 disconnectTimeout: document.getElementById('settingsDisconnectTimeout'),
                 serverPort: document.getElementById('settingsServerPort'),
-                discordBotEnabled: document.getElementById('settingsDiscordBotEnabled'),
                 discordBotToken: document.getElementById('settingsDiscordBotToken')
             };
             fields.browserAutoOpen.checked = !!settings.browserAutoOpen;
@@ -1113,7 +1112,6 @@ function initApp() {
             fields.monitorInterval.value = settings.autoStartIntervalMs ?? 5000;
             fields.disconnectTimeout.value = settings.workerDisconnectTimeoutMs ?? 30000;
             fields.serverPort.value = settings.serverPort ?? 8080;
-            fields.discordBotEnabled.checked = !!settings.discordBotEnabled;
             fields.discordBotToken.value = settings.discordBotToken || '';
             renderGlobalSettingsFeedback('');
             globalSettingsModal.hidden = false;
@@ -1139,7 +1137,6 @@ function initApp() {
             autoStartIntervalMs: Number(document.getElementById('settingsMonitorInterval').value),
             workerDisconnectTimeoutMs: Number(document.getElementById('settingsDisconnectTimeout').value),
             serverPort: Number(document.getElementById('settingsServerPort').value),
-            discordBotEnabled: document.getElementById('settingsDiscordBotEnabled').checked,
             discordBotToken: document.getElementById('settingsDiscordBotToken').value.trim()
         };
 

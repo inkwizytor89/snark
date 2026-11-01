@@ -16,8 +16,11 @@ import org.enoch.conductor.settings.ConductorSettings;
 import org.enoch.conductor.startproperties.StartPropertiesRepository;
 import org.enoch.conductor.startproperties.StartPropertyTemplate;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.conductor.discord.DiscordBotService;
+import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -37,19 +40,25 @@ public class InstanceController {
     private final InstanceConfigService instanceConfigService;
     private final CommandRequestService commandRequestService;
     private final ConductorSettings conductorSettings;
+    private final ObjectProvider<DiscordBotService> discordBotServiceProvider;
+    private final ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider;
 
     public InstanceController(ProcessService processService,
                               ProfileRepository profileRepository,
                               StartPropertiesRepository startPropertiesRepository,
                               InstanceConfigService instanceConfigService,
                               CommandRequestService commandRequestService,
-                              ConductorSettings conductorSettings) {
+                              ConductorSettings conductorSettings,
+                              ObjectProvider<DiscordBotService> discordBotServiceProvider,
+                              ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider) {
         this.processService = processService;
         this.profileRepository = profileRepository;
         this.startPropertiesRepository = startPropertiesRepository;
         this.instanceConfigService = instanceConfigService;
         this.commandRequestService = commandRequestService;
         this.conductorSettings = conductorSettings;
+        this.discordBotServiceProvider = discordBotServiceProvider;
+        this.discordStatusNotifierProvider = discordStatusNotifierProvider;
     }
 
     @GetMapping
@@ -88,7 +97,6 @@ public class InstanceController {
         settings.put("autoStartIntervalMs", conductorSettings.getInstanceMonitorIntervalMs());
         settings.put("workerDisconnectTimeoutMs", conductorSettings.getWorkerDisconnectTimeoutMs());
         settings.put("serverPort", conductorSettings.getServerPort());
-        settings.put("discordBotEnabled", conductorSettings.isDiscordBotEnabled());
         settings.put("discordBotToken", conductorSettings.getDiscordBotToken());
         return ResponseEntity.ok(settings);
     }
@@ -128,16 +136,13 @@ public class InstanceController {
         if (serverPort != null) {
             next.setServerPort(Integer.parseInt(String.valueOf(serverPort).trim()));
         }
-        Object discordBotEnabled = request.get("discordBotEnabled");
-        if (discordBotEnabled != null) {
-            next.setDiscordBotEnabled(Boolean.parseBoolean(String.valueOf(discordBotEnabled)));
-        }
         Object discordBotToken = request.get("discordBotToken");
         if (discordBotToken != null) {
             next.setDiscordBotToken(String.valueOf(discordBotToken).trim());
         }
 
         conductorSettings.apply(next);
+        refreshDiscordBot();
         Map<String, Object> saved = new HashMap<>();
         saved.put("message", "Settings saved");
         saved.put("browserAutoOpen", conductorSettings.isBrowserAutoOpen());
@@ -148,7 +153,6 @@ public class InstanceController {
         saved.put("autoStartIntervalMs", conductorSettings.getInstanceMonitorIntervalMs());
         saved.put("workerDisconnectTimeoutMs", conductorSettings.getWorkerDisconnectTimeoutMs());
         saved.put("serverPort", conductorSettings.getServerPort());
-        saved.put("discordBotEnabled", conductorSettings.isDiscordBotEnabled());
         saved.put("discordBotToken", conductorSettings.getDiscordBotToken());
         return ResponseEntity.ok(saved);
     }
@@ -513,6 +517,12 @@ public class InstanceController {
 
         profile.setDiscordChannelId(normalized);
         profileRepository.save(profile);
+        refreshDiscordBot();
+        DiscordStatusNotifier notifier = discordStatusNotifierProvider.getIfAvailable();
+        if (notifier != null) {
+            notifier.resetLastNotifiedState(id);
+            notifier.publishState(id, processService.getState(id));
+        }
         return ResponseEntity.ok(Map.of(
                 "message", "Discord channel assigned",
                 "id", id,
@@ -529,6 +539,11 @@ public class InstanceController {
 
         profile.setDiscordChannelId(null);
         profileRepository.save(profile);
+        refreshDiscordBot();
+        DiscordStatusNotifier notifier = discordStatusNotifierProvider.getIfAvailable();
+        if (notifier != null) {
+            notifier.resetLastNotifiedState(id);
+        }
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Discord channel cleared");
         response.put("id", id);
@@ -566,6 +581,11 @@ public class InstanceController {
         } catch (IOException e) {
             throw e;
         }
+        DiscordStatusNotifier notifier = discordStatusNotifierProvider.getIfAvailable();
+        if (notifier != null) {
+            notifier.resetLastNotifiedState(id);
+        }
+        refreshDiscordBot();
 
         return ResponseEntity.ok(Map.of(
                 "message", "Instance deleted",
@@ -649,5 +669,12 @@ public class InstanceController {
         }
 
         return ResponseEntity.status(409).body(Map.of("error", message));
+    }
+
+    private void refreshDiscordBot() {
+        DiscordBotService discordBotService = discordBotServiceProvider.getIfAvailable();
+        if (discordBotService != null) {
+            discordBotService.refresh();
+        }
     }
 }

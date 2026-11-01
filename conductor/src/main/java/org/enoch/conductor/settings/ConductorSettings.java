@@ -25,7 +25,6 @@ public class ConductorSettings {
     private static final String DEFAULT_INSTANCE_MONITOR_INTERVAL_MS = "5000";
     private static final String DEFAULT_WORKER_DISCONNECT_TIMEOUT_MS = "30000";
     private static final String DEFAULT_SERVER_PORT = "8080";
-    private static final String DEFAULT_DISCORD_BOT_ENABLED = "false";
     private static final String DEFAULT_DISCORD_BOT_TOKEN = "";
 
     private boolean browserAutoOpen = Boolean.parseBoolean(DEFAULT_BROWSER_AUTO_OPEN);
@@ -36,7 +35,6 @@ public class ConductorSettings {
     private long instanceMonitorIntervalMs = Long.parseLong(DEFAULT_INSTANCE_MONITOR_INTERVAL_MS);
     private long workerDisconnectTimeoutMs = Long.parseLong(DEFAULT_WORKER_DISCONNECT_TIMEOUT_MS);
     private int serverPort = Integer.parseInt(DEFAULT_SERVER_PORT);
-    private boolean discordBotEnabled = Boolean.parseBoolean(DEFAULT_DISCORD_BOT_ENABLED);
     private String discordBotToken = DEFAULT_DISCORD_BOT_TOKEN;
 
     public ConductorSettings() {
@@ -62,7 +60,6 @@ public class ConductorSettings {
         defaults.put("conductor.worker-disconnect-timeout", properties.getProperty("conductor.worker-disconnect-timeout", DEFAULT_WORKER_DISCONNECT_TIMEOUT_MS));
         defaults.put("server.port", properties.getProperty("server.port", DEFAULT_SERVER_PORT));
         defaults.put("browser.auto-open", properties.getProperty("browser.auto-open", DEFAULT_BROWSER_AUTO_OPEN));
-        defaults.put("discord.bot.enabled", properties.getProperty("discord.bot.enabled", DEFAULT_DISCORD_BOT_ENABLED));
         defaults.put("discord.bot.token", properties.getProperty("discord.bot.token", DEFAULT_DISCORD_BOT_TOKEN));
 
         for (String arg : args) {
@@ -89,7 +86,6 @@ public class ConductorSettings {
         this.instanceMonitorIntervalMs = parseLong(properties.getProperty("conductor.instances-monitor-interval", DEFAULT_INSTANCE_MONITOR_INTERVAL_MS), 5000L);
         this.workerDisconnectTimeoutMs = parseLong(properties.getProperty("conductor.worker-disconnect-timeout", DEFAULT_WORKER_DISCONNECT_TIMEOUT_MS), 30000L);
         this.serverPort = parseInt(properties.getProperty("server.port", DEFAULT_SERVER_PORT), 8080);
-        this.discordBotEnabled = Boolean.parseBoolean(properties.getProperty("discord.bot.enabled", DEFAULT_DISCORD_BOT_ENABLED));
         this.discordBotToken = properties.getProperty("discord.bot.token", DEFAULT_DISCORD_BOT_TOKEN);
         applySystemProperties();
     }
@@ -103,7 +99,6 @@ public class ConductorSettings {
         this.instanceMonitorIntervalMs = other.instanceMonitorIntervalMs > 0 ? other.instanceMonitorIntervalMs : 5000L;
         this.workerDisconnectTimeoutMs = other.workerDisconnectTimeoutMs > 0 ? other.workerDisconnectTimeoutMs : 30000L;
         this.serverPort = other.serverPort > 0 ? other.serverPort : 8080;
-        this.discordBotEnabled = other.discordBotEnabled;
         this.discordBotToken = other.discordBotToken == null ? DEFAULT_DISCORD_BOT_TOKEN : other.discordBotToken.trim();
 
         Properties properties = new Properties();
@@ -115,7 +110,6 @@ public class ConductorSettings {
         properties.setProperty("conductor.instances-monitor-interval", Long.toString(this.instanceMonitorIntervalMs));
         properties.setProperty("conductor.worker-disconnect-timeout", Long.toString(this.workerDisconnectTimeoutMs));
         properties.setProperty("server.port", Integer.toString(this.serverPort));
-        properties.setProperty("discord.bot.enabled", Boolean.toString(this.discordBotEnabled));
         properties.setProperty("discord.bot.token", this.discordBotToken);
         writeProperties(properties);
         applySystemProperties();
@@ -131,7 +125,6 @@ public class ConductorSettings {
         copy.instanceMonitorIntervalMs = this.instanceMonitorIntervalMs;
         copy.workerDisconnectTimeoutMs = this.workerDisconnectTimeoutMs;
         copy.serverPort = this.serverPort;
-        copy.discordBotEnabled = this.discordBotEnabled;
         copy.discordBotToken = this.discordBotToken;
         return copy;
     }
@@ -200,14 +193,6 @@ public class ConductorSettings {
         this.serverPort = serverPort > 0 ? serverPort : 8080;
     }
 
-    public boolean isDiscordBotEnabled() {
-        return discordBotEnabled;
-    }
-
-    public void setDiscordBotEnabled(boolean discordBotEnabled) {
-        this.discordBotEnabled = discordBotEnabled;
-    }
-
     public String getDiscordBotToken() {
         return discordBotToken == null ? DEFAULT_DISCORD_BOT_TOKEN : discordBotToken;
     }
@@ -254,7 +239,6 @@ public class ConductorSettings {
         content.append("conductor.instances-monitor-interval=5000\n");
         content.append("conductor.worker-disconnect-timeout=30000\n");
         content.append("server.port=8080\n");
-        content.append("discord.bot.enabled=false\n");
         content.append("discord.bot.token=\n");
         return content.toString();
     }
@@ -292,7 +276,6 @@ public class ConductorSettings {
         System.setProperty("conductor.instances-monitor-interval", Long.toString(this.instanceMonitorIntervalMs));
         System.setProperty("conductor.worker-disconnect-timeout", Long.toString(this.workerDisconnectTimeoutMs));
         System.setProperty("server.port", Integer.toString(this.serverPort));
-        System.setProperty("discord.bot.enabled", Boolean.toString(this.discordBotEnabled));
         System.setProperty("discord.bot.token", this.discordBotToken == null ? DEFAULT_DISCORD_BOT_TOKEN : this.discordBotToken);
     }
 }

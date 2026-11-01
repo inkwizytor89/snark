@@ -3,8 +3,13 @@ package org.enoch.conductor.discord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.enoch.conductor.instance.InstanceProfile;
+import org.enoch.conductor.instance.ProfileRepository;
+import org.enoch.conductor.process.ProcessService;
 import org.enoch.conductor.settings.ConductorSettings;
+import org.springframework.beans.factory.ObjectProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,33 +22,70 @@ public class DiscordBotService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordBotService.class);
 
-    private final DiscordCommandRouter commandRouter;
+    private final ObjectProvider<DiscordCommandRouter> commandRouterProvider;
+    private final ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider;
+    private final ObjectProvider<ProcessService> processServiceProvider;
     private final ConductorSettings conductorSettings;
+    private final ProfileRepository profileRepository;
     private volatile JDA jda;
+    private String activeToken;
 
-    public DiscordBotService(DiscordCommandRouter commandRouter, ConductorSettings conductorSettings) {
-        this.commandRouter = commandRouter;
+    public DiscordBotService(ObjectProvider<DiscordCommandRouter> commandRouterProvider,
+                             ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider,
+                             ObjectProvider<ProcessService> processServiceProvider,
+                             ConductorSettings conductorSettings,
+                             ProfileRepository profileRepository) {
+        this.commandRouterProvider = commandRouterProvider;
+        this.discordStatusNotifierProvider = discordStatusNotifierProvider;
+        this.processServiceProvider = processServiceProvider;
         this.conductorSettings = conductorSettings;
+        this.profileRepository = profileRepository;
     }
 
     @PostConstruct
     public void initialize() {
+        refresh();
+    }
+
+    public synchronized void refresh() {
         String token = conductorSettings.getDiscordBotToken();
-        boolean enabled = conductorSettings.isDiscordBotEnabled();
+        boolean hasConfiguredChannel;
+        try {
+            hasConfiguredChannel = profileRepository.loadAll().stream()
+                    .map(InstanceProfile::getDiscordChannelId)
+                    .anyMatch(DiscordChannelValidator::isAllowedForNotification);
+        } catch (Exception e) {
+            LOGGER.error("discord.bot.configuration.failed reason=profiles_unavailable", e);
+            stopBot();
+            return;
+        }
 
         if (token == null || token.isBlank()) {
-            LOGGER.info("discord.bot.startup status=disabled reason=missing_token");
+            LOGGER.info("discord.bot.status=disabled reason=missing_token");
+            stopBot();
+            return;
+        }
+        if (!hasConfiguredChannel) {
+            LOGGER.info("discord.bot.status=disabled reason=no_configured_channel");
+            stopBot();
+            return;
+        }
+        if (jda != null && token.equals(activeToken) && jda.getStatus() != JDA.Status.SHUTDOWN) {
             return;
         }
 
-        if (!enabled) {
-            LOGGER.info("discord.bot.startup status=disabled reason=feature_off token_present=true");
-            return;
-        }
-
+        stopBot();
         try {
-            jda = JDABuilder.createDefault(token)
+            JDA startedJda = JDABuilder.createDefault(token)
                     .addEventListeners(new ListenerAdapter() {
+                        @Override
+                        public void onReady(ReadyEvent event) {
+                            jda = event.getJDA();
+                            activeToken = token;
+                            LOGGER.info("discord.bot.status=ready");
+                            publishCurrentStatuses();
+                        }
+
                         @Override
                         public void onMessageReceived(MessageReceivedEvent event) {
                             if (event.getAuthor().isBot() || event.getAuthor().isSystem()) {
@@ -58,41 +100,64 @@ public class DiscordBotService {
                                 return;
                             }
                             LOGGER.info("discord.bot.command.received user={} command={}", event.getAuthor().getName(), command);
-                            String reply = commandRouter.handle(command).render();
+                            String reply = commandRouterProvider.getObject().handle(command).render();
                             event.getChannel().sendMessage(reply).queue();
                         }
                     })
                     .build();
-            String defaultInstance = commandRouter.resolveDefaultActiveInstanceId();
-            LOGGER.info("discord.bot.startup status=started default_instance={}", defaultInstance == null ? "none" : defaultInstance);
+            jda = startedJda;
+            activeToken = token;
+            LOGGER.info("discord.bot.status=starting reason=token_and_channel_configured");
         } catch (Exception e) {
-            LOGGER.error("discord.bot.startup status=failed reason={} token_present=true", e.getMessage(), e);
+            LOGGER.error("discord.bot.startup status=failed reason={}", e.getMessage(), e);
+            stopBot();
+        }
+    }
+
+    private void publishCurrentStatuses() {
+        try {
+            ProcessService processService = processServiceProvider.getObject();
+            commandRouterProvider.getObject().resolveDefaultActiveInstanceId();
+            DiscordStatusNotifier notifier = discordStatusNotifierProvider.getObject();
+            for (InstanceProfile profile : profileRepository.loadAll()) {
+                if (DiscordChannelValidator.isAllowedForNotification(profile.getDiscordChannelId())) {
+                    notifier.publishState(profile.getId(), processService.getState(profile.getId()));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("discord.bot.startup_status.failed reason={}", e.getMessage(), e);
         }
     }
 
     @PreDestroy
     public void shutdown() {
+        stopBot();
+    }
+
+    private synchronized void stopBot() {
         if (jda != null) {
-            LOGGER.info("discord.bot.shutdown status=stopping");
-            jda.shutdown();
+            LOGGER.info("discord.bot.status=stopping");
+            jda.shutdownNow();
+            jda = null;
         }
+        activeToken = null;
     }
 
     public boolean isEnabled() {
         String token = conductorSettings.getDiscordBotToken();
-        return conductorSettings.isDiscordBotEnabled() && token != null && !token.isBlank() && jda != null;
+        return token != null && !token.isBlank() && jda != null && jda.getStatus() != JDA.Status.SHUTDOWN;
     }
 
     public String handleCommand(String message) {
         if (!isEnabled()) {
-            return "Discord bot is not active. Set a Discord token and enable the bot in the global settings before use.";
+            return "Discord bot is not active. Configure a Discord token and an instance channel in the conductor.";
         }
 
-        return commandRouter.handle(message).render();
+        return commandRouterProvider.getObject().handle(message).render();
     }
 
     public String getDefaultActiveInstanceId() {
-        return commandRouter.resolveDefaultActiveInstanceId();
+        return commandRouterProvider.getObject().resolveDefaultActiveInstanceId();
     }
 
     public JDA getJda() {

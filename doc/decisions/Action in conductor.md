@@ -6,4 +6,4 @@ The GUI and terminal are not allowed to execute operations directly on worker in
 
 This keeps execution centralized and prevents bypassing lifecycle controls, status checks, and instance isolation rules. In practice, the conductor is the single entry point for start, stop, restart, status polling, and other instance-related actions.
 
-Discord commands with optional Gemini-assisted natural-language translation are a future conductor interface only; they are not currently usable. See [Discord commands and Gemini](../architecture/Discord%20commands%20and%20Gemini.md).
+Discord bot commands and status notifications are conductor-owned interfaces. Optional Gemini-assisted natural-language translation is not implemented. See [Discord commands and Gemini](../architecture/Discord%20commands%20and%20Gemini.md).

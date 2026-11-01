@@ -1,8 +1,8 @@
 # Discord commands and Gemini
 
-Discord commands are a planned conductor interface, not a usable feature at present. The intended flow is for the conductor to receive a Discord command, optionally use Gemini to translate natural-language input into an approved conductor operation, validate the operation, and send a correlated WebSocket request to the selected snark instance. Responses and status should return through the conductor before being reported to Discord.
+Discord is a conductor-owned interface. When a bot token and at least one valid instance channel are configured, the conductor starts the JDA bot and sends instance status changes to each instance's configured channel. See [Discord instance status notifications](../bugfix/Discord%20instance%20status%20notifications.md) for lifecycle and delivery behavior.
 
-The conductor CLI already sends worker requests through the conductor-worker WebSocket connection. Discord and Gemini do not yet use this path: their conductor classes are placeholders, no Discord listener is started, and natural-language commands are not executed. Snark must not connect to Discord or execute conductor commands locally.
+The bot also routes a limited set of explicit text commands through the conductor. Optional Gemini-assisted natural-language translation is not implemented. Worker operations remain conductor-owned; snark must not connect to Discord or execute Discord commands locally.
 
 Before enabling this feature, define the allowed command schema, authorization and instance-selection rules, confirmation behavior for state-changing operations, response correlation and timeout handling, and safe Gemini output validation. Gemini output must never be treated as an executable expression or command without conductor-side validation.
 
