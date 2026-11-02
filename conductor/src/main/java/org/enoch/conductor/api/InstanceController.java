@@ -90,6 +90,7 @@ public class InstanceController {
     public ResponseEntity<Map<String, Object>> getSettings() {
         Map<String, Object> settings = new HashMap<>();
         settings.put("browserAutoOpen", conductorSettings.isBrowserAutoOpen());
+        settings.put("webSocketDebug", conductorSettings.isWebSocketDebug());
         settings.put("instancesDir", conductorSettings.getInstancesDir());
         settings.put("startPropertiesDir", conductorSettings.getStartPropertiesDir());
         settings.put("templatesDir", conductorSettings.getTemplatesDir());
@@ -107,6 +108,10 @@ public class InstanceController {
         Object browserAutoOpen = request.get("browserAutoOpen");
         if (browserAutoOpen != null) {
             next.setBrowserAutoOpen(Boolean.parseBoolean(String.valueOf(browserAutoOpen)));
+        }
+        Object webSocketDebug = request.get("webSocketDebug");
+        if (webSocketDebug != null) {
+            next.setWebSocketDebug(Boolean.parseBoolean(String.valueOf(webSocketDebug)));
         }
         Object instancesDir = request.get("instancesDir");
         if (instancesDir != null && String.valueOf(instancesDir).isBlank() == false) {
@@ -146,6 +151,7 @@ public class InstanceController {
         Map<String, Object> saved = new HashMap<>();
         saved.put("message", "Settings saved");
         saved.put("browserAutoOpen", conductorSettings.isBrowserAutoOpen());
+        saved.put("webSocketDebug", conductorSettings.isWebSocketDebug());
         saved.put("instancesDir", conductorSettings.getInstancesDir());
         saved.put("startPropertiesDir", conductorSettings.getStartPropertiesDir());
         saved.put("templatesDir", conductorSettings.getTemplatesDir());

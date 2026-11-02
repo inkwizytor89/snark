@@ -7,6 +7,7 @@ import org.enoch.common.status.StatusDetails;
 import org.enoch.conductor.command.CommandRequestService;
 import org.enoch.conductor.config.InstanceConfigService;
 import org.enoch.conductor.discord.DiscordStatusNotifier;
+import org.enoch.conductor.settings.ConductorSettings;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -50,6 +51,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private InstanceConfigService instanceConfigService;
     private CommandRequestService instanceCommandService;
     private ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider;
+    private ConductorSettings conductorSettings;
     private volatile BiConsumer<String, String> restartRequestHandler = (instanceId, reason) -> {
         System.err.println("[WS][WORKER][RESTART][UNHANDLED] instanceId=" + instanceId
                 + " reason=" + reason);
@@ -61,6 +63,11 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     public void setInstanceCommandService(CommandRequestService service) {
         this.instanceCommandService = service;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setConductorSettings(ConductorSettings settings) {
+        this.conductorSettings = settings;
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -417,12 +424,18 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     }
 
     private void logIncoming(WebSocketSession session, String payload) {
+        if (conductorSettings == null || !conductorSettings.isWebSocketDebug()) {
+            return;
+        }
         System.out.println("[WS][WORKER][IN] sessionId=" + session.getId()
                 + " instanceId=" + resolveWorkerId(session)
                 + " payload=" + payload);
     }
 
     private void logOutgoing(WebSocketSession session, String workerId, String payload) {
+        if (conductorSettings == null || !conductorSettings.isWebSocketDebug()) {
+            return;
+        }
         System.out.println("[WS][WORKER][OUT] sessionId=" + session.getId()
                 + " instanceId=" + (workerId != null ? workerId : resolveWorkerId(session))
                 + " payload=" + payload);

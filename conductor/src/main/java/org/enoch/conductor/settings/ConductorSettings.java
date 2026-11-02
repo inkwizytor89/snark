@@ -18,6 +18,7 @@ public class ConductorSettings {
     public static final Path SETTINGS_PATH = Path.of("settings");
 
     private static final String DEFAULT_BROWSER_AUTO_OPEN = "true";
+    private static final String DEFAULT_WEBSOCKET_DEBUG = "false";
     private static final String DEFAULT_INSTANCES_DIR = "instances";
     private static final String DEFAULT_START_PROPERTIES_DIR = "start-properties";
     private static final String DEFAULT_TEMPLATES_DIR = "templates";
@@ -28,6 +29,7 @@ public class ConductorSettings {
     private static final String DEFAULT_DISCORD_BOT_TOKEN = "";
 
     private boolean browserAutoOpen = Boolean.parseBoolean(DEFAULT_BROWSER_AUTO_OPEN);
+    private volatile boolean webSocketDebug = Boolean.parseBoolean(DEFAULT_WEBSOCKET_DEBUG);
     private String instancesDir = DEFAULT_INSTANCES_DIR;
     private String startPropertiesDir = DEFAULT_START_PROPERTIES_DIR;
     private String templatesDir = DEFAULT_TEMPLATES_DIR;
@@ -60,6 +62,7 @@ public class ConductorSettings {
         defaults.put("conductor.worker-disconnect-timeout", properties.getProperty("conductor.worker-disconnect-timeout", DEFAULT_WORKER_DISCONNECT_TIMEOUT_MS));
         defaults.put("server.port", properties.getProperty("server.port", DEFAULT_SERVER_PORT));
         defaults.put("browser.auto-open", properties.getProperty("browser.auto-open", DEFAULT_BROWSER_AUTO_OPEN));
+        defaults.put("conductor.websocket-debug", properties.getProperty("conductor.websocket-debug", DEFAULT_WEBSOCKET_DEBUG));
         defaults.put("discord.bot.token", properties.getProperty("discord.bot.token", DEFAULT_DISCORD_BOT_TOKEN));
 
         for (String arg : args) {
@@ -79,6 +82,7 @@ public class ConductorSettings {
         ensureFileExists();
         Properties properties = loadProperties();
         this.browserAutoOpen = Boolean.parseBoolean(properties.getProperty("browser.auto-open", DEFAULT_BROWSER_AUTO_OPEN));
+        this.webSocketDebug = Boolean.parseBoolean(properties.getProperty("conductor.websocket-debug", DEFAULT_WEBSOCKET_DEBUG));
         this.instancesDir = normalize(properties.getProperty("conductor.instances-dir", DEFAULT_INSTANCES_DIR), DEFAULT_INSTANCES_DIR);
         this.startPropertiesDir = normalize(properties.getProperty("conductor.start-properties-dir", DEFAULT_START_PROPERTIES_DIR), DEFAULT_START_PROPERTIES_DIR);
         this.templatesDir = normalize(properties.getProperty("conductor.templates-dir", DEFAULT_TEMPLATES_DIR), DEFAULT_TEMPLATES_DIR);
@@ -92,6 +96,7 @@ public class ConductorSettings {
 
     public void apply(ConductorSettings other) throws IOException {
         this.browserAutoOpen = other.browserAutoOpen;
+        this.webSocketDebug = other.webSocketDebug;
         this.instancesDir = normalize(other.instancesDir, DEFAULT_INSTANCES_DIR);
         this.startPropertiesDir = normalize(other.startPropertiesDir, DEFAULT_START_PROPERTIES_DIR);
         this.templatesDir = normalize(other.templatesDir, DEFAULT_TEMPLATES_DIR);
@@ -103,6 +108,7 @@ public class ConductorSettings {
 
         Properties properties = new Properties();
         properties.setProperty("browser.auto-open", Boolean.toString(this.browserAutoOpen));
+        properties.setProperty("conductor.websocket-debug", Boolean.toString(this.webSocketDebug));
         properties.setProperty("conductor.instances-dir", this.instancesDir);
         properties.setProperty("conductor.start-properties-dir", this.startPropertiesDir);
         properties.setProperty("conductor.templates-dir", this.templatesDir);
@@ -118,6 +124,7 @@ public class ConductorSettings {
     public ConductorSettings copy() {
         ConductorSettings copy = new ConductorSettings();
         copy.browserAutoOpen = this.browserAutoOpen;
+        copy.webSocketDebug = this.webSocketDebug;
         copy.instancesDir = this.instancesDir;
         copy.startPropertiesDir = this.startPropertiesDir;
         copy.templatesDir = this.templatesDir;
@@ -135,6 +142,14 @@ public class ConductorSettings {
 
     public void setBrowserAutoOpen(boolean browserAutoOpen) {
         this.browserAutoOpen = browserAutoOpen;
+    }
+
+    public boolean isWebSocketDebug() {
+        return webSocketDebug;
+    }
+
+    public void setWebSocketDebug(boolean webSocketDebug) {
+        this.webSocketDebug = webSocketDebug;
     }
 
     public String getInstancesDir() {
@@ -232,6 +247,7 @@ public class ConductorSettings {
     private static String buildDefaultPropertiesContent() {
         StringBuilder content = new StringBuilder();
         content.append("browser.auto-open=true\n");
+        content.append("conductor.websocket-debug=false\n");
         content.append("conductor.instances-dir=instances\n");
         content.append("conductor.start-properties-dir=start-properties\n");
         content.append("conductor.templates-dir=templates\n");
@@ -269,6 +285,7 @@ public class ConductorSettings {
 
     private void applySystemProperties() {
         System.setProperty("browser.auto-open", Boolean.toString(this.browserAutoOpen));
+        System.setProperty("conductor.websocket-debug", Boolean.toString(this.webSocketDebug));
         System.setProperty("conductor.instances-dir", this.instancesDir);
         System.setProperty("conductor.start-properties-dir", this.startPropertiesDir);
         System.setProperty("conductor.templates-dir", this.templatesDir);

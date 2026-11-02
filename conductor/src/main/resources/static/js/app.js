@@ -1095,6 +1095,7 @@ function initApp() {
             const settings = await response.json();
             const fields = {
                 browserAutoOpen: document.getElementById('settingsBrowserAutoOpen'),
+                webSocketDebug: document.getElementById('settingsWebSocketDebug'),
                 instancesDir: document.getElementById('settingsInstancesDir'),
                 startPropertiesDir: document.getElementById('settingsStartPropertiesDir'),
                 templatesDir: document.getElementById('settingsTemplatesDir'),
@@ -1105,6 +1106,7 @@ function initApp() {
                 discordBotToken: document.getElementById('settingsDiscordBotToken')
             };
             fields.browserAutoOpen.checked = !!settings.browserAutoOpen;
+            fields.webSocketDebug.checked = !!settings.webSocketDebug;
             fields.instancesDir.value = settings.instancesDir || '';
             fields.startPropertiesDir.value = settings.startPropertiesDir || '';
             fields.templatesDir.value = settings.templatesDir || '';
@@ -1130,6 +1132,7 @@ function initApp() {
         event.preventDefault();
         const payload = {
             browserAutoOpen: document.getElementById('settingsBrowserAutoOpen').checked,
+            webSocketDebug: document.getElementById('settingsWebSocketDebug').checked,
             instancesDir: document.getElementById('settingsInstancesDir').value.trim(),
             startPropertiesDir: document.getElementById('settingsStartPropertiesDir').value.trim(),
             templatesDir: document.getElementById('settingsTemplatesDir').value.trim(),
