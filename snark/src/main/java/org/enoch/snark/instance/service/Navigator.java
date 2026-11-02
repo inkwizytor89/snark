@@ -159,7 +159,10 @@ public class Navigator {
         }
         Map<String, Long> summary = new LinkedHashMap<>();
         eventFleetList.stream()
-                .filter(fleet -> fleet != null && fleet.mission != null)
+                .filter(fleet -> fleet != null
+                        && fleet.mission != null
+                        && (FleetDirectionType.BACK == fleet.iconMovement
+                        || (THERE == fleet.iconMovement && Mission.STATIONED.equals(fleet.mission))))
                 .collect(Collectors.groupingBy(fleet -> fleet.mission.name(), Collectors.counting()))
                 .forEach(summary::put);
         return summary;
