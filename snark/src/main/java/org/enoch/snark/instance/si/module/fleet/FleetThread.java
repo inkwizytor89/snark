@@ -122,6 +122,9 @@ public class FleetThread extends AbstractThread {
 //            if(container.contains(command.getHash())) continue;
 //            logFleetOverview(command);
 
+            if(command.getSource() == null )
+                throw new RuntimeException("Fleet source is null where threat source was "+getNearestConfig(SOURCE, PLANETS)+ " and generated "+fleetSendCommands.size() + " commands");
+
             FleetContext fleetContext = FleetContext.builder()
                     .source(new PlanetData(command.getSource()))
                     .target(command.getTarget())
