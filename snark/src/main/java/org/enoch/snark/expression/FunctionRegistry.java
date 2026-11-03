@@ -7,6 +7,7 @@ import org.enoch.snark.expression.function.coordinate.Colonies;
 import org.enoch.snark.expression.function.coordinate.SpelFunctionWrapper;
 import org.enoch.snark.expression.function.eventfleet.EventFleetFunctions;
 import org.enoch.snark.expression.function.list.ListFunctions;
+import org.enoch.snark.expression.function.technology.TechnologyFunctions;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -127,6 +128,11 @@ public class FunctionRegistry {
         // Usage reserved for a future concrete HasTechnologyCondition implementation.
         context.registerFunction("hasTechnology",
             ConditionFunctions.class.getDeclaredMethod("hasTechnology", java.util.Map.class));
+
+        context.registerFunction("hasTechnologyGreaterThan",
+                TechnologyFunctions.class.getDeclaredMethod("hasTechnologyGreaterThan", Map.class));
+        context.registerFunction("hasTechnologyLessThan",
+                TechnologyFunctions.class.getDeclaredMethod("hasTechnologyLessThan", Map.class));
 
         // NO_MISSIONS: Check no missions on planet
         // Usage: #hasNoMissions({planet: 'source'}) or #hasNoMissions({source: 'source', missions: 'TRANSPORT|ATTACK'})

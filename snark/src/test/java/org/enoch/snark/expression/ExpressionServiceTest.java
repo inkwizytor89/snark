@@ -14,6 +14,7 @@ import org.enoch.snark.instance.model.action.condition.IsSpyNotExpiredCondition;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.to.EventFleet;
@@ -55,6 +56,7 @@ class ExpressionServiceTest {
                 new ExpressionCache(),
                 cacheEntryRepository,
                 colonyRepository,
+                mock(PlayerRepository.class),
                 targetRepository,
                 planetDataService
         );

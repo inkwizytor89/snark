@@ -2,6 +2,7 @@ package org.enoch.snark.db.entity;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.snark.instance.model.technology.Research;
 import org.enoch.snark.instance.model.to.HighScorePosition;
 
 import jakarta.persistence.Basic;
@@ -131,6 +132,28 @@ public class PlayerEntity extends IdEntity {
     @Basic
     @Column(name = "armor_technology")
     public Long armorTechnology;
+
+    public Long getResearchLevel(Research research) {
+        Long level = switch (research) {
+            case energyTechnology -> energyTechnology;
+            case laserTechnology -> laserTechnology;
+            case ionTechnology -> ionTechnology;
+            case hyperspaceTechnology -> hyperspaceTechnology;
+            case plasmaTechnology -> plasmaTechnology;
+            case combustionDriveTechnology -> combustionDriveTechnology;
+            case impulseDriveTechnology -> impulseDriveTechnology;
+            case hyperspaceDriveTechnology -> hyperspaceDriveTechnology;
+            case espionageTechnology -> espionageTechnology;
+            case computerTechnology -> computerTechnology;
+            case astrophysicsTechnology -> astrophysicsTechnology;
+            case researchNetworkTechnology -> researchNetworkTechnology;
+            case gravitonTechnology -> gravitonTechnology;
+            case weaponsTechnology -> weaponsTechnology;
+            case shieldingTechnology -> shieldingTechnology;
+            case armorTechnology -> armorTechnology;
+        };
+        return level == null ? 0L : level;
+    }
 
     public static PlayerEntity mainPlayer() {
         PlayerEntity player = new PlayerEntity();

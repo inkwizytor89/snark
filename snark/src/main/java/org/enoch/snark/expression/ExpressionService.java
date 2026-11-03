@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.db.repository.TargetRepository;
 import org.enoch.snark.expression.function.coordinate.Base;
 import org.enoch.snark.expression.function.coordinate.Colonies;
 import org.enoch.snark.expression.function.coordinate.CycleTrip;
 import org.enoch.snark.expression.function.coordinate.Swarn;
+import org.enoch.snark.expression.function.technology.TechnologyFunctions;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.PlanetDataService;
@@ -65,6 +67,7 @@ public class ExpressionService {
 
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
+    private final PlayerRepository playerRepository;
     private final TargetRepository targetRepository;
     private final PlanetDataService planetDataService;
     
@@ -346,6 +349,7 @@ public class ExpressionService {
 
         Colonies.setRepository(colonyRepository);
         Colonies.setRepository(planetDataService);
+        TechnologyFunctions.setRepositories(colonyRepository, playerRepository);
         Base.setRepository(planetDataService, cacheEntryRepository);
         CycleTrip.setRepository(planetDataService);
         Swarn.setRepository(planetDataService);
