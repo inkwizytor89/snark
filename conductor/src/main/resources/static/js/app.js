@@ -306,7 +306,7 @@ function initApp() {
         }
 
         instancesList.innerHTML = instances.map((inst) => `
-            <div class="instance-item ${selectedInstance === inst.id ? 'selected' : ''}" data-id="${escapeHtml(inst.id)}">
+            <div class="instance-item ${selectedInstance === inst.id ? 'selected' : ''} ${activeMenuInstanceId === inst.id ? 'menu-open' : ''}" data-id="${escapeHtml(inst.id)}">
                 <div class="instance-top">
                     <div class="instance-header">
                         <div class="instance-title-row">

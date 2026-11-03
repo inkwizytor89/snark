@@ -291,6 +291,10 @@ main {
     gap: 6px;
 }
 
+.instance-item.menu-open {
+    z-index: 20;
+}
+
 .instance-details {
     flex: 1;
     padding: 15px;
