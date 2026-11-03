@@ -8,7 +8,10 @@ import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
+import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.db.repository.PlayerRepository;
+import org.enoch.snark.instance.model.technology.Research;
 import org.enoch.snark.instance.service.FleetService;
 import org.enoch.snark.instance.model.uc.ResourceUC;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
@@ -33,6 +36,7 @@ public class BuildThread extends AbstractThread {
     public static final int SHORT_PAUSE = 20;
 
     private final FleetRepository fleetRepository;
+    private final PlayerRepository playerRepository;
     private final FleetService fleetService;
 
     private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
@@ -122,7 +126,11 @@ public class BuildThread extends AbstractThread {
 
     private boolean skipAlreadyBuild(ColonyEntity colony, BuildRequest request) {
         if(isNothingToBuild(request)) return false;
-        Long buildingLevel = colony.getBuildingLevel(request.technology);
+        Long buildingLevel = null;
+        if(request.technology instanceof Research) {
+            PlayerEntity player = playerRepository.mainPlayer();
+            buildingLevel = player.getResearchLevel((Research) request.technology);
+        } else buildingLevel = colony.getBuildingLevel(request.technology);
         return request.level <= buildingLevel;
     }
 

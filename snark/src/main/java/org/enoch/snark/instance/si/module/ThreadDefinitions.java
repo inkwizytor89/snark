@@ -38,7 +38,7 @@ public final class ThreadDefinitions {
                 new DefineThread(null, null).threadDefinition(),
                 new DefenseThread(null).threadDefinition(),
                 new ExpeditionThread(null).threadDefinition(),
-                new BuildThread(null, null).threadDefinition(),
+                new BuildThread(null, null, null).threadDefinition(),
                 new SpaceThread().threadDefinition(),
                 new ScanThread().threadDefinition(),
                 new HuntingThread().threadDefinition(),

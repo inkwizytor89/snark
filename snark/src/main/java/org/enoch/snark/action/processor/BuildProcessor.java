@@ -6,6 +6,9 @@ import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.db.repository.PlayerRepository;
+import org.enoch.snark.instance.model.technology.Research;
+import org.enoch.snark.instance.model.technology.Technology;
 import org.enoch.snark.instance.si.module.consumer.gi.Wd;
 import org.enoch.snark.instance.si.module.consumer.gi.TechnologyGIR;
 import org.enoch.snark.instance.model.to.Resources;
@@ -24,6 +27,7 @@ import static org.enoch.snark.action.command.status.ExecutionIssue.NO_ISSUE;
 public class BuildProcessor {
 
     private final ColonyRepository colonyRepository;
+    private final PlayerRepository playerRepository;
 
     public TechnologyGIR gir;
     private Wd wd;
@@ -33,8 +37,14 @@ public class BuildProcessor {
         gir = new TechnologyGIR(wd);
         BuildRequirements requirements = command.requirements;
 
-        ColonyEntity colony = wd.url().openComponent(command.requirements.request.technology.getPage(), command.colony);
-        colonyRepository.save(colony);
+        Technology technology = command.requirements.request.technology;
+        ColonyEntity colony = command.colony;
+        if(technology instanceof Research) {
+            wd.url().openResearch(playerRepository.mainPlayer());
+        } else {
+            colony = wd.url().openComponent(technology.getPage(), command.colony);
+            colonyRepository.save(colony);
+        }
 
         if(isBuildQueueBlockedForBuildRequest(colony, requirements.request)) return NO_ISSUE;
 

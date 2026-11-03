@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.building.list.planet;
 
 import org.enoch.snark.instance.model.technology.Building;
+import org.enoch.snark.instance.model.technology.Research;
 import org.enoch.snark.instance.si.module.building.BuildRequest;
 import org.enoch.snark.instance.si.module.building.list.AbstractBuildingList;
 
@@ -45,7 +46,6 @@ public class DirectiveIV extends AbstractBuildingList {
                 new BuildRequest(Building.deuteriumStorage, 1),
 
                 new BuildRequest(Building.roboticsFactory, 2),
-//                new BuildingRequest(BuildingEnum.researchLaboratory, 1),
                 new BuildRequest(Building.shipyard, 2),
 
                 new BuildRequest(Building.metalMine, 8),
@@ -77,7 +77,16 @@ public class DirectiveIV extends AbstractBuildingList {
                 new BuildRequest(Building.solarPlant, 15),
 
                 new BuildRequest(Building.crystalMine, 13),
+                new BuildRequest(Building.researchLaboratory, 3),
+                new BuildRequest(Building.shipyard, 3),
+                new BuildRequest(Research.energyTechnology, 1),
+                new BuildRequest(Research.combustionDriveTechnology, 2),
+                new BuildRequest(Research.energyTechnology, 3),
+                new BuildRequest(Research.combustionDriveTechnology, 3),
+                new BuildRequest(Research.espionageTechnology, 4),
+                new BuildRequest(Research.espionageTechnology, 3),
+                new BuildRequest(Research.astrophysicsTechnology, 1),
                 new BuildRequest(Building.shipyard, 4)
-        );
+                );
     }
 }
