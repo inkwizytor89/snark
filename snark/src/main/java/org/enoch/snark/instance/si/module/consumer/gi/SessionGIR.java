@@ -105,7 +105,6 @@ public class SessionGIR extends GraphicalInterfaceReader {
             }
             String serverName = wd.getServerName();
             List<WebElement> webElements = longFetchAll(By.xpath("//div[@role='row']"));
-            System.err.println("serwers count "+webElements.size());
             java.util.Set<String> previousWindows = new java.util.HashSet<>(wd().getWindowHandles());
             webElements.stream()
                     .filter(webElement -> webElement.getText().contains(serverName))

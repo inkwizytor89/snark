@@ -202,7 +202,7 @@ public class SnarkWebSocketClient {
             System.err.println("[WS][LOGGED_OUT][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
             return;
         }
-        sendAndLog(current, buildLoggedOutEvent(retryAtText));
+        sendWebSocketMessage(current, buildLoggedOutEvent(retryAtText));
     }
 
     public void publishStartingState() {
@@ -212,7 +212,7 @@ public class SnarkWebSocketClient {
             System.err.println("[WS][STARTING][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
             return;
         }
-        sendAndLog(current, buildStateEvent("starting", "Session restart is starting"));
+        sendWebSocketMessage(current, buildStateEvent("starting", "Session restart is starting"));
     }
 
     public void publishRunningState() {
@@ -221,7 +221,7 @@ public class SnarkWebSocketClient {
         if (!registered || current == null || !connectionOpen) {
             return;
         }
-        sendAndLog(current, buildStateEvent("running", "Session resumed"));
+        sendWebSocketMessage(current, buildStateEvent("running", "Session resumed"));
     }
 
     CommandMessage buildLoggedOutEvent(String retryAtText) {
@@ -315,7 +315,7 @@ public class SnarkWebSocketClient {
         return "conductor";
     }
 
-    private void sendAndLog(WebSocket socket, CommandMessage message) {
+    private void sendWebSocketMessage(WebSocket socket, CommandMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
             int messageBytes = json.getBytes(StandardCharsets.UTF_8).length;
@@ -324,7 +324,6 @@ public class SnarkWebSocketClient {
                         + " bytes=" + messageBytes + " limit=" + MAX_MESSAGE_BYTES);
                 return;
             }
-            System.out.println("[WS][OUT] " + json);
             if (!socket.send(json)) {
                 System.err.println("[WS][ERROR] WebSocket rejected outgoing message type=" + message.getType()
                         + " id=" + message.getId());
@@ -345,7 +344,7 @@ public class SnarkWebSocketClient {
                         + " instanceId=" + instanceId);
                 return;
             }
-            sendAndLog(current, buildStatusUpdate());
+            sendWebSocketMessage(current, buildStatusUpdate());
         }
     }
 
@@ -355,7 +354,7 @@ public class SnarkWebSocketClient {
             System.err.println("[WS][RESTART][UNAVAILABLE] Cannot notify conductor; instanceId=" + instanceId);
             return;
         }
-        sendAndLog(current, buildRestartRequiredEvent(reason));
+        sendWebSocketMessage(current, buildRestartRequiredEvent(reason));
     }
 
     CommandMessage buildRestartRequiredEvent(String reason) {
@@ -419,12 +418,11 @@ public class SnarkWebSocketClient {
             System.out.println("[WS][OPEN] managerUrl=" + managerUrl + " instanceId=" + instanceId);
             CommandMessage registration = buildRegistrationMessage();
             registrationRequestId = registration.getId();
-            sendAndLog(webSocket, registration);
+            sendWebSocketMessage(webSocket, registration);
         }
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
-            System.out.println("[WS][IN] " + text);
             try {
                 CommandMessage incoming = objectMapper.readValue(text, CommandMessage.class);
                 if ("response:register".equals(incoming.getType())
@@ -433,7 +431,7 @@ public class SnarkWebSocketClient {
                         && incoming.getStatus() == 200) {
                     registered = true;
                     System.out.println("[WS][REGISTERED] instanceId=" + instanceId);
-                    sendAndLog(webSocket, buildStatusUpdate());
+                    sendWebSocketMessage(webSocket, buildStatusUpdate());
                 } else if ("error:register".equals(incoming.getType())
                         && registrationRequestId != null
                         && registrationRequestId.equals(incoming.getId())) {
@@ -447,10 +445,10 @@ public class SnarkWebSocketClient {
                         && (!"conductor".equals(incoming.getFrom()) || !instanceId.equals(incoming.getTo()))) {
                     System.err.println("[WS][REJECTED] Request is not addressed from conductor to " + instanceId);
                 } else if ("request:status".equals(incoming.getType()) && registered) {
-                    sendAndLog(webSocket, buildStatusResponse(incoming));
+                    sendWebSocketMessage(webSocket, buildStatusResponse(incoming));
                 } else if ("request:stop".equals(incoming.getType()) && registered) {
                     System.out.println("[WS][STOP] Received stop request id=" + incoming.getId());
-                    sendAndLog(webSocket, buildStopResponse(incoming));
+                    sendWebSocketMessage(webSocket, buildStopResponse(incoming));
                     if (workerLifecycleProvider == null) {
                         System.err.println("[WS][ERROR] Cannot stop instance: lifecycle is unavailable");
                     } else {
@@ -472,25 +470,25 @@ public class SnarkWebSocketClient {
                     int offset = detailsRequest.path("offset").asInt(-1);
                     int limit = detailsRequest.path("limit").asInt(-1);
                     if (offset < 0 || limit < 1 || limit > MAX_STATUS_DETAIL_PAGE_SIZE) {
-                        sendAndLog(webSocket, buildRequestError(incoming,
+                        sendWebSocketMessage(webSocket, buildRequestError(incoming,
                                 400, "Status details require offset >= 0 and limit between 1 and 25."));
                     } else {
                         try {
-                            sendAndLog(webSocket, buildStatusDetailsResponse(
+                            sendWebSocketMessage(webSocket, buildStatusDetailsResponse(
                                     incoming, core.statusDetails(offset, limit)));
                         } catch (RuntimeException e) {
                             System.err.println("[WS][ERROR] Failed to create status details page: " + e.getMessage());
-                            sendAndLog(webSocket, buildRequestError(incoming, 500,
+                            sendWebSocketMessage(webSocket, buildRequestError(incoming, 500,
                                     "Failed to create status details page."));
                         }
                     }
                 } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
-                    sendAndLog(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
+                    sendWebSocketMessage(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
                 } else if ("request:command:submit".equals(incoming.getType()) && registered && commandRecipeService != null) {
                     CommandSubmitRequest request = objectMapper.convertValue(incoming.getPayload(), CommandSubmitRequest.class);
-                    sendAndLog(webSocket, buildCommandSubmitResponse(incoming, commandRecipeService.submitRecipe(request)));
+                    sendWebSocketMessage(webSocket, buildCommandSubmitResponse(incoming, commandRecipeService.submitRecipe(request)));
                 } else if (isRequest(incoming) && registered) {
-                    sendAndLog(webSocket, buildEchoResponse(incoming));
+                    sendWebSocketMessage(webSocket, buildEchoResponse(incoming));
                 } else if (isRequest(incoming)) {
                     System.err.println("[WS][REJECTED] Request received before registration acknowledgement");
                 } else {
@@ -499,7 +497,7 @@ public class SnarkWebSocketClient {
             } catch (Exception e) {
                 System.err.println("[WS][ERROR] Failed to parse incoming message: " + e.getMessage());
                 e.printStackTrace(System.err);
-                sendAndLog(webSocket, buildParseError(text, e));
+                sendWebSocketMessage(webSocket, buildParseError(text, e));
             }
         }
 

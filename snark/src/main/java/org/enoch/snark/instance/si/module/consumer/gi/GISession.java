@@ -72,7 +72,6 @@ public class GISession {
         boolean emptyUrl = isRunning && gir.isCurrentUrlEmpty();
         boolean backToLobby = isRunning && !emptyUrl && gir.isCurrentUrlBackToLobby();
         boolean toCheck = !isRunning || emptyUrl || backToLobby;
-        if(toCheck) System.err.println("!isRunning "+!isRunning +" gir.isCurrentUrlEmpty() "+ emptyUrl +" gir.isCurrentUrlBackToLobby() "+ backToLobby);
         return toCheck;
     }
 
@@ -90,7 +89,6 @@ public class GISession {
             wd.requireWindow(serverWindowHandle);
         }
         if (!isRunning) {
-            System.err.println("!isRunning");
             return start(credentials);
         }
 
