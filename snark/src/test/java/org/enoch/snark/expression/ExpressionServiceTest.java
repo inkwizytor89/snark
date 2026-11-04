@@ -90,6 +90,25 @@ class ExpressionServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("Should evaluate whether an expedition slot is free")
+    void testExpeditionFreeSlotFunction() {
+        try {
+            Navigator.setExpeditionCount(2);
+            Navigator.setExpeditionMax(3);
+            assertTrue(expressionService.evaluateNoCached("#isExpeditionFreeSlot()", Map.of(), Boolean.class));
+
+            Navigator.setExpeditionCount(3);
+            assertFalse(expressionService.evaluateNoCached("#isExpeditionFreeSlot()", Map.of(), Boolean.class));
+
+            Navigator.setExpeditionCount(4);
+            assertFalse(expressionService.evaluateNoCached("#isExpeditionFreeSlot()", Map.of(), Boolean.class));
+        } finally {
+            Navigator.setExpeditionCount(0);
+            Navigator.setExpeditionMax(0);
+        }
+    }
+
     @Nested
     @DisplayName("Coordinate Expression Tests")
     class CoordinateExpressionTests {

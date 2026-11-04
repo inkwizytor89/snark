@@ -63,7 +63,7 @@ public class Navigator {
     }
 
     public static boolean isExpeditionFreeSlot() {
-        return getFleetFreeSlots() > 0;
+        return getExpeditionFreeSlots() > 0;
     }
 
     public static int getExpeditionFreeSlots() {

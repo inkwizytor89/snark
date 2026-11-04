@@ -9,6 +9,7 @@ import org.enoch.snark.expression.function.eventfleet.EventFleetFunctions;
 import org.enoch.snark.expression.function.list.ListFunctions;
 import org.enoch.snark.expression.function.technology.TechnologyFunctions;
 import org.enoch.snark.instance.model.to.EventFleet;
+import org.enoch.snark.instance.service.Navigator;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class FunctionRegistry {
         // ============ COORDINATE FUNCTIONS ============
         // These functions return coordinates/planets/moons
         registerCoordinateFunctions(context);
+        registerNavigationFunctions(context);
 
         // ============ CONDITION FUNCTIONS ============
         // These functions create AbstractCondition instances
@@ -54,6 +56,12 @@ public class FunctionRegistry {
         registerResourceFunctions(context);
 
         log.debug("SpEL functions registered successfully");
+    }
+
+    /** Register navigation state functions. */
+    private static void registerNavigationFunctions(StandardEvaluationContext context) throws NoSuchMethodException {
+        context.registerFunction("isExpeditionFreeSlot",
+                Navigator.class.getDeclaredMethod("isExpeditionFreeSlot"));
     }
 
     /** Register coordinate-related functions. */

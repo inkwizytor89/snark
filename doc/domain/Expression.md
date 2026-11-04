@@ -20,6 +20,7 @@ This page is the reference for the SpEL functions registered by [`FunctionRegist
 | Get coordinates from a cache entry | `#cacheKey(...)` |
 | Filter or inspect event fleets | `#eventFleetFilter(...)`, `#endingPlanet(...)` |
 | Work with a list | `#first(...)` |
+| Check expedition availability | `#isExpeditionFreeSlot()` |
 | Build an action condition | Functions in [Conditions](#conditions) |
 | Compare a technology level | `#hasTechnologyGreaterThan(...)`, `#hasTechnologyLessThan(...)` |
 
@@ -89,6 +90,12 @@ With an empty filter map, `eventFleetFilter` returns the current event-fleet lis
 | Function | Description | Parameters | Returns |
 |---|---|---|---|
 | `#first(values)` | Returns the first element in a non-empty list. | `values` — required; `List<T>` | `T`, the list element type |
+
+## Expedition availability
+
+| Function | Description | Parameters | Returns |
+|---|---|---|---|
+| `#isExpeditionFreeSlot()` | Checks whether the number of active expeditions is below the maximum expedition count. | None | `Boolean` |
 
 ## Conditions
 
