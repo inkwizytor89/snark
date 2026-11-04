@@ -84,9 +84,11 @@ public class DirectiveIV extends AbstractBuildingList {
                 new BuildRequest(Research.energyTechnology, 3),
                 new BuildRequest(Research.combustionDriveTechnology, 3),
                 new BuildRequest(Research.espionageTechnology, 4),
-                new BuildRequest(Research.espionageTechnology, 3),
+                new BuildRequest(Research.impulseDriveTechnology, 3),
                 new BuildRequest(Research.astrophysicsTechnology, 1),
-                new BuildRequest(Building.shipyard, 4)
+                new BuildRequest(Research.computerTechnology, 2),
+                new BuildRequest(Building.shipyard, 4),
+                new BuildRequest(Research.combustionDriveTechnology, 6)
                 );
     }
 }

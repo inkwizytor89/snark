@@ -80,6 +80,7 @@ public class BuildThread extends AbstractThread {
             if(requirements.isResourceUnknown() || ResourceUC.toTransport(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
                 log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
                 pushCommand(colony.toString(), new BuildCommand(colony, requirements));
+                setCurrentStateDescription("Building on " + colony + " with requirements: " + requirements);
                continue;
             }
 

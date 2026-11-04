@@ -78,6 +78,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     private boolean isLive = true;
     protected Boolean debug;
     protected Long limit = NO_LIMIT;
+    protected String currentStateDescription = "UNKNOWN";
 
     protected CommandContainer container = new CommandContainer();
     private final Map<String, String> notification = new ConcurrentHashMap<>();
@@ -373,6 +374,13 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected List<AbstractCondition> getConditions(String configName) {
         String configJson = map().getConfig(configName, "[]");
         return expressionService.evaluateConditions(configJson, Map.of());
+    }
+
+    protected void setCurrentStateDescription(String state) {
+        if(!state.equals(currentStateDescription)) {
+            log("Thread " + map.name() + " state description: " + state);
+            this.currentStateDescription = state;
+        }
     }
 
     @Override
