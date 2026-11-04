@@ -57,6 +57,33 @@ class ProcessServiceTest {
     }
 
     @Test
+    void shouldRequestGracefulWorkerShutdownBeforeWaitingForProcessExit() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        WorkerSocketHandler workerSocketHandler = mock(WorkerSocketHandler.class);
+        WorkerProcessLauncher launcher = mock(WorkerProcessLauncher.class);
+        InstanceLogService logService = mock(InstanceLogService.class);
+        Process process = mock(Process.class);
+        InstanceProfile profile = profile("worker#graceful-stop");
+        when(profileRepository.resolvePropertiesPath(profile)).thenReturn(temporaryDirectory.resolve("worker.properties"));
+        when(launcher.launch(eq(profile), any(Path.class), any(Path.class))).thenReturn(process);
+        when(process.isAlive()).thenReturn(true);
+        when(process.pid()).thenReturn(48L);
+        when(workerSocketHandler.requestStop(profile.getId())).thenReturn(true);
+        when(process.waitFor(anyLong(), any(TimeUnit.class))).thenReturn(true);
+
+        ProcessService service = new ProcessService(
+                temporaryDirectory.toString(), 30_000L, profileRepository,
+                workerSocketHandler, launcher, logService, null);
+        service.start(profile);
+
+        service.stop(profile.getId());
+
+        verify(workerSocketHandler).requestStop(profile.getId());
+        verify(process).waitFor(5, TimeUnit.SECONDS);
+        verify(process, org.mockito.Mockito.never()).destroy();
+    }
+
+    @Test
     void shouldReportStartingUntilTheWorkerSendsAStatusUpdate() throws Exception {
         ProfileRepository profileRepository = mock(ProfileRepository.class);
         WorkerSocketHandler workerSocketHandler = mock(WorkerSocketHandler.class);

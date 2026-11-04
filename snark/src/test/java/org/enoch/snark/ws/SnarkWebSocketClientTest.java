@@ -109,6 +109,24 @@ class SnarkWebSocketClientTest {
     }
 
     @Test
+    void shouldBuildCorrelatedStopResponse() {
+        CommandMessage request = new CommandMessage();
+        request.setId("stop-1");
+        request.setType("request:stop");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+
+        CommandMessage response = client.buildStopResponse(request);
+
+        assertEquals("stop-1", response.getId());
+        assertEquals("response:stop", response.getType());
+        assertEquals("worker#1", response.getFrom());
+        assertEquals("conductor", response.getTo());
+        assertEquals(200, response.getStatus());
+        assertEquals(Boolean.TRUE, ((Map<?, ?>) response.getPayload()).get("accepted"));
+    }
+
+    @Test
     void shouldBuildUnsolicitedStatusUpdateWithRevision() {
         when(core.statusSummary()).thenReturn(new ServerStatus(
                 new NavigatorStatus("F:0/1 E:0/0", LocalDateTime.of(2026, 10, 21, 12, 34, 56)),

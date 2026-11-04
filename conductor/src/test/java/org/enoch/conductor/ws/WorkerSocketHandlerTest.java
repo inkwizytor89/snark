@@ -107,6 +107,29 @@ class WorkerSocketHandlerTest {
     }
 
     @Test
+    void shouldSendStopRequestToRegisteredWorker() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        WebSocketSession session = openSession();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        testHandler.receive(session, """
+                {"id":"registration-1","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+        clearInvocations(session);
+
+        assertTrue(handler.requestStop("worker#1"));
+
+        ArgumentCaptor<TextMessage> request = ArgumentCaptor.forClass(TextMessage.class);
+        verify(session).sendMessage(request.capture());
+        JsonNode requestJson = mapper.readTree(request.getValue().getPayload());
+        assertTrue(!requestJson.path("id").asText().isBlank());
+        assertEquals("request:stop", requestJson.path("type").asText());
+        assertEquals("conductor", requestJson.path("from").asText());
+        assertEquals("worker#1", requestJson.path("to").asText());
+        assertEquals(100, requestJson.path("status").asInt());
+    }
+
+    @Test
     void shouldAcceptLegacyStatusResponseDuringWorkerUpgrade() throws Exception {
         WorkerSocketHandler handler = new TestWorkerSocketHandler();
         WebSocketSession session = openSession();

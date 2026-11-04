@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ProcessService {
 
+    private static final long GRACEFUL_STOP_TIMEOUT_SECONDS = 5;
+
     private final Map<String, InstanceRuntime> runtimes = new ConcurrentHashMap<>();
     private final Map<String, InstanceProfile> managedProfiles = new ConcurrentHashMap<>();
     private final Set<String> restartingInstances = ConcurrentHashMap.newKeySet();
@@ -136,12 +138,21 @@ public class ProcessService {
 
         System.err.println("Stopping instance with id " + id + " and pid " + runtime.getPid());
         Process process = runtime.getProcess();
-        process.destroy();
         try {
-            if (!process.waitFor(5, TimeUnit.SECONDS)) {
-                process.destroyForcibly();
+            boolean stopRequested = false;
+            try {
+                stopRequested = workerSocketHandler.requestStop(id);
+            } catch (Exception e) {
+                System.err.println("Failed to request graceful shutdown for instance " + id + ": " + e.getMessage());
+            }
+
+            if (!stopRequested || !process.waitFor(GRACEFUL_STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                process.destroy();
                 if (!process.waitFor(5, TimeUnit.SECONDS)) {
-                    throw new IllegalStateException("Process did not terminate after forced shutdown: " + id);
+                    process.destroyForcibly();
+                    if (!process.waitFor(5, TimeUnit.SECONDS)) {
+                        throw new IllegalStateException("Process did not terminate after forced shutdown: " + id);
+                    }
                 }
             }
         } catch (InterruptedException e) {

@@ -343,6 +343,26 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         return true;
     }
 
+    public boolean requestStop(String workerId) throws Exception {
+        WebSocketSession session = workers.get(workerId);
+        if (session == null || !session.isOpen()) {
+            return false;
+        }
+
+        CommandMessage request = new CommandMessage();
+        request.setId(UUID.randomUUID().toString());
+        request.setType("request:stop");
+        request.setFrom("conductor");
+        request.setTo(workerId);
+        request.setTimestamp(System.currentTimeMillis());
+        request.setStatus(100);
+
+        String json = mapper.writeValueAsString(request);
+        logOutgoing(session, workerId, json);
+        session.sendMessage(new TextMessage(json));
+        return true;
+    }
+
     public StatusDetails requestStatusDetails(String workerId, int offset, int limit) throws Exception {
         if (offset < 0 || limit < 1 || limit > MAX_STATUS_DETAIL_PAGE_SIZE) {
             throw new IllegalArgumentException("Status details require offset >= 0 and limit between 1 and 25");

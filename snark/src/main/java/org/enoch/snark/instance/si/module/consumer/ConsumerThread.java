@@ -143,9 +143,18 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @PreDestroy
     public void closeBrowser() {
-        if (wd != null) {
-            wd.closeWebDriver();
+        System.out.println("[SHUTDOWN][CONSUMER] Closing browser; driver initialized=" + (wd != null));
+        if (wd == null) {
+            return;
         }
+        try {
+            wd.closeWebDriver();
+        } catch (RuntimeException e) {
+            System.err.println("[SHUTDOWN][CONSUMER] Browser close failed: " + e.getMessage());
+            e.printStackTrace(System.err);
+            throw e;
+        }
+        System.out.println("[SHUTDOWN][CONSUMER] Browser close completed");
     }
 
     private void registerDequeIfNeeded() {

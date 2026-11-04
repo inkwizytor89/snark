@@ -128,9 +128,22 @@ public class Wd {
         ChromeDriver currentDriver = webDriver;
         webDriver = null;
         if (currentDriver == null) {
+            System.out.println("[SHUTDOWN][WEBDRIVER] No active ChromeDriver to close");
             return;
         }
-        currentDriver.quit();
+        long startedAt = System.nanoTime();
+        System.out.println("[SHUTDOWN][WEBDRIVER] Calling ChromeDriver.quit()");
+        try {
+            currentDriver.quit();
+            System.out.println("[SHUTDOWN][WEBDRIVER] ChromeDriver.quit() completed in "
+                    + java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt) + " ms");
+        } catch (RuntimeException e) {
+            System.err.println("[SHUTDOWN][WEBDRIVER] ChromeDriver.quit() failed after "
+                    + java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt)
+                    + " ms: " + e.getMessage());
+            e.printStackTrace(System.err);
+            throw e;
+        }
     }
 
     public WebElement findElement(String tag, String attribute, String value, String unacceptable) {

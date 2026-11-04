@@ -63,6 +63,10 @@ After a successful registration acknowledgement, and every 10 seconds while conn
 
 The summary contains `navigatorStatus`, `activeThreads`, `commandDeque`, and `notifications`; its `coordinates` field is `null`. `navigatorStatus` contains `fleetStatus` and `lastUpdate` (an ISO-8601 local date-time). Snark does not query colony data to build a standard status summary. To bound summaries, snark includes at most 32 active thread names (each at most 40 characters), at most 512 characters of notification text, a 256-character command queue, and a 128-character fleet status.
 
+## Graceful stop
+
+When stopping a registered worker, the conductor sends a correlated `request:stop` with the standard request envelope. Snark responds with `response:stop` and payload `{"accepted": true}`, explicitly closes the consumer's ChromeDriver browser, then closes its Spring application context before exiting. If the worker is disconnected or does not exit within the conductor's graceful-stop timeout, the conductor falls back to terminating the process.
+
 ## Restart-required event
 
 When snark encounters a fatal runtime condition that requires a fresh process, it sends an unsolicited `event:restart-required` message on its registered WebSocket session. The message has a unique `id`, `from` set to the instance ID, `to: "conductor"`, `status: 200`, and a payload containing a non-empty `reason`. The conductor accepts it only from the active session registered for that instance, marks the instance `restarting`, then stops the tracked worker process, forcibly terminating it if needed, and relaunches the same profile after a one-second delay. This event is not a request and receives no response. A worker waiting through the configured lobby pause must not send this event; its process and registered WebSocket remain healthy.

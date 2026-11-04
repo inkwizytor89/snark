@@ -15,7 +15,9 @@ import org.enoch.common.command.CommandSubmitRequest;
 import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
+import org.enoch.snark.instance.WorkerLifecycle;
 import org.enoch.snark.instance.si.Core;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -46,6 +48,7 @@ public class SnarkWebSocketClient {
     private final CommandRecipeService commandRecipeService;
     private final AtomicLong statusRevision = new AtomicLong();
 
+    private ObjectProvider<WorkerLifecycle> workerLifecycleProvider;
     private volatile WebSocket webSocket;
     private volatile String registrationRequestId;
     private volatile boolean registered;
@@ -70,6 +73,11 @@ public class SnarkWebSocketClient {
         this.instanceId = instanceId == null || instanceId.isBlank() ? "snark" : instanceId.trim();
         this.core = core;
         this.commandRecipeService = commandRecipeService;
+    }
+
+    @Autowired
+    public void setWorkerLifecycleProvider(ObjectProvider<WorkerLifecycle> workerLifecycleProvider) {
+        this.workerLifecycleProvider = workerLifecycleProvider;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -147,6 +155,18 @@ public class SnarkWebSocketClient {
                 "hostname", resolveHostname(),
                 "version", resolveVersion()
         ));
+        return response;
+    }
+
+    CommandMessage buildStopResponse(CommandMessage incoming) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:stop");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(Map.of("accepted", true));
         return response;
     }
 
@@ -428,6 +448,25 @@ public class SnarkWebSocketClient {
                     System.err.println("[WS][REJECTED] Request is not addressed from conductor to " + instanceId);
                 } else if ("request:status".equals(incoming.getType()) && registered) {
                     sendAndLog(webSocket, buildStatusResponse(incoming));
+                } else if ("request:stop".equals(incoming.getType()) && registered) {
+                    System.out.println("[WS][STOP] Received stop request id=" + incoming.getId());
+                    sendAndLog(webSocket, buildStopResponse(incoming));
+                    if (workerLifecycleProvider == null) {
+                        System.err.println("[WS][ERROR] Cannot stop instance: lifecycle is unavailable");
+                    } else {
+                        Thread stopThread = new Thread(
+                                () -> {
+                                    System.out.println("[WS][STOP] Starting graceful shutdown thread");
+                                    try {
+                                        workerLifecycleProvider.getObject().stop();
+                                    } catch (RuntimeException e) {
+                                        System.err.println("[WS][STOP] Graceful shutdown thread failed: " + e.getMessage());
+                                        e.printStackTrace(System.err);
+                                    }
+                                },
+                                "snark-conductor-stop");
+                        stopThread.start();
+                    }
                 } else if ("request:status:details".equals(incoming.getType()) && registered) {
                     JsonNode detailsRequest = objectMapper.valueToTree(incoming.getPayload());
                     int offset = detailsRequest.path("offset").asInt(-1);

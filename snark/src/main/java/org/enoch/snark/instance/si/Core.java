@@ -17,6 +17,7 @@ import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.technology.Ship;
+import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
@@ -64,8 +65,25 @@ public class Core {
 
     @PreDestroy
     public void shutdownThreads() {
+        System.out.println("[SHUTDOWN][CORE] Stopping configured threads");
         modules.values().forEach(AbstractModule::destroy);
+        System.out.println("[SHUTDOWN][CORE] Interrupting " + threadExecutors.size() + " thread executors");
         threadExecutors.values().forEach(ExecutorService::shutdownNow);
+        System.out.println("[SHUTDOWN][CORE] Thread shutdown requests sent");
+    }
+
+    public void closeBrowserSessions() {
+        List<ConsumerThread> consumers = modules.values().stream()
+                .flatMap(module -> module.getThreadsMap().values().stream())
+                .filter(ConsumerThread.class::isInstance)
+                .map(ConsumerThread.class::cast)
+                .distinct()
+                .toList();
+        System.out.println("[SHUTDOWN][CORE] Closing browser sessions for " + consumers.size() + " consumer thread(s)");
+        for (ConsumerThread consumer : consumers) {
+            consumer.closeBrowser();
+        }
+        System.out.println("[SHUTDOWN][CORE] Browser session shutdown requests completed");
     }
 
     public void configurationUpdate(PropertiesMap propertiesMap) {
