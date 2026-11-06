@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+import java.util.Locale;
+
 @Service
 public class DiscordBotService {
 
@@ -100,7 +102,7 @@ public class DiscordBotService {
                                 return;
                             }
                             LOGGER.info("discord.bot.command.received user={} command={}", event.getAuthor().getName(), command);
-                            String reply = commandRouterProvider.getObject().handle(command).render();
+                            String reply = renderReply(rawContent, event.getJDA().getSelfUser().getName(), command);
                             event.getChannel().sendMessage(reply).queue();
                         }
                     })
@@ -154,6 +156,17 @@ public class DiscordBotService {
         }
 
         return commandRouterProvider.getObject().handle(message).render();
+    }
+
+    String renderReply(String rawContent, String botName, String command) {
+        String reply = commandRouterProvider.getObject().handle(command).render();
+        if ("sylwia".equalsIgnoreCase(botName)
+                && rawContent != null
+                && rawContent.toLowerCase(Locale.ROOT).contains("kamil")
+                && reply.startsWith("Unknown action: ")) {
+            return "Zajmę się tym wieczorem ;)";
+        }
+        return reply;
     }
 
     public String getDefaultActiveInstanceId() {

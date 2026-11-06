@@ -109,6 +109,8 @@ public class GIUrl {
         } else if (FLEETDISPATCH.equals(component)) {
             loadFleetStatus();
             wd.updateFleet(colony);
+        } else if (SHIPYARD.equals(component)) {
+            wd.updateFleet(colony);
         } else if (DEFENSES.equals(component)) {
             wd.updateDefence(colony);
             new TechnologyGIR(wd).updateQueue(colony, TechnologyService.SHIPYARD);

@@ -7,6 +7,7 @@ public enum UrlComponent {
     LFBUILDINGS,
     FACILITIES,
     RESEARCH,
+    SHIPYARD,
     DEFENSES,
     FLEETDISPATCH,
     GALAXY;

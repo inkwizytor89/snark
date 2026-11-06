@@ -3,6 +3,8 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.instance.model.technology.Defense;
+import org.enoch.snark.instance.model.technology.Ship;
 import org.enoch.snark.instance.model.technology.Technology;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.uc.TechnologyUC;
@@ -65,12 +67,21 @@ public class TechnologyGIR extends GraphicalInterfaceReader {
         if(buildingLevel >= requirements.request.level) {
             return true;
         }
-        List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
-        if(upgrades.isEmpty()) {
-            return false;
+        Technology technology = requirements.request.technology;
+        if(technology instanceof Ship || technology instanceof Defense) {
+            buildingElement.click();
+            SleepUtil.sleep();
+            wd().findElement(By.id("build_amount")).sendKeys(requirements.request.level.toString());
+            wd().findElement(By.className("upgrade")).click();
+            return true;
+        } else {
+            List<WebElement> upgrades = buildingElement.findElements(By.className("upgrade"));
+            if (upgrades.isEmpty()) {
+                return false;
+            }
+            upgrades.get(0).click();
+            return true;
         }
-        upgrades.get(0).click();
-        return true;
     }
 
     public Resources findTechnologyCosts(String technologyName) {

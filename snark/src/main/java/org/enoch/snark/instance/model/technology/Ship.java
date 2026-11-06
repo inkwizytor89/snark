@@ -59,6 +59,6 @@ public enum Ship implements Technology {
 
     @Override
     public UrlComponent getPage() {
-        return null;
+        return UrlComponent.SHIPYARD;
     }
 }
