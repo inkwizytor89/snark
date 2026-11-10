@@ -55,13 +55,15 @@ public class DirectiveIV extends AbstractBuildingList {
                 new BuildRequest(Building.crystalMine, 7),
                 new BuildRequest(Building.metalMine, 10),
                 new BuildRequest(Building.crystalMine, 8),
+                new BuildRequest(Building.metalStorage, 2),
                 new BuildRequest(Building.solarPlant, 11),
 
+                new BuildRequest(Building.crystalMine, 9),
                 new BuildRequest(Building.metalMine, 11),
                 new BuildRequest(Building.deuteriumSynthesizer, 7),
                 new BuildRequest(Building.solarPlant, 12),
-                new BuildRequest(Building.metalMine, 12),
                 new BuildRequest(Building.crystalMine, 10),
+                new BuildRequest(Building.metalMine, 12),
                 new BuildRequest(Building.solarPlant, 13),
 
                 new BuildRequest(Building.metalMine, 13),
@@ -73,7 +75,6 @@ public class DirectiveIV extends AbstractBuildingList {
                 new BuildRequest(Building.deuteriumSynthesizer, 10),
 
 
-                new BuildRequest(Building.metalStorage, 2),
                 new BuildRequest(Building.solarPlant, 15),
 
                 new BuildRequest(Building.crystalMine, 13),
