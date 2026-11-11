@@ -4,12 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.config.ConfigTerm;
 import org.enoch.snark.config.ConfigurationScheduledTask;
+import org.enoch.snark.db.entity.ConfigEntity;
+import org.enoch.snark.db.entity.ModuleEntity;
+import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
+import org.enoch.snark.db.repository.ModuleRepository;
+import org.enoch.snark.db.repository.ThreadRepository;
 import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +26,8 @@ public class RemotePropertiesMap {
     private final ConfigurationScheduledTask configurationScheduledTask;
     private final Core core;
     private final ConfigRepository configRepository;
+    private final ModuleRepository moduleRepository;
+    private final ThreadRepository threadRepository;
 
     private  List<ConfigTerm> fileConfigs = new ArrayList<>();
     private  List<ConfigTerm> remoteConfigs = new ArrayList<>();
@@ -35,8 +43,24 @@ public class RemotePropertiesMap {
     private void pushConfigs() {
         List<ConfigTerm> configs = new ArrayList<>(remoteConfigs);
         configs.addAll(fileConfigs);
-        configRepository.saveAll(configs);
+        saveConfigs(configs);
         core.configurationUpdate(new PropertiesMap(configs));
+    }
+
+    private void saveConfigs(List<ConfigTerm> configs) {
+        for (ConfigTerm config : configs) {
+            ModuleEntity module = moduleRepository.findByName(config.getModule())
+                    .orElseGet(() -> moduleRepository.save(new ModuleEntity(config.getModule())));
+            ThreadEntity thread = threadRepository.findByModuleAndName(module, config.getThread())
+                    .orElseGet(() -> threadRepository.save(
+                            new ThreadEntity(config.getThread(), module, config.getThread())
+                    ));
+            ConfigEntity entity = configRepository.findByThreadAndKey(thread, config.getKey())
+                    .orElseGet(() -> new ConfigEntity(thread, config.getKey(), config.getValue()));
+            entity.value = config.getValue();
+            entity.updated = LocalDateTime.now();
+            configRepository.save(entity);
+        }
     }
 
     public void addRemoteConfig(ConfigTerm config) {

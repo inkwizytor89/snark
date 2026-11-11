@@ -1,44 +1,27 @@
 package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.enoch.snark.config.ConfigTerm;
 
 @Entity
-@Table(
-        name = "config",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_config",
-                        columnNames = {"module", "thread", "config_key"}
-                )
-        }
-)
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ConfigEntity {
+@Table(name = "config")
+public class ConfigEntity extends IdEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "thread_id", nullable = false)
+    public ThreadEntity thread;
 
-    private String module;
+    @Column(name = "\"key\"", nullable = false)
+    public String key;
 
-    private String thread;
+    @Column(name = "\"value\"", nullable = false)
+    public String value;
 
-    @Column(name = "config_key")
-    private String key;
+    public ConfigEntity() {
+    }
 
-    @Column(name = "\"value\"")
-    private String value;
-
-    public ConfigEntity(ConfigTerm configTerm) {
-        this.module = configTerm.getModule();
-        this.thread = configTerm.getThread();
-        this.key = configTerm.getKey();
-        this.value = configTerm.getValue();
+    public ConfigEntity(ThreadEntity thread, String key, String value) {
+        this.thread = thread;
+        this.key = key;
+        this.value = value;
     }
 }

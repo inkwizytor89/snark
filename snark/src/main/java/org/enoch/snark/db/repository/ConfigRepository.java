@@ -1,35 +1,18 @@
 package org.enoch.snark.db.repository;
 
-import org.enoch.snark.config.ConfigTerm;
 import org.enoch.snark.db.entity.ConfigEntity;
+import org.enoch.snark.db.entity.ThreadEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Repository
 public interface ConfigRepository extends JpaRepository<ConfigEntity, Long> {
 
-    Optional<ConfigEntity> findByModuleAndThreadAndKey(
-            String module,
-            String thread,
-            String key
-    );
-    List<ConfigEntity> findByModule(String module);
+    Optional<ConfigEntity> findByThreadAndKey(
+            ThreadEntity thread, String key);
 
-    List<ConfigEntity> findByModuleAndThread(String module, String thread);
-
-    default void saveAll(List<ConfigTerm> configList) {
-        List<ConfigEntity> entityList = configList.stream().map(ConfigEntity::new).collect(Collectors.toUnmodifiableList());
-        entityList.forEach(configEntity -> findByModuleAndThreadAndKey(
-                configEntity.getModule(),
-                configEntity.getThread(),
-                configEntity.getKey()
-        ).ifPresentOrElse((config ) -> {
-            config.setValue(configEntity.getValue());
-        }, () -> {
-            configEntity.setValue(configEntity.getValue());
-            save(configEntity);
-        }));
-    }
+    List<ConfigEntity> findByThread_Module_NameAndThread_Name(String moduleName, String threadName);
 }
