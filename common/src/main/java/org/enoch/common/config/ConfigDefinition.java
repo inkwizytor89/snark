@@ -12,6 +12,18 @@ public class ConfigDefinition {
     private String thread;
     private String key;
     private String value;
+    private Class<?> type = String.class;
     private boolean temporary;
     private String description;
+
+    public ConfigDefinition(
+            String module,
+            String thread,
+            String key,
+            String value,
+            boolean temporary,
+            String description
+    ) {
+        this(module, thread, key, value, String.class, temporary, description);
+    }
 }

@@ -11,6 +11,12 @@ public class ModuleEntity extends IdEntity {
     @Column(name = "name", nullable = false, unique = true)
     public String name;
 
+    @Column(name = "time")
+    public String time;
+
+    @Column(name = "conditions", columnDefinition = "TEXT")
+    public String conditions;
+
     public ModuleEntity() {
     }
 

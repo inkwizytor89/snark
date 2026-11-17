@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.enoch.snark.instance.si.module.ThreadMap.*;
+
 @Service
 @RequiredArgsConstructor
 public class RemotePropertiesMap {
@@ -32,20 +34,20 @@ public class RemotePropertiesMap {
     private  List<ConfigTerm> fileConfigs = new ArrayList<>();
     private  List<ConfigTerm> remoteConfigs = new ArrayList<>();
 
-    @Scheduled(fixedDelay = 10000)
-    public void loadConfig() throws IOException {
-        List<ConfigTerm> configs = configurationScheduledTask.loadConfig();
-        if(configs == null) return;
-        fileConfigs = configs;
-        pushConfigs();
-    }
-
-    private void pushConfigs() {
-        List<ConfigTerm> configs = new ArrayList<>(remoteConfigs);
-        configs.addAll(fileConfigs);
-        saveConfigs(configs);
-        core.configurationUpdate(new PropertiesMap(configs));
-    }
+//    @Scheduled(fixedDelay = 10000)
+//    public void loadConfig() throws IOException {
+//        List<ConfigTerm> configs = configurationScheduledTask.loadConfig();
+//        if(configs == null) return;
+//        fileConfigs = configs;
+//        pushConfigs();
+//    }
+//
+//    private void pushConfigs() {
+//        List<ConfigTerm> configs = new ArrayList<>(remoteConfigs);
+//        configs.addAll(fileConfigs);
+//        saveConfigs(configs);
+//        core.configurationUpdate(new PropertiesMap(configs));
+//    }
 
     private void saveConfigs(List<ConfigTerm> configs) {
         for (ConfigTerm config : configs) {
@@ -55,6 +57,11 @@ public class RemotePropertiesMap {
                     .orElseGet(() -> threadRepository.save(
                             new ThreadEntity(config.getThread(), module, config.getThread())
                     ));
+            if (updateThreadField(thread, config.getKey(), config.getValue())) {
+                thread.updated = LocalDateTime.now();
+                threadRepository.save(thread);
+                continue;
+            }
             ConfigEntity entity = configRepository.findByThreadAndKey(thread, config.getKey())
                     .orElseGet(() -> new ConfigEntity(thread, config.getKey(), config.getValue()));
             entity.value = config.getValue();
@@ -63,18 +70,34 @@ public class RemotePropertiesMap {
         }
     }
 
+    private boolean updateThreadField(ThreadEntity thread, String key, String value) {
+        switch (key) {
+            case TIME -> thread.time = value;
+            case PAUSE -> thread.pause = value;
+            case DEBUG -> thread.debug = value;
+            case COMMAND_LIMIT -> thread.commandLimit = value;
+            case CONDITIONS -> thread.conditions = value;
+            case NAME -> thread.name = value;
+            case TYPE -> thread.type = value;
+            default -> {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addRemoteConfig(ConfigTerm config) {
         remoteConfigs.stream()
                 .filter(c -> c.getKey().equals(config.getKey()) && c.getModule().equals(config.getModule()) && c.getThread().equals(config.getThread()))
                 .findFirst()
                 .ifPresent(remoteConfigs::remove);
         remoteConfigs.add(config);
-        pushConfigs();
+//        pushConfigs();
     }
 
     public void resetRemoteConfig() {
         remoteConfigs = new ArrayList<>();
-        pushConfigs();
+//        pushConfigs();
     }
 
     public String showConfig(String phrase) {

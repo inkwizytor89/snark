@@ -3,10 +3,19 @@ package org.enoch.snark.common.time;
 import org.enoch.snark.common.Parsable;
 import org.enoch.snark.common.RunningState;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class TimeScheduler extends Parsable<TimePlan> {
+
+    private static Map<String, TimeScheduler> cache = new ConcurrentHashMap<>();
 
     public TimeScheduler(String input) {
         super(input);
+    }
+
+    public static TimeScheduler parse(String input) {
+        return cache.computeIfAbsent(input, TimeScheduler::new);
     }
 
     @Override

@@ -128,7 +128,7 @@ public class SpaceThread extends AbstractThread {
                     wrap);
             galaxyList.forEach(galaxyEntity -> galaxyEntityMap.put(galaxyEntity.toSystemView(), galaxyEntity));
         }
-        if(map().getConfigBoolean(DEBUG, false)) {
+        if(isDebugEnabled()) {
             String spyRangesString = spacedRange.stream().map(SystemViewRange::toString).collect(Collectors.joining(", "));
             long nullCount = galaxyEntityMap.values().stream().filter(Objects::isNull).count();
             log(spyRangesString + " - SystemView total "+  galaxyEntityMap.size()+" in that "+ nullCount + " never checked");
@@ -146,7 +146,7 @@ public class SpaceThread extends AbstractThread {
         log(newSpaceHash);
 
         // limit must be set before push
-        if(!isNearestConfig(COMMAND_LIMIT)) limit= map().getConfigLong(COMMAND_LIMIT, 10L);
+        if(!isNearestConfig(COMMAND_LIMIT)) limit = getThreadConfigLong(COMMAND_LIMIT, 10L);
         return newSpaceHash;
     }
 

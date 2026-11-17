@@ -20,7 +20,7 @@ public class ConfigEntity extends IdEntity {
     }
 
     public ConfigEntity(ThreadEntity thread, String key, String value) {
-        this.thread = thread;
+        thread.addConfig(this);
         this.key = key;
         this.value = value;
     }

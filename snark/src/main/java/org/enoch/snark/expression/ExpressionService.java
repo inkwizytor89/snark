@@ -81,6 +81,11 @@ public class ExpressionService {
 //        this.cache = cache;
 //    }
 
+    public Boolean evaluateCondition(String condition, Map<String, Object> context) {
+        if(condition == null || condition.isBlank()) return true;
+        return evaluate(condition, context, Boolean.class);
+    }
+
     /**
      * Evaluate a SpEL expression with caching.
      *

@@ -85,56 +85,61 @@ public class Core {
         }
         System.out.println("[SHUTDOWN][CORE] Browser session shutdown requests completed");
     }
+//
+//    public void configurationUpdate(PropertiesMap propertiesMap) {
+//        for(ModuleMap moduleMap : propertiesMap.modules()) {
+//            String moduleName = moduleMap.getName();
+//            AbstractModule module = registerModuleBeanIfAbsent(moduleName, moduleMap);
+//            modules.putIfAbsent(moduleName, module);
+//            module.updateMap(moduleMap);
+//
+//            for(ThreadMap threadMap : module.getModuleMap().threads()) {
+//                String threadName = threadMap.get(NAME);
+//                if(threadName.endsWith(MAIN)) {
+//                    module.setMainMap(threadMap);
+//                    continue;
+//                }
+//
+//                AbstractThread thread = registerThreadBeanIfAbsent(threadMap.name(), threadMap.getTypeClass());
+//                thread.updateMap(threadMap);
+//                thread.setModule(module);
+//                module.getThreadsMap().put(threadName, thread);
+//                threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
+//                threadExecutors.computeIfAbsent(thread, configuredThread -> {
+//                    ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
+//                        Thread workerThread = new Thread(task, "snark-" + configuredThread.map().name());
+//                        workerThread.setDaemon(true);
+//                        return workerThread;
+//                    });
+//                    executor.submit(configuredThread);
+//                    return executor;
+//                });
+//            }
+//            // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
+//        }
+//    }
+//
+//    public AbstractModule registerModuleBeanIfAbsent(String name, ModuleMap map) {
+//        Class<AbstractModule> moduleClass = AbstractModule.class;
+//        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, moduleClass);
+//
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(moduleClass)
+//                    .addConstructorArgValue(map);
+//        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
+//        return beanFactory.getBean(name, moduleClass);
+//    }
+//
+//    public <T> T registerThreadBeanIfAbsent(String name, Class<? extends T> beanClass) {
+//        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, beanClass);
+//
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+//        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
+//        return beanFactory.getBean(name, beanClass);
+//    }
 
-    public void configurationUpdate(PropertiesMap propertiesMap) {
-        for(ModuleMap moduleMap : propertiesMap.modules()) {
-            String moduleName = moduleMap.getName();
-            AbstractModule module = registerModuleBeanIfAbsent(moduleName, moduleMap);
-            modules.putIfAbsent(moduleName, module);
-            module.updateMap(moduleMap);
-
-            for(ThreadMap threadMap : module.getModuleMap().threads()) {
-                String threadName = threadMap.get(NAME);
-                if(threadName.endsWith(MAIN)) {
-                    module.setMainMap(threadMap);
-                    continue;
-                }
-
-                AbstractThread thread = registerThreadBeanIfAbsent(threadMap.name(), threadMap.getTypeClass());
-                thread.updateMap(threadMap);
-                thread.setModule(module);
-                module.getThreadsMap().put(threadName, thread);
-                threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
-                threadExecutors.computeIfAbsent(thread, configuredThread -> {
-                    ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
-                        Thread workerThread = new Thread(task, "snark-" + configuredThread.map().name());
-                        workerThread.setDaemon(true);
-                        return workerThread;
-                    });
-                    executor.submit(configuredThread);
-                    return executor;
-                });
-            }
-            // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
-        }
-    }
-
-    public AbstractModule registerModuleBeanIfAbsent(String name, ModuleMap map) {
-        Class<AbstractModule> moduleClass = AbstractModule.class;
-        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, moduleClass);
-
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(moduleClass)
-                    .addConstructorArgValue(map);
-        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-        return beanFactory.getBean(name, moduleClass);
-    }
-
-    public <T> T registerThreadBeanIfAbsent(String name, Class<? extends T> beanClass) {
-        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, beanClass);
-
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
-        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-        return beanFactory.getBean(name, beanClass);
+    public boolean hasLegacyThread(String moduleName, String threadName) {
+        AbstractModule module = modules.get(moduleName);
+        return module != null && module.getThreadsMap().containsKey(threadName);
     }
 
     public void register(CommandDeque commandDeque) {

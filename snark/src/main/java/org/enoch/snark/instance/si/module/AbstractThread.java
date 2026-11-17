@@ -12,6 +12,7 @@ import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
 import org.enoch.snark.action.command.OpenPageCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
+import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.GalaxyRepository;
@@ -72,10 +73,15 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Setter
     protected AbstractModule module;
 
+    @Getter
+    @Setter
+    protected ThreadEntity threadEntity;
+
+    protected ThreadMap map;
     protected ThreadMap map;
     private TimeScheduler timeScheduler;
     protected Duration pause = new Duration("1M");
-    private boolean isLive = true;
+    private volatile boolean isLive = true;
     protected Boolean debug;
     protected Long limit = NO_LIMIT;
     protected String currentStateDescription = "UNKNOWN";
@@ -117,20 +123,22 @@ public abstract class AbstractThread extends ExecutorImpl {
     public void run() {
         while(isLive) {
             try {
-                if(shouldWaitForDeque() || shouldWaitForConditions()) {
+                if(shouldWaitForDeque() || (!isDatabaseManaged() && shouldWaitForConditions())) {
                     SleepUtil.sleep();
                     continue;
                 }
 
-                RunningState actualState = runningProcessor.update(timeScheduler.isOn(), module.getTimeScheduler().isOn())
+                boolean threadScheduleIsOn = isDatabaseManaged() || timeScheduler.isOn();
+                boolean moduleScheduleIsOn = isDatabaseManaged() || module.getTimeScheduler().isOn();
+                RunningState actualState = runningProcessor.update(threadScheduleIsOn, moduleScheduleIsOn)
                         .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
                         .getActualState();
 
                 if(RunningState.STARTING.equals(actualState)) onStart();
 
                 if (RunningState.isRunning(actualState)) {
-                    debug = map.getConfigBoolean(ThreadMap.DEBUG, false);
-                    limit = map.getConfigNumber(ThreadMap.COMMAND_LIMIT, "-1");
+                    debug = isDebugEnabled();
+                    limit = getThreadConfigLong(ThreadMap.COMMAND_LIMIT, -1L);
                     updatePause();
 //                    log(actualState.name()+" pause="+pause);
 
@@ -180,46 +188,50 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     private boolean shouldWaitForConditions() {
-        String configValue = map().getConfig(CONDITIONS, "[]");
-        return !isConditionSatisfied(configValue);
+        return !expressionService.evaluate(map().getConfig(CONDITIONS, "[]"), Map.of(), Boolean.class);
     }
 
-    private boolean isConditionSatisfied(String configValue) {
-        if (StringUtils.isBlank(configValue) || "[]".equals(configValue.trim())) {
-            return true;
-        }
-
-        try {
-            List<AbstractCondition> conditions = expressionService.evaluateConditions(configValue, Map.of());
-            if (!conditions.isEmpty()) {
-                return conditionChecker.fit(conditions, null);
-            }
-        } catch (IllegalStateException ignored) {
-            // The config may contain a raw boolean expression (e.g. "#isReady()" or "2 > 1")
-            // rather than a legacy condition list.
-        }
-
-        Object result = expressionService.evaluateNoCached(configValue, Map.of(), Object.class);
-        if (result instanceof Boolean bool) {
-            return bool;
-        }
-        if (result instanceof AbstractCondition condition) {
-            return conditionChecker.check(List.of(condition), null) == null;
-        }
-
-        throw new IllegalStateException("Condition config '" + configValue + "' must resolve to a boolean or AbstractCondition");
-    }
-
-    private boolean isOn() {
-        return timeScheduler.isOn() && module.getTimeScheduler().isOn();
+    private boolean isDatabaseManaged() {
+        return threadEntity != null;
     }
 
     private void updatePause() {
-        pause.update(map.getConfig(ThreadMap.PAUSE, defaultPause()));
+        pause.update(getThreadConfig(ThreadMap.PAUSE, defaultPause()));
+    }
+
+    protected String getThreadConfig(String key, String defaultValue) {
+        if (threadEntity == null) {
+            return map.getConfig(key, defaultValue);
+        }
+        String value = switch (key) {
+            case TIME -> threadEntity.time;
+            case PAUSE -> threadEntity.pause;
+            case DEBUG -> threadEntity.debug;
+            case COMMAND_LIMIT -> threadEntity.commandLimit;
+            case CONDITIONS -> threadEntity.conditions;
+            case NAME -> threadEntity.name;
+            case TYPE -> threadEntity.type;
+            default -> null;
+        };
+        return StringUtils.isBlank(value) ? defaultValue : value;
+    }
+
+    protected boolean isDebugEnabled() {
+        return Boolean.parseBoolean(getThreadConfig(ThreadMap.DEBUG, "false"));
+    }
+
+    protected Long getThreadConfigLong(String key, Long defaultValue) {
+        if (threadEntity == null) {
+            return map.getConfigLong(key, defaultValue);
+        }
+        String value = getThreadConfig(key, defaultValue == null ? null : defaultValue.toString());
+        return value == null ? null : NumberUtil.toLong(value);
     }
 
     public void updateMap(ThreadMap map) {
-        timeScheduler.update(map.getConfig(TIME, OFF));
+        if (!isDatabaseManaged()) {
+            timeScheduler.update(map.getConfig(TIME, OFF));
+        }
         this.map = map;
         notification.clear();
     }
@@ -242,31 +254,12 @@ public abstract class AbstractThread extends ExecutorImpl {
         return "Thread behavior for " + getThreadType();
     }
 
-    protected List<ConfigDefinition> commonConfigDefinitions() {
-        List<ConfigDefinition> definitions = new ArrayList<>();
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.TIME, "", false,
-                "Activation window for the thread. Examples: on, off, 09:00-18:00"));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.PAUSE, "10S", false,
-                "Sleep between loop iterations. Example: 4S, 10M"));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.DEBUG, "false", false,
-                "Enable verbose logging for the thread."));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.COMMAND_LIMIT, "-1", false,
-                "Maximum commands queued per loop. -1 means unlimited."));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.CONDITIONS, "[]", false,
-                "Preconditions that must pass before the thread runs."));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.NAME, "", false,
-                "Logical name of the thread."));
-        definitions.add(new ConfigDefinition("global", "main", ThreadMap.TYPE, "", false,
-                "Thread type used by the runtime."));
-        return definitions;
-    }
-
     protected void log(String message) {
         Debug.log(this, message);
     }
 
     protected void logList(String header, Iterable list) {
-        if(map().getConfigBoolean(DEBUG, false)) {
+        if(isDebugEnabled()) {
             StringBuilder stringBuilder = new StringBuilder(header + ": ");
             list.forEach(command -> stringBuilder.append(command).append(", "));
             log(stringBuilder.toString());
@@ -342,11 +335,18 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     protected boolean isNearestConfig(String key) {
+        if (threadEntity != null && StringUtils.isNotBlank(getThreadConfig(key, null))) {
+            return true;
+        }
         return (map().containsKey(key) &&  !StringUtils.EMPTY.equals(map().get(key))) ||
                 (module.getModuleMap().get(MAIN).containsKey(key) && !StringUtils.EMPTY.equals(module.getModuleMap().get(MAIN).get(key)));
     }
 
     protected String getNearestConfig(String key, String defaultValue) {
+        String entityValue = getThreadConfig(key, null);
+        if (entityValue != null) {
+            return entityValue;
+        }
         if(map().containsKey(key)) return map().get(key);
         ThreadMap moduleMainMap = module.getModuleMap().get(MAIN);
         if(moduleMainMap.containsKey(key)) return moduleMainMap.get(key);

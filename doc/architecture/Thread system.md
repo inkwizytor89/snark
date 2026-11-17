@@ -45,6 +45,23 @@ Configuration is provided through property files. The naming scheme is:
 module_name.thread_name.key=value
 ```
 
+Database-backed thread definitions are also reconciled by `DatabaseThreadManager`
+every 30 seconds. It evaluates the `time` and `conditions` fields on each
+`ModuleEntity` and `ThreadEntity`: an inactive module stops all its threads, and
+a thread runs only when both the module and thread are active. Eligible
+definitions run as prototype Spring instances; updated definitions are
+restarted, and ineligible or deleted definitions are stopped. The manager does
+not load thread or module configuration rows or build their `ThreadMap`.
+This lifecycle remains separate from the existing `Core` property-file lifecycle.
+Each database-managed `AbstractThread` receives its corresponding `ThreadEntity`.
+The entity supplies its common runtime settings, while scheduling and condition
+evaluation remain exclusively in the manager.
+
+The common `time`, `pause`, `debug`, `command_limit`, and `conditions` settings
+are columns on the database `threads` table, rather than rows in `config`.
+Module-level `time` and `conditions` are columns on `modules`. Thread `name`
+and `type` are also stored on `threads`.
+
 Example from `swarn.properties`:
 
 ```
