@@ -7,6 +7,7 @@ import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.module.building.BuildThread;
+import org.enoch.snark.instance.si.module.consumer.ConsumerDefinition;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
 import org.enoch.snark.instance.si.module.defense.DefenseThread;
 import org.enoch.snark.instance.si.module.define.DefineThread;
@@ -115,7 +116,7 @@ public class ThreadMap extends HashMap<String, String> {
     public Class<? extends AbstractThread> getTypeClass() {
         String name = name();
 
-        if (name.contains(ConsumerThread.threadType)) {
+        if (name.contains(ConsumerDefinition.threadType)) {
             return ConsumerThread.class;
         } else if (name.contains(UpdateThread.threadType)) {
             return UpdateThread.class;

@@ -20,6 +20,15 @@ public class DatabaseThreadBeanFactory {
         this.beanFactory = beanFactory;
     }
 
+    public synchronized AbstractThread create(
+            Class<? extends AbstractThread> threadClass,
+            ThreadEntity entity
+    ) {
+        AbstractThread thread = create(threadClass);
+        initializeDatabaseThread(thread, entity);
+        return thread;
+    }
+
     public synchronized AbstractThread create(Class<? extends AbstractThread> threadClass) {
         String beanName = BEAN_NAME_PREFIX + threadClass.getName();
         if (!beanFactory.containsBeanDefinition(beanName)) {
@@ -32,10 +41,7 @@ public class DatabaseThreadBeanFactory {
         return beanFactory.getBean(beanName, threadClass);
     }
 
-    public void initializeDatabaseThread(
-            AbstractThread thread,
-            ThreadEntity entity
-    ) {
+    public void initializeDatabaseThread(AbstractThread thread, ThreadEntity entity) {
         String moduleName = entity.module.name;
         String threadName = entity.name;
         String threadType = entity.type;
@@ -45,8 +51,8 @@ public class DatabaseThreadBeanFactory {
         AbstractModule module = new AbstractModule(moduleMap);
         module.setMainMap(moduleMainMap);
 
-        ThreadMap threadMap = identityMap(moduleName, threadName, threadType);
         thread.setThreadEntity(entity);
+        ThreadMap threadMap = identityMap(moduleName, threadName, threadType);
         thread.updateMap(threadMap);
         thread.setModule(module);
     }

@@ -162,8 +162,7 @@ public class DatabaseThreadManager {
             LocalDateTime moduleUpdated,
             LocalDateTime threadUpdated
     ) {
-        AbstractThread thread = threadBeanFactory.create(threadClass);
-        threadBeanFactory.initializeDatabaseThread(thread, entity);
+        AbstractThread thread = threadBeanFactory.create(threadClass, entity);
         ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
             Thread worker = new Thread(task, "snark-db-" + identity);
             worker.setDaemon(true);

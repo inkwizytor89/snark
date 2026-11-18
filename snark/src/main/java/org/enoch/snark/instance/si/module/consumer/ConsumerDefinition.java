@@ -1,11 +1,16 @@
 package org.enoch.snark.instance.si.module.consumer;
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
+import org.enoch.snark.db.entity.ConfigEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@Slf4j
 public class ConsumerDefinition {
 
     public static final String threadType = "consumer";
@@ -19,37 +24,60 @@ public class ConsumerDefinition {
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_PATH = "driver";
 
+    private String url;
+    private String hash;
+    private String server;
+    private String login;
+    private String password;
+    private String webdriverPath;
+    private String restartDuration;
 
-    public static final ConfigDefinition URL_CONFIG = new ConfigDefinition("consumer", threadType, URL, "", false,
-            "Game URL used to start the browser session.");
-    public static final ConfigDefinition HASH_CONFIG = new ConfigDefinition("consumer", threadType, HASH, "", false,
-            "Hash identifier for the target server session.");
-    public static final ConfigDefinition SERVER_CONFIG = new ConfigDefinition("consumer", threadType, SERVER, "", false,
-            "Server code or name used when opening the game session.");
-    public static final ConfigDefinition LOGIN_CONFIG = new ConfigDefinition("consumer", threadType, LOGIN, "", false,
-            "Login name used for the player session.");
-    public static final ConfigDefinition PASSWORD_CONFIG = new ConfigDefinition("consumer", threadType, PASSWORD, "", false,
-            "Password used for the player session.");
-    public static final ConfigDefinition WEBDRIVER_PATH_CONFIG =
-            new ConfigDefinition("consumer", threadType, WEBDRIVER_PATH,
-                    "C:\\global\\selenium\\chromedriver.exe", false,
-                    "Custom path to the ChromeDriver used by the browser session.");
-    public static final ConfigDefinition RESTART_DURATION_CONFIG =
-            new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
-                    "How long the session stays alive before a restart is triggered.");
-    public static final List<ConfigDefinition> CONFIGS = List.of(
-            URL_CONFIG,
-            HASH_CONFIG,
-            SERVER_CONFIG,
-            LOGIN_CONFIG,
-            PASSWORD_CONFIG,
-            WEBDRIVER_PATH_CONFIG,
-            RESTART_DURATION_CONFIG
-    );
+    public ConsumerDefinition() {
+        for (ConfigDefinition config : threadDefinition().getConfigs())
+            switch (config.getKey()) {
+                case URL -> url = config.getValue();
+                case HASH -> hash = config.getValue();
+                case SERVER -> server = config.getValue();
+                case LOGIN -> login = config.getValue();
+                case PASSWORD -> password = config.getValue();
+                case WEBDRIVER_PATH -> webdriverPath = config.getValue();
+                case RESTART_DURATION -> restartDuration = config.getValue();
+                default -> log.warn("Config '{}' was not found in ConsumerDefinition", config.getKey());
+            }
+    }
+
+    public void update(List<ConfigEntity> configs) {
+        for (ConfigEntity config : configs) {
+            switch (config.key) {
+                case URL -> url = config.value;
+                case HASH -> hash = config.value;
+                case SERVER -> server = config.value;
+                case LOGIN -> login = config.value;
+                case PASSWORD -> password = config.value;
+                case WEBDRIVER_PATH -> webdriverPath = config.value;
+                case RESTART_DURATION -> restartDuration = config.value;
+                default -> {
+                }
+            }
+        }
+    }
 
     public static ThreadDefinition threadDefinition() {
-        return new ThreadDefinition(threadType,
-                "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.",
-                new ArrayList<>(CONFIGS));
+        List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("consumer", threadType, URL, null, false,
+                "Game URL used to start the browser session."));
+        configs.add(new ConfigDefinition("consumer", threadType, HASH, null, false,
+                "Hash identifier for the target server session."));
+        configs.add(new ConfigDefinition("consumer", threadType, SERVER, null, false,
+                "Server code or name used when opening the game session."));
+        configs.add(new ConfigDefinition("consumer", threadType, LOGIN, "missing_value", false,
+                "Login name used for the player session."));
+        configs.add(new ConfigDefinition("consumer", threadType, PASSWORD, "missing_value", false,
+                "Password used for the player session."));
+        configs.add(new ConfigDefinition("consumer", threadType, WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe", false,
+                "Custom path to the ChromeDriver used by the browser session."));
+        configs.add(new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
+                "How long the session stays alive before a restart is triggered."));
+        return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
     }
 }

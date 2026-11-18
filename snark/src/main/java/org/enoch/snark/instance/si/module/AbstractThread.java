@@ -78,7 +78,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     protected ThreadEntity threadEntity;
 
     protected ThreadMap map;
-    protected ThreadMap map;
     private TimeScheduler timeScheduler;
     protected Duration pause = new Duration("1M");
     private volatile boolean isLive = true;
@@ -247,8 +246,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     public int getRequestedFleetCount() {
         return 0;
     }
-
-    public abstract ThreadDefinition threadDefinition();
 
     protected String threadDescription() {
         return "Thread behavior for " + getThreadType();

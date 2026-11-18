@@ -33,7 +33,7 @@ public final class ThreadDefinitions {
 
     public static List<ThreadDefinition> availableDefinitions() {
         return List.of(
-                new ConsumerThread(null, null, null).threadDefinition(),
+                new ConsumerThread(null, null, null, null).threadDefinition(),
                 new UpdateThread(null).threadDefinition(),
                 new DefineThread(null, null).threadDefinition(),
                 new DefenseThread(null).threadDefinition(),

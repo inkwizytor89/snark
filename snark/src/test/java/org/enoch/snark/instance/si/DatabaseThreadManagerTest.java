@@ -53,17 +53,18 @@ class DatabaseThreadManagerTest {
     void keepsUnchangedThreadAndRestartsWhenDatabaseUpdateAdvances() {
         AbstractThread firstInstance = mock(AbstractThread.class);
         AbstractThread secondInstance = mock(AbstractThread.class);
-        when(threadBeanFactory.create(UpdateThread.class)).thenReturn(firstInstance, secondInstance);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread))
+                .thenReturn(firstInstance, secondInstance);
 
         manager.synchronizeThreads();
         manager.synchronizeThreads();
 
-        verify(threadBeanFactory, times(1)).create(UpdateThread.class);
+        verify(threadBeanFactory, times(1)).create(UpdateThread.class, databaseThread);
 
         databaseThread.updated = databaseThread.updated.plusSeconds(1);
         manager.synchronizeThreads();
 
-        verify(threadBeanFactory, times(2)).create(UpdateThread.class);
+        verify(threadBeanFactory, times(2)).create(UpdateThread.class, databaseThread);
         verify(threadBeanFactory).destroy(firstInstance);
 
         when(threadRepository.findAllWithModule()).thenReturn(List.of());
@@ -74,7 +75,7 @@ class DatabaseThreadManagerTest {
     @Test
     void stopsAnExistingThreadWhenItNoLongerQualifiesToRun() {
         AbstractThread runningInstance = mock(AbstractThread.class);
-        when(threadBeanFactory.create(UpdateThread.class)).thenReturn(runningInstance);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
 
         manager.synchronizeThreads();
         when(expressionService.evaluate(eq("[]"), anyMap(), eq(Boolean.class))).thenReturn(false);
@@ -86,14 +87,14 @@ class DatabaseThreadManagerTest {
     @Test
     void initializesThreadIdentityWithoutReadingThreadOrModuleConfigs() {
         AbstractThread runningInstance = mock(AbstractThread.class);
-        when(threadBeanFactory.create(UpdateThread.class)).thenReturn(runningInstance);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
 
         new ConfigEntity(databaseThread, "source", "#all_moons()");
         when(threadRepository.findAllWithModule()).thenReturn(List.of(databaseThread));
 
         manager.synchronizeThreads();
 
-        verify(threadBeanFactory).initializeDatabaseThread(runningInstance, databaseThread);
+        verify(threadBeanFactory).create(UpdateThread.class, databaseThread);
         verify(runningInstance, never()).updateMap(any(ThreadMap.class));
     }
 
@@ -119,7 +120,7 @@ class DatabaseThreadManagerTest {
     @Test
     void moduleConditionStopsAllThreadsInThatModule() {
         AbstractThread runningInstance = mock(AbstractThread.class);
-        when(threadBeanFactory.create(UpdateThread.class)).thenReturn(runningInstance);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
         manager.synchronizeThreads();
 
         databaseThread.module.conditions = "module-condition";
@@ -142,7 +143,7 @@ class DatabaseThreadManagerTest {
     @Test
     void threadConditionStopsAnExistingThread() {
         AbstractThread runningInstance = mock(AbstractThread.class);
-        when(threadBeanFactory.create(UpdateThread.class)).thenReturn(runningInstance);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
         manager.synchronizeThreads();
 
         databaseThread.conditions = "thread-condition";

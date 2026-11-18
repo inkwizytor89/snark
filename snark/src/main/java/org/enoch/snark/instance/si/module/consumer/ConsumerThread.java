@@ -2,12 +2,8 @@ package org.enoch.snark.instance.si.module.consumer;
 
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.enoch.snark.action.command.status.CommandStatus;
 import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.Debug;
@@ -15,6 +11,7 @@ import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.si.Core;
@@ -24,7 +21,6 @@ import org.enoch.snark.instance.si.module.consumer.gi.GISession;
 import org.enoch.snark.instance.si.module.consumer.gi.BrowserWindowUnavailableException;
 import org.enoch.snark.instance.si.CommandDeque;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.action.processor.CommandProcessor;
 import org.enoch.snark.instance.si.module.consumer.gi.types.UrlComponent;
 import org.openqa.selenium.By;
@@ -33,17 +29,17 @@ import org.openqa.selenium.WebElement;
 
 import static org.enoch.snark.action.command.status.ExecutionIssue.*;
 import static org.enoch.snark.action.command.status.ExecutionStatus.*;
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
 import static org.enoch.snark.instance.si.module.consumer.gi.SessionGIR.GF_TOKEN_PRODUCTION;
 
 @RequiredArgsConstructor
 public class ConsumerThread extends AbstractThread implements Credentials {
 
-    public static final String threadType = "consumer";
+    private ConsumerDefinition config;
 
     private final CommandProcessor processor;
     private final CacheEntryRepository cacheEntryRepository;
     private final WorkerLifecycle workerLifecycle;
+    private final ConfigRepository configRepository;
 
     private CommandDeque commandDeque;
     private final RunningProcessor runningProcessor = new RunningProcessor();
@@ -53,27 +49,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private Duration restartPause = new Duration("300S");
     private boolean isRunning = true;
-
-    @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("consumer", threadType, URL, "", false,
-                "Game URL used to start the browser session."));
-        configs.add(new ConfigDefinition("consumer", threadType, HASH, "", false,
-                "Hash identifier for the target server session."));
-        configs.add(new ConfigDefinition("consumer", threadType, SERVER, "", false,
-                "Server code or name used when opening the game session."));
-        configs.add(new ConfigDefinition("consumer", threadType, LOGIN, "", false,
-                "Login name used for the player session."));
-        configs.add(new ConfigDefinition("consumer", threadType, PASSWORD, "", false,
-                "Password used for the player session."));
-        configs.add(new ConfigDefinition("consumer", threadType, WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe", false,
-                "Custom path to the ChromeDriver used by the browser session."));
-        configs.add(new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
-                "How long the session stays alive before a restart is triggered."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
-    }
 
     @Override
     protected boolean shouldWaitForDeque() {
@@ -86,6 +61,10 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @Override
     protected void onStart() {
+        config = new ConsumerDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override
@@ -118,12 +97,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     private void startGiSessionIfNeeded() {
         if(session == null) {
             System.err.println("startGiSessionIfNeeded session == null");
-            session = new GISession(map().getConfig(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe"), workerLifecycle);
+            session = new GISession(config.getWebdriverPath(), workerLifecycle);
             wd = session.getWd();
         }
-        wd.setUrl(map().getConfig(URL, null));
-        wd.setHash(map().getConfig(HASH, null));
-        wd.setServerName(map().getConfig(ThreadMap.SERVER, null));
+        wd.setUrl(config.getUrl());
+        wd.setHash(config.getHash());
+        wd.setServerName(config.getServer());
 
         if(!session.isNeededToRestart()) return;
 
@@ -219,12 +198,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @Override
     public String login() {
-        return map.getConfig(ThreadMap.LOGIN);
+        return config.getLogin();
     }
 
     @Override
     public String password() {
-        return map.getConfig(ThreadMap.PASSWORD);
+        return config.getPassword();
     }
 
     @Override
@@ -234,17 +213,17 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     @Override
     public String server() {
-        return map.getConfig(ThreadMap.SERVER);
+        return config.getServer();
     }
 
     @Override
     public String hash() {
-        return "";
+        return config.getHash();
     }
 
     @Override
     public Duration restartDuration() {
-        restartPause.update(map.getConfig(ThreadMap.RESTART_DURATION, "300S"));
+        restartPause.update(config.getRestartDuration());
         return restartPause;
     }
 }
