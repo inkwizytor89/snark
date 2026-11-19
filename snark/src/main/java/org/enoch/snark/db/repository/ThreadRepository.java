@@ -15,7 +15,12 @@ public interface ThreadRepository extends JpaRepository<ThreadEntity, Long> {
 
     Optional<ThreadEntity> findByModuleAndName(ModuleEntity module, String name);
 
+    List<ThreadEntity> findByModule(ModuleEntity module);
+
     @EntityGraph(attributePaths = {"module", "configs"})
     @Query("select distinct t from ThreadEntity t")
     List<ThreadEntity> findAllWithModule();
+
+    @Query("select t from ThreadEntity t where t.module.name = ?1 and t.name = ?2")
+    Optional<ThreadEntity> find(String moduleName, String threadName);
 }

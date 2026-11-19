@@ -9,13 +9,13 @@ import jakarta.persistence.Table;
 public class ModuleEntity extends IdEntity {
 
     @Column(name = "name", nullable = false, unique = true)
-    public String name;
+    public String name = "global";
 
-    @Column(name = "time")
-    public String time;
+    @Column(name = "time", nullable = false)
+    public String time = "on";
 
-    @Column(name = "conditions", columnDefinition = "TEXT")
-    public String conditions;
+    @Column(name = "conditions", nullable = false, columnDefinition = "TEXT")
+    public String conditions = "";
 
     public ModuleEntity() {
     }

@@ -1,27 +1,19 @@
 package org.enoch.snark.instance.si;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.common.status.ColonyStatus;
 import org.enoch.common.status.CoordinatesStatus;
-import org.enoch.snark.common.RunningState;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
-import org.enoch.snark.config.ConfigurationScheduledTask;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.technology.Ship;
-import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
-import org.enoch.snark.instance.si.module.*;
-import org.springframework.beans.factory.support.*;
-import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,27 +21,17 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.enoch.snark.instance.si.module.AbstractThread.PROCESSING_SUFFIX;
 import static org.enoch.snark.instance.model.types.ColonyType.PLANET;
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Service
 @RequiredArgsConstructor
 public class Core {
 
-    private final ApplicationContext applicationContext;
-    private final DefaultListableBeanFactory beanFactory;
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
-//    private final RemotePropertiesMap remotePropertiesMap;
 
-    private Map<String, AbstractModule> modules = new ConcurrentHashMap<>();
-    private final Map<AbstractThread, ExecutorService> threadExecutors = new ConcurrentHashMap<>();
-    private CommandDeque queue;
     private CommandDeque commandDeque;
     private boolean isDequeReady;
     public static boolean isSomethingAttacking;
@@ -61,85 +43,6 @@ public class Core {
     @PostConstruct
     public void init() {
         cacheEntryRepository.setUnknownForSuffix(PROCESSING_SUFFIX);
-    }
-
-    @PreDestroy
-    public void shutdownThreads() {
-        System.out.println("[SHUTDOWN][CORE] Stopping configured threads");
-        modules.values().forEach(AbstractModule::destroy);
-        System.out.println("[SHUTDOWN][CORE] Interrupting " + threadExecutors.size() + " thread executors");
-        threadExecutors.values().forEach(ExecutorService::shutdownNow);
-        System.out.println("[SHUTDOWN][CORE] Thread shutdown requests sent");
-    }
-
-    public void closeBrowserSessions() {
-        List<ConsumerThread> consumers = modules.values().stream()
-                .flatMap(module -> module.getThreadsMap().values().stream())
-                .filter(ConsumerThread.class::isInstance)
-                .map(ConsumerThread.class::cast)
-                .distinct()
-                .toList();
-        System.out.println("[SHUTDOWN][CORE] Closing browser sessions for " + consumers.size() + " consumer thread(s)");
-        for (ConsumerThread consumer : consumers) {
-            consumer.closeBrowser();
-        }
-        System.out.println("[SHUTDOWN][CORE] Browser session shutdown requests completed");
-    }
-//
-//    public void configurationUpdate(PropertiesMap propertiesMap) {
-//        for(ModuleMap moduleMap : propertiesMap.modules()) {
-//            String moduleName = moduleMap.getName();
-//            AbstractModule module = registerModuleBeanIfAbsent(moduleName, moduleMap);
-//            modules.putIfAbsent(moduleName, module);
-//            module.updateMap(moduleMap);
-//
-//            for(ThreadMap threadMap : module.getModuleMap().threads()) {
-//                String threadName = threadMap.get(NAME);
-//                if(threadName.endsWith(MAIN)) {
-//                    module.setMainMap(threadMap);
-//                    continue;
-//                }
-//
-//                AbstractThread thread = registerThreadBeanIfAbsent(threadMap.name(), threadMap.getTypeClass());
-//                thread.updateMap(threadMap);
-//                thread.setModule(module);
-//                module.getThreadsMap().put(threadName, thread);
-//                threadMap.put(TYPE, threadMap.getTypeClass().getSimpleName());
-//                threadExecutors.computeIfAbsent(thread, configuredThread -> {
-//                    ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
-//                        Thread workerThread = new Thread(task, "snark-" + configuredThread.map().name());
-//                        workerThread.setDaemon(true);
-//                        return workerThread;
-//                    });
-//                    executor.submit(configuredThread);
-//                    return executor;
-//                });
-//            }
-//            // brakuje usuwania modułów i wygaszanie beanow i co tmajeszcze potrzeba
-//        }
-//    }
-//
-//    public AbstractModule registerModuleBeanIfAbsent(String name, ModuleMap map) {
-//        Class<AbstractModule> moduleClass = AbstractModule.class;
-//        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, moduleClass);
-//
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(moduleClass)
-//                    .addConstructorArgValue(map);
-//        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-//        return beanFactory.getBean(name, moduleClass);
-//    }
-//
-//    public <T> T registerThreadBeanIfAbsent(String name, Class<? extends T> beanClass) {
-//        if (applicationContext.containsBean(name)) return applicationContext.getBean(name, beanClass);
-//
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
-//        beanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-//        return beanFactory.getBean(name, beanClass);
-//    }
-
-    public boolean hasLegacyThread(String moduleName, String threadName) {
-        AbstractModule module = modules.get(moduleName);
-        return module != null && module.getThreadsMap().containsKey(threadName);
     }
 
     public void register(CommandDeque commandDeque) {
@@ -185,16 +88,6 @@ public class Core {
     private ServerStatus buildStatus(boolean includeColonies) {
         List<String> activeThreads = new ArrayList<>();
         List<String> notifications = new ArrayList<>();
-        for(Map.Entry<String, AbstractModule> moduleEntry : modules.entrySet()) {
-            moduleEntry.getValue().getThreadsMap().values().stream()
-                    .filter(thread -> RunningState.ON.equals(thread.getActualState()))
-                    .map(thread -> moduleEntry.getKey() + ":" + thread.map().get(NAME))
-                    .forEach(activeThreads::add);
-            moduleEntry.getValue().getThreadsMap().values().forEach(thread ->
-                    thread.getNotifications().forEach((key, value) -> notifications.add(
-                            thread.map().name() + System.lineSeparator() + key +
-                                    System.lineSeparator() + value)));
-        }
         CoordinatesStatus coordinatesStatus = null;
         if (includeColonies) {
             List<ColonyEntity> colonies = sortedColonies();

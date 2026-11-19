@@ -13,7 +13,7 @@ import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;
-import org.enoch.snark.instance.service.CoordinateExpressionService;
+import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.WorkerLifecycle;
 import org.enoch.snark.instance.si.module.consumer.gi.Wd;
@@ -96,7 +96,6 @@ public class ConsumerThread extends AbstractThread implements Credentials {
 
     private void startGiSessionIfNeeded() {
         if(session == null) {
-            System.err.println("startGiSessionIfNeeded session == null");
             session = new GISession(config.getWebdriverPath(), workerLifecycle);
             wd = session.getWd();
         }
@@ -144,9 +143,12 @@ public class ConsumerThread extends AbstractThread implements Credentials {
         commandDeque.push(new UpdateFleetEventsCommand());
         commandDeque.push(new UpdateResearchCommand());
 
-        if(!colonyRepository.findAll().isEmpty()) getSources(CoordinateExpressionService.NONE)
-                .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
-                        .sourceHash(this.getClass().getSimpleName())));
+        if(!colonyRepository.findAll().isEmpty()) {
+            expressionService.evaluateCoordinates(config.getSource()).stream()
+                    .map(PlanetData::getColony)
+                    .forEach(colony -> commandDeque.push(new OpenPageCommand(UrlComponent.FLEETDISPATCH, colony)
+                            .sourceHash(this.getClass().getSimpleName())));
+        }
         core.register(commandDeque);
     }
 
@@ -193,7 +195,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
             if (status.getFailed() < 2 || (RETRY.equals(status.getIssue()) && status.getFailed() < 4)) commandDeque.pushFailed(command);
             else status.setStatus(CRASHED);
         }
-        Debug.log(this, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash()+" <- "+commandDeque.toString());
+        Debug.log(threadEntity, command.getDebugId()+" "+command.getStatus()+"\t"+command.hash()+" <- "+commandDeque.toString());
     }
 
     @Override

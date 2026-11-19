@@ -11,16 +11,12 @@ import org.enoch.snark.common.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.common.time.TimeScheduler;
 import org.enoch.snark.action.command.OpenPageCommand;
-import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.db.repository.GalaxyRepository;
 import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
-import org.enoch.snark.instance.model.to.PlanetData;
-import org.enoch.snark.instance.model.to.Resources;
-import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.si.Core;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +28,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.enoch.snark.action.command.status.ExecutionIssue.STUCK_IN_QUEUE_IN_PROGRESS_AS_WAITING;
@@ -58,8 +53,6 @@ public abstract class AbstractThread extends ExecutorImpl {
     @Autowired
     protected final Core core;
     @Autowired
-    protected final ConditionChecker conditionChecker;
-    @Autowired
     protected final CacheEntryRepository cacheEntryRepository;
     @Autowired
     protected final ColonyRepository colonyRepository;
@@ -70,18 +63,12 @@ public abstract class AbstractThread extends ExecutorImpl {
 
     private RunningProcessor runningProcessor = new RunningProcessor();
 
-    @Setter
-    protected AbstractModule module;
-
     @Getter
     @Setter
     protected ThreadEntity threadEntity;
 
-    protected ThreadMap map;
-    private TimeScheduler timeScheduler;
     protected Duration pause = new Duration("1M");
     private volatile boolean isLive = true;
-    protected Boolean debug;
     protected Long limit = NO_LIMIT;
     protected String currentStateDescription = "UNKNOWN";
 
@@ -91,72 +78,51 @@ public abstract class AbstractThread extends ExecutorImpl {
     @PostConstruct
     public void init() {
         runningProcessor = new RunningProcessor();
-        timeScheduler = new TimeScheduler(OFF);
     }
 
-    protected String getThreadType() {return "";}
-
-    protected String defaultPause() {return "10S";}
-
     protected void onStart() {
-        try {
-            if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
-            if(map.containsKey(SOURCE)) {
-                expressionService.evaluateCoordinates(map.getConfig(SOURCE)).stream()
-                                .map(PlanetData::getColony)
-                                .forEach(colony -> {
-                    if(DateUtil.isExpired2H(colony.updated))
-                        core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()));
-                });
-            }
-        } catch (Throwable throwable) {
-            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            System.err.println("For "+this.map.get("name")+" ["+time+"] onStart skipping");
-            throwable.printStackTrace();
-        }
+//        try {
+//            if(limit > 0) saveProcessingStatus(IN_PROGRESS_PROCESSING);
+//            if(map.containsKey(SOURCE)) {
+//                expressionService.evaluateCoordinates(map.getConfig(SOURCE)).stream()
+//                                .map(PlanetData::getColony)
+//                                .forEach(colony -> {
+//                    if(DateUtil.isExpired2H(colony.updated))
+//                        core.push(new OpenPageCommand(FLEETDISPATCH, colony).sourceHash(this.getClass().getSimpleName()));
+//                });
+//            }
+//        } catch (Throwable throwable) {
+//            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+//            System.err.println("For "+this.threadEntity.name+" ["+time+"] onStart skipping");
+//            throwable.printStackTrace();
+//        }
     }
 
     protected abstract void onStep();
 
     @Override
     public void run() {
+        onStart();
         while(isLive) {
             try {
-                if(shouldWaitForDeque() || (!isDatabaseManaged() && shouldWaitForConditions())) {
+                if(shouldWaitForDeque() ) {
                     SleepUtil.sleep();
                     continue;
                 }
-
-                boolean threadScheduleIsOn = isDatabaseManaged() || timeScheduler.isOn();
-                boolean moduleScheduleIsOn = isDatabaseManaged() || module.getTimeScheduler().isOn();
-                RunningState actualState = runningProcessor.update(threadScheduleIsOn, moduleScheduleIsOn)
-                        .logChangedStatus("Thread " + map.name(), timeScheduler, " ", timeScheduler, " ", map)
-                        .getActualState();
-
-                if(RunningState.STARTING.equals(actualState)) onStart();
-
-                if (RunningState.isRunning(actualState)) {
-                    debug = isDebugEnabled();
-                    limit = getThreadConfigLong(ThreadMap.COMMAND_LIMIT, -1L);
-                    updatePause();
-//                    log(actualState.name()+" pause="+pause);
-
-//                    if(!container.anyNotProcessed())
-                        onStep();
-                    if(container.anyNotProcessed())
-                        limitedPush();
-                    SleepUtil.sleep(pause);
-                }
-                else SleepUtil.sleep(pause);
+                limit = NumberUtil.toLong(threadEntity.commandLimit);
+                pause.update(threadEntity.pause); // default "10S"
+                 onStep();
+                 if(container.anyNotProcessed())  limitedPush();
+                 SleepUtil.sleep(pause);
                 cacheProcessingStatus();
             } catch (Exception e) {
-                runningProcessor.logChangedStatus("Thread " + map.name(), map);
+                runningProcessor.logChangedStatus("Thread " + threadEntity.name, threadEntity);
                 String message = Objects.toString(e.getMessage(), "");
                 if (!notification.containsKey(message)) {
                     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     StringWriter stackTrace = new StringWriter();
                     e.printStackTrace(new PrintWriter(stackTrace));
-                    String details = "Thread " + map.name() + " [" + time + "]" +
+                    String details = "Thread " + threadEntity.name + " [" + time + "]" +
                             System.lineSeparator() + stackTrace;
                     notification.put(message, details);
                     log.warn(notification.get(message));
@@ -164,7 +130,7 @@ public abstract class AbstractThread extends ExecutorImpl {
             }
         }
         String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        System.err.println("Destroy "+map.name()+" ["+time+"]");
+        System.err.println("Destroy "+threadEntity.name+" ["+time+"]");
     }
 
     private void cacheProcessingStatus() {
@@ -174,7 +140,7 @@ public abstract class AbstractThread extends ExecutorImpl {
     }
 
     protected void saveProcessingStatus(String statusName) {
-        String key = map().name() + PROCESSING_SUFFIX;
+        String key = threadEntity.name + PROCESSING_SUFFIX;
         String oldValue = cacheEntryRepository.getValue(key);
         if(statusName!= null && !statusName.equals(oldValue)) {
             cacheEntryRepository.setValue(key, statusName);
@@ -186,22 +152,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         return !core.isDequeReady();
     }
 
-    private boolean shouldWaitForConditions() {
-        return !expressionService.evaluate(map().getConfig(CONDITIONS, "[]"), Map.of(), Boolean.class);
-    }
-
-    private boolean isDatabaseManaged() {
-        return threadEntity != null;
-    }
-
-    private void updatePause() {
-        pause.update(getThreadConfig(ThreadMap.PAUSE, defaultPause()));
-    }
-
     protected String getThreadConfig(String key, String defaultValue) {
-        if (threadEntity == null) {
-            return map.getConfig(key, defaultValue);
-        }
         String value = switch (key) {
             case TIME -> threadEntity.time;
             case PAUSE -> threadEntity.pause;
@@ -215,26 +166,6 @@ public abstract class AbstractThread extends ExecutorImpl {
         return StringUtils.isBlank(value) ? defaultValue : value;
     }
 
-    protected boolean isDebugEnabled() {
-        return Boolean.parseBoolean(getThreadConfig(ThreadMap.DEBUG, "false"));
-    }
-
-    protected Long getThreadConfigLong(String key, Long defaultValue) {
-        if (threadEntity == null) {
-            return map.getConfigLong(key, defaultValue);
-        }
-        String value = getThreadConfig(key, defaultValue == null ? null : defaultValue.toString());
-        return value == null ? null : NumberUtil.toLong(value);
-    }
-
-    public void updateMap(ThreadMap map) {
-        if (!isDatabaseManaged()) {
-            timeScheduler.update(map.getConfig(TIME, OFF));
-        }
-        this.map = map;
-        notification.clear();
-    }
-
     public RunningState getActualState() {
         return runningProcessor.getActualState();
     }
@@ -243,28 +174,20 @@ public abstract class AbstractThread extends ExecutorImpl {
         isLive = false;
     }
 
-    public int getRequestedFleetCount() {
-        return 0;
-    }
-
-    protected String threadDescription() {
-        return "Thread behavior for " + getThreadType();
+    public ThreadDefinition threadDefinition() {
+        throw new UnsupportedOperationException("Thread definition is not provided by " + getClass().getName());
     }
 
     protected void log(String message) {
-        Debug.log(this, message);
+        Debug.log(threadEntity, message);
     }
 
     protected void logList(String header, Iterable list) {
-        if(isDebugEnabled()) {
+        if(Boolean.getBoolean(threadEntity.debug)) {
             StringBuilder stringBuilder = new StringBuilder(header + ": ");
             list.forEach(command -> stringBuilder.append(command).append(", "));
             log(stringBuilder.toString());
         }
-    }
-
-    public ThreadMap map() {
-        return map;
     }
 
     public Map<String, String> getNotifications() {
@@ -312,7 +235,7 @@ public abstract class AbstractThread extends ExecutorImpl {
                     .filter(command -> WAITING.equals(command.getStatus().getStatus()))
                     .forEach(command -> {
                         String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                        System.err.println("For limitedPush "+map().name()+" ["+time+"] core.push do not put in queue command "+command.hash());
+                        System.err.println("For limitedPush "+threadEntity.name+" ["+time+"] core.push do not put in queue command "+command.hash());
                         command.getStatus().setStatus(CRASHED);
                         command.getStatus().setIssue(STUCK_IN_QUEUE_IN_PROGRESS_AS_WAITING);
                     });
@@ -321,67 +244,15 @@ public abstract class AbstractThread extends ExecutorImpl {
         }
     }
 
-    private boolean isAnyCommandInQueue(Collection<AbstractCommand> cmd) {
-        return cmd.stream().anyMatch(command -> asList(NEW, IN_PROGRESS).contains(command.getStatus().getStatus()));
-    }
-
-    private boolean isWaiting(Collection<AbstractCommand> cmd) {
-        return cmd.stream().allMatch(command -> asList(WAITING).contains(command.getStatus().getStatus()));
-//        AbstractCommand first = cmd.stream().findFirst().get();
-//        return asList(WAITING).contains(first);
-    }
-
-    protected boolean isNearestConfig(String key) {
-        if (threadEntity != null && StringUtils.isNotBlank(getThreadConfig(key, null))) {
-            return true;
-        }
-        return (map().containsKey(key) &&  !StringUtils.EMPTY.equals(map().get(key))) ||
-                (module.getModuleMap().get(MAIN).containsKey(key) && !StringUtils.EMPTY.equals(module.getModuleMap().get(MAIN).get(key)));
-    }
-
-    protected String getNearestConfig(String key, String defaultValue) {
-        String entityValue = getThreadConfig(key, null);
-        if (entityValue != null) {
-            return entityValue;
-        }
-        if(map().containsKey(key)) return map().get(key);
-        ThreadMap moduleMainMap = module.getModuleMap().get(MAIN);
-        if(moduleMainMap.containsKey(key)) return moduleMainMap.get(key);
-        return defaultValue;
-    }
-
-    public Resources getNearestLeaveResources(ColonyType type, Resources defaultResources) {
-        String key = ColonyType.PLANET.equals(type) ? LEAVE_PLANET_RESOURCES : LEAVE_MOON_RESOURCES;
-        String nearestConfig = getNearestConfig(key, null);
-        if (nearestConfig == null) return defaultResources;
-        return Resources.parse(nearestConfig);
-    }
-
-    protected List<ColonyEntity> getSources(String defaultValue) {
-        String sourcesCode = map().getSourcesCode(defaultValue);
-        List<PlanetData> planetData = expressionService.evaluateCoordinates(sourcesCode);
-        return planetData.stream().map(PlanetData::getColony).collect(Collectors.toList());
-    }
-
-    protected List<PlanetData> getNearestCoordinate(String defaultValue) {
-        String coordinateCode = getNearestConfig(COORDINATE, defaultValue);
-        return expressionService.evaluateCoordinates(coordinateCode);
-    }
-
-    protected List<AbstractCondition> getConditions(String configName) {
-        String configJson = map().getConfig(configName, "[]");
-        return expressionService.evaluateConditions(configJson, Map.of());
-    }
-
     protected void setCurrentStateDescription(String state) {
         if(!state.equals(currentStateDescription)) {
-            log("Thread " + map.name() + " state description: " + state);
+            log("Thread " + threadEntity.name + " state description: " + state);
             this.currentStateDescription = state;
         }
     }
 
     @Override
     public String toString() {
-        return map().name()+":"+runningProcessor.getActualState();
+        return threadEntity.name+":"+runningProcessor.getActualState();
     }
 }

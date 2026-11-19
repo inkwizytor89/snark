@@ -1,26 +1,18 @@
 package org.enoch.snark.instance.si.module;
 
 import org.enoch.common.config.ThreadDefinition;
-import org.enoch.snark.action.processor.CommandProcessor;
-import org.enoch.snark.db.repository.CacheEntryRepository;
-import org.enoch.snark.db.repository.ColonyRepository;
-import org.enoch.snark.db.repository.FleetRepository;
-import org.enoch.snark.instance.WorkerLifecycle;
-import org.enoch.snark.instance.service.ConditionChecker;
-import org.enoch.snark.instance.service.FleetDispatcher;
-import org.enoch.snark.instance.service.FleetService;
-import org.enoch.snark.instance.service.ShipService;
-import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.building.BuildThread;
+import org.enoch.snark.instance.si.module.building.BuildDefinition;
+import org.enoch.snark.instance.si.module.consumer.ConsumerDefinition;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
-import org.enoch.snark.instance.si.module.defense.DefenseThread;
-import org.enoch.snark.instance.si.module.define.DefineThread;
-import org.enoch.snark.instance.si.module.event.EventThread;
-import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
-import org.enoch.snark.instance.si.module.fleet.FleetThread;
-import org.enoch.snark.instance.si.module.hunting.HuntingThread;
-import org.enoch.snark.instance.si.module.scan.ScanThread;
-import org.enoch.snark.instance.si.module.space.SpaceThread;
+import org.enoch.snark.instance.si.module.defense.DefenseDefinition;
+import org.enoch.snark.instance.si.module.define.DefineDefinition;
+import org.enoch.snark.instance.si.module.event.EventDefinition;
+import org.enoch.snark.instance.si.module.expedition.ExpeditionDefinition;
+import org.enoch.snark.instance.si.module.fleet.FleetDefinition;
+import org.enoch.snark.instance.si.module.hunting.HuntingDefinition;
+import org.enoch.snark.instance.si.module.scan.ScanDefinition;
+import org.enoch.snark.instance.si.module.space.SpaceDefinition;
+import org.enoch.snark.instance.si.module.update.UpdateDefinition;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 
 import java.util.List;
@@ -33,17 +25,17 @@ public final class ThreadDefinitions {
 
     public static List<ThreadDefinition> availableDefinitions() {
         return List.of(
-                new ConsumerThread(null, null, null, null).threadDefinition(),
-                new UpdateThread(null).threadDefinition(),
-                new DefineThread(null, null).threadDefinition(),
-                new DefenseThread(null).threadDefinition(),
-                new ExpeditionThread(null).threadDefinition(),
-                new BuildThread(null, null, null).threadDefinition(),
-                new SpaceThread().threadDefinition(),
-                new ScanThread().threadDefinition(),
-                new HuntingThread().threadDefinition(),
-                new FleetThread(null, null, null, null, null).threadDefinition(),
-                new EventThread().threadDefinition()
+                ConsumerDefinition.threadDefinition(),
+                UpdateDefinition.threadDefinition(),
+                DefineDefinition.threadDefinition(),
+                DefenseDefinition.threadDefinition(),
+                ExpeditionDefinition.threadDefinition(),
+                BuildDefinition.threadDefinition(),
+                SpaceDefinition.threadDefinition(),
+                ScanDefinition.threadDefinition(),
+                HuntingDefinition.threadDefinition(),
+                FleetDefinition.threadDefinition(),
+                EventDefinition.threadDefinition()
         );
     }
 

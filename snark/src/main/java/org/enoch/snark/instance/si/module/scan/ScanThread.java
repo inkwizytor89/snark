@@ -2,13 +2,10 @@ package org.enoch.snark.instance.si.module.scan;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.FleetEntity;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.util.LinkedList;
@@ -19,43 +16,20 @@ import java.util.logging.Logger;
 public class ScanThread extends AbstractThread {
 
     protected static final Logger LOG = Logger.getLogger(ScanThread.class.getName());
-    public static final String threadType = "scan";
+    public static final String threadType = ScanDefinition.THREAD_TYPE;
+    private final ConfigRepository configRepository;
     private int threadPause = 150;
 
     private Queue<TargetEntity> notScanned = new LinkedList<>();
-
-    @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("scan", threadType, "coordinate", "", false,
-                "Coordinate used as the origin for the scan range."));
-        configs.add(new ConfigDefinition("scan", threadType, "range", "", false,
-                "Scan radius around the configured coordinate or system."));
-        configs.add(new ConfigDefinition("scan", threadType, "exploration_area", "", false,
-                "System area selected for discovery scans and exploration."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Finds unscanned targets within a configured area and prepares them for follow-up actions.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return threadPause+"S";
-    }
-
-    @Override
-    public int getRequestedFleetCount() {
-        return 1;
-    }
-
+    private ScanDefinition config;
 
     @Override
     protected void onStart() {
         super.onStart();
+        config = new ScanDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override

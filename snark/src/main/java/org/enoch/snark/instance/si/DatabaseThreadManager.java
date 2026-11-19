@@ -10,6 +10,10 @@ import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.DatabaseThreadBeanFactory;
 import org.enoch.snark.instance.si.module.DatabaseThreadTypeRegistry;
+import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +29,8 @@ import static java.util.Collections.emptyList;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DatabaseThreadManager {
+@Order(2)
+public class DatabaseThreadManager implements ApplicationRunner {
 
     private static final LocalDateTime EARLIEST_UPDATE = LocalDateTime.MIN;
 
@@ -34,10 +39,21 @@ public class DatabaseThreadManager {
     private final DatabaseThreadTypeRegistry typeRegistry;
     private final ExpressionService expressionService;
     private final Map<String, ManagedThread> managedThreads = new ConcurrentHashMap<>();
+    private volatile boolean startupPropertiesLoadedComplete;
 
-    @Scheduled(fixedDelay = 30_000)
+    @Override
+    public void run(ApplicationArguments args) {
+        startupPropertiesLoadedComplete = true;
+        synchronizeThreads();
+    }
+
+    @Scheduled(initialDelay = 30_000, fixedDelay = 30_000)
     @Transactional(readOnly = true)
     public synchronized void synchronizeThreads() {
+        if (!startupPropertiesLoadedComplete) {
+            return;
+        }
+
         Map<String, List<ThreadEntity>> threadsMap = fetchThreadsByModule();
         List<ThreadEntity> activeThreads = new ArrayList<>();
         for (Map.Entry<String, List<ThreadEntity>> entry : threadsMap.entrySet()) {
@@ -65,8 +81,6 @@ public class DatabaseThreadManager {
                 .filter(thread -> !isMainThread(thread))
                 .filter(thread -> shouldBeActive(thread.time, thread.conditions))
                 .toList();
-
-
     }
 
     private boolean shouldBeActive(String time, String conditions) {
@@ -181,6 +195,20 @@ public class DatabaseThreadManager {
         managed.executor.shutdownNow();
         threadBeanFactory.destroy(managed.thread);
         log.info("Stopped database thread {}", identity);
+    }
+
+    public void closeBrowserSessions() {
+        List<ConsumerThread> consumers = managedThreads.values().stream()
+                .map(ManagedThread::thread)
+                .filter(ConsumerThread.class::isInstance)
+                .map(ConsumerThread.class::cast)
+                .toList();
+        System.out.println("[SHUTDOWN][THREAD_MANAGER] Closing browser sessions for "
+                + consumers.size() + " consumer thread(s)");
+        for (ConsumerThread consumer : consumers) {
+            consumer.closeBrowser();
+        }
+        System.out.println("[SHUTDOWN][THREAD_MANAGER] Browser session shutdown requests completed");
     }
 
     @jakarta.annotation.PreDestroy

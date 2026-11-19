@@ -40,6 +40,7 @@ Keep comments clear, brief, and factual. Do not mix English and Polish in projec
 - Coordinate domain: see [doc/domain/Coordinate.md](../doc/domain/Coordinate.md) for coordinate types, parsing, and the relationship between planets, moons, targets, and debris.
 - Ships domain: see [doc/domain/Ships.md](../doc/domain/Ships.md) for fleet composition, ship maps, fleet persistence, and fleet dispatch processing.
 - Expression functions: see [doc/domain/Expression.md](../doc/domain/Expression.md) for the complete list of supported SpEL functions, their parameters, and return types.
+- Configuration service: see [doc/domain/ConfigService.md](../doc/domain/ConfigService.md) for module, thread, and configuration management operations.
 
 ### Architecture
 

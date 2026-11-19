@@ -9,6 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
@@ -28,6 +29,14 @@ public class SessionGIR extends GraphicalInterfaceReader {
     public static final String GF_TOKEN_PRODUCTION = "gf-token-production";
     public static final String GF_COOKIE_CONSENT = "gf-cookie-consent-4449562312";
     public static final String GF_COOKIE_CONSENT_YES = "|7|1";
+
+    private static final By MY_ACCOUNTS_SECTION = By.id("myAccounts");
+
+    private enum LobbyPageState {
+        ACCOUNTS,
+        OTHER_LOBBY_PAGE,
+        SIGN_IN
+    }
 
     SessionGIR(Wd wd) {
         super(wd);
@@ -52,8 +61,22 @@ public class SessionGIR extends GraphicalInterfaceReader {
     }
 
     public boolean isCurrentUrlLobbyAccount() {
-        String currentUrl = wd().getCurrentUrl();
-        return currentUrl != null && currentUrl.contains(LOBBY_WITH_ACCOUNTS);
+        LobbyPageState pageState = getLongWait().until(driver -> {
+            String currentUrl = driver.getCurrentUrl();
+            if (currentUrl != null && currentUrl.startsWith(LOBBY_URL)) {
+                if (!currentUrl.endsWith("/accounts")) {
+                    return LobbyPageState.OTHER_LOBBY_PAGE;
+                }
+                if (ExpectedConditions.presenceOfElementLocated(MY_ACCOUNTS_SECTION).apply(driver) != null) {
+                    return LobbyPageState.ACCOUNTS;
+                }
+            }
+            if (ExpectedConditions.visibilityOfElementLocated(By.id(LOGIN_INPUT)).apply(driver) != null) {
+                return LobbyPageState.SIGN_IN;
+            }
+            return null;
+        });
+        return pageState == LobbyPageState.ACCOUNTS;
     }
 
     public String signInWithRetry(Credentials credentials) {

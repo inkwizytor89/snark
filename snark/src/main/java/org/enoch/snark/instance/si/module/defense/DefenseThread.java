@@ -6,16 +6,14 @@ import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.model.to.*;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
-import org.enoch.snark.instance.si.module.consumer.gi.text.Msg;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.model.types.FleetDirectionType;
 import org.enoch.snark.instance.service.Navigator;
 import org.enoch.snark.instance.model.action.ColonyPlaner;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -25,24 +23,24 @@ import java.util.stream.Collectors;
 
 import static org.enoch.snark.instance.model.to.ShipsMap.ALL_SHIPS;
 import static org.enoch.snark.instance.si.QueueRunType.CRITICAL;
-import static org.enoch.snark.instance.si.module.ThreadMap.RECALL;
-import static org.enoch.snark.instance.si.module.consumer.gi.text.Msg.BAZINGA_PL;
 import static org.enoch.snark.instance.model.to.Resources.everything;
 import static org.enoch.snark.instance.si.module.consumer.gi.types.Mission.*;
-import static org.enoch.snark.instance.si.module.defense.AlarmSoundPlayer.MISSING_WAV;
 
 @RequiredArgsConstructor
 public class DefenseThread extends AbstractThread {
 
-    public static final String threadType = "defense";
-    public static final String ALARM = "alarm";
+    public static final String threadType = DefenseDefinition.THREAD_TYPE;
+    public static final String ALARM = DefenseDefinition.ALARM;
     public static final int UPDATE_TIME_IN_SECONDS = 10;
-    public static final String LIMIT = "limit";
-    public static final String EXAMPLE_TIME = "example_time";
-    public static final String EXAMPLE_COORDINATE = "example_coordinate";
-    public static final String EXAMPLE_ATTACKER_COORDINATE = "example_attacker_coordinate";
+    public static final String LIMIT = DefenseDefinition.LIMIT;
+    public static final String RECALL = DefenseDefinition.RECALL;
+    public static final String EXAMPLE_TIME = DefenseDefinition.EXAMPLE_TIME;
+    public static final String EXAMPLE_COORDINATE = DefenseDefinition.EXAMPLE_COORDINATE;
+    public static final String EXAMPLE_ATTACKER_COORDINATE = DefenseDefinition.EXAMPLE_ATTACKER_COORDINATE;
 
     private final FleetDispatcher fleetDispatcher;
+    private final ConfigRepository configRepository;
+    private DefenseDefinition config;
 
     private List<String> aggressorsAttacks = new ArrayList<>();
     private List<EventFleet> aggressorsEvents = new ArrayList<>();
@@ -50,35 +48,12 @@ public class DefenseThread extends AbstractThread {
     private int incomingActionCont;
 
     @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("defense", threadType, ALARM, "false", false,
-                "Play the alarm sound when hostile fleets are detected near the colony."));
-        configs.add(new ConfigDefinition("defense", threadType, LIMIT, "0", false,
-                "Maximum defensive actions allowed before the thread pauses."));
-        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_TIME, "10S", false,
-                "Sample time value used for defensive calculations and tests."));
-        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_COORDINATE, "", false,
-                "Example coordinate used for defensive examples."));
-        configs.add(new ConfigDefinition("defense", threadType, EXAMPLE_ATTACKER_COORDINATE, "", false,
-                "Example coordinate of the attacker used for interception examples."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Monitors enemy fleets and reacts with local defense or retreat actions.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return UPDATE_TIME_IN_SECONDS + "S";
-    }
-
-    @Override
-    public int getRequestedFleetCount() {
-        return 2;
+    protected void onStart() {
+        super.onStart();
+        config = new DefenseDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override
@@ -127,7 +102,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private FleetSendCommand sendFleetEscape(ColonyEntity source, List<EventFleet> eventFleets) {
-        Duration recall = map.getDuration(RECALL, null);
+        Duration recall = config.getRecallValue();
         FleetSendCommand sendCommand = null;
 
         if (isMoreColonies()) {
@@ -221,7 +196,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void loadAggressiveFleet() {
-        Long limit = map.getConfigLong(LIMIT, 3000L);
+        Long limit = config.getLimit();
 
         List<EventFleet> eventFleetList = Navigator.getInstance().getEventFleetList();
         if(eventFleetList == null) return;
@@ -236,7 +211,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void putExampleFromConfig(Long limit) {
-        LocalTime exampleTime = map.getLocalTime(EXAMPLE_TIME, null);
+        LocalTime exampleTime = config.getExampleTimeValue();
         if (exampleTime == null) return;
 
         EventFleet exampleFleet = new EventFleet();
@@ -249,11 +224,11 @@ public class DefenseThread extends AbstractThread {
         time.withMinute(exampleTime.getMinute());
         exampleFleet.arrivalTime = time;
 
-        Planet destOrigin = map.getConfigPlanet(EXAMPLE_COORDINATE);
+        Planet destOrigin = config.getExampleCoordinateValue();
         exampleFleet.destCoords = destOrigin.toString().substring(1);
         exampleFleet.destFleet = destOrigin.type;
 
-        Planet coordsOrigin = map.getConfigPlanet(EXAMPLE_ATTACKER_COORDINATE);
+        Planet coordsOrigin = config.getExampleAttackerCoordinateValue();
         if(coordsOrigin == null) coordsOrigin = new Planet("p[1:1:1]");
         exampleFleet.coordsOrigin = coordsOrigin.toString();
         exampleFleet.originFleet = coordsOrigin.type;
@@ -275,7 +250,7 @@ public class DefenseThread extends AbstractThread {
     }
 
     private void playMusic() {
-        AlarmSoundPlayer.start(map.getConfig(ALARM, MISSING_WAV));
+        AlarmSoundPlayer.start(config.getAlarm());
     }
 
     private void writeMessageToPlayer(List<EventFleet> events) {

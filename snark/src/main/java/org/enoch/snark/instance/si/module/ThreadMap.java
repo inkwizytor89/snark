@@ -6,17 +6,6 @@ import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.si.module.building.BuildThread;
-import org.enoch.snark.instance.si.module.consumer.ConsumerDefinition;
-import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
-import org.enoch.snark.instance.si.module.defense.DefenseThread;
-import org.enoch.snark.instance.si.module.define.DefineThread;
-import org.enoch.snark.instance.si.module.expedition.ExpeditionThread;
-import org.enoch.snark.instance.si.module.fleet.FleetThread;
-import org.enoch.snark.instance.si.module.hunting.HuntingThread;
-import org.enoch.snark.instance.si.module.scan.ScanThread;
-import org.enoch.snark.instance.si.module.space.SpaceThread;
-import org.enoch.snark.instance.si.module.update.UpdateThread;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -24,21 +13,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Configuration container and accessor for a single thread or module-level config.
- * Extends HashMap to store thread-specific key-value pairs loaded from property files.
+ * Legacy configuration container and accessor for thread-level key-value settings.
  * 
  * Config naming: module.thread.key=value (e.g., attack.source=#cache_key('swarm_nest'))
  * 
- * ThreadMap holds recognized config keys (TIME, PAUSE, SOURCE, TARGET, etc.) and provides
- * type-safe accessors (getConfig, getConfigInteger, getShips, etc.) that return defaults if
- * a key is not set or is empty.
- * 
- * Threads inherit module-level config via AbstractModule.mainMap if the thread-specific
- * config is not set. See doc/architecture/Thread system.md for configuration resolution.
+ * Thread definitions and database entities now own runtime configuration. This class
+ * remains for shared configuration key constants and compatibility helpers.
  */
+@Deprecated
 public class ThreadMap extends HashMap<String, String> {
 
-    // todo move to properties map
     public static final String MODULE = "module";
     public static final String GLOBAL = "global";
     public static final String MAIN = "main";
@@ -111,32 +95,6 @@ public class ThreadMap extends HashMap<String, String> {
 
     public ThreadMap(Map map) {
         super(map);
-    }
-
-    public Class<? extends AbstractThread> getTypeClass() {
-        String name = name();
-
-        if (name.contains(ConsumerDefinition.threadType)) {
-            return ConsumerThread.class;
-        } else if (name.contains(UpdateThread.threadType)) {
-            return UpdateThread.class;
-        } else if (name.contains(DefineThread.threadType)) {
-            return DefineThread.class;
-        } else if (name.contains(DefenseThread.threadType)) {
-            return DefenseThread.class;
-        } else if (name.contains(ExpeditionThread.threadType)) {
-            return ExpeditionThread.class;
-        } else if (name.contains(BuildThread.threadType)) {
-            return BuildThread.class;
-        } else if (name.contains(SpaceThread.threadType)) {
-            return SpaceThread.class;
-        } else if (name.contains(ScanThread.threadType)) {
-            return ScanThread.class;
-        } else if (name.contains(HuntingThread.threadType)) {
-            return HuntingThread.class;
-        } else {
-            return FleetThread.class;
-        }
     }
 
     public String getConfig(String key) {

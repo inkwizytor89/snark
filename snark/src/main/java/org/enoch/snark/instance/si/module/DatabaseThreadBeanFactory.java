@@ -7,8 +7,6 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.stereotype.Component;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
-
 @Component
 public class DatabaseThreadBeanFactory {
 
@@ -25,7 +23,7 @@ public class DatabaseThreadBeanFactory {
             ThreadEntity entity
     ) {
         AbstractThread thread = create(threadClass);
-        initializeDatabaseThread(thread, entity);
+        thread.setThreadEntity(entity);
         return thread;
     }
 
@@ -39,30 +37,6 @@ public class DatabaseThreadBeanFactory {
                     .getBeanDefinition());
         }
         return beanFactory.getBean(beanName, threadClass);
-    }
-
-    public void initializeDatabaseThread(AbstractThread thread, ThreadEntity entity) {
-        String moduleName = entity.module.name;
-        String threadName = entity.name;
-        String threadType = entity.type;
-        ThreadMap moduleMainMap = identityMap(moduleName, MAIN, MAIN);
-        ModuleMap moduleMap = new ModuleMap(moduleName);
-        moduleMap.put(MAIN, moduleMainMap);
-        AbstractModule module = new AbstractModule(moduleMap);
-        module.setMainMap(moduleMainMap);
-
-        thread.setThreadEntity(entity);
-        ThreadMap threadMap = identityMap(moduleName, threadName, threadType);
-        thread.updateMap(threadMap);
-        thread.setModule(module);
-    }
-
-    private ThreadMap identityMap(String moduleName, String threadName, String threadType) {
-        ThreadMap map = new ThreadMap();
-        map.put(MODULE, moduleName);
-        map.put(NAME, threadName);
-        map.put(TYPE, threadType);
-        return map;
     }
 
     public void destroy(AbstractThread thread) {

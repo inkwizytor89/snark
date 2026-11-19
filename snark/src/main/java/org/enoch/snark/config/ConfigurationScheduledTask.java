@@ -2,12 +2,7 @@ package org.enoch.snark.config;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.ThreadMap;
-import org.enoch.snark.instance.si.module.ModuleMap;
-import org.enoch.snark.instance.si.module.PropertiesMap;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -17,20 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
-
+@Deprecated // This class is deprecated and should not be used. Use ConfigService instead.
 @Component
 @RequiredArgsConstructor
 public class ConfigurationScheduledTask {
 
+    private static final String GLOBAL_MODULE = "global";
+    private static final String SERVER_KEY = "server";
     public static final String TEMPLATE = "template";
     private static List<ConfigTerm> configs = new ArrayList<>();
 
     @Value("${properties:server.properties}")
     private String propertiesPath;
 
-    public List<ConfigTerm>  loadConfig() throws IOException {
-        List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL);
+    @Deprecated
+    public List<ConfigTerm> loadConfig() throws IOException {
+        List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL_MODULE);
         List<ConfigTerm> result = new ArrayList<>(globals);
         for (ConfigTerm term : globals)
             if(TEMPLATE.equals(term.getKey()) && !StringUtils.isEmpty(term.getValue())) {
@@ -63,7 +60,7 @@ public class ConfigurationScheduledTask {
     }
 
     public String determineDatabase() {
-        return getFirstByKey(SERVER).getValue();
+        return getFirstByKey(SERVER_KEY).getValue();
     }
 
     private ConfigTerm getFirstByKey(String key) {
@@ -75,4 +72,3 @@ public class ConfigurationScheduledTask {
         return null;
     }
 }
-

@@ -1,6 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
+import org.enoch.snark.config.ConfigTerm;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,29 +12,29 @@ import java.util.List;
 public class ThreadEntity extends IdEntity {
 
     @Column(name = "name", nullable = false)
-    public String name;
+    public String name = "main";
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "module_id", nullable = false)
     public ModuleEntity module;
 
     @Column(name = "\"type\"", nullable = false)
-    public String type;
+    public String type = "fleet";
 
-    @Column(name = "time")
-    public String time;
+    @Column(name = "time", nullable = false)
+    public String time = "off";
 
-    @Column(name = "pause")
-    public String pause;
+    @Column(name = "pause", nullable = false)
+    public String pause = "off";
 
-    @Column(name = "debug")
-    public String debug;
+    @Column(name = "debug", nullable = false)
+    public String debug = "false";
 
-    @Column(name = "command_limit")
-    public String commandLimit;
+    @Column(name = "command_limit", nullable = false)
+    public String commandLimit = "-1";
 
-    @Column(name = "conditions", columnDefinition = "TEXT")
-    public String conditions;
+    @Column(name = "conditions", nullable = false, columnDefinition = "TEXT")
+    public String conditions = "";
 
     @Column(name = "created_on")
     public LocalDateTime createdOn = LocalDateTime.now();
@@ -57,5 +58,27 @@ public class ThreadEntity extends IdEntity {
 
     public String getThreadIdentity() {
         return module.name + "." + name;
+    }
+
+    public void update(ConfigTerm term) {
+        switch (term.getKey()) {
+            case "time" -> time = term.getValue();
+            case "pause" -> pause = term.getValue();
+            case "debug" -> debug = term.getValue();
+            case "command_limit" -> commandLimit = term.getValue();
+            case "conditions" -> conditions = term.getValue();
+            default -> {
+                ConfigEntity config = configs.stream()
+                        .filter(existing -> existing.key.equals(term.getKey()))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            ConfigEntity newConfig = new ConfigEntity();
+                            addConfig(newConfig);
+                            newConfig.key = term.getKey();
+                            return newConfig;
+                        });
+                config.value = term.getValue();
+            }
+        }
     }
 }

@@ -1,10 +1,9 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.FleetMovement;
 import org.enoch.snark.instance.service.MessageService;
@@ -15,7 +14,6 @@ import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,8 +29,10 @@ public class UpdateThread extends AbstractThread {
     public static final String CHECK_SPY_REPORTS_DURATION = "check_spy_reports_duration";
 
     private final ColonyRepository colonyRepository;
+    private final ConfigRepository configRepository;
 
-    public Duration refresh = new Duration("12M");
+    private final Duration refresh = new Duration("12M");
+    private UpdateDefinition config;
 
     private Navigator navigator;
     private List<EventFleet> events;
@@ -40,33 +40,16 @@ public class UpdateThread extends AbstractThread {
     @Override
     protected void onStart() {
         super.onStart();
+        config = new UpdateDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
         navigator = Navigator.getInstance();
     }
 
     @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("update", threadType, REFRESH, "12M", false,
-                "How often the navigator and colony state should be refreshed."));
-        configs.add(new ConfigDefinition("update", threadType, CHECK_SPY_REPORTS_DURATION, "2M", false,
-                "Interval between checks for new spy reports and message processing."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Refreshes navigator, colony, and message state so other threads operate on a current view of the game.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return "1S";
-    }
-
-    @Override
     protected void onStep() {
-        refresh.update(map.getConfig(REFRESH, "12M"));
+        refresh.update(config.getRefresh());
         List<FleetMovement> pulled = Navigator.getInstance().pollExpired();
         pulled.forEach(fleetMovement -> {
             log(LocalDateTime.now() + " update after fleetMovement: "+fleetMovement);
@@ -79,7 +62,7 @@ public class UpdateThread extends AbstractThread {
         }
         events = navigator.getEventFleetList();
 
-        java.time.Duration duration = new Duration(getNearestConfig(CHECK_SPY_REPORTS_DURATION, "2M")).getValue();
+        java.time.Duration duration = new Duration(config.getCheckSpyReportsDuration()).getValue();
         if(MessageService.getInstance().shouldTrigger(duration) && !alreadyWaiting(CHECK_SPY_REPORTS_DURATION)) {
             pushCommand(CHECK_SPY_REPORTS_DURATION, new ReadMessageCommand());
         }

@@ -3,88 +3,17 @@ package org.enoch.snark.instance.si;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.snark.config.ConfigTerm;
-import org.enoch.snark.config.ConfigurationScheduledTask;
-import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.db.entity.ModuleEntity;
-import org.enoch.snark.db.entity.ThreadEntity;
-import org.enoch.snark.db.repository.ConfigRepository;
-import org.enoch.snark.db.repository.ModuleRepository;
-import org.enoch.snark.db.repository.ThreadRepository;
-import org.enoch.snark.instance.si.module.PropertiesMap;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
-
 @Service
 @RequiredArgsConstructor
 public class RemotePropertiesMap {
-    private final ConfigurationScheduledTask configurationScheduledTask;
-    private final Core core;
-    private final ConfigRepository configRepository;
-    private final ModuleRepository moduleRepository;
-    private final ThreadRepository threadRepository;
-
     private  List<ConfigTerm> fileConfigs = new ArrayList<>();
     private  List<ConfigTerm> remoteConfigs = new ArrayList<>();
-
-//    @Scheduled(fixedDelay = 10000)
-//    public void loadConfig() throws IOException {
-//        List<ConfigTerm> configs = configurationScheduledTask.loadConfig();
-//        if(configs == null) return;
-//        fileConfigs = configs;
-//        pushConfigs();
-//    }
-//
-//    private void pushConfigs() {
-//        List<ConfigTerm> configs = new ArrayList<>(remoteConfigs);
-//        configs.addAll(fileConfigs);
-//        saveConfigs(configs);
-//        core.configurationUpdate(new PropertiesMap(configs));
-//    }
-
-    private void saveConfigs(List<ConfigTerm> configs) {
-        for (ConfigTerm config : configs) {
-            ModuleEntity module = moduleRepository.findByName(config.getModule())
-                    .orElseGet(() -> moduleRepository.save(new ModuleEntity(config.getModule())));
-            ThreadEntity thread = threadRepository.findByModuleAndName(module, config.getThread())
-                    .orElseGet(() -> threadRepository.save(
-                            new ThreadEntity(config.getThread(), module, config.getThread())
-                    ));
-            if (updateThreadField(thread, config.getKey(), config.getValue())) {
-                thread.updated = LocalDateTime.now();
-                threadRepository.save(thread);
-                continue;
-            }
-            ConfigEntity entity = configRepository.findByThreadAndKey(thread, config.getKey())
-                    .orElseGet(() -> new ConfigEntity(thread, config.getKey(), config.getValue()));
-            entity.value = config.getValue();
-            entity.updated = LocalDateTime.now();
-            configRepository.save(entity);
-        }
-    }
-
-    private boolean updateThreadField(ThreadEntity thread, String key, String value) {
-        switch (key) {
-            case TIME -> thread.time = value;
-            case PAUSE -> thread.pause = value;
-            case DEBUG -> thread.debug = value;
-            case COMMAND_LIMIT -> thread.commandLimit = value;
-            case CONDITIONS -> thread.conditions = value;
-            case NAME -> thread.name = value;
-            case TYPE -> thread.type = value;
-            default -> {
-                return false;
-            }
-        }
-        return true;
-    }
 
     public void addRemoteConfig(ConfigTerm config) {
         remoteConfigs.stream()
@@ -92,12 +21,10 @@ public class RemotePropertiesMap {
                 .findFirst()
                 .ifPresent(remoteConfigs::remove);
         remoteConfigs.add(config);
-//        pushConfigs();
     }
 
     public void resetRemoteConfig() {
         remoteConfigs = new ArrayList<>();
-//        pushConfigs();
     }
 
     public String showConfig(String phrase) {

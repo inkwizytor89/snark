@@ -1,14 +1,13 @@
 package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
 import org.enoch.snark.common.DateUtil;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.FleetRepository;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.model.action.condition.AbstractCondition;
 import org.enoch.snark.instance.model.action.condition.AreShipsCondition;
 import org.enoch.snark.instance.model.to.*;
@@ -16,8 +15,6 @@ import org.enoch.snark.instance.service.ConditionChecker;
 import org.enoch.snark.instance.service.FleetDispatcher;
 import org.enoch.snark.instance.service.ShipService;
 import org.enoch.snark.instance.si.Core;
-import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
-import org.enoch.snark.instance.si.QueueRunType;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.time.LocalDateTime;
@@ -28,102 +25,64 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static org.enoch.snark.instance.model.to.Resources.nothing;
 import static org.enoch.snark.instance.model.to.ShipsMap.*;
-import static org.enoch.snark.instance.service.CoordinateExpressionService.PLANETS;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @RequiredArgsConstructor
 public class FleetThread extends AbstractThread {
 
-    public static final String threadName = "fleet";
+    public static final String threadName = FleetDefinition.THREAD_TYPE;
 
     private final Core core;
     private final FleetRepository fleetRepository;
     private final FleetDispatcher fleetDispatcher;
     private final ConditionChecker conditionChecker;
     private final ShipService shipService;
+    private final ConfigRepository configRepository;
 
     private int size = 0;
     private HashMap<String, LocalDateTime> blockingMap = new HashMap<>();
     private String expiredConfig;
-
-    @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("fleet", threadName, SOURCE, "", false,
-                "Source coordinate expression that defines from which colonies fleets are dispatched."));
-        configs.add(new ConfigDefinition("fleet", threadName, TARGET, "", false,
-                "Target coordinate expression used by the fleet plan."));
-        configs.add(new ConfigDefinition("fleet", threadName, MISSION, Mission.STATIONED.name(), false,
-                "Mission assigned to the dispatched fleet."));
-        configs.add(new ConfigDefinition("fleet", threadName, RESOURCES, "", false,
-                "Resources to include in the fleet payload."));
-        configs.add(new ConfigDefinition("fleet", threadName, LEAVE_RESOURCES, "", false,
-                "Resources to leave behind on the origin colony after dispatch."));
-        configs.add(new ConfigDefinition("fleet", threadName, SPEED, "", false,
-                "Fleet speed override used during dispatch."));
-        configs.add(new ConfigDefinition("fleet", threadName, TRIP, "", false,
-                "Trip route expression used to define the fleet path."));
-        configs.add(new ConfigDefinition("fleet", threadName, RECALL, "", false,
-                "Recall delay applied after the fleet is sent."));
-        configs.add(new ConfigDefinition("fleet", threadName, DRY_RUN, "false", false,
-                "Only simulate dispatch planning without sending the fleet."));
-        configs.add(new ConfigDefinition("fleet", threadName, QUEUE, QueueRunType.NORMAL.name(), false,
-                "Queue priority used when the fleet command is scheduled."));
-        configs.add(new ConfigDefinition("fleet", threadName, EXPIRED_TIME, "", false,
-                "Blocking time window used to avoid duplicate fleet dispatches."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadName, "Creates and sends fleet plans according to target, mission, and route configuration.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadName;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return "10S";
-    }
+    private FleetDefinition config;
 
     @Override
     protected void onStart() {
         super.onStart();
+        config = new FleetDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override
     protected void onStep() {
         if(container.anyNotProcessed()) return; // no need to find next if waiting is more than limit
-//        List<Entry<String, String>> conditionsEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("condition_")).toList();
-        List<Entry<String, String>> filtersEntry = map.entrySet().stream().filter(entry -> entry.getKey().startsWith("filter_")).toList();
         FleetPlan fleetPlan = FleetPlan.builder()
-                .source(getNearestConfig(SOURCE, PLANETS))
-                .target(map.getConfig(TARGET, null))
-                .conditions(getConditions(START_CONDITION))
-//                .filters(AbstractFilter.create(filtersEntry))
-                .mission(Mission.convert(map.getConfig(MISSION, Mission.STATIONED.name())))
-                .shipsWaves(map.getShipsWaves(singletonList(ALL_SHIPS)))
-                .leaveShips(map.getShipsWaves(LEAVE_SHIPS_WAVE, EMPTY_SHIP_WAVE))
-                .resources(map.getConfigResources(RESOURCES, nothing))
-                .leaveResources(map.getConfigResources(LEAVE_RESOURCES, null))
-                .speed(map.getConfigLong(SPEED, null))
-                .trip(expressionService.evaluateCoordinates(map.getConfig(TRIP, null)))
+                .source(config.getEffectiveSource())
+                .target(config.getTargetValue())
+                .conditions(expressionService.evaluateConditions(config.getStartConditionsValue(), Map.of()))
+                .mission(config.getMissionValue())
+                .shipsWaves(config.getShipsWavesValue())
+                .leaveShips(config.getLeaveShipsWavesValue())
+                .resources(config.getResourcesValue())
+                .leaveResources(config.getLeaveResourcesValue())
+                .speed(config.getSpeedValue())
+                .trip(expressionService.evaluateCoordinates(config.getTripValue()))
                 .build();
 
         List<FleetSendCommand> fleetSendCommands = fleetDispatcher.from(fleetPlan);
 
         Map<String, Boolean> containerToRelease = createMapToRelease();
-        expiredConfig = map.getConfig(EXPIRED_TIME, null);
+        expiredConfig = config.getExpiredTimeValue();
         for(FleetSendCommand command : fleetSendCommands) {
-            command.generateHash(map.name(), "X");
+            command.generateHash(threadEntity.name, "X");
             containerToRelease.remove(command.getHash());
             if (isBlocked(command)) continue;
 //            if(container.contains(command.getHash())) continue;
 //            logFleetOverview(command);
 
             if(command.getSource() == null )
-                throw new RuntimeException("Fleet source is null where threat source was "+getNearestConfig(SOURCE, PLANETS)+ " and generated "+fleetSendCommands.size() + " commands");
+                throw new RuntimeException("Fleet source is null where threat source was "+config.getEffectiveSource()+ " and generated "+fleetSendCommands.size() + " commands");
 
             FleetContext fleetContext = FleetContext.builder()
                     .source(new PlanetData(command.getSource()))
@@ -143,11 +102,11 @@ public class FleetThread extends AbstractThread {
 //conditionChecker.check(command.getConditions(), command).getClass().getSimpleName() +" "+command.getTarget().getTarget().getResources().count()
 //            if (blockExpiredTime(command)) continue;
 
-            if (!map.getConfigBoolean(DRY_RUN, false)) {
-                command.setRunType(QueueRunType.valueOf(map.getConfig(QUEUE, QueueRunType.NORMAL.name())));
+            if (!Boolean.TRUE.equals(config.getDryRun())) {
+                command.setRunType(config.getQueueValue());
                 command.addConditions(singletonList(new AreShipsCondition(realShips, command.getLeaveShipsMap(), command.getSource().toPlanet())));
 
-                Duration recallDuration = map.getDuration(RECALL, null);
+                Duration recallDuration = config.getRecallValue();
                 if(recallDuration != null) command.setNext(new RecallCommand(command), recallDuration.getSeconds());
                 pushCommand(command);
             }
@@ -155,7 +114,7 @@ public class FleetThread extends AbstractThread {
         if(fleetSendCommands.size() != size) {
 
             size = fleetSendCommands.size();
-            System.err.println("Fleets "+map().name()+" in map "+size);
+            System.err.println("Fleets "+threadEntity.name+" in map "+size);
             fleetSendCommands.forEach(fleetSendCommand -> System.err.print(fleetSendCommand+"="+fleetSendCommand.getStatus().getStatus()+", "));
         }
         containerToRelease.keySet().forEach(s -> container.removeKey(s));

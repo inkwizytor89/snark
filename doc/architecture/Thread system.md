@@ -25,15 +25,9 @@ Thread types include:
 - `ExpeditionThread` — expedition command generation
 - `EventThread` — handles event processing
 
-## Module and thread grouping
+## Thread configuration
 
-Modules group related threads together. Each module:
-
-- Owns a collection of threads.
-- Shares a time schedule across all threads.
-- Has a `mainMap` configuration that is inherited by all its threads.
-
-Threads inherit configuration from their module's `mainMap` through [`AbstractModule`](../../snark/src/main/java/org/enoch/snark/instance/si/module/AbstractModule.java). If a thread-specific value is not set, it falls back to the module-level value.
+The database-backed `DatabaseThreadManager` reconciles active thread entities, creates their worker beans, and starts or stops their executors. Each thread loads its definition defaults, then overlays configuration from the module's `main` thread and finally its own `ThreadEntity.configs`; thread-specific values take precedence.
 
 The consumer's ChromeDriver session, lobby pause, and process-level recovery are described in [Instance lifecycle and recovery](Instance%20lifecycle%20and%20recovery.md).
 
@@ -78,13 +72,9 @@ attack.pause=4S
 
 ### Configuration resolution
 
-When a thread reads a config key:
-
-1. First check the thread's own config (e.g., `attack.start_conditions`).
-2. If not found, check the module's `mainMap` (shared module config).
-3. If still not found, use the provided default value.
-
-Thread-specific configs override module-level ones, allowing global defaults with per-thread overrides.
+Each thread definition starts with its declared defaults. Runtime config values are then
+overlaid first from the module's `main` thread and finally from the thread's own config
+entities. Thread-specific values therefore take precedence over module defaults.
 
 ## Global control configs
 
@@ -153,5 +143,4 @@ Broken down:
 ## Important types
 
 - [`AbstractThread`](../../snark/src/main/java/org/enoch/snark/instance/si/module/AbstractThread.java) — base class for all threads; handles loop, config loading, and queue management
-- [`ThreadMap`](../../snark/src/main/java/org/enoch/snark/instance/si/module/ThreadMap.java) — configuration container and accessor with type-safe getters
-- [`AbstractModule`](../../snark/src/main/java/org/enoch/snark/instance/si/module/AbstractModule.java) — groups threads and manages shared time schedule
+- [`ThreadMap`](../../snark/src/main/java/org/enoch/snark/instance/si/module/ThreadMap.java) — legacy configuration accessors and shared key constants

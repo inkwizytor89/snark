@@ -1,47 +1,19 @@
 package org.enoch.snark.instance.si.module.hunting;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class HuntingThread extends AbstractThread {
 
-    public static final String threadType = "hunting";
+    public static final String threadType = HuntingDefinition.THREAD_TYPE;
     public static final int UPDATE_TIME_IN_SECONDS = 10;
 
-    private List<PlayerEntity> targets = new ArrayList<>();
+//    private List<PlayerEntity> targets = new ArrayList<>();
 
-//    public HuntingThread(ThreadMap map) {
-//        super(map);
-//    }
-
-    @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Monitors active players and prioritizes hunt targets based on the current high-score state.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return UPDATE_TIME_IN_SECONDS*10 + "S";
-    }
-
-    @Override
-    public int getRequestedFleetCount() {
-        return 0;
-    }
 
     @Override
     protected void onStep() {

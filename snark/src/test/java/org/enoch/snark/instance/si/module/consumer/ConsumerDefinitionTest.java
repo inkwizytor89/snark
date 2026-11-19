@@ -33,5 +33,12 @@ class ConsumerDefinitionTest {
         assertEquals("player", config.getLogin());
         assertEquals("driver.exe", config.getWebdriverPath());
         assertEquals("600S", config.getRestartDuration());
+        assertEquals("#all_moons()", config.getSource());
+    }
+
+    @Test
+    void defaultsSourceToNoCoordinates() {
+        assertEquals(org.enoch.snark.instance.service.CoordinateExpressionService.NONE,
+                new ConsumerDefinition().getSource());
     }
 }

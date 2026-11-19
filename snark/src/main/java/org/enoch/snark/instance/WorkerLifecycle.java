@@ -3,7 +3,7 @@ package org.enoch.snark.instance;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.enoch.snark.ws.SnarkWebSocketClient;
-import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.DatabaseThreadManager;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,15 +16,15 @@ public class WorkerLifecycle {
 
     private final ConfigurableApplicationContext applicationContext;
     private final SnarkWebSocketClient webSocketClient;
-    private final Core core;
+    private final DatabaseThreadManager threadManager;
     private final AtomicBoolean shuttingDown = new AtomicBoolean();
 
     public WorkerLifecycle(ConfigurableApplicationContext applicationContext,
                            SnarkWebSocketClient webSocketClient,
-                           Core core) {
+                           DatabaseThreadManager threadManager) {
         this.applicationContext = applicationContext;
         this.webSocketClient = webSocketClient;
-        this.core = core;
+        this.threadManager = threadManager;
     }
 
     public void terminate(String reason) {
@@ -62,7 +62,7 @@ public class WorkerLifecycle {
     private void closeBrowserSessions() {
         long startedAt = System.nanoTime();
         try {
-            core.closeBrowserSessions();
+            threadManager.closeBrowserSessions();
         } catch (RuntimeException e) {
             System.err.println("[SHUTDOWN][LIFECYCLE] Failed while closing browser sessions: " + e.getMessage());
             e.printStackTrace(System.err);

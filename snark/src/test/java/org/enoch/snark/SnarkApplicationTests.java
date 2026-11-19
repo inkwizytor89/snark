@@ -42,33 +42,6 @@ class SnarkApplicationTests {
 	}
 
 	@Test
-	void initializesDatabaseThreadFromItsEntity() {
-		AbstractThread thread = threadBeanFactory.create(UpdateThread.class);
-		ModuleEntity module = new ModuleEntity("database-module");
-		ThreadEntity entity = new ThreadEntity("worker", module, "update");
-		entity.time = "on";
-		entity.pause = "5S";
-		entity.debug = "true";
-		entity.commandLimit = "3";
-		entity.conditions = "[]";
-		try {
-			threadBeanFactory.initializeDatabaseThread(thread, entity);
-
-			assertSame(entity, thread.getThreadEntity());
-			assertEquals("database-module", thread.map().get(ThreadMap.MODULE));
-			assertEquals("worker", thread.map().get(ThreadMap.NAME));
-			assertEquals("update", thread.map().get(ThreadMap.TYPE));
-			assertFalse(thread.map().containsKey(ThreadMap.TIME));
-			assertFalse(thread.map().containsKey(ThreadMap.PAUSE));
-			assertFalse(thread.map().containsKey(ThreadMap.DEBUG));
-			assertFalse(thread.map().containsKey(ThreadMap.COMMAND_LIMIT));
-			assertFalse(thread.map().containsKey(ThreadMap.CONDITIONS));
-		} finally {
-			threadBeanFactory.destroy(thread);
-		}
-	}
-
-	@Test
 	void migratesCommonThreadConfigurationOutOfConfigRows() {
 		String mainTime = jdbcTemplate.queryForObject("""
 				SELECT t.time

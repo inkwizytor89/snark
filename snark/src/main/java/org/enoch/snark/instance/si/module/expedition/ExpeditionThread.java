@@ -2,12 +2,11 @@ package org.enoch.snark.instance.si.module.expedition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.TargetEntity;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.model.to.PlanetData;
@@ -29,40 +28,21 @@ import static org.enoch.snark.instance.model.to.ShipsMap.NO_SHIPS;
 @RequiredArgsConstructor
 public class ExpeditionThread extends AbstractThread {
 
-    public static final String threadType = "expedition";
-    public static final ShipsMap DEFAULT_SHIPS = ShipsMap.parse("explorer:1,transporterLarge:2500,battleship:1");
-    public static final String SYSTEM_SHIFT = "system_shift";
+    public static final String threadType = ExpeditionDefinition.THREAD_TYPE;
+    public static final ShipsMap DEFAULT_SHIPS = ShipsMap.parse(ExpeditionDefinition.DEFAULT_SHIPS_VALUE);
+    public static final String SYSTEM_SHIFT = ExpeditionDefinition.SYSTEM_SHIFT;
 
     private final FleetRepository fleetRepository;
+    private final ConfigRepository configRepository;
+    private ExpeditionDefinition config;
 
     @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("expedition", threadType, "source", "", false,
-                "Source colony set used for expedition planning."));
-        configs.add(new ConfigDefinition("expedition", threadType, "max_dt", "2500", false,
-                "Maximum transport capacity used for expedition ships."));
-        configs.add(new ConfigDefinition("expedition", threadType, "battle_extension", "true", false,
-                "Whether to include battle ships in expedition groups."));
-        configs.add(new ConfigDefinition("expedition", threadType, SYSTEM_SHIFT, "0", false,
-                "System offset applied to the expedition target."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Sends expeditions to distant systems and balances transport capability.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return "8S";
-    }
-
-    @Override
-    public int getRequestedFleetCount() {
-        return Navigator.getExpeditionMax();
+    protected void onStart() {
+        super.onStart();
+        config = new ExpeditionDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override
@@ -72,8 +52,13 @@ public class ExpeditionThread extends AbstractThread {
         if (container.anyNotProcessed()) return;
 
         ColonyEntity bestColony;
-        List<ColonyEntity> source = getSources(CoordinateExpressionService.ALL);
-        ShipsMap requiredShipMap = map.getShips(DEFAULT_SHIPS);
+        String sourceExpression = config.getSource();
+        if (sourceExpression == null || sourceExpression.isBlank()) {
+            sourceExpression = CoordinateExpressionService.ALL;
+        }
+        List<ColonyEntity> source = expressionService.evaluateCoordinates(sourceExpression)
+                .stream().map(PlanetData::getColony).collect(Collectors.toList());
+        ShipsMap requiredShipMap = config.getShips();
         if (enoughShipsForAllRequiredExpeditions(source, requiredShipMap)) {
             List<ColonyEntity> possibleColonies = canSendExpeditons(source, requiredShipMap);
             bestColony = findBest(possibleColonies);
@@ -122,7 +107,7 @@ public class ExpeditionThread extends AbstractThread {
         FleetSendCommand command = new FleetSendCommand();
         command.setSource(bestColony);
         TargetEntity space = new TargetEntity(bestColony.toPlanet().toSpace());
-        Integer systemShift = map.getConfigInteger(SYSTEM_SHIFT, 0);
+        Integer systemShift = Objects.requireNonNullElse(config.getSystemShift(), 0);
         space.system += systemShift;
         command.setTarget(new PlanetData(space));
         command.setMission(Mission.EXPEDITION);

@@ -1,20 +1,19 @@
 package org.enoch.snark.instance.si.module.building;
 
 import lombok.RequiredArgsConstructor;
-import org.enoch.common.config.ConfigDefinition;
-import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.action.command.BuildCommand;
 import org.enoch.snark.db.entity.PlayerEntity;
+import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.FleetRepository;
 import org.enoch.snark.db.repository.PlayerRepository;
 import org.enoch.snark.instance.model.technology.Research;
+import org.enoch.snark.instance.model.to.PlanetData;
 import org.enoch.snark.instance.service.FleetService;
 import org.enoch.snark.instance.model.uc.ResourceUC;
-import org.enoch.snark.instance.service.CoordinateExpressionService;
 import org.enoch.snark.instance.service.TechnologyService;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.si.module.AbstractThread;
@@ -28,41 +27,31 @@ import static org.enoch.snark.instance.model.to.Resources.nothing;
 @RequiredArgsConstructor
 public class BuildThread extends AbstractThread {
 
-    public static final String threadType = "build";
-    public static final String LIST = "list";
-    public static final String SWAP_TRANSPORT = "swap_transport";
+    public static final String threadType = BuildDefinition.THREAD_TYPE;
+    public static final String LIST = BuildDefinition.LIST;
+    public static final String SWAP_TRANSPORT = BuildDefinition.SWAP_TRANSPORT;
 
-    public static final String DEFAULT_LIST = "small";
+    public static final String DEFAULT_LIST = BuildDefinition.DEFAULT_LIST;
     public static final int SHORT_PAUSE = 20;
 
     private final FleetRepository fleetRepository;
     private final PlayerRepository playerRepository;
     private final FleetService fleetService;
+    private final ConfigRepository configRepository;
 
     private Map<ColonyEntity, Queue<BuildRequest>> colonyMap;
     private TechnologyService technologyService  = TechnologyService.getInstance();
     private BuildingCost buildingCost = BuildingCost.getInstance();
     private String buildingList;
+    private BuildDefinition config;
 
     @Override
-    public ThreadDefinition threadDefinition() {
-        List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("build", threadType, LIST, DEFAULT_LIST, false,
-                "Build list applied on each colony to decide which structures are ordered next."));
-        configs.add(new ConfigDefinition("build", threadType, SWAP_TRANSPORT, "true", false,
-                "Allow resource transport between colonies before building if the local colony is short on materials."));
-        configs.addAll(commonConfigDefinitions());
-        return new ThreadDefinition(threadType, "Builds structures from a configured colony build sequence and resource strategy.", configs);
-    }
-
-    @Override
-    protected String getThreadType() {
-        return threadType;
-    }
-
-    @Override
-    protected String defaultPause() {
-        return SHORT_PAUSE+"S";
+    protected void onStart() {
+        super.onStart();
+        config = new BuildDefinition();
+        config.update(configRepository.findByThread_Module_NameAndThread_Name(
+                threadEntity.module.name, "main"));
+        config.update(threadEntity.configs);
     }
 
     @Override
@@ -76,7 +65,7 @@ public class BuildThread extends AbstractThread {
             if (isBuildQueueBlockedForBuildRequest(colony, buildRequest)) continue;
 
             BuildRequirements requirements = new BuildRequirements(buildRequest, buildingCost.getCosts(buildRequest));
-            Resources leave = getNearestLeaveResources(colony.type, nothing);
+            Resources leave = config.getLeaveResources(colony.type, nothing);
             if(requirements.isResourceUnknown() || ResourceUC.toTransport(colony, requirements.resources, leave) != null) { // moze colony.hasEnoughResources powinno miec to zaszyte
                 log("Push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
                 pushCommand(colony.toString(), new BuildCommand(colony, requirements));
@@ -85,7 +74,7 @@ public class BuildThread extends AbstractThread {
             }
 
             SendCommand pushedCommand = null;
-            if (map.getConfigBoolean(SWAP_TRANSPORT, true))
+            if (config.getSwapTransport())
                 pushedCommand = transportNearResourcesAndBuild(colony, requirements);
             if(pushedCommand != null) log("Move "+pushedCommand.hash()+" missing resource and push build on "+colony+" "+colony.getResources()+" where requirements:"+requirements);
             else log("On "+colony+" "+colony.getResources()+" is not enough to start requirements:"+requirements);
@@ -99,9 +88,9 @@ public class BuildThread extends AbstractThread {
     private SendCommand transportNearResourcesAndBuild(ColonyEntity colony, BuildRequirements requirements) {
         Optional<ColonyEntity> swapColony = colonyRepository.findByCp(colony.cpm);
         if(swapColony.isEmpty()) return null;
-        Resources leaveColony = getNearestLeaveResources(colony.type, nothing);
+        Resources leaveColony = config.getLeaveResources(colony.type, nothing);
         Resources missing = requirements.resources.missing(colony.getResources().missing(leaveColony));
-        Resources leaveSwap = getNearestLeaveResources(swapColony.get().type, nothing);
+        Resources leaveSwap = config.getLeaveResources(swapColony.get().type, nothing);
         FleetSendCommand command = fleetService.transportFleet(swapColony.get(), colony, missing, leaveSwap);
         if(command != null) {
             command.setNext(new BuildCommand(colony, requirements), DELAY_TO_FLEET_THERE);
@@ -118,7 +107,7 @@ public class BuildThread extends AbstractThread {
     private BuildRequest getNextRequest(ColonyEntity colony) {
         Queue<BuildRequest> requests = colonyMap.get(colony);
         if(requests == null) {
-            requests = BuildingManager.getBuildRequests(buildingList, debug);
+            requests = BuildingManager.getBuildRequests(buildingList, Boolean.parseBoolean(threadEntity.debug));
             colonyMap.put(colony, requests);
         }
         while(skipAlreadyBuild(colony, requests.peek())) requests.poll();
@@ -136,12 +125,18 @@ public class BuildThread extends AbstractThread {
     }
 
     private void updateSourceMap() {
-        String configList = map.getConfig(LIST, DEFAULT_LIST);
+        String configList = config.getList();
         if(!configList.equals(buildingList)) {
             colonyMap = new HashMap<>();
             buildingList = configList;
         }
-        List<ColonyEntity> planets = new ArrayList<>(this.getSources(CoordinateExpressionService.PLANETS));
+        List<ColonyEntity> planets = getSources(config.getSource());
         Util.updateMapKeys(colonyMap, planets, null);
+    }
+
+    private List<ColonyEntity> getSources(String sourceExpression) {
+        return expressionService.evaluateCoordinates(sourceExpression).stream()
+                .map(PlanetData::getColony)
+                .toList();
     }
 }

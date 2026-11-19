@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
+import org.enoch.snark.instance.service.CoordinateExpressionService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,9 @@ public class ConsumerDefinition {
     public static final String MODE = "mode";
     public static final String CONFIG = "config";
     public static final String WEBDRIVER_PATH = "driver";
+    public static final String SOURCE = "source";
 
+    private String source;
     private String url;
     private String hash;
     private String server;
@@ -35,6 +38,7 @@ public class ConsumerDefinition {
     public ConsumerDefinition() {
         for (ConfigDefinition config : threadDefinition().getConfigs())
             switch (config.getKey()) {
+                case SOURCE -> source = config.getValue();
                 case URL -> url = config.getValue();
                 case HASH -> hash = config.getValue();
                 case SERVER -> server = config.getValue();
@@ -49,6 +53,7 @@ public class ConsumerDefinition {
     public void update(List<ConfigEntity> configs) {
         for (ConfigEntity config : configs) {
             switch (config.key) {
+                case SOURCE -> source = config.value;
                 case URL -> url = config.value;
                 case HASH -> hash = config.value;
                 case SERVER -> server = config.value;
@@ -64,6 +69,8 @@ public class ConsumerDefinition {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
+        configs.add(new ConfigDefinition("consumer", threadType, SOURCE, CoordinateExpressionService.NONE, false,
+                "Colony coordinate expression used to open fleet dispatch pages when the consumer starts."));
         configs.add(new ConfigDefinition("consumer", threadType, URL, null, false,
                 "Game URL used to start the browser session."));
         configs.add(new ConfigDefinition("consumer", threadType, HASH, null, false,
