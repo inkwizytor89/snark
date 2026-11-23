@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.building;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.common.Util;
@@ -138,5 +139,10 @@ public class BuildThread extends AbstractThread {
         return expressionService.evaluateCoordinates(sourceExpression).stream()
                 .map(PlanetData::getColony)
                 .toList();
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 }

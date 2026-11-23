@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.fleet;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.action.command.RecallCommand;
@@ -118,6 +119,11 @@ public class FleetThread extends AbstractThread {
             fleetSendCommands.forEach(fleetSendCommand -> System.err.print(fleetSendCommand+"="+fleetSendCommand.getStatus().getStatus()+", "));
         }
         containerToRelease.keySet().forEach(s -> container.removeKey(s));
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private Map<String, Boolean> createMapToRelease() {

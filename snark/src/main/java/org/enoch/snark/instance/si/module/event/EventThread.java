@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.event;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
@@ -30,6 +31,11 @@ public class EventThread extends AbstractThread {
             NotificationSoundPlayer.getInstance().play();
             elements = eventsCount;
         }
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private Long getTargets() {

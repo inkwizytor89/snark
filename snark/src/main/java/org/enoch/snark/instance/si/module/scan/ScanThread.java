@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.scan;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.FleetEntity;
 
 import org.enoch.snark.db.entity.TargetEntity;
@@ -42,6 +43,11 @@ public class ScanThread extends AbstractThread {
 //        if(consumer.notingToPool()) {
 //            setWaitingScan();
 //        }
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private boolean loadNotScannedTargets() {

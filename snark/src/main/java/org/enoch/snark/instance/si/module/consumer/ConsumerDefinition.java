@@ -6,13 +6,14 @@ import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Slf4j
-public class ConsumerDefinition {
+public class ConsumerDefinition implements ThreadConfig {
 
     public static final String threadType = "consumer";
     public static final String SERVER = "server";
@@ -86,5 +87,33 @@ public class ConsumerDefinition {
         configs.add(new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
                 "How long the session stays alive before a restart is triggered."));
         return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case SOURCE -> source;
+                case URL -> url;
+                case HASH -> hash;
+                case SERVER -> server;
+                case LOGIN -> login;
+                case PASSWORD -> password;
+                case WEBDRIVER_PATH -> webdriverPath;
+                case RESTART_DURATION -> restartDuration;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

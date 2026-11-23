@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.defense;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.entity.ColonyEntity;
@@ -99,6 +100,11 @@ public class DefenseThread extends AbstractThread {
                 pushCommand(command);
             }
         }
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private FleetSendCommand sendFleetEscape(ColonyEntity source, List<EventFleet> eventFleets) {

@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.enoch.common.command.CommandMessage;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.common.status.ColonyStatus;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.ThreadManager;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -181,5 +185,54 @@ class SnarkWebSocketClientTest {
         StatusDetails details = (StatusDetails) payload.get("details");
         assertEquals(25, details.limit());
         assertEquals("p[1:2:3]", details.colonies().getFirst().getCoordinate());
+    }
+
+    @Test
+    void shouldBuildCorrelatedManagedThreadConfigurationResponse() {
+        CommandMessage request = new CommandMessage();
+        request.setId("thread-config-1");
+        request.setType("request:thread:configurations");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+
+        CommandMessage response = client.buildThreadConfigurationResponse(request, java.util.List.of(
+                new ThreadDefinition("fleet", "Fleet configuration", java.util.List.of(
+                        new ConfigDefinition("fleet", "fleet", "mission", "ATTACK", false, "")))));
+
+        assertEquals("thread-config-1", response.getId());
+        assertEquals("response:thread:configurations", response.getType());
+        assertEquals("worker#1", response.getFrom());
+        assertEquals("conductor", response.getTo());
+        assertEquals(200, response.getStatus());
+        Map<?, ?> payload = (Map<?, ?>) response.getPayload();
+        assertEquals("worker#1", payload.get("instanceId"));
+        java.util.List<?> definitions = (java.util.List<?>) payload.get("definitions");
+        ThreadDefinition definition = (ThreadDefinition) definitions.getFirst();
+        assertEquals("fleet", definition.getThread());
+        assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
+    }
+
+    @Test
+    void shouldReadManagedDefinitionsWhenBuildingRequestedResponse() {
+        ObjectProvider<ThreadManager> provider = mock(ObjectProvider.class);
+        ThreadManager threadManager = mock(ThreadManager.class);
+        when(provider.getObject()).thenReturn(threadManager);
+        when(threadManager.managedDefinitions()).thenReturn(java.util.List.of(
+                new ThreadDefinition("fleet", "Fleet configuration", java.util.List.of(
+                        new ConfigDefinition("fleet", "fleet", "mission", "ATTACK", false, "")))));
+        client.setThreadManagerProvider(provider);
+        CommandMessage request = new CommandMessage();
+        request.setId("thread-config-2");
+        request.setType("request:thread:configurations");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+
+        CommandMessage response = client.buildManagedThreadConfigurationResponse(request);
+
+        assertEquals("response:thread:configurations", response.getType());
+        ThreadDefinition definition = (ThreadDefinition) ((java.util.List<?>)
+                ((Map<?, ?>) response.getPayload()).get("definitions")).getFirst();
+        assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
+        org.mockito.Mockito.verify(threadManager).managedDefinitions();
     }
 }

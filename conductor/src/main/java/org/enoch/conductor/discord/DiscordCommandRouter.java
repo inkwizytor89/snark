@@ -1,5 +1,8 @@
 package org.enoch.conductor.discord;
 
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
+import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
@@ -7,6 +10,7 @@ import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -24,15 +28,25 @@ public class DiscordCommandRouter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordCommandRouter.class);
     private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final int MAX_THREAD_STATUS_LENGTH = 1800;
 
     private final ProfileRepository profileRepository;
     private final ProcessService processService;
+    private final InstanceThreadConfigurationService threadConfigurationService;
     private final DiscordCommandContext context = new DiscordCommandContext();
     private final CommandNode commands = createCommandTree();
 
-    public DiscordCommandRouter(ProfileRepository profileRepository, ProcessService processService) {
+    @Autowired
+    public DiscordCommandRouter(ProfileRepository profileRepository,
+                                ProcessService processService,
+                                InstanceThreadConfigurationService threadConfigurationService) {
         this.profileRepository = profileRepository;
         this.processService = processService;
+        this.threadConfigurationService = threadConfigurationService;
+    }
+
+    public DiscordCommandRouter(ProfileRepository profileRepository, ProcessService processService) {
+        this(profileRepository, processService, null);
     }
 
     private CommandNode createCommandTree() {
@@ -50,7 +64,7 @@ public class DiscordCommandRouter {
         root.add("restart", "Restarts the selected instance.", runWithoutArguments(this::restartInstance));
 
         CommandNode status = root.add("status", "Shows the selected instance status.", runWithoutArguments(this::statusInstance));
-        status.add("thread", "Lists the active threads of the selected instance.",
+        status.add("thread", "Shows active thread configurations of the selected instance.",
                 runWithoutArguments(this::statusThreads));
         status.add("deque", "Shows the selected instance command deque.",
                 runWithoutArguments(this::statusDeque));
@@ -342,16 +356,67 @@ public class DiscordCommandRouter {
                 LOGGER.warn("discord.bot.command.failed command=status thread instanceId={} reason=active_instance_not_found", instanceId);
                 return DiscordCommandResult.failure("status thread", "Active instance does not exist.", instanceId);
             }
-            ServerStatus serverStatus = processService.getLastServerStatus(instanceId);
-            List<String> activeThreads = serverStatus == null ? null : serverStatus.getActiveThreads();
-            String threads = activeThreads == null || activeThreads.isEmpty()
-                    ? "-"
-                    : String.join(System.lineSeparator(), activeThreads);
-            return DiscordCommandResult.success("status thread", threads);
+            if (threadConfigurationService == null) {
+                return DiscordCommandResult.failure("status thread",
+                        "Unable to request active thread configurations.", null);
+            }
+            List<ThreadDefinition> definitions = threadConfigurationService.fetchManagedDefinitions(instanceId);
+            return DiscordCommandResult.success("status thread", formatThreadConfigurations(definitions));
         } catch (Exception e) {
-            LOGGER.warn("discord.bot.command.failed command=status thread instanceId={} reason={}", instanceId, e.getMessage(), e);
-            return DiscordCommandResult.failure("status thread", "Unable to read active threads.", e.getMessage());
+            LOGGER.warn("discord.bot.command.failed command=status thread instanceId={} reason={}",
+                    instanceId, e.getMessage(), e);
+            return DiscordCommandResult.failure("status thread",
+                    "Unable to read active thread configurations.", e.getMessage());
         }
+    }
+
+    private String formatThreadConfigurations(List<ThreadDefinition> definitions) {
+        if (definitions == null || definitions.isEmpty()) {
+            return "No active threads.";
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (ThreadDefinition definition : definitions) {
+            StringBuilder line = new StringBuilder(definition.getThread());
+            List<String> configValues = definition.getConfigs().stream()
+                    .map(this::formatConfigValue)
+                    .toList();
+            if (!configValues.isEmpty()) {
+                line.append(": ").append(String.join(", ", configValues));
+            }
+            if (result.length() + line.length() + System.lineSeparator().length() > MAX_THREAD_STATUS_LENGTH) {
+                result.append(System.lineSeparator()).append("...");
+                break;
+            }
+            if (!result.isEmpty()) {
+                result.append(System.lineSeparator());
+            }
+            result.append(line);
+        }
+        return result.toString();
+    }
+
+    private String formatConfigValue(ConfigDefinition config) {
+        String key = config.getKey();
+        if (isSensitiveConfigKey(key)) {
+            return "******";
+        }
+        String value = String.valueOf(config.getValue()).replaceAll("[\\r\\n]+", " ");
+        if (value.length() > 80) {
+            value = value.substring(0, 77) + "...";
+        }
+        return key + "=" + value;
+    }
+
+    private boolean isSensitiveConfigKey(String key) {
+        String normalizedKey = key.toLowerCase(Locale.ROOT);
+        return normalizedKey.contains("password")
+                || normalizedKey.contains("login")
+                || normalizedKey.contains("hash")
+                || normalizedKey.contains("token")
+                || normalizedKey.contains("url")
+                || normalizedKey.contains("secret")
+                || normalizedKey.contains("credential");
     }
 
     private DiscordCommandResult statusDeque() {

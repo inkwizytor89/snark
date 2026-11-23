@@ -4,13 +4,13 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ScanDefinition {
+public class ScanDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "scan";
     public static final String COORDINATE = "coordinate";
@@ -54,5 +54,28 @@ public class ScanDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Finds unscanned targets within a configured area and prepares them for follow-up actions.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case COORDINATE -> coordinate;
+                case RANGE -> range;
+                case EXPLORATION_AREA -> explorationArea;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

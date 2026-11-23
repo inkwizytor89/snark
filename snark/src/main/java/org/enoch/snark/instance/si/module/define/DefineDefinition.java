@@ -4,7 +4,7 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 import static org.enoch.snark.instance.si.module.ThreadMap.STRATEGY;
 
 @Data
-public class DefineDefinition {
+public class DefineDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "define";
     public static final String NOT_NULL_STRATEGY = "not_null";
@@ -42,5 +42,23 @@ public class DefineDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Writes and refreshes cache values derived from configured database queries.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = STRATEGY.equals(config.getKey()) ? strategy : config.getValue();
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

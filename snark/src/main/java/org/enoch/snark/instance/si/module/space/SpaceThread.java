@@ -3,6 +3,7 @@ package org.enoch.snark.instance.si.module.space;
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.AbstractCommand;
 import org.enoch.snark.action.command.GalaxyAnalyzeCommand;
 import org.enoch.snark.common.DateUtil;
@@ -61,6 +62,11 @@ public class SpaceThread extends AbstractThread {
         List<AbstractCommand> commandList = container.peek();
         logList("Pushed commands "+commandList.size(), commandList);
         spaceHash = newSpaceHash;
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private void pushGalaxyAnalyzeCommandIfNeeded(Entry<SystemView, GalaxyEntity> entry, ArrayListMultimap<SystemView, Planet> spyCoordinate) {

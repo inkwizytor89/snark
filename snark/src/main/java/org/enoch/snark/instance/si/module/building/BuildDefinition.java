@@ -7,13 +7,13 @@ import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class BuildDefinition {
+public class BuildDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "build";
     public static final String LIST = "list";
@@ -77,5 +77,43 @@ public class BuildDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Builds structures from a configured colony build sequence and resource strategy.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case LIST -> list;
+                case SWAP_TRANSPORT -> swapTransport == null ? null : swapTransport.toString();
+                case SOURCE -> source;
+                case LEAVE_PLANET_RESOURCES -> formatResources(leavePlanetResources);
+                case LEAVE_MOON_RESOURCES -> formatResources(leaveMoonResources);
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+    }
+
+    private String formatResources(Resources value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.metal == 0L && value.crystal == 0L && value.deuterium == 0L) {
+            return "nothing";
+        }
+        if (value.metal == -100L && value.crystal == -100L && value.deuterium == -100L) {
+            return "everything";
+        }
+        return "m" + value.metal + " c" + value.crystal + " d" + value.deuterium;
     }
 }

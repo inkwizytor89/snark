@@ -5,6 +5,7 @@ import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Data
-public class SpaceDefinition {
+public class SpaceDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "space";
 
@@ -83,5 +84,33 @@ public class SpaceDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Analyzes space ranges, refreshes galaxy data, and schedules follow-up scan commands.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case COORDINATE -> coordinate;
+                case RANGE -> range;
+                case SPY_COORDINATE -> spyCoordinate;
+                case SPY_PATTERN -> spyPattern;
+                case GALAXY_MAX -> galaxyMax == null ? null : galaxyMax.toString();
+                case SYSTEM_MAX -> systemMax == null ? null : systemMax.toString();
+                case WRAP_SYSTEM -> wrapSystem == null ? null : wrapSystem.toString();
+                case EXPIRED_TIME -> expiredTime;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

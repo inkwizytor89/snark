@@ -4,12 +4,13 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class UpdateDefinition {
+public class UpdateDefinition implements ThreadConfig {
 
     private String refresh;
     private String checkSpyReportsDuration;
@@ -46,5 +47,27 @@ public class UpdateDefinition {
         return new ThreadDefinition(UpdateThread.threadType,
                 "Refreshes navigator, colony, and message state so other threads operate on a current view of the game.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case UpdateThread.REFRESH -> refresh;
+                case UpdateThread.CHECK_SPY_REPORTS_DURATION -> checkSpyReportsDuration;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

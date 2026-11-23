@@ -8,6 +8,8 @@ import org.enoch.conductor.config.DeleteInstanceConfigsRequest;
 import org.enoch.conductor.config.ConfigDefinitionsResponse;
 import org.enoch.conductor.config.InstanceConfigResponse;
 import org.enoch.conductor.config.InstanceConfigService;
+import org.enoch.conductor.config.InstanceThreadConfigurationService;
+import org.enoch.conductor.config.InstanceThreadConfigurationsResponse;
 import org.enoch.conductor.config.UpdateInstanceConfigsRequest;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
@@ -38,6 +40,7 @@ public class InstanceController {
     private final ProfileRepository profileRepository;
     private final StartPropertiesRepository startPropertiesRepository;
     private final InstanceConfigService instanceConfigService;
+    private final InstanceThreadConfigurationService instanceThreadConfigurationService;
     private final CommandRequestService commandRequestService;
     private final ConductorSettings conductorSettings;
     private final ObjectProvider<DiscordBotService> discordBotServiceProvider;
@@ -47,6 +50,7 @@ public class InstanceController {
                               ProfileRepository profileRepository,
                               StartPropertiesRepository startPropertiesRepository,
                               InstanceConfigService instanceConfigService,
+                              InstanceThreadConfigurationService instanceThreadConfigurationService,
                               CommandRequestService commandRequestService,
                               ConductorSettings conductorSettings,
                               ObjectProvider<DiscordBotService> discordBotServiceProvider,
@@ -55,6 +59,7 @@ public class InstanceController {
         this.profileRepository = profileRepository;
         this.startPropertiesRepository = startPropertiesRepository;
         this.instanceConfigService = instanceConfigService;
+        this.instanceThreadConfigurationService = instanceThreadConfigurationService;
         this.commandRequestService = commandRequestService;
         this.conductorSettings = conductorSettings;
         this.discordBotServiceProvider = discordBotServiceProvider;
@@ -611,6 +616,27 @@ public class InstanceController {
             return ResponseEntity.ok(new InstanceConfigResponse(id, configs));
         } catch (RuntimeException e) {
             return mapConfigException(e);
+        }
+    }
+
+    @GetMapping("/{id}/thread-configurations")
+    public ResponseEntity<?> getManagedThreadConfigurations(@PathVariable String id) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
+            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions));
+        } catch (RuntimeException e) {
+            String message = e.getMessage() == null ? "Unknown thread configuration error" : e.getMessage();
+            if (message.contains("timed out")) {
+                return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(Map.of("error", message));
+            }
+            if (message.contains("offline") || message.contains("disconnected")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", message));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", message));
         }
     }
 

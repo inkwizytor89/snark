@@ -251,6 +251,8 @@ public abstract class AbstractThread extends ExecutorImpl {
         }
     }
 
+    public abstract ThreadDefinition threadConfiguration();
+
     @Override
     public String toString() {
         return threadEntity.name+":"+runningProcessor.getActualState();

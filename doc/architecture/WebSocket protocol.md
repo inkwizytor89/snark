@@ -83,6 +83,12 @@ The conductor exposes this request through `GET /api/instances/{id}/status/colon
 
 During rolling upgrades, the conductor continues to accept the previous `payload.message` string only in a correlated `response:status` and exposes it as the Navigator fleet status. The conductor accepts status responses only when the response ID matches an outstanding request for the same registered session, the response comes from that session, and `to` is `conductor`. Missing or malformed status data is not a successful status update. Unsolicited updates do not answer requests and do not weaken request/response correlation.
 
+## Managed thread configurations
+
+The conductor requests live configuration values for currently managed threads with `request:thread:configurations`. The request uses the standard envelope with an empty object payload. Snark responds with the correlated `response:thread:configurations`; its payload contains `instanceId` and `definitions`, where `definitions` is the `ThreadManager.managedDefinitions()` list. Each definition includes the thread type, description, and configuration entries with their current runtime values. If the worker cannot produce the list, it returns `error:thread:configurations`.
+
+The conductor exposes this request through `GET /api/instances/{id}/thread-configurations`. The GUI's Configs refresh action requests these live definitions and displays their configuration entries; opening the tab still loads the stored configuration list. Discord `status thread` requests the same data but renders a compact summary and hides login, password, hash, token, URL, secret, and credential values. The HTTP request waits up to five seconds; offline workers return `409`, request timeouts return `504`, and worker or malformed-response errors return `502`. The worker response must fit the 16 KiB WebSocket application limit.
+
 ## Compatibility and tests
 
 Message type names, identity locations, response correlation, revision ordering, frame and page limits, and payload schemas are protocol requirements. Changes must update both producer and consumer in the same change and include tests that assert serialized message shape and handling on the receiving side. Do not preserve competing aliases such as `REGISTER` alongside `request:register`; an alternate format requires an explicit versioned migration.

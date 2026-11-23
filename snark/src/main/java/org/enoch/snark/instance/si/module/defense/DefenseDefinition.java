@@ -6,13 +6,13 @@ import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.common.time.Duration;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class DefenseDefinition {
+public class DefenseDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "defense";
     public static final String ALARM = "alarm";
@@ -89,5 +89,31 @@ public class DefenseDefinition {
 
     public Duration getRecallValue() {
         return recall == null || recall.isBlank() ? null : new Duration(recall);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case ALARM -> alarm;
+                case LIMIT -> limit == null ? null : limit.toString();
+                case RECALL -> recall;
+                case EXAMPLE_TIME -> exampleTime;
+                case EXAMPLE_COORDINATE -> exampleCoordinate;
+                case EXAMPLE_ATTACKER_COORDINATE -> exampleAttackerCoordinate;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

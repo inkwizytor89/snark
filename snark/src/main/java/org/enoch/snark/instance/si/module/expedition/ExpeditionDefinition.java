@@ -5,13 +5,14 @@ import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.ShipsMap;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
-public class ExpeditionDefinition {
+public class ExpeditionDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "expedition";
     public static final String SOURCE = "source";
@@ -74,5 +75,45 @@ public class ExpeditionDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Sends expeditions to distant systems and balances transport capability.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case SOURCE -> source;
+                case MAX_DT -> maxDt == null ? null : maxDt.toString();
+                case BATTLE_EXTENSION -> battleExtension == null ? null : battleExtension.toString();
+                case SYSTEM_SHIFT -> systemShift == null ? null : systemShift.toString();
+                case SHIPS -> formatShips(ships);
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+    }
+
+    private String formatShips(ShipsMap value) {
+        if (value == null) {
+            return null;
+        }
+        if (value == ShipsMap.ALL_SHIPS) {
+            return "all";
+        }
+        if (value == ShipsMap.NO_SHIPS) {
+            return "none";
+        }
+        return value.entrySet().stream()
+                .map(entry -> entry.getKey().name() + ":" + entry.getValue())
+                .collect(Collectors.joining(","));
     }
 }

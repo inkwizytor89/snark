@@ -8,7 +8,7 @@ import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import static org.enoch.snark.instance.service.CoordinateExpressionService.PLANE
 import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 @Data
-public class FleetDefinition {
+public class FleetDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "fleet";
 
@@ -166,5 +166,39 @@ public class FleetDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Creates and sends fleet plans according to target, mission, and route configuration.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = switch (config.getKey()) {
+                case SOURCE -> source;
+                case TARGET -> target;
+                case MISSION -> mission;
+                case SHIPS_WAVE -> shipsWaves;
+                case LEAVE_SHIPS_WAVE -> leaveShipsWaves;
+                case RESOURCES -> resources;
+                case LEAVE_RESOURCES -> leaveResources;
+                case SPEED -> speed;
+                case TRIP -> trip;
+                case RECALL -> recall;
+                case DRY_RUN -> dryRun == null ? null : dryRun.toString();
+                case QUEUE -> queue;
+                case EXPIRED_TIME -> expiredTime;
+                case START_CONDITION -> startConditions;
+                default -> config.getValue();
+            };
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

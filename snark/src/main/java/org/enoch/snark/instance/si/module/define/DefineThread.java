@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ConfigRepository;
@@ -64,5 +65,10 @@ public class DefineThread extends AbstractThread {
                         SleepUtil.secondsToSleep(30L);
                     }
                 });
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 }

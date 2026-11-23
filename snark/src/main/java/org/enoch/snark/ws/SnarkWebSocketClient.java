@@ -13,10 +13,12 @@ import org.enoch.common.command.CommandCatalogResponse;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.command.CommandSubmitRequest;
 import org.enoch.common.command.CommandSubmitResponse;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.WorkerLifecycle;
 import org.enoch.snark.instance.si.Core;
+import org.enoch.snark.instance.si.ThreadManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +51,7 @@ public class SnarkWebSocketClient {
     private final AtomicLong statusRevision = new AtomicLong();
 
     private ObjectProvider<WorkerLifecycle> workerLifecycleProvider;
+    private ObjectProvider<ThreadManager> threadManagerProvider;
     private volatile WebSocket webSocket;
     private volatile String registrationRequestId;
     private volatile boolean registered;
@@ -78,6 +81,11 @@ public class SnarkWebSocketClient {
     @Autowired
     public void setWorkerLifecycleProvider(ObjectProvider<WorkerLifecycle> workerLifecycleProvider) {
         this.workerLifecycleProvider = workerLifecycleProvider;
+    }
+
+    @Autowired
+    public void setThreadManagerProvider(ObjectProvider<ThreadManager> threadManagerProvider) {
+        this.threadManagerProvider = threadManagerProvider;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -265,6 +273,52 @@ public class SnarkWebSocketClient {
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(200);
         response.setPayload(Map.of("instanceId", instanceId, "details", details));
+        return response;
+    }
+
+    CommandMessage buildThreadConfigurationResponse(
+            CommandMessage incoming,
+            java.util.List<ThreadDefinition> definitions
+    ) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:thread:configurations");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(Map.of("instanceId", instanceId, "definitions", definitions));
+        return response;
+    }
+
+    CommandMessage buildManagedThreadConfigurationResponse(CommandMessage incoming) {
+        try {
+            if (threadManagerProvider == null) {
+                throw new IllegalStateException("Thread manager is unavailable");
+            }
+            java.util.List<ThreadDefinition> definitions = threadManagerProvider.getObject().managedDefinitions();
+            CommandMessage response = buildThreadConfigurationResponse(incoming, definitions);
+            if (objectMapper.writeValueAsBytes(response).length > MAX_MESSAGE_BYTES) {
+                return buildThreadConfigurationError(incoming, 500,
+                        "Managed thread configuration response exceeds the message size limit.");
+            }
+            return response;
+        } catch (Exception e) {
+            System.err.println("[WS][ERROR] Failed to read managed thread configurations: " + e.getMessage());
+            return buildThreadConfigurationError(incoming, 500,
+                    "Failed to read managed thread configurations.");
+        }
+    }
+
+    private CommandMessage buildThreadConfigurationError(CommandMessage incoming, int status, String error) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("error:thread:configurations");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(status);
+        response.setError(error);
         return response;
     }
 
@@ -482,6 +536,8 @@ public class SnarkWebSocketClient {
                                     "Failed to create status details page."));
                         }
                     }
+                } else if ("request:thread:configurations".equals(incoming.getType()) && registered) {
+                    sendWebSocketMessage(webSocket, buildManagedThreadConfigurationResponse(incoming));
                 } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
                     sendWebSocketMessage(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
                 } else if ("request:command:submit".equals(incoming.getType()) && registered && commandRecipeService != null) {

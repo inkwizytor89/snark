@@ -4,13 +4,13 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.instance.si.module.AbstractThread;
+import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class EventDefinition {
+public class EventDefinition implements ThreadConfig {
 
     public static final String THREAD_TYPE = "event";
     public static final String ELEMENTS = "elements";
@@ -42,5 +42,25 @@ public class EventDefinition {
         return new ThreadDefinition(THREAD_TYPE,
                 "Tracks important in-game events and raises a notification when the volume changes.",
                 configs);
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        ThreadDefinition definition = threadDefinition();
+        List<ConfigDefinition> configs = new ArrayList<>();
+        for (ConfigDefinition config : definition.getConfigs()) {
+            String value = ELEMENTS.equals(config.getKey())
+                    ? elements == null ? null : elements.toString()
+                    : config.getValue();
+            configs.add(new ConfigDefinition(
+                    config.getModule(),
+                    config.getThread(),
+                    config.getKey(),
+                    value,
+                    config.getType(),
+                    config.isTemporary(),
+                    config.getDescription()));
+        }
+        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
     }
 }

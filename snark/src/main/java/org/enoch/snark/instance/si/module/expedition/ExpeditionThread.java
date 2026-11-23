@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.expedition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.FleetSendCommand;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
@@ -71,6 +72,11 @@ public class ExpeditionThread extends AbstractThread {
             }
         }
         refreshSingleListCommand(createFleetSendCommand(bestColony, requiredShipMap));
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private ShipsMap specifyShips(ColonyEntity colony, List<ColonyEntity> colonies) {

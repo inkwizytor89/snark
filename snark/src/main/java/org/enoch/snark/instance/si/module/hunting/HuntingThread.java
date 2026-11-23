@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.hunting;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.PlayerEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
 
@@ -11,6 +12,7 @@ public class HuntingThread extends AbstractThread {
 
     public static final String threadType = HuntingDefinition.THREAD_TYPE;
     public static final int UPDATE_TIME_IN_SECONDS = 10;
+    private final HuntingDefinition config = new HuntingDefinition();
 
 //    private List<PlayerEntity> targets = new ArrayList<>();
 
@@ -36,6 +38,11 @@ public class HuntingThread extends AbstractThread {
 //            return false;
 //        }
 //        return true;
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
 }

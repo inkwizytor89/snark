@@ -744,7 +744,9 @@ function initApp() {
             <div class="detail-tab-toolbar">
                 <span class="detail-tab-caption">Runtime configuration for ${escapeHtml(inst.id)}</span>
                 <div class="detail-tab-actions">
-                    <button type="button" class="btn-secondary btn-small" data-config-action="refresh">Refresh</button>
+                    <button type="button" class="btn-secondary btn-small" data-config-action="refresh" ${configState.status === 'loading' ? 'disabled' : ''}>
+                        ${configState.status === 'loading' ? 'Loading...' : 'Refresh'}
+                    </button>
                     <button type="button" class="btn-primary btn-small" data-config-action="add-thread">Add thread</button>
                 </div>
             </div>
@@ -927,10 +929,15 @@ function initApp() {
         renderInstanceDetails();
 
         try {
-            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/configs`);
+            const endpoint = forceReload ? 'thread-configurations' : 'configs';
+            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/${endpoint}`);
             configState.status = 'loaded';
-            configState.configs = Array.isArray(payload.configs) ? payload.configs : [];
-            setConfigBanner('', '');
+            configState.configs = forceReload
+                ? (Array.isArray(payload.definitions)
+                    ? payload.definitions.flatMap((definition) => Array.isArray(definition.configs) ? definition.configs : [])
+                    : [])
+                : (Array.isArray(payload.configs) ? payload.configs : []);
+            setConfigBanner(forceReload ? 'Runtime thread configurations refreshed' : '', forceReload ? 'success' : '');
         } catch (error) {
             configState.status = 'error';
             configState.error = error.message;

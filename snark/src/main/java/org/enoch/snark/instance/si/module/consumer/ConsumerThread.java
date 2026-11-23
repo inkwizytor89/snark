@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si.module.consumer;
 
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 
 import org.enoch.snark.action.command.status.CommandStatus;
@@ -227,5 +228,10 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     public Duration restartDuration() {
         restartPause.update(config.getRestartDuration());
         return restartPause;
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 }

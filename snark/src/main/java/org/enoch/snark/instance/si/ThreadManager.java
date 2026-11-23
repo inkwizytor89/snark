@@ -254,6 +254,13 @@ public class ThreadManager implements ApplicationRunner {
         );
     }
 
+    public List<ThreadDefinition> managedDefinitions() {
+        return managedThreads.values().stream()
+                .map(ManagedThread::thread)
+                .map(AbstractThread::threadConfiguration)
+                .toList();
+    }
+
     public static List<String> availableThreadTypes() {
         return availableDefinitions().stream()
                 .map(ThreadDefinition::getThread)

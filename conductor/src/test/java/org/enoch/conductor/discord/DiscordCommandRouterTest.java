@@ -1,5 +1,8 @@
 package org.enoch.conductor.discord;
 
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
+import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
@@ -114,15 +117,22 @@ class DiscordCommandRouterTest {
     void shouldListActiveThreadsForContextInstance() throws Exception {
         ProfileRepository profileRepository = mock(ProfileRepository.class);
         ProcessService processService = mock(ProcessService.class);
+        InstanceThreadConfigurationService threadConfigurationService =
+                mock(InstanceThreadConfigurationService.class);
         InstanceProfile profile = profile("server#context", null);
         when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
-        when(processService.getLastServerStatus("server#context"))
-                .thenReturn(new ServerStatus(null, List.of("NavigatorThread", "FleetThread"), "", "", null));
-        DiscordCommandRouter router = new DiscordCommandRouter(profileRepository, processService);
+        when(threadConfigurationService.fetchManagedDefinitions("server#context")).thenReturn(List.of(
+                new ThreadDefinition("fleet", "Fleet config", List.of(
+                        new ConfigDefinition("fleet", "fleet", "mission", "ATTACK", false, ""))),
+                new ThreadDefinition("consumer", "Consumer config", List.of(
+                        new ConfigDefinition("consumer", "consumer", "password", "private", false, "")))));
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                profileRepository, processService, threadConfigurationService);
         router.handle("set server#context");
 
-        assertEquals("NavigatorThread" + System.lineSeparator() + "FleetThread",
-                router.handle("status thread").render());
+        String result = router.handle("status thread").render();
+        assertEquals("fleet: mission=ATTACK" + System.lineSeparator() + "consumer: password=[hidden]", result);
+        verify(threadConfigurationService).fetchManagedDefinitions("server#context");
     }
 
     @Test
@@ -146,7 +156,8 @@ class DiscordCommandRouterTest {
 
         assertTrue(router.handle("list help").render().contains("Lists all configured instances"));
         assertTrue(router.handle("status help").render().contains("Shows the selected instance status"));
-        assertTrue(router.handle("status thread help").render().contains("Lists the active threads"));
+        assertTrue(router.handle("status thread help").render()
+                .contains("Shows active thread configurations"));
         assertTrue(router.handle("status deque help").render().contains("Shows the selected instance command deque"));
         assertTrue(router.handle("set help").render().contains("Selects the active instance"));
         assertTrue(router.handle("set server#context help").render().contains("Selects the active instance"));

@@ -6,6 +6,7 @@ import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.conductor.command.CommandRequestService;
 import org.enoch.conductor.config.InstanceConfigService;
+import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.enoch.conductor.settings.ConductorSettings;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,6 +50,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     private final Map<String, PendingStatusDetailsRequest> pendingStatusDetailsRequests = new ConcurrentHashMap<>();
     
     private InstanceConfigService instanceConfigService;
+    private InstanceThreadConfigurationService instanceThreadConfigurationService;
     private CommandRequestService instanceCommandService;
     private ObjectProvider<DiscordStatusNotifier> discordStatusNotifierProvider;
     private ConductorSettings conductorSettings;
@@ -59,6 +61,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
 
     public void setInstanceConfigService(InstanceConfigService service) {
         this.instanceConfigService = service;
+    }
+
+    public void setInstanceThreadConfigurationService(InstanceThreadConfigurationService service) {
+        this.instanceThreadConfigurationService = service;
     }
 
     public void setInstanceCommandService(CommandRequestService service) {
@@ -128,6 +134,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         if (isConfigResponse(type) && instanceConfigService != null) {
             CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
             instanceConfigService.handleConfigResponse(response);
+        }
+        if (isThreadConfigurationResponse(type) && instanceThreadConfigurationService != null) {
+            CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
+            instanceThreadConfigurationService.handleResponse(registeredInstanceId, session.getId(), response);
         }
         if (isCommandResponse(type) && instanceCommandService != null) {
             CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
@@ -232,6 +242,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 instanceConfigService.clearInstanceState(instanceId);
                 instanceConfigService.cancelPendingRequests(instanceId);
             }
+            if (instanceThreadConfigurationService != null) {
+                instanceThreadConfigurationService.cancelPendingRequests(instanceId);
+            }
             if (instanceCommandService != null) {
                 instanceCommandService.cancelPendingRequests(instanceId);
             }
@@ -279,6 +292,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             if (instanceConfigService != null) {
                 instanceConfigService.clearInstanceState(instanceId);
                 instanceConfigService.cancelPendingRequests(instanceId);
+            }
+            if (instanceThreadConfigurationService != null) {
+                instanceThreadConfigurationService.cancelPendingRequests(instanceId);
             }
             if (instanceCommandService != null) {
                 instanceCommandService.cancelPendingRequests(instanceId);
@@ -417,6 +433,11 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     public boolean isRegistered(String workerId) {
         WebSocketSession session = workers.get(workerId);
         return session != null && session.isOpen();
+    }
+
+    public String getRegisteredSessionId(String workerId) {
+        WebSocketSession session = workers.get(workerId);
+        return session == null || !session.isOpen() ? null : session.getId();
     }
 
     public long getLastRegisteredAt(String workerId) {
@@ -673,6 +694,11 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || "response:config:definitions".equals(type)
                 || "response:config:set".equals(type)
                 || "response:config:delete".equals(type);
+    }
+
+    private boolean isThreadConfigurationResponse(String type) {
+        return "response:thread:configurations".equals(type)
+                || "error:thread:configurations".equals(type);
     }
 
     private boolean isCommandResponse(String type) {

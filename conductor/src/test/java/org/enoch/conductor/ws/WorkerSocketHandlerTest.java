@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -245,6 +246,40 @@ class WorkerSocketHandlerTest {
 
         assertEquals(1, details.total());
         assertEquals("p[1:2:3]", details.colonies().getFirst().getCoordinate());
+    }
+
+    @Test
+    void shouldRequestAndCorrelateManagedThreadConfigurations() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        WebSocketSession session = openSession();
+        testHandler.receive(session, """
+                {"id":"registration-1","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+        InstanceThreadConfigurationService service = new InstanceThreadConfigurationService(handler);
+        handler.setInstanceThreadConfigurationService(service);
+        doAnswer(invocation -> {
+            TextMessage sentMessage = invocation.getArgument(0);
+            JsonNode request = mapper.readTree(sentMessage.getPayload());
+            assertEquals("request:thread:configurations", request.path("type").asText());
+            assertTrue(request.path("payload").isObject());
+            assertTrue(request.path("payload").isEmpty());
+            testHandler.receive(session, """
+                    {"id":"%s","type":"response:thread:configurations","from":"worker#1","to":"conductor",
+                     "timestamp":2,"status":200,"payload":{"instanceId":"worker#1","definitions":[{
+                     "thread":"fleet","description":"Fleet config","configs":[{
+                     "module":"fleet","thread":"fleet","key":"mission","value":"ATTACK",
+                     "type":"java.lang.String","temporary":false,"description":"Mission"}]}]}}
+                    """.formatted(request.path("id").asText()));
+            return null;
+        }).when(session).sendMessage(any(TextMessage.class));
+
+        var definitions = service.fetchManagedDefinitions("worker#1");
+
+        assertEquals(1, definitions.size());
+        assertEquals("fleet", definitions.getFirst().getThread());
+        assertEquals("ATTACK", definitions.getFirst().getConfigs().getFirst().getValue());
     }
 
     @Test

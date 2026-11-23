@@ -1,6 +1,7 @@
 package org.enoch.snark.instance.si.module.update;
 
 import lombok.RequiredArgsConstructor;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
 import org.enoch.snark.common.time.Duration;
 import org.enoch.snark.db.repository.ConfigRepository;
@@ -69,6 +70,11 @@ public class UpdateThread extends AbstractThread {
 
         if (events == null) return;
         markSpecialFleets();
+    }
+
+    @Override
+    public ThreadDefinition threadConfiguration() {
+        return config.threadConfiguration();
     }
 
     private void updateColonies(List<FleetMovement> movements) {
