@@ -13,6 +13,7 @@ import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ModuleRepository;
 import org.enoch.snark.db.repository.ThreadRepository;
+import org.enoch.snark.instance.si.ThreadManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,10 +102,18 @@ public class ConfigService implements ApplicationRunner {
     private ThreadEntity createThreadEntity(ConfigTerm term) {
         ModuleEntity module = moduleRepository.findByName(term.getModule())
                 .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
-        ThreadEntity thread = new ThreadEntity(term.getThread(), module, term.getThread());
+        ThreadEntity thread = new ThreadEntity(
+                term.getThread(), module, resolveThreadType(term.getThread()));
         ThreadEntity savedThread = threadRepository.save(thread);
-        log.info("Created thread '{}' in module '{}'", term.getThread(), term.getModule());
+        log.info("Created thread '{}' in module '{} as {}'", savedThread.name, savedThread.module.name, savedThread.type);
         return savedThread;
+    }
+
+    private String resolveThreadType(String threadName) {
+        return ThreadManager.availableThreadTypes().stream()
+                .filter(threadName::contains)
+                .findFirst()
+                .orElse(threadName);
     }
 
     @Transactional

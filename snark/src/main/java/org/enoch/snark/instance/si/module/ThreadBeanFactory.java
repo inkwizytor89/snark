@@ -8,13 +8,13 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DatabaseThreadBeanFactory {
+public class ThreadBeanFactory {
 
     private static final String BEAN_NAME_PREFIX = "databaseThreadPrototype.";
 
     private final DefaultListableBeanFactory beanFactory;
 
-    public DatabaseThreadBeanFactory(DefaultListableBeanFactory beanFactory) {
+    public ThreadBeanFactory(DefaultListableBeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 

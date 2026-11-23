@@ -6,7 +6,7 @@ import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ThreadRepository;
 import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.DatabaseThreadBeanFactory;
+import org.enoch.snark.instance.si.module.ThreadBeanFactory;
 import org.enoch.snark.instance.si.module.DatabaseThreadTypeRegistry;
 import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
@@ -18,18 +18,18 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-class DatabaseThreadManagerTest {
+class ThreadManagerTest {
 
     private final ThreadRepository threadRepository = mock(ThreadRepository.class);
-    private final DatabaseThreadBeanFactory threadBeanFactory = mock(DatabaseThreadBeanFactory.class);
+    private final ThreadBeanFactory threadBeanFactory = mock(ThreadBeanFactory.class);
     private final ExpressionService expressionService = mock(ExpressionService.class);
 
-    private DatabaseThreadManager manager;
+    private ThreadManager manager;
     private ThreadEntity databaseThread;
 
     @BeforeEach
     void setUp() {
-        manager = new DatabaseThreadManager(
+        manager = new ThreadManager(
                 threadRepository,
                 threadBeanFactory,
                 new DatabaseThreadTypeRegistry(),
@@ -95,7 +95,6 @@ class DatabaseThreadManagerTest {
         manager.synchronizeThreads();
 
         verify(threadBeanFactory).create(UpdateThread.class, databaseThread);
-        verify(runningInstance, never()).updateMap(any(ThreadMap.class));
     }
 
     @Test

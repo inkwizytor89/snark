@@ -206,8 +206,8 @@ public class Wd {
         colony.plasmaCannon = getAmount(technologies,"plasmaCannon");
         colony.shieldDomeSmall = getAmount(technologies,"shieldDomeSmall");
         colony.shieldDomeLarge = getAmount(technologies,"shieldDomeLarge");
-        colony.missileInterceptor = getAmount(technologies,"missileInterceptor");
-        colony.missileInterplanetary = getAmount(technologies,"missileInterplanetary");
+//        colony.missileInterceptor = getAmount(technologies,"missileInterceptor");
+//        colony.missileInterplanetary = getAmount(technologies,"missileInterplanetary");
         colony.save();
     }
 

@@ -3,7 +3,7 @@ package org.enoch.snark.instance;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.enoch.snark.ws.SnarkWebSocketClient;
-import org.enoch.snark.instance.si.DatabaseThreadManager;
+import org.enoch.snark.instance.si.ThreadManager;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,12 +16,12 @@ public class WorkerLifecycle {
 
     private final ConfigurableApplicationContext applicationContext;
     private final SnarkWebSocketClient webSocketClient;
-    private final DatabaseThreadManager threadManager;
+    private final ThreadManager threadManager;
     private final AtomicBoolean shuttingDown = new AtomicBoolean();
 
     public WorkerLifecycle(ConfigurableApplicationContext applicationContext,
                            SnarkWebSocketClient webSocketClient,
-                           DatabaseThreadManager threadManager) {
+                           ThreadManager threadManager) {
         this.applicationContext = applicationContext;
         this.webSocketClient = webSocketClient;
         this.threadManager = threadManager;

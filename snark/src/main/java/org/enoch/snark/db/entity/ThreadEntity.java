@@ -25,7 +25,7 @@ public class ThreadEntity extends IdEntity {
     public String time = "off";
 
     @Column(name = "pause", nullable = false)
-    public String pause = "off";
+    public String pause = "10S";
 
     @Column(name = "debug", nullable = false)
     public String debug = "false";

@@ -1,10 +1,7 @@
 package org.enoch.snark;
 
-import org.enoch.snark.db.entity.ModuleEntity;
-import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.instance.si.module.AbstractThread;
-import org.enoch.snark.instance.si.module.DatabaseThreadBeanFactory;
-import org.enoch.snark.instance.si.module.ThreadMap;
+import org.enoch.snark.instance.si.module.ThreadBeanFactory;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class SnarkApplicationTests {
 
 	@Autowired
-	private DatabaseThreadBeanFactory threadBeanFactory;
+	private ThreadBeanFactory threadBeanFactory;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
