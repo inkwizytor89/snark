@@ -1,5 +1,7 @@
 package org.enoch.snark.instance.si;
 
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ModuleEntity;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.db.entity.ThreadEntity;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class ThreadManagerTest {
@@ -70,6 +73,36 @@ class ThreadManagerTest {
         when(threadRepository.findAllWithModule()).thenReturn(List.of());
         manager.synchronizeThreads();
         verify(threadBeanFactory).destroy(secondInstance);
+    }
+
+    @Test
+    void managedDefinitionsPutThreadControlConfigsAtTheBeginning() {
+        AbstractThread runningInstance = mock(AbstractThread.class);
+        databaseThread.pause = "30S";
+        databaseThread.debug = "true";
+        databaseThread.commandLimit = "25";
+        databaseThread.conditions = "thread-condition";
+
+        ThreadDefinition threadDefinition = new ThreadDefinition("update", "Update description", List.of(
+                new ConfigDefinition("database-module", "worker", "refresh", "12M", false, "Refresh interval")));
+        when(runningInstance.threadConfiguration()).thenReturn(threadDefinition);
+        when(runningInstance.getThreadEntity()).thenReturn(databaseThread);
+        when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
+
+        manager.synchronizeThreads();
+
+        List<ThreadDefinition> definitions = manager.managedDefinitions();
+        assertEquals(1, definitions.size());
+        List<ConfigDefinition> configs = definitions.getFirst().getConfigs();
+        assertEquals(List.of("time", "pause", "debug", "command_limit", "conditions"),
+                configs.subList(0, 5).stream().map(ConfigDefinition::getKey).toList());
+        assertEquals("30S", configs.get(1).getValue());
+        assertEquals("true", configs.get(2).getValue());
+        assertEquals("25", configs.get(3).getValue());
+        assertEquals("thread-condition", configs.get(4).getValue());
+        assertEquals("database-module", configs.get(0).getModule());
+        assertEquals("worker", configs.get(0).getThread());
+        assertEquals("refresh", configs.get(5).getKey());
     }
 
     @Test

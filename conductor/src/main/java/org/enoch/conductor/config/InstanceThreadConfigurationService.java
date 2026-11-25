@@ -2,6 +2,7 @@ package org.enoch.conductor.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.config.ThreadDefinition;
@@ -22,7 +23,7 @@ public class InstanceThreadConfigurationService {
     private static final long REQUEST_TIMEOUT_SECONDS = 5L;
 
     private final WorkerSocketHandler workerSocketHandler;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<String, CompletableFuture<List<ThreadDefinition>>> pendingRequests = new ConcurrentHashMap<>();
     private final Map<String, PendingRequest> pendingRequestDetails = new ConcurrentHashMap<>();
 

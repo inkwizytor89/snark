@@ -2,6 +2,7 @@ package org.enoch.snark.instance.si;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.common.time.TimeScheduler;
 import org.enoch.snark.db.entity.ModuleEntity;
@@ -257,8 +258,50 @@ public class ThreadManager implements ApplicationRunner {
     public List<ThreadDefinition> managedDefinitions() {
         return managedThreads.values().stream()
                 .map(ManagedThread::thread)
-                .map(AbstractThread::threadConfiguration)
+                .map(this::managedDefinition)
                 .toList();
+    }
+
+    private ThreadDefinition managedDefinition(AbstractThread thread) {
+        ThreadDefinition definition = thread.threadConfiguration();
+        ThreadEntity entity = thread.getThreadEntity();
+        if (definition == null || entity == null) {
+            return definition;
+        }
+
+        definition.setId(entity.id);
+        definition.setUpdated(entity.updated);
+        definition.setName(entity.name);
+        definition.setThread(entity.name);
+        definition.setModule(entity.module == null ? null : entity.module.name);
+        definition.setType(entity.type);
+        definition.setTime(entity.time);
+        definition.setPause(entity.pause);
+        definition.setDebug(entity.debug);
+        definition.setCommandLimit(entity.commandLimit);
+        definition.setConditions(entity.conditions);
+        definition.setCreatedOn(entity.createdOn);
+
+        String moduleName = entity.module == null ? null : entity.module.name;
+        List<ConfigDefinition> controlConfigs = List.of(
+                new ConfigDefinition(moduleName, entity.name, "time", entity.time, false,
+                        "Schedule controlling when the thread can run."),
+                new ConfigDefinition(moduleName, entity.name, "pause", entity.pause, false,
+                        "Pause duration between thread processing cycles."),
+                new ConfigDefinition(moduleName, entity.name, "debug", entity.debug, false,
+                        "Whether debug logging is enabled for the thread."),
+                new ConfigDefinition(moduleName, entity.name, "command_limit", entity.commandLimit, false,
+                        "Maximum number of commands processed concurrently; -1 means unlimited."),
+                new ConfigDefinition(moduleName, entity.name, "conditions", entity.conditions, false,
+                        "Conditions that must be satisfied before the thread can run.")
+        );
+
+        List<ConfigDefinition> configs = new ArrayList<>(controlConfigs);
+        if (definition.getConfigs() != null) {
+            configs.addAll(definition.getConfigs());
+        }
+        definition.setConfigs(configs);
+        return definition;
     }
 
     public static List<String> availableThreadTypes() {
