@@ -1,6 +1,6 @@
 package org.enoch.snark.common;
 
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 
 import java.util.concurrent.TimeUnit;
 

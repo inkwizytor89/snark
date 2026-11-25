@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.si.module.consumer;
 
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 
 public interface Credentials {
     String login();

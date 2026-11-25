@@ -10,7 +10,7 @@ import org.enoch.snark.action.command.status.ExecutionIssue;
 import org.enoch.snark.common.Debug;
 import org.enoch.snark.common.RunningProcessor;
 import org.enoch.snark.common.WaitingThread;
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.instance.model.exception.FleetIsCurrentlyInCombatException;

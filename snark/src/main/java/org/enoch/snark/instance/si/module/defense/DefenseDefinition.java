@@ -5,7 +5,7 @@ import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Planet;
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;

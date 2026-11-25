@@ -1,4 +1,4 @@
-package org.enoch.snark.common;
+package org.enoch.common;
 
 public enum RunningState {
     OFF,

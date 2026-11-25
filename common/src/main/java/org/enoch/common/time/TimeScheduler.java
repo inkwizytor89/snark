@@ -1,7 +1,7 @@
-package org.enoch.snark.common.time;
+package org.enoch.common.time;
 
-import org.enoch.snark.common.Parsable;
-import org.enoch.snark.common.RunningState;
+import org.enoch.common.Parsable;
+import org.enoch.common.RunningState;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,6 +1,6 @@
 package org.enoch.snark.db.repository;
 
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.db.entity.JPAUtility;

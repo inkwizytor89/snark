@@ -1,6 +1,6 @@
-package org.enoch.snark.common.time;
+package org.enoch.common.time;
 
-import org.enoch.snark.common.RunningState;
+import org.enoch.common.RunningState;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -8,9 +8,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enoch.snark.instance.si.module.ThreadMap.*;
 
 public class TimePlan  {
+    private static final String ON = "on";
+    private static final String OFF = "off";
+    private static final String ARRAY_SEPARATOR = ";";
+
     private final List<TimeInterval> activationTimes;
 
     public TimePlan(String input) {

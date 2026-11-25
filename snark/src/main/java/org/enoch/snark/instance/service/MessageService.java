@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.service;
 
 import lombok.Getter;
-import org.enoch.snark.common.DateUtil;
+import org.enoch.common.DateUtil;
 import org.enoch.snark.instance.model.to.Planet;
 
 import java.time.Duration;

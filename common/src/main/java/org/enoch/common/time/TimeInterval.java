@@ -1,13 +1,15 @@
-package org.enoch.snark.common.time;
-
-import lombok.AllArgsConstructor;
+package org.enoch.common.time;
 
 import java.time.LocalTime;
 
-@AllArgsConstructor
 public class TimeInterval {
     LocalTime start;
     LocalTime end;
+
+    public TimeInterval(LocalTime start, LocalTime end) {
+        this.start = start;
+        this.end = end;
+    }
 
     public boolean isOn() {
         return (nowIsInMiddle(start, end) && start.isBefore(end)) ||

@@ -1,6 +1,4 @@
-package org.enoch.snark.common;
-
-import org.enoch.snark.instance.model.types.Expression;
+package org.enoch.common;
 
 public class NumberUtil {
 
@@ -14,12 +12,12 @@ public class NumberUtil {
 
     public static Long toLong(String input) {
         if(input == null || input.isEmpty()) return 0L;
-        if(input.toLowerCase().contains(Expression.ALL.name().toLowerCase())) return Long.MAX_VALUE;
+        if(input.toLowerCase().contains("all")) return Long.MAX_VALUE;
         return Long.parseLong(normalizationString(input));
     }
 
     public static Integer toInt(String input) {
-        if(input.toLowerCase().contains(Expression.ALL.name().toLowerCase())) return Integer.MAX_VALUE;
+        if(input.toLowerCase().contains("all")) return Integer.MAX_VALUE;
         return Integer.parseInt(normalizationString(input));
     }
 }

@@ -2,7 +2,7 @@ package org.enoch.snark.instance.si.module.consumer.gi;
 
 import org.enoch.snark.action.command.SendCommand;
 import org.enoch.snark.action.command.status.ExecutionIssue;
-import org.enoch.snark.common.DateUtil;
+import org.enoch.common.DateUtil;
 import org.enoch.snark.common.SleepUtil;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.entity.FleetEntity;

@@ -3,7 +3,7 @@ package org.enoch.snark.instance.model.action.condition;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import org.enoch.snark.common.DateUtil;
+import org.enoch.common.DateUtil;
 import org.enoch.snark.db.entity.TargetEntity;
 import org.enoch.snark.instance.model.to.Planet;
 

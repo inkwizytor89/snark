@@ -2,7 +2,7 @@ package org.enoch.snark.instance.model.to;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.common.NumberUtil;
+import org.enoch.common.NumberUtil;
 import org.enoch.snark.instance.model.types.ResourceType;
 
 import java.util.Arrays;

@@ -3,7 +3,7 @@ package org.enoch.snark.instance.si.module.update;
 import lombok.RequiredArgsConstructor;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.action.command.*;
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
 import org.enoch.snark.instance.model.to.FleetMovement;

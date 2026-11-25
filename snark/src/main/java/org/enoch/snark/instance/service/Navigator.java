@@ -2,7 +2,7 @@ package org.enoch.snark.instance.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.snark.db.entity.FleetEntity;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;

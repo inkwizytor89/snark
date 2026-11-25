@@ -1,6 +1,6 @@
-package org.enoch.snark.common.time;
+package org.enoch.common.time;
 
-import org.enoch.snark.common.Parsable;
+import org.enoch.common.Parsable;
 
 import java.time.format.DateTimeParseException;
 import java.util.Random;

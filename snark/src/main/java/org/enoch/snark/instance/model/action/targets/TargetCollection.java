@@ -1,6 +1,6 @@
 package org.enoch.snark.instance.model.action.targets;
 
-import org.enoch.snark.common.DateUtil;
+import org.enoch.common.DateUtil;
 import org.enoch.snark.db.entity.TargetEntity;
 
 import java.util.ArrayList;

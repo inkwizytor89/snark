@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
-import org.enoch.snark.common.time.TimeScheduler;
+import org.enoch.common.time.TimeScheduler;
 import org.enoch.snark.db.entity.ModuleEntity;
 import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ThreadRepository;

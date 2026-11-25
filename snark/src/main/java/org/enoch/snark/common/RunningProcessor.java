@@ -1,10 +1,11 @@
 package org.enoch.snark.common;
 
 import lombok.Getter;
+import org.enoch.common.RunningState;
 
 import java.util.Arrays;
 
-import static org.enoch.snark.common.RunningState.*;
+import static org.enoch.common.RunningState.*;
 
 public class RunningProcessor {
     private final RunningState[] loggingStates;

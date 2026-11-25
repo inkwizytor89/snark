@@ -1,4 +1,4 @@
-package org.enoch.snark.common;
+package org.enoch.common;
 
 import java.time.Duration;
 import java.time.LocalDate;

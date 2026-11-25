@@ -1,6 +1,6 @@
 package org.enoch.snark.expression.function.eventfleet;
 
-import org.enoch.snark.common.time.Duration;
+import org.enoch.common.time.Duration;
 import org.enoch.snark.instance.model.to.EventFleet;
 import org.enoch.snark.instance.model.to.Planet;
 import org.enoch.snark.instance.service.Navigator;
