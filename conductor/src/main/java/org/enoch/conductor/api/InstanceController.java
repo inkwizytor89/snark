@@ -682,12 +682,12 @@ public class InstanceController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Thread config is required"));
             }
             var config = new ConfigEntry(
-                    String.valueOf(configMap.get("module")),
-                    String.valueOf(configMap.get("thread")),
-                    String.valueOf(configMap.getOrDefault("key", "")),
-                    String.valueOf(configMap.getOrDefault("value", "")));
+                    configValue(configMap, "module"),
+                    configValue(configMap, "thread"),
+                    configValue(configMap, "key"),
+                    configValue(configMap, "value"));
             String moduleName = request.get("module") instanceof String value ? value.trim() : "";
-            if (config == null || moduleName.isBlank()) {
+            if (moduleName.isBlank()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Thread config and destination module are required"));
             }
             instanceConfigService.changeThreadModule(id, config, moduleName);
@@ -704,10 +704,10 @@ public class InstanceController {
         }
         try {
             var config = new ConfigEntry(
-                    String.valueOf(request.get("module")),
-                    String.valueOf(request.get("thread")),
-                    String.valueOf(request.getOrDefault("key", "")),
-                    String.valueOf(request.getOrDefault("value", "")));
+                    configValue(request, "module"),
+                    configValue(request, "thread"),
+                    configValue(request, "key"),
+                    configValue(request, "value"));
             instanceConfigService.deleteModule(id, config);
             return ResponseEntity.ok(Map.of("message", "Module deleted"));
         } catch (RuntimeException e) {
@@ -722,10 +722,10 @@ public class InstanceController {
         }
         try {
             var config = new ConfigEntry(
-                    String.valueOf(request.get("module")),
-                    String.valueOf(request.get("thread")),
-                    String.valueOf(request.getOrDefault("key", "")),
-                    String.valueOf(request.getOrDefault("value", "")));
+                    configValue(request, "module"),
+                    configValue(request, "thread"),
+                    configValue(request, "key"),
+                    configValue(request, "value"));
             instanceConfigService.deleteThread(id, config);
             return ResponseEntity.ok(Map.of("message", "Thread deleted"));
         } catch (RuntimeException e) {
@@ -746,6 +746,11 @@ public class InstanceController {
         } catch (RuntimeException e) {
             return mapConfigException(e);
         }
+    }
+
+    private static String configValue(Map<?, ?> values, String key) {
+        Object value = values.get(key);
+        return value == null ? "" : String.valueOf(value);
     }
 
     private ResponseEntity<Map<String, String>> mapConfigException(RuntimeException e) {

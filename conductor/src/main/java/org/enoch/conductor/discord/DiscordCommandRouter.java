@@ -458,7 +458,10 @@ public class DiscordCommandRouter {
         for (ThreadDefinition definition : definitions) {
             List<ConfigDefinition> configs = definition.getConfigs();
             String module = definition.getModule();
-            StringBuilder line = new StringBuilder(module+"."+definition.getName());
+            String name = definition.getName();
+            StringBuilder line = new StringBuilder(module == null || module.isBlank()
+                    ? name
+                    : module + "." + name);
             List<String> configValues = configs.stream()
                     .map(this::formatConfigValue)
                     .toList();
@@ -480,7 +483,7 @@ public class DiscordCommandRouter {
     private String formatConfigValue(ConfigDefinition config) {
         String key = config.getKey();
         if (isSensitiveConfigKey(key)) {
-            return "******";
+            return key + "=[hidden]";
         }
         String value = String.valueOf(config.getValue()).replaceAll("[\\r\\n]+", " ");
         if (value.length() > 80) {

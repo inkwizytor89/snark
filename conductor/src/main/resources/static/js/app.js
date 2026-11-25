@@ -1039,6 +1039,15 @@ function initApp() {
             return;
         }
 
+        if (!String(config.module ?? '').trim()
+                || !String(config.thread ?? '').trim()
+                || !String(config.key ?? '').trim()) {
+            configState.rowErrors[rowKey] = 'Config requires module, thread, and key';
+            setConfigBanner('Config is missing module, thread, or key', 'error');
+            renderInstanceDetails();
+            return;
+        }
+
         configState.pendingActions[rowKey] = 'saving';
         delete configState.rowErrors[rowKey];
         renderInstanceDetails();
@@ -1049,14 +1058,25 @@ function initApp() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     configs: [{
-                        ...config,
-                        value: updatedValue
+                        module: String(config.module ?? ''),
+                        thread: String(config.thread ?? ''),
+                        key: String(config.key ?? ''),
+                        value: String(updatedValue ?? '')
                     }]
                 })
             });
 
+            const returnedConfigs = Array.isArray(payload.configs) ? payload.configs : [];
+            const savedConfig = returnedConfigs.find((item) =>
+                item.module === config.module
+                && item.thread === config.thread
+                && item.key === config.key);
+            if (!savedConfig) {
+                throw new Error('Worker did not confirm the saved config');
+            }
+
             configState.status = 'loaded';
-            configState.configs = Array.isArray(payload.configs) ? payload.configs : [];
+            configState.configs = returnedConfigs;
             configState.dirtyValues = {};
             configState.rowErrors = {};
             configState.pendingActions = {};

@@ -16,6 +16,7 @@ import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.config.ConfigService;
 import org.enoch.common.config.ConfigEntry;
+import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.WorkerLifecycle;
@@ -370,7 +371,12 @@ public class SnarkWebSocketClient {
         response.setTo(resolveTarget(incoming));
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(200);
-        response.setPayload(entries);
+        java.util.List<ConfigDefinition> definitions = entries.stream()
+                .map(entry -> new ConfigDefinition(
+                        entry.getModule(), entry.getThread(), entry.getKey(), entry.getValue(),
+                        String.class, false, ""))
+                .toList();
+        response.setPayload(definitions);
         return response;
     }
 
@@ -434,7 +440,11 @@ public class SnarkWebSocketClient {
         response.setTo(resolveTarget(incoming));
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(status);
-        response.setPayload(status == 200 ? java.util.List.of() : null);
+        if (status == 200 && "request:config:delete".equals(incoming.getType())) {
+            response.setPayload(configServiceProvider.getObject().listConfigs());
+        } else {
+            response.setPayload(status == 200 ? java.util.List.of() : null);
+        }
         response.setError(errorMessage);
         return response;
     }

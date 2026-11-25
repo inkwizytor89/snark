@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.common.config.ConfigEntry;
+import org.enoch.common.config.ConfigDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -86,6 +87,19 @@ public class ConfigService implements ApplicationRunner {
             moduleRepository.delete(module);
             log.info("Deleted module '{}' and all its threads and configurations", term.getModule());
         });
+    }
+
+    public List<ConfigDefinition> listConfigs() {
+        return configRepository.findAll().stream()
+                .map(config -> new ConfigDefinition(
+                        config.thread.module.name,
+                        config.thread.name,
+                        config.key,
+                        config.value,
+                        String.class,
+                        false,
+                        ""))
+                .toList();
     }
 
     @Transactional
