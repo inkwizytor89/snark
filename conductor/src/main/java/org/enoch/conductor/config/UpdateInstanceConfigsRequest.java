@@ -1,11 +1,11 @@
 package org.enoch.conductor.config;
 
-import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ConfigEntry;
 
 import java.util.List;
 
 public record UpdateInstanceConfigsRequest(
-        List<ConfigDefinition> configs
+        List<ConfigEntry> configs
 ) {
 }
 

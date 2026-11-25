@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.conductor.config.InstanceConfigService;
 import org.enoch.conductor.config.InstanceConfigStateRepository;
 import org.enoch.conductor.config.InstanceThreadConfigurationService;
@@ -297,7 +298,7 @@ class WorkerSocketHandlerTest {
                 """);
         InstanceConfigStateRepository stateRepository = mock(InstanceConfigStateRepository.class);
         ConfigDefinition currentConfig = new ConfigDefinition(
-                "fleet", "UpdateThread", "refresh", "old value", Boolean.class, true, "Refresh interval");
+                "refresh", "old value", Boolean.class, true, "Refresh interval");
         when(stateRepository.getConfigs("worker#1")).thenReturn(List.of(currentConfig));
         InstanceConfigService service = new InstanceConfigService(stateRepository, handler);
         handler.setInstanceConfigService(service);
@@ -317,7 +318,7 @@ class WorkerSocketHandlerTest {
         }).when(session).sendMessage(any(TextMessage.class));
 
         service.updateConfigEntry("worker#1",
-                new ConfigDefinition("refresh", "45 seconds", false, ""));
+                new ConfigEntry("fleet", "UpdateThread", "refresh", "45 seconds"));
 
         ArgumentCaptor<List<ConfigDefinition>> configs = ArgumentCaptor.forClass(List.class);
         verify(stateRepository).saveConfigs(org.mockito.ArgumentMatchers.eq("worker#1"), configs.capture());

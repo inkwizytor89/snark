@@ -99,8 +99,8 @@ class ThreadManagerTest {
         assertEquals("true", configs.get(2).getValue());
         assertEquals("25", configs.get(3).getValue());
         assertEquals("thread-condition", configs.get(4).getValue());
-        assertEquals("database-module", configs.get(0).getModule());
-        assertEquals("worker", configs.get(0).getThread());
+        assertEquals("database-module", definitions.getFirst().getModule());
+        assertEquals("worker", definitions.getFirst().getThread());
         assertEquals("refresh", configs.get(5).getKey());
     }
 

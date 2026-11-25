@@ -1,6 +1,7 @@
 package org.enoch.conductor.discord;
 
 import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.conductor.config.InstanceConfigService;
 import org.enoch.conductor.config.InstanceThreadConfigurationService;
@@ -64,11 +65,11 @@ class DiscordCommandRouterTest {
                 "set config fleet.UpdateThread.refresh   =   45 seconds");
 
         assertEquals("Configuration updated: fleet.UpdateThread.refresh", result.render());
-        org.mockito.ArgumentCaptor<ConfigDefinition> configCaptor =
-                org.mockito.ArgumentCaptor.forClass(ConfigDefinition.class);
+        org.mockito.ArgumentCaptor<ConfigEntry> configCaptor =
+                org.mockito.ArgumentCaptor.forClass(ConfigEntry.class);
         verify(configService).updateConfigEntry(
                 org.mockito.ArgumentMatchers.eq("server#context"), configCaptor.capture());
-        ConfigDefinition config = configCaptor.getValue();
+        ConfigEntry config = configCaptor.getValue();
         assertEquals("fleet", config.getModule());
         assertEquals("UpdateThread", config.getThread());
         assertEquals("refresh", config.getKey());

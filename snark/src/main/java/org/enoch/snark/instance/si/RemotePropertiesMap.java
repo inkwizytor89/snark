@@ -2,7 +2,7 @@ package org.enoch.snark.instance.si;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.enoch.snark.config.ConfigTerm;
+import org.enoch.common.config.ConfigEntry;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RemotePropertiesMap {
-    private  List<ConfigTerm> fileConfigs = new ArrayList<>();
-    private  List<ConfigTerm> remoteConfigs = new ArrayList<>();
+    private  List<ConfigEntry> fileConfigs = new ArrayList<>();
+    private  List<ConfigEntry> remoteConfigs = new ArrayList<>();
 
-    public void addRemoteConfig(ConfigTerm config) {
+    public void addRemoteConfig(ConfigEntry config) {
         remoteConfigs.stream()
                 .filter(c -> c.getKey().equals(config.getKey()) && c.getModule().equals(config.getModule()) && c.getThread().equals(config.getThread()))
                 .findFirst()
@@ -28,7 +28,7 @@ public class RemotePropertiesMap {
     }
 
     public String showConfig(String phrase) {
-        List<ConfigTerm> configs = new ArrayList<>();
+        List<ConfigEntry> configs = new ArrayList<>();
         final String key = phrase.trim().toLowerCase();
         if("remote".equals(key)) configs.addAll(remoteConfigs);
         else if("file".equals(key)) configs.addAll(fileConfigs);
@@ -44,6 +44,6 @@ public class RemotePropertiesMap {
                     .forEach(configs::add);
         }
         configs.removeIf(x -> x.getKey().equals("password"));
-        return configs.stream().map(ConfigTerm::toString).collect(Collectors.joining("\n"));
+        return configs.stream().map(ConfigEntry::toString).collect(Collectors.joining("\n"));
     }
 }

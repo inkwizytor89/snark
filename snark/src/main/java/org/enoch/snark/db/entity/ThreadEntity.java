@@ -1,7 +1,7 @@
 package org.enoch.snark.db.entity;
 
 import jakarta.persistence.*;
-import org.enoch.snark.config.ConfigTerm;
+import org.enoch.common.config.ConfigEntry;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class ThreadEntity extends IdEntity {
         return module.name + "." + name;
     }
 
-    public void update(ConfigTerm term) {
+    public void update(ConfigEntry term) {
         switch (term.getKey()) {
             case "time" -> time = term.getValue();
             case "pause" -> pause = term.getValue();

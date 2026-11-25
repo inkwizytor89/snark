@@ -1,5 +1,6 @@
 package org.enoch.snark.config;
 
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.snark.db.entity.ModuleEntity;
 import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
@@ -29,7 +30,7 @@ class ConfigServiceTest {
         when(threadRepository.save(any(ThreadEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        ConfigTerm term = new ConfigTerm();
+        ConfigEntry term = new ConfigEntry();
         term.setModule("module");
         term.setThread("expedition_day");
         term.setKey("time");

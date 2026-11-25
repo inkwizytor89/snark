@@ -3,6 +3,7 @@ package org.enoch.snark.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.enoch.common.config.ConfigEntry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -33,7 +34,7 @@ public class ConfigService implements ApplicationRunner {
     private static final String GLOBAL_MODULE = "global";
     private static final String SERVER_KEY = "server";
     public static final String TEMPLATE = "template";
-    private static List<ConfigTerm> configs = new ArrayList<>();
+    private static List<ConfigEntry> configs = new ArrayList<>();
 
     private final ModuleRepository moduleRepository;
     private final ThreadRepository threadRepository;
@@ -51,8 +52,8 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
-    public void updateThreads(List<ConfigTerm> configTerms) {
-        for (ConfigTerm term : configTerms) {
+    public void updateThreads(List<ConfigEntry> configTerms) {
+        for (ConfigEntry term : configTerms) {
             ThreadEntity threadEntity = threadRepository.find(term.getModule(), term.getThread())
                     .orElseGet(() -> createThreadEntity(term));
             threadEntity.update(term);
@@ -61,7 +62,7 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
-    public void changeThreadModule(ConfigTerm term, String moduleName) {
+    public void changeThreadModule(ConfigEntry term, String moduleName) {
         ThreadEntity thread = threadRepository.find(term.getModule(), term.getThread())
                 .orElseThrow(() -> new RuntimeException(
                         "Could not find thread '" + term.getThread() + "' in module '" + term.getModule() + "'"));
@@ -73,7 +74,7 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
-    public void deleteModule(ConfigTerm term) {
+    public void deleteModule(ConfigEntry term) {
         moduleRepository.findByName(term.getModule()).ifPresent(module -> {
             List<ThreadEntity> threads = threadRepository.findByModule(module);
             for (ThreadEntity thread : threads) {
@@ -88,7 +89,7 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
-    public void deleteThread(ConfigTerm term) {
+    public void deleteThread(ConfigEntry term) {
         threadRepository.find(term.getModule(), term.getThread()).ifPresent(thread -> {
             List<ConfigEntity> configs = configRepository.findByThread_Module_NameAndThread_Name(
                     term.getModule(), term.getThread());
@@ -99,7 +100,7 @@ public class ConfigService implements ApplicationRunner {
         });
     }
 
-    private ThreadEntity createThreadEntity(ConfigTerm term) {
+    private ThreadEntity createThreadEntity(ConfigEntry term) {
         ModuleEntity module = moduleRepository.findByName(term.getModule())
                 .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
         ThreadEntity thread = new ThreadEntity(
@@ -118,7 +119,7 @@ public class ConfigService implements ApplicationRunner {
 
     @Transactional
     public void loadFromFile(String propertiesPath) throws IOException {
-        List<ConfigTerm> loadedConfigs = loadConfig(propertiesPath);
+        List<ConfigEntry> loadedConfigs = loadConfig(propertiesPath);
         if (loadedConfigs != null) {
             updateThreads(loadedConfigs);
             log.info("Loaded {} configurations from file '{}'", loadedConfigs.size(), propertiesPath);
@@ -127,10 +128,10 @@ public class ConfigService implements ApplicationRunner {
         }
     }
 
-    private List<ConfigTerm> loadConfig(String propertiesPath) throws IOException {
-        List<ConfigTerm> globals = loadConfigsFromFile(propertiesPath, GLOBAL_MODULE);
-        List<ConfigTerm> result = new ArrayList<>(globals);
-        for (ConfigTerm term : globals)
+    private List<ConfigEntry> loadConfig(String propertiesPath) throws IOException {
+        List<ConfigEntry> globals = loadConfigsFromFile(propertiesPath, GLOBAL_MODULE);
+        List<ConfigEntry> result = new ArrayList<>(globals);
+        for (ConfigEntry term : globals)
             if(TEMPLATE.equals(term.getKey()) && !StringUtils.isEmpty(term.getValue())) {
                 result.addAll(loadConfigsFromFile(term.getValue(), term.getModule()));
             }
@@ -140,7 +141,7 @@ public class ConfigService implements ApplicationRunner {
         } else return null;
     }
 
-    private boolean areConfigsChanged(List<ConfigTerm> configs, List<ConfigTerm> result) {
+    private boolean areConfigsChanged(List<ConfigEntry> configs, List<ConfigEntry> result) {
         if(configs.size() != result.size()) return true;
         for(int i = 0; i < configs.size(); i++)
             if (!configs.get(i).getValue().equals(result.get(i).getValue()))
@@ -148,7 +149,7 @@ public class ConfigService implements ApplicationRunner {
         return false;
     }
 
-    private static List<ConfigTerm> loadConfigsFromFile(String propertiesPath, String defaultModule) throws IOException {
+    private static List<ConfigEntry> loadConfigsFromFile(String propertiesPath, String defaultModule) throws IOException {
         File file = new File(propertiesPath);
         if(!file.exists() || !file.isFile()) throw new RuntimeException("File "+file.getAbsolutePath()+" is incorrect");
 
@@ -157,6 +158,6 @@ public class ConfigService implements ApplicationRunner {
         properties.load(fileInputStream);
         fileInputStream.close();
         return properties.stringPropertyNames().stream()
-                .map(s -> ConfigTerm.parse(s, properties.getProperty(s), defaultModule)).toList();
+                .map(s -> ConfigEntry.parse(s, properties.getProperty(s), defaultModule)).toList();
     }
 }

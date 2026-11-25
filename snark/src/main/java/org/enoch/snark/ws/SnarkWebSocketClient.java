@@ -13,10 +13,9 @@ import org.enoch.common.command.CommandCatalogResponse;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.command.CommandSubmitRequest;
 import org.enoch.common.command.CommandSubmitResponse;
-import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.config.ConfigService;
-import org.enoch.snark.config.ConfigTerm;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.WorkerLifecycle;
@@ -329,8 +328,7 @@ public class SnarkWebSocketClient {
                 throw new IllegalArgumentException("Expected a non-empty configuration list");
             }
 
-            java.util.List<ConfigDefinition> definitions = new java.util.ArrayList<>();
-            java.util.List<ConfigTerm> terms = new java.util.ArrayList<>();
+            java.util.List<ConfigEntry> entries = new java.util.ArrayList<>();
             for (JsonNode config : payload) {
                 if (!config.isObject()
                         || !config.path("module").isTextual()
@@ -347,17 +345,16 @@ public class SnarkWebSocketClient {
                 String thread = config.path("thread").asText();
                 String key = config.path("key").asText();
                 String value = config.path("value").asText();
-                definitions.add(new ConfigDefinition(key, value, false, null));
-                ConfigTerm term = new ConfigTerm();
-                term.setModule(module);
-                term.setThread(thread);
-                term.setKey(key);
-                term.setValue(value);
-                terms.add(term);
+                ConfigEntry entry = new ConfigEntry();
+                entry.setModule(module);
+                entry.setThread(thread);
+                entry.setKey(key);
+                entry.setValue(value);
+                entries.add(entry);
             }
 
-            configServiceProvider.getObject().updateThreads(terms);
-            return buildConfigSetResponse(incoming, definitions);
+            configServiceProvider.getObject().updateThreads(entries);
+            return buildConfigSetResponse(incoming, entries);
         } catch (IllegalArgumentException e) {
             return buildConfigSetError(incoming, 400, "Failed to update configuration.");
         } catch (RuntimeException e) {
@@ -365,7 +362,7 @@ public class SnarkWebSocketClient {
         }
     }
 
-    private CommandMessage buildConfigSetResponse(CommandMessage incoming, java.util.List<ConfigDefinition> definitions) {
+    private CommandMessage buildConfigSetResponse(CommandMessage incoming, java.util.List<ConfigEntry> entries) {
         CommandMessage response = new CommandMessage();
         response.setId(incoming.getId());
         response.setType("response:config:set");
@@ -373,7 +370,7 @@ public class SnarkWebSocketClient {
         response.setTo(resolveTarget(incoming));
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(200);
-        response.setPayload(definitions);
+        response.setPayload(entries);
         return response;
     }
 

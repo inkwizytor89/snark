@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.conductor.ws.WorkerSocketHandler;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +58,7 @@ public class InstanceConfigService {
         return result;
     }
 
-    public List<ConfigDefinition> setConfigs(String instanceId, List<ConfigDefinition> configs) throws Exception {
+    public List<ConfigDefinition> setConfigs(String instanceId, List<ConfigEntry> configs) throws Exception {
         List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:set", configs);
         if (result != null) {
             stateRepository.saveConfigs(instanceId, result);
@@ -65,7 +66,7 @@ public class InstanceConfigService {
         return result;
     }
 
-    public void updateConfigEntry(String instanceId, ConfigDefinition config) throws Exception {
+    public void updateConfigEntry(String instanceId, ConfigEntry config) throws Exception {
         List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:set", List.of(config));
         if (result == null || result.isEmpty()) {
             return;
@@ -74,9 +75,7 @@ public class InstanceConfigService {
         List<ConfigDefinition> currentConfigs = new ArrayList<>(stateRepository.getConfigs(instanceId));
         for (ConfigDefinition updated : result) {
             ConfigDefinition existing = currentConfigs.stream()
-                    .filter(current -> Objects.equals(current.getModule(), updated.getModule())
-                            && Objects.equals(current.getThread(), updated.getThread())
-                            && Objects.equals(current.getKey(), updated.getKey()))
+                    .filter(current -> Objects.equals(current.getKey(), updated.getKey()))
                     .findFirst()
                     .orElse(null);
             if (existing == null) {
@@ -88,7 +87,7 @@ public class InstanceConfigService {
         stateRepository.saveConfigs(instanceId, currentConfigs);
     }
 
-    public List<ConfigDefinition> deleteConfigs(String instanceId, List<ConfigDefinition> configs) throws Exception {
+    public List<ConfigDefinition> deleteConfigs(String instanceId, List<ConfigEntry> configs) throws Exception {
         List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:delete", configs);
         if (result != null) {
             stateRepository.saveConfigs(instanceId, result);
@@ -100,7 +99,7 @@ public class InstanceConfigService {
         return sendConfigRequest(instanceId, type, null);
     }
 
-    private List<ConfigDefinition> sendConfigRequest(String instanceId, String type, List<ConfigDefinition> configs) throws Exception {
+    private List<ConfigDefinition> sendConfigRequest(String instanceId, String type, Object configs) throws Exception {
         String requestId = UUID.randomUUID().toString();
         CompletableFuture<List<ConfigDefinition>> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);

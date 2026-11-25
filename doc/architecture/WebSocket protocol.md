@@ -89,7 +89,7 @@ The conductor requests live configuration values for currently managed threads w
 
 The conductor exposes this request through `GET /api/instances/{id}/thread-configurations`. The GUI's Configs refresh action requests these live definitions and displays their configuration entries; opening the tab still loads the stored configuration list. Discord `status thread` requests the same data but renders a compact summary and hides login, password, hash, token, URL, secret, and credential values. The HTTP request waits up to five seconds; offline workers return `409`, request timeouts return `504`, and worker or malformed-response errors return `502`. The worker response must fit the 16 KiB WebSocket application limit.
 
-Discord `set config <module>.<thread>.<key> = <value>` sends a one-element `ConfigDefinition` list with `request:config:set`. Snark validates each entry, converts it to a `ConfigTerm`, and applies it with `ConfigService.updateThreads`; success returns the correlated `response:config:set` with the updated entries, while invalid or failed requests return `error:config:set`. Configuration values are redacted from conductor Discord command logs.
+Discord `set config <module>.<thread>.<key> = <value>` sends a one-element `ConfigEntry` list with `request:config:set`. Snark validates each entry, converts it to a `ConfigTerm`, and applies it with `ConfigService.updateThreads`; success returns the correlated `response:config:set` with the updated entries, while invalid or failed requests return `error:config:set`. Configuration values are redacted from conductor Discord command logs.
 
 ## Compatibility and tests
 

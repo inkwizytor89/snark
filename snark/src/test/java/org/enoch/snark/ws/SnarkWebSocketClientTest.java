@@ -11,7 +11,7 @@ import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.config.ConfigService;
-import org.enoch.snark.config.ConfigTerm;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.ThreadManager;
 import org.junit.jupiter.api.Test;
@@ -261,10 +261,10 @@ class SnarkWebSocketClientTest {
         assertEquals("response:config:set", response.getType());
         assertEquals("config-set-1", response.getId());
         assertEquals(200, response.getStatus());
-        ConfigDefinition definition = (ConfigDefinition) ((java.util.List<?>) response.getPayload()).getFirst();
-        assertEquals("fleet", definition.getModule());
+        ConfigEntry definition = (ConfigEntry) ((java.util.List<?>) response.getPayload()).getFirst();
+        assertEquals("refresh", definition.getKey());
         assertEquals("45 seconds", definition.getValue());
-        org.mockito.ArgumentCaptor<java.util.List<ConfigTerm>> terms =
+        org.mockito.ArgumentCaptor<java.util.List<ConfigEntry>> terms =
                 org.mockito.ArgumentCaptor.forClass(java.util.List.class);
         org.mockito.Mockito.verify(configService).updateThreads(terms.capture());
         assertEquals(1, terms.getValue().size());

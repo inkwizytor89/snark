@@ -1,6 +1,7 @@
 package org.enoch.conductor.discord;
 
 import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.instance.InstanceProfile;
@@ -226,11 +227,11 @@ public class DiscordCommandRouter {
                         "Unable to update instance configuration.", null);
             }
 
-            ConfigDefinition config = new ConfigDefinition(
+            ConfigEntry config = new ConfigEntry(
+                    matcher.group(1),
+                    matcher.group(2),
                     matcher.group(3),
-                    matcher.group(4),
-                    false,
-                    null);
+                    matcher.group(4));
             instanceConfigService.updateConfigEntry(instanceId, config);
             LOGGER.info("discord.bot.command.dispatched command=set config instanceId={} entry={}.{}.{} result=accepted",
                     instanceId, config.getModule(), config.getThread(), config.getKey());
