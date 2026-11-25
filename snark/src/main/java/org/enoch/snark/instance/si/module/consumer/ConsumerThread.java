@@ -231,7 +231,7 @@ public class ConsumerThread extends AbstractThread implements Credentials {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return config.threadConfiguration();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        return config.threadConfiguration(threadEntity.name, threadEntity.module.name);
     }
 }

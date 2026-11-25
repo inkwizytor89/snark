@@ -119,7 +119,7 @@ public class InstanceThreadConfigurationService {
     }
 
     private boolean isInvalidDefinition(ThreadDefinition definition) {
-        return definition == null || definition.getThread() == null || definition.getThread().isBlank()
+        return definition == null || definition.getName() == null || definition.getName().isBlank()
                 || definition.getConfigs() == null
                 || definition.getConfigs().stream().anyMatch(config ->
                 config == null || config.getKey() == null || config.getKey().isBlank());

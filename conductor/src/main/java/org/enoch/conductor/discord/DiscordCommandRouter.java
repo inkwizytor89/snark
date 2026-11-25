@@ -458,7 +458,7 @@ public class DiscordCommandRouter {
         for (ThreadDefinition definition : definitions) {
             List<ConfigDefinition> configs = definition.getConfigs();
             String module = definition.getModule();
-            StringBuilder line = new StringBuilder(module+"."+definition.getThread());
+            StringBuilder line = new StringBuilder(module+"."+definition.getName());
             List<String> configValues = configs.stream()
                     .map(this::formatConfigValue)
                     .toList();

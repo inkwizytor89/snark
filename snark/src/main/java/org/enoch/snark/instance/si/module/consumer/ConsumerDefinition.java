@@ -86,11 +86,11 @@ public class ConsumerDefinition implements ThreadConfig {
                 "Custom path to the ChromeDriver used by the browser session."));
         configs.add(new ConfigDefinition(RESTART_DURATION, "300S", false,
                 "How long the session stays alive before a restart is triggered."));
-        return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
+        return new ThreadDefinition(threadType, threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -112,6 +112,8 @@ public class ConsumerDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

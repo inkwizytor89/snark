@@ -13,12 +13,15 @@ public final class HuntingDefinition implements ThreadConfig {
     }
 
     public static ThreadDefinition threadDefinition() {
-        return new ThreadDefinition("hunting",
+        return new ThreadDefinition("hunting", "hunting",
                 "Monitors active players and prioritizes hunt targets based on the current high-score state.", Collections.emptyList());
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return threadDefinition();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        ThreadDefinition configured = threadDefinition();
+        configured.setName(thread);
+        configured.setModule(module);
+        return configured;
     }
 }

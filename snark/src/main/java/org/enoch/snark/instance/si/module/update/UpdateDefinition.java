@@ -44,13 +44,13 @@ public class UpdateDefinition implements ThreadConfig {
         configs.add(new ConfigDefinition(
                 UpdateThread.CHECK_SPY_REPORTS_DURATION, "2M", false,
                 "Interval between checks for new spy reports and message processing."));
-        return new ThreadDefinition(UpdateThread.threadType,
+        return new ThreadDefinition(UpdateThread.threadType, UpdateThread.threadType,
                 "Refreshes navigator, colony, and message state so other threads operate on a current view of the game.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -66,6 +66,8 @@ public class UpdateDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

@@ -51,13 +51,13 @@ public class ScanDefinition implements ThreadConfig {
                 "Scan radius around the configured coordinate or system."));
         configs.add(new ConfigDefinition(EXPLORATION_AREA, "", false,
                 "System area selected for discovery scans and exploration."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Finds unscanned targets within a configured area and prepares them for follow-up actions.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -74,6 +74,8 @@ public class ScanDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

@@ -68,7 +68,7 @@ public class DefineThread extends AbstractThread {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return config.threadConfiguration();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        return config.threadConfiguration(threadEntity.name, threadEntity.module.name);
     }
 }

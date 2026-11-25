@@ -68,7 +68,7 @@ public class DefenseDefinition implements ThreadConfig {
                 "Example coordinate used for defensive examples."));
         configs.add(new ConfigDefinition(EXAMPLE_ATTACKER_COORDINATE, null, false,
                 "Example coordinate of the attacker used for interception examples."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Monitors enemy fleets and reacts with local defense or retreat actions.",
                 configs);
     }
@@ -92,7 +92,7 @@ public class DefenseDefinition implements ThreadConfig {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -112,6 +112,8 @@ public class DefenseDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

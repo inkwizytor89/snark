@@ -253,7 +253,7 @@ public abstract class AbstractThread extends ExecutorImpl {
         }
     }
 
-    public abstract ThreadDefinition threadConfiguration();
+    public abstract ThreadDefinition threadConfiguration(String thread, String module);
 
     @Override
     public String toString() {

@@ -283,7 +283,7 @@ class WorkerSocketHandlerTest {
         var definitions = service.fetchManagedDefinitions("worker#1");
 
         assertEquals(1, definitions.size());
-        assertEquals("fleet", definitions.getFirst().getThread());
+        assertEquals("fleet", definitions.getFirst().getName());
         assertEquals("ATTACK", definitions.getFirst().getConfigs().getFirst().getValue());
     }
 

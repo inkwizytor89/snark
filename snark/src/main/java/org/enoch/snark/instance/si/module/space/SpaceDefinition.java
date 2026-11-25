@@ -80,13 +80,13 @@ public class SpaceDefinition implements ThreadConfig {
                 "Wrap system indexing when the range exceeds the maximum system number."));
         configs.add(new ConfigDefinition(EXPIRED_TIME, "P7D", false,
                 "Age threshold after which a system record is considered stale and should be rechecked."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Analyzes space ranges, refreshes galaxy data, and schedules follow-up scan commands.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -108,6 +108,8 @@ public class SpaceDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

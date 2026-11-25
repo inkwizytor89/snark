@@ -163,9 +163,9 @@ class DiscordCommandRouterTest {
         InstanceProfile profile = profile("server#context", null);
         when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
         when(threadConfigurationService.fetchManagedDefinitions("server#context")).thenReturn(List.of(
-                new ThreadDefinition("fleet", "Fleet config", List.of(
+                new ThreadDefinition("fleet", "fleet", "Fleet config", List.of(
                         new ConfigDefinition("mission", "ATTACK", false, ""))),
-                new ThreadDefinition("consumer", "Consumer config", List.of(
+                new ThreadDefinition("consumer", "consumer", "Consumer config", List.of(
                         new ConfigDefinition("password", "private", false, "")))));
         DiscordCommandRouter router = new DiscordCommandRouter(
                 profileRepository, processService, threadConfigurationService);

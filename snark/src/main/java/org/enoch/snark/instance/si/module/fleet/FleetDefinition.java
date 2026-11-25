@@ -163,13 +163,13 @@ public class FleetDefinition implements ThreadConfig {
                 "Blocking time window used to avoid duplicate fleet dispatches."));
         configs.add(new ConfigDefinition(START_CONDITION, "[]", false,
                 "Conditions that must be satisfied before the fleet plan can run."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Creates and sends fleet plans according to target, mission, and route configuration.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -197,6 +197,8 @@ public class FleetDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

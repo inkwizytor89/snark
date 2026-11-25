@@ -4,5 +4,5 @@ import org.enoch.common.config.ThreadDefinition;
 
 public interface ThreadConfig {
 
-    ThreadDefinition threadConfiguration();
+    ThreadDefinition threadConfiguration(String thread, String module);
 }

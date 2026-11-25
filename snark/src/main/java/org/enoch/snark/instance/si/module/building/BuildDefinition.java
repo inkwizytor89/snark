@@ -74,13 +74,13 @@ public class BuildDefinition implements ThreadConfig {
                 "Resources to leave on each planet when calculating builds and resource transports."));
         configs.add(new ConfigDefinition(BuildDefinition.LEAVE_MOON_RESOURCES, null, false,
                 "Resources to leave on each moon when calculating builds and resource transports."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Builds structures from a configured colony build sequence and resource strategy.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -99,7 +99,9 @@ public class BuildDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 
     private String formatResources(Resources value) {

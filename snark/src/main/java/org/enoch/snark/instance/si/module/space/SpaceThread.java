@@ -65,8 +65,8 @@ public class SpaceThread extends AbstractThread {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return config.threadConfiguration();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        return config.threadConfiguration(threadEntity.name, threadEntity.module.name);
     }
 
     private void pushGalaxyAnalyzeCommandIfNeeded(Entry<SystemView, GalaxyEntity> entry, ArrayListMultimap<SystemView, Planet> spyCoordinate) {

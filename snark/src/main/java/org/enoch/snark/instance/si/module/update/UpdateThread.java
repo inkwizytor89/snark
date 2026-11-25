@@ -73,8 +73,8 @@ public class UpdateThread extends AbstractThread {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return config.threadConfiguration();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        return config.threadConfiguration(threadEntity.name, threadEntity.module.name);
     }
 
     private void updateColonies(List<FleetMovement> movements) {

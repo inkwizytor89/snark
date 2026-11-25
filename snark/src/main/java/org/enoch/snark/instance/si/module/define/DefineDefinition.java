@@ -39,13 +39,13 @@ public class DefineDefinition implements ThreadConfig {
         List<ConfigDefinition> configs = new ArrayList<>();
         configs.add(new ConfigDefinition(STRATEGY, NOT_NULL_STRATEGY, false,
                 "Strategy used when processing cached values and deciding whether empty results are accepted."));
-        return new ThreadDefinition(THREAD_TYPE,
+        return new ThreadDefinition(THREAD_TYPE, THREAD_TYPE,
                 "Writes and refreshes cache values derived from configured database queries.",
                 configs);
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
+    public ThreadDefinition threadConfiguration(String thread, String module) {
         ThreadDefinition definition = threadDefinition();
         List<ConfigDefinition> configs = new ArrayList<>();
         for (ConfigDefinition config : definition.getConfigs()) {
@@ -57,6 +57,8 @@ public class DefineDefinition implements ThreadConfig {
                     config.isTemporary(),
                     config.getDescription()));
         }
-        return new ThreadDefinition(definition.getThread(), definition.getDescription(), configs);
+        ThreadDefinition configured = new ThreadDefinition(thread, definition.getType(), definition.getDescription(), configs);
+        configured.setModule(module);
+        return configured;
     }
 }

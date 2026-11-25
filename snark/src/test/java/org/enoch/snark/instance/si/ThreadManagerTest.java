@@ -48,7 +48,16 @@ class ThreadManagerTest {
         databaseThread.updated = LocalDateTime.parse("2026-01-01T10:00:00");
 
         when(threadRepository.findAllWithModule()).thenAnswer(invocation -> List.of(databaseThread));
-        when(expressionService.evaluate(anyString(), anyMap(), eq(Boolean.class))).thenReturn(true);
+        when(expressionService.evaluateCondition(anyString(), anyMap())).thenReturn(true);
+
+        try {
+            java.lang.reflect.Field startupLoaded = ThreadManager.class
+                    .getDeclaredField("startupPropertiesLoadedComplete");
+            startupLoaded.setAccessible(true);
+            startupLoaded.setBoolean(manager, true);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError(exception);
+        }
     }
 
     @Test
@@ -82,9 +91,9 @@ class ThreadManagerTest {
         databaseThread.commandLimit = "25";
         databaseThread.conditions = "thread-condition";
 
-        ThreadDefinition threadDefinition = new ThreadDefinition("update", "Update description", List.of(
+        ThreadDefinition threadDefinition = new ThreadDefinition("update", "update", "Update description", List.of(
                 new ConfigDefinition("refresh", "12M", false, "Refresh interval")));
-        when(runningInstance.threadConfiguration()).thenReturn(threadDefinition);
+        when(runningInstance.threadConfiguration("worker", "database-module")).thenReturn(threadDefinition);
         when(runningInstance.getThreadEntity()).thenReturn(databaseThread);
         when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
 
@@ -100,7 +109,7 @@ class ThreadManagerTest {
         assertEquals("25", configs.get(3).getValue());
         assertEquals("thread-condition", configs.get(4).getValue());
         assertEquals("database-module", definitions.getFirst().getModule());
-        assertEquals("worker", definitions.getFirst().getThread());
+        assertEquals("worker", definitions.getFirst().getName());
         assertEquals("refresh", configs.get(5).getKey());
     }
 
@@ -110,7 +119,7 @@ class ThreadManagerTest {
         when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);
 
         manager.synchronizeThreads();
-        when(expressionService.evaluate(eq("[]"), anyMap(), eq(Boolean.class))).thenReturn(false);
+        when(expressionService.evaluateCondition(eq("[]"), anyMap())).thenReturn(false);
         manager.synchronizeThreads();
 
         verify(threadBeanFactory).destroy(runningInstance);
@@ -155,7 +164,7 @@ class ThreadManagerTest {
         manager.synchronizeThreads();
 
         databaseThread.module.conditions = "module-condition";
-        when(expressionService.evaluate(eq("module-condition"), anyMap(), eq(Boolean.class))).thenReturn(false);
+        when(expressionService.evaluateCondition(eq("module-condition"), anyMap())).thenReturn(false);
         manager.synchronizeThreads();
 
         verify(threadBeanFactory).destroy(runningInstance);
@@ -164,7 +173,7 @@ class ThreadManagerTest {
     @Test
     void threadConditionPreventsStartingThatThread() {
         databaseThread.conditions = "thread-condition";
-        when(expressionService.evaluate(eq("thread-condition"), anyMap(), eq(Boolean.class))).thenReturn(false);
+        when(expressionService.evaluateCondition(eq("thread-condition"), anyMap())).thenReturn(false);
 
         manager.synchronizeThreads();
 
@@ -178,7 +187,7 @@ class ThreadManagerTest {
         manager.synchronizeThreads();
 
         databaseThread.conditions = "thread-condition";
-        when(expressionService.evaluate(eq("thread-condition"), anyMap(), eq(Boolean.class))).thenReturn(false);
+        when(expressionService.evaluateCondition(eq("thread-condition"), anyMap())).thenReturn(false);
         manager.synchronizeThreads();
 
         verify(threadBeanFactory).destroy(runningInstance);

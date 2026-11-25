@@ -198,7 +198,7 @@ class SnarkWebSocketClientTest {
         request.setTo("worker#1");
 
         CommandMessage response = client.buildThreadConfigurationResponse(request, java.util.List.of(
-                new ThreadDefinition("fleet", "Fleet configuration", java.util.List.of(
+                new ThreadDefinition("fleet", "fleet", "Fleet configuration", java.util.List.of(
                         new ConfigDefinition("mission", "ATTACK", false, "")))));
 
         assertEquals("thread-config-1", response.getId());
@@ -210,7 +210,7 @@ class SnarkWebSocketClientTest {
         assertEquals("worker#1", payload.get("instanceId"));
         java.util.List<?> definitions = (java.util.List<?>) payload.get("definitions");
         ThreadDefinition definition = (ThreadDefinition) definitions.getFirst();
-        assertEquals("fleet", definition.getThread());
+        assertEquals("fleet", definition.getName());
         assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
     }
 
@@ -220,7 +220,7 @@ class SnarkWebSocketClientTest {
         ThreadManager threadManager = mock(ThreadManager.class);
         when(provider.getObject()).thenReturn(threadManager);
         when(threadManager.managedDefinitions()).thenReturn(java.util.List.of(
-                new ThreadDefinition("fleet", "Fleet configuration", java.util.List.of(
+                new ThreadDefinition("fleet", "fleet", "Fleet configuration", java.util.List.of(
                         new ConfigDefinition("mission", "ATTACK", false, "")))));
         client.setThreadManagerProvider(provider);
         CommandMessage request = new CommandMessage();

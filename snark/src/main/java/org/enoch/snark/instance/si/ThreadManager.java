@@ -263,22 +263,19 @@ public class ThreadManager implements ApplicationRunner {
     }
 
     private ThreadDefinition managedDefinition(AbstractThread thread) {
-        ThreadDefinition definition = thread.threadConfiguration();
         ThreadEntity entity = thread.getThreadEntity();
+        ThreadDefinition definition = entity == null
+                ? thread.threadConfiguration(null, null)
+                : thread.threadConfiguration(entity.name,
+                        entity.module == null ? null : entity.module.name);
         if (definition == null || entity == null) {
             return definition;
         }
 
         definition.setUpdated(entity.updated);
         definition.setName(entity.name);
-        definition.setThread(entity.name);
         definition.setModule(entity.module == null ? null : entity.module.name);
         definition.setType(entity.type);
-        definition.setTime(entity.time);
-        definition.setPause(entity.pause);
-        definition.setDebug(entity.debug);
-        definition.setCommandLimit(entity.commandLimit);
-        definition.setConditions(entity.conditions);
         definition.setCreatedOn(entity.createdOn);
 
         String moduleName = entity.module == null ? null : entity.module.name;
@@ -305,7 +302,7 @@ public class ThreadManager implements ApplicationRunner {
 
     public static List<String> availableThreadTypes() {
         return availableDefinitions().stream()
-                .map(ThreadDefinition::getThread)
+                .map(ThreadDefinition::getType)
                 .filter(Objects::nonNull)
                 .sorted()
                 .toList();

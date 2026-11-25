@@ -75,8 +75,8 @@ public class ExpeditionThread extends AbstractThread {
     }
 
     @Override
-    public ThreadDefinition threadConfiguration() {
-        return config.threadConfiguration();
+    public ThreadDefinition threadConfiguration(String thread, String module) {
+        return config.threadConfiguration(threadEntity.name, threadEntity.module.name);
     }
 
     private ShipsMap specifyShips(ColonyEntity colony, List<ColonyEntity> colonies) {
