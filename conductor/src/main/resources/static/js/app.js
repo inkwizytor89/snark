@@ -934,7 +934,15 @@ function initApp() {
             configState.status = 'loaded';
             configState.configs = forceReload
                 ? (Array.isArray(payload.definitions)
-                    ? payload.definitions.flatMap((definition) => Array.isArray(definition.configs) ? definition.configs : [])
+                    ? payload.definitions.flatMap((definition) => (
+                        Array.isArray(definition.configs)
+                            ? definition.configs.map((config) => ({
+                                ...config,
+                                module: config.module ?? definition.module ?? '',
+                                thread: config.thread ?? definition.name ?? definition.type ?? ''
+                            }))
+                            : []
+                    ))
                     : [])
                 : (Array.isArray(payload.configs) ? payload.configs : []);
             setConfigBanner(forceReload ? 'Runtime thread configurations refreshed' : '', forceReload ? 'success' : '');
