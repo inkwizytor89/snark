@@ -18,6 +18,7 @@ import org.enoch.conductor.settings.ConductorSettings;
 import org.enoch.conductor.startproperties.StartPropertiesRepository;
 import org.enoch.conductor.startproperties.StartPropertyTemplate;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.common.config.ConfigEntry;
 import org.enoch.conductor.discord.DiscordBotService;
 import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.springframework.http.HttpStatus;
@@ -665,6 +666,68 @@ public class InstanceController {
         try {
             var configs = instanceConfigService.setConfigs(id, request.configs() == null ? List.of() : request.configs());
             return ResponseEntity.ok(new InstanceConfigResponse(id, configs));
+        } catch (RuntimeException e) {
+            return mapConfigException(e);
+        }
+    }
+
+    @PostMapping("/{id}/thread-module")
+    public ResponseEntity<?> changeThreadModule(@PathVariable String id, @RequestBody Map<String, Object> request) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            Object configPayload = request.get("config");
+            if (!(configPayload instanceof Map<?, ?> configMap)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Thread config is required"));
+            }
+            var config = new ConfigEntry(
+                    String.valueOf(configMap.get("module")),
+                    String.valueOf(configMap.get("thread")),
+                    String.valueOf(configMap.getOrDefault("key", "")),
+                    String.valueOf(configMap.getOrDefault("value", "")));
+            String moduleName = request.get("module") instanceof String value ? value.trim() : "";
+            if (config == null || moduleName.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Thread config and destination module are required"));
+            }
+            instanceConfigService.changeThreadModule(id, config, moduleName);
+            return ResponseEntity.ok(Map.of("message", "Thread module changed"));
+        } catch (RuntimeException e) {
+            return mapConfigException(e);
+        }
+    }
+
+    @DeleteMapping("/{id}/module")
+    public ResponseEntity<?> deleteModule(@PathVariable String id, @RequestBody Map<String, Object> request) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            var config = new ConfigEntry(
+                    String.valueOf(request.get("module")),
+                    String.valueOf(request.get("thread")),
+                    String.valueOf(request.getOrDefault("key", "")),
+                    String.valueOf(request.getOrDefault("value", "")));
+            instanceConfigService.deleteModule(id, config);
+            return ResponseEntity.ok(Map.of("message", "Module deleted"));
+        } catch (RuntimeException e) {
+            return mapConfigException(e);
+        }
+    }
+
+    @DeleteMapping("/{id}/thread")
+    public ResponseEntity<?> deleteThread(@PathVariable String id, @RequestBody Map<String, Object> request) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            var config = new ConfigEntry(
+                    String.valueOf(request.get("module")),
+                    String.valueOf(request.get("thread")),
+                    String.valueOf(request.getOrDefault("key", "")),
+                    String.valueOf(request.getOrDefault("value", "")));
+            instanceConfigService.deleteThread(id, config);
+            return ResponseEntity.ok(Map.of("message", "Thread deleted"));
         } catch (RuntimeException e) {
             return mapConfigException(e);
         }

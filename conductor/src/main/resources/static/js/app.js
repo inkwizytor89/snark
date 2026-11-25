@@ -779,11 +779,14 @@ function initApp() {
                 <section class="config-module-card">
                     <div class="config-module-header">
                         <div class="config-module-title">${escapeHtml(moduleName)}</div>
+                        <div class="config-header-actions">
+                            <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}">Delete module</button>
+                        </div>
                     </div>
                     <div class="config-thread-list">
                         ${[...threads.entries()]
                             .sort((a, b) => a[0].localeCompare(b[0]))
-                            .map(([threadName, items]) => renderConfigThread(threadName, items))
+                            .map(([threadName, items]) => renderConfigThread(moduleName, threadName, items))
                             .join('')}
                     </div>
                 </section>
@@ -793,11 +796,19 @@ function initApp() {
         return `<div class="config-groups">${moduleMarkup}</div>`;
     }
 
-    function renderConfigThread(threadName, configs) {
+    function renderConfigThread(moduleName, threadName, configs) {
+        const description = configs.find((config) => config.threadDescription)?.threadDescription || '';
+        const helpIcon = description
+            ? `<span class="config-help-icon" title="${escapeHtml(description)}">?</span>`
+            : '';
         return `
             <section class="config-thread-card">
                 <div class="config-thread-header">
-                    <div class="config-thread-title">${escapeHtml(threadName)}</div>
+                    <div class="config-thread-title">${escapeHtml(threadName)} ${helpIcon}</div>
+                    <div class="config-header-actions">
+                        <button type="button" class="btn-secondary btn-small" data-config-action="change-thread-module" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}">Change module</button>
+                        <button type="button" class="btn-danger btn-small" data-config-action="delete-thread" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}">Delete thread</button>
+                    </div>
                 </div>
                 <div class="config-thread-body">
                     ${configs
@@ -831,7 +842,7 @@ function initApp() {
             <div class="config-row-shell" data-row-key="${escapeHtml(rowKey)}">
                 <div class="config-row">
                     <div class="config-key">
-                        <span class="config-key-name">${escapeHtml(config.key)}</span>
+                        <span class="config-key-name">${escapeHtml(config.key)} <span class="config-help-icon" title="${escapeHtml(config.description || 'No description available')}">?</span></span>
                         ${descriptionParts.length ? `<span class="config-description-text">${escapeHtml(descriptionParts.join(' · '))}</span>` : ''}
                     </div>
                     <div>
@@ -912,6 +923,64 @@ function initApp() {
         return payload;
     }
 
+    async function changeThreadModule(moduleName, threadName) {
+        const inst = getSelectedInstance();
+        if (!inst) return;
+        const destination = window.prompt(`Move thread "${threadName}" to module`, moduleName);
+        if (destination === null || !destination.trim()) return;
+        try {
+            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread-module`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: { module: moduleName, thread: threadName, key: '', value: '' },
+                    module: destination.trim()
+                })
+            });
+            setConfigBanner(`Thread "${threadName}" moved to module "${destination.trim()}"`, 'success');
+            await loadConfigs(true);
+        } catch (error) {
+            setConfigBanner(error.message, 'error');
+            renderInstanceDetails();
+        }
+    }
+
+    async function deleteThread(moduleName, threadName) {
+        const inst = getSelectedInstance();
+        if (!inst) return;
+        if (!window.confirm(`Delete thread "${threadName}" and all its configs?`)) return;
+        try {
+            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ module: moduleName, thread: threadName, key: '', value: '' })
+            });
+            setConfigBanner(`Thread "${threadName}" deleted`, 'success');
+            await loadConfigs(true);
+        } catch (error) {
+            setConfigBanner(error.message, 'error');
+            renderInstanceDetails();
+        }
+    }
+
+    async function deleteModule(moduleName) {
+        const inst = getSelectedInstance();
+        if (!inst) return;
+        if (!window.confirm(`Delete module "${moduleName}" and all its threads and configs?`)) return;
+        try {
+            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/module`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ module: moduleName, thread: 'main', key: '', value: '' })
+            });
+            setConfigBanner(`Module "${moduleName}" deleted`, 'success');
+            await loadConfigs(true);
+        } catch (error) {
+            setConfigBanner(error.message, 'error');
+            renderInstanceDetails();
+        }
+    }
+
     async function loadConfigs(forceReload = false) {
         const inst = getSelectedInstance();
         if (!inst) {
@@ -939,7 +1008,8 @@ function initApp() {
                             ? definition.configs.map((config) => ({
                                 ...config,
                                 module: config.module ?? definition.module ?? '',
-                                thread: config.thread ?? definition.name ?? definition.type ?? ''
+                                thread: config.thread ?? definition.name ?? definition.type ?? '',
+                                threadDescription: definition.description || ''
                             }))
                             : []
                     ))
@@ -1883,6 +1953,12 @@ function initApp() {
                 saveConfigRow(configAction.dataset.rowKey);
             } else if (action === 'delete-row') {
                 deleteConfigRow(configAction.dataset.rowKey);
+            } else if (action === 'change-thread-module') {
+                changeThreadModule(configAction.dataset.moduleName, configAction.dataset.threadName);
+            } else if (action === 'delete-thread') {
+                deleteThread(configAction.dataset.moduleName, configAction.dataset.threadName);
+            } else if (action === 'delete-module') {
+                deleteModule(configAction.dataset.moduleName);
             }
             return;
         }

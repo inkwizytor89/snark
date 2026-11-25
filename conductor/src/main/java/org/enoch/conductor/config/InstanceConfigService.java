@@ -95,6 +95,18 @@ public class InstanceConfigService {
         return result;
     }
 
+    public void changeThreadModule(String instanceId, ConfigEntry term, String moduleName) throws Exception {
+        sendConfigRequest(instanceId, "request:thread:change-module", Map.of("config", term, "module", moduleName));
+    }
+
+    public void deleteModule(String instanceId, ConfigEntry term) throws Exception {
+        sendConfigRequest(instanceId, "request:module:delete", term);
+    }
+
+    public void deleteThread(String instanceId, ConfigEntry term) throws Exception {
+        sendConfigRequest(instanceId, "request:thread:delete", term);
+    }
+
     private List<ConfigDefinition> sendConfigRequest(String instanceId, String type) throws Exception {
         return sendConfigRequest(instanceId, type, null);
     }

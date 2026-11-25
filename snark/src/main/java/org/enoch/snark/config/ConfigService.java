@@ -89,6 +89,13 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
+    public void deleteConfig(ConfigEntry term) {
+        threadRepository.find(term.getModule(), term.getThread()).ifPresent(thread ->
+                configRepository.findByThreadAndKey(thread, term.getKey())
+                        .ifPresent(configRepository::delete));
+    }
+
+    @Transactional
     public void deleteThread(ConfigEntry term) {
         threadRepository.find(term.getModule(), term.getThread()).ifPresent(thread -> {
             List<ConfigEntity> configs = configRepository.findByThread_Module_NameAndThread_Name(

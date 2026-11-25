@@ -374,6 +374,71 @@ public class SnarkWebSocketClient {
         return response;
     }
 
+    CommandMessage buildConfigMutationResponse(CommandMessage incoming) {
+        try {
+            if (configServiceProvider == null) {
+                throw new IllegalStateException("Configuration service is unavailable");
+            }
+
+            if ("request:thread:change-module".equals(incoming.getType())) {
+                JsonNode payload = objectMapper.valueToTree(incoming.getPayload());
+                ConfigEntry config = objectMapper.convertValue(payload.path("config"), ConfigEntry.class);
+                String moduleName = payload.path("module").asText("");
+                if (config == null || moduleName.isBlank()) {
+                    throw new IllegalArgumentException("Config and destination module are required");
+                }
+                configServiceProvider.getObject().changeThreadModule(config, moduleName);
+                return buildConfigMutationResponse(incoming, 200, null);
+            }
+
+            JsonNode payload = objectMapper.valueToTree(incoming.getPayload());
+            if ("request:config:delete".equals(incoming.getType()) && payload.isArray()) {
+                for (JsonNode node : payload) {
+                    ConfigEntry entry = objectMapper.convertValue(node, ConfigEntry.class);
+                    if (entry != null) {
+                        configServiceProvider.getObject().deleteConfig(entry);
+                    }
+                }
+                return buildConfigMutationResponse(incoming, 200, null);
+            }
+
+            ConfigEntry config = objectMapper.convertValue(incoming.getPayload(), ConfigEntry.class);
+            if (config == null || config.getModule() == null || config.getModule().isBlank()
+                    || config.getThread() == null || config.getThread().isBlank()) {
+                throw new IllegalArgumentException("Module and thread are required");
+            }
+            if ("request:module:delete".equals(incoming.getType())) {
+                configServiceProvider.getObject().deleteModule(config);
+            } else if ("request:thread:delete".equals(incoming.getType())) {
+                configServiceProvider.getObject().deleteThread(config);
+            } else if ("request:config:delete".equals(incoming.getType())) {
+                configServiceProvider.getObject().deleteConfig(config);
+            } else {
+                throw new IllegalArgumentException("Unsupported configuration mutation");
+            }
+            return buildConfigMutationResponse(incoming, 200, null);
+        } catch (IllegalArgumentException e) {
+            return buildConfigMutationResponse(incoming, 400, e.getMessage());
+        } catch (RuntimeException e) {
+            return buildConfigMutationResponse(incoming, 500, "Failed to mutate configuration.");
+        }
+    }
+
+    private CommandMessage buildConfigMutationResponse(CommandMessage incoming, int status, String errorMessage) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType(status == 200
+                ? "response:" + incoming.getType().substring("request:".length())
+                : "error:" + incoming.getType().substring("request:".length()));
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(status);
+        response.setPayload(status == 200 ? java.util.List.of() : null);
+        response.setError(errorMessage);
+        return response;
+    }
+
     private CommandMessage buildConfigSetError(CommandMessage incoming, int status, String errorMessage) {
         CommandMessage error = new CommandMessage();
         error.setId(incoming.getId());
@@ -616,6 +681,11 @@ public class SnarkWebSocketClient {
                     sendWebSocketMessage(webSocket, buildManagedThreadConfigurationResponse(incoming));
                 } else if ("request:config:set".equals(incoming.getType()) && registered) {
                     sendWebSocketMessage(webSocket, buildConfigSetResponse(incoming));
+                } else if (("request:config:delete".equals(incoming.getType())
+                        || "request:thread:change-module".equals(incoming.getType())
+                        || "request:module:delete".equals(incoming.getType())
+                        || "request:thread:delete".equals(incoming.getType())) && registered) {
+                    sendWebSocketMessage(webSocket, buildConfigMutationResponse(incoming));
                 } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
                     sendWebSocketMessage(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
                 } else if ("request:command:submit".equals(incoming.getType()) && registered && commandRecipeService != null) {

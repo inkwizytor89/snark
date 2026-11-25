@@ -485,8 +485,12 @@ main {
 
 .config-module-header,
 .config-thread-header {
-    padding: 12px 14px;
-    border-bottom: 1px solid #404060;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 10px;
+   padding: 12px 14px;
+   border-bottom: 1px solid #404060;
 }
 
 .config-module-title {
@@ -496,9 +500,32 @@ main {
 }
 
 .config-thread-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13px;
     color: #d7d7dd;
     font-weight: 700;
+}
+
+.config-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.config-help-icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #777799;
+    border-radius: 50%;
+    color: #bfcfff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
 }
 
 .config-module-body,
