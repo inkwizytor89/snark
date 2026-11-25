@@ -2,6 +2,7 @@ package org.enoch.conductor.discord;
 
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
+import org.enoch.conductor.config.InstanceConfigService;
 import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.instance.InstanceProfile;
 import org.enoch.conductor.instance.ProfileRepository;
@@ -46,6 +47,45 @@ class DiscordCommandRouterTest {
         DiscordCommandResult result = router.handle("set server#user");
 
         assertEquals("Active instance set to server#user", result.render());
+    }
+
+    @Test
+    void shouldSendSingleConfigEntryForActiveInstance() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ProcessService processService = mock(ProcessService.class);
+        InstanceConfigService configService = mock(InstanceConfigService.class);
+        InstanceProfile profile = profile("server#context", null);
+        when(profileRepository.findById("server#context")).thenReturn(Optional.of(profile));
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                profileRepository, processService, null, configService);
+        router.handle("set server#context");
+
+        DiscordCommandResult result = router.handle(
+                "set config fleet.UpdateThread.refresh   =   45 seconds");
+
+        assertEquals("Configuration updated: fleet.UpdateThread.refresh", result.render());
+        org.mockito.ArgumentCaptor<ConfigDefinition> configCaptor =
+                org.mockito.ArgumentCaptor.forClass(ConfigDefinition.class);
+        verify(configService).updateConfigEntry(
+                org.mockito.ArgumentMatchers.eq("server#context"), configCaptor.capture());
+        ConfigDefinition config = configCaptor.getValue();
+        assertEquals("fleet", config.getModule());
+        assertEquals("UpdateThread", config.getThread());
+        assertEquals("refresh", config.getKey());
+        assertEquals("45 seconds", config.getValue());
+        assertFalse(DiscordCommandRouter.redactConfigValue(
+                "set config fleet.UpdateThread.refresh = 45 seconds").contains("45 seconds"));
+    }
+
+    @Test
+    void shouldRejectMalformedConfigEntryWithoutSendingRequest() throws Exception {
+        InstanceConfigService configService = mock(InstanceConfigService.class);
+        DiscordCommandRouter router = new DiscordCommandRouter(
+                mock(ProfileRepository.class), mock(ProcessService.class), null, configService);
+
+        assertEquals("Invalid configuration entry.", router.handle("set config fleet.refresh=1").render());
+        verify(configService, never()).updateConfigEntry(
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test

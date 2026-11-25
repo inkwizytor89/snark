@@ -8,8 +8,10 @@ import org.enoch.common.config.ConfigDefinition;
 import org.enoch.conductor.ws.WorkerSocketHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,6 +65,29 @@ public class InstanceConfigService {
         return result;
     }
 
+    public void updateConfigEntry(String instanceId, ConfigDefinition config) throws Exception {
+        List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:set", List.of(config));
+        if (result == null || result.isEmpty()) {
+            return;
+        }
+
+        List<ConfigDefinition> currentConfigs = new ArrayList<>(stateRepository.getConfigs(instanceId));
+        for (ConfigDefinition updated : result) {
+            ConfigDefinition existing = currentConfigs.stream()
+                    .filter(current -> Objects.equals(current.getModule(), updated.getModule())
+                            && Objects.equals(current.getThread(), updated.getThread())
+                            && Objects.equals(current.getKey(), updated.getKey()))
+                    .findFirst()
+                    .orElse(null);
+            if (existing == null) {
+                currentConfigs.add(updated);
+            } else {
+                existing.setValue(updated.getValue());
+            }
+        }
+        stateRepository.saveConfigs(instanceId, currentConfigs);
+    }
+
     public List<ConfigDefinition> deleteConfigs(String instanceId, List<ConfigDefinition> configs) throws Exception {
         List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:delete", configs);
         if (result != null) {
@@ -103,8 +128,15 @@ public class InstanceConfigService {
     }
 
     public void handleConfigResponse(CommandMessage response) {
+        if (response == null || response.getId() == null) {
+            return;
+        }
         CompletableFuture<List<ConfigDefinition>> future = pendingRequests.get(response.getId());
-        if (future == null) {
+        String expectedInstance = pendingRequestInstances.get(response.getId());
+        if (future == null
+                || expectedInstance == null
+                || !expectedInstance.equals(response.getFrom())
+                || !"conductor".equals(response.getTo())) {
             return;
         }
 
@@ -141,4 +173,3 @@ public class InstanceConfigService {
         });
     }
 }
-

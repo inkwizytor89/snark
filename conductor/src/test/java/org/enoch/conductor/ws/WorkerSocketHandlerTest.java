@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.common.config.ConfigDefinition;
+import org.enoch.conductor.config.InstanceConfigService;
+import org.enoch.conductor.config.InstanceConfigStateRepository;
 import org.enoch.conductor.config.InstanceThreadConfigurationService;
 import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.junit.jupiter.api.Test;
@@ -12,6 +15,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -280,6 +285,48 @@ class WorkerSocketHandlerTest {
         assertEquals(1, definitions.size());
         assertEquals("fleet", definitions.getFirst().getThread());
         assertEquals("ATTACK", definitions.getFirst().getConfigs().getFirst().getValue());
+    }
+
+    @Test
+    void shouldSendAndCorrelateConfigUpdateRequest() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        WebSocketSession session = openSession();
+        testHandler.receive(session, """
+                {"id":"registration-1","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+        InstanceConfigStateRepository stateRepository = mock(InstanceConfigStateRepository.class);
+        ConfigDefinition currentConfig = new ConfigDefinition(
+                "fleet", "UpdateThread", "refresh", "old value", Boolean.class, true, "Refresh interval");
+        when(stateRepository.getConfigs("worker#1")).thenReturn(List.of(currentConfig));
+        InstanceConfigService service = new InstanceConfigService(stateRepository, handler);
+        handler.setInstanceConfigService(service);
+        doAnswer(invocation -> {
+            TextMessage sentMessage = invocation.getArgument(0);
+            JsonNode request = mapper.readTree(sentMessage.getPayload());
+            assertEquals("request:config:set", request.path("type").asText());
+            assertTrue(request.path("payload").isArray());
+            assertEquals(1, request.path("payload").size());
+            assertEquals("fleet", request.path("payload").get(0).path("module").asText());
+            testHandler.receive(session, """
+                    {"id":"%s","type":"response:config:set","from":"worker#1","to":"conductor",
+                     "timestamp":2,"status":200,"payload":[{"module":"fleet","thread":"UpdateThread",
+                     "key":"refresh","value":"45 seconds","temporary":false}]}
+                    """.formatted(request.path("id").asText()));
+            return null;
+        }).when(session).sendMessage(any(TextMessage.class));
+
+        service.updateConfigEntry("worker#1",
+                new ConfigDefinition("fleet", "UpdateThread", "refresh", "45 seconds", false, ""));
+
+        ArgumentCaptor<List<ConfigDefinition>> configs = ArgumentCaptor.forClass(List.class);
+        verify(stateRepository).saveConfigs(org.mockito.ArgumentMatchers.eq("worker#1"), configs.capture());
+        assertEquals(1, configs.getValue().size());
+        assertEquals("45 seconds", configs.getValue().getFirst().getValue());
+        assertEquals(Boolean.class, configs.getValue().getFirst().getType());
+        assertTrue(configs.getValue().getFirst().isTemporary());
+        assertEquals("Refresh interval", configs.getValue().getFirst().getDescription());
     }
 
     @Test

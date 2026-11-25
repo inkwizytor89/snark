@@ -11,6 +11,7 @@ import org.enoch.conductor.discord.DiscordStatusNotifier;
 import org.enoch.conductor.settings.ConductorSettings;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -131,7 +132,10 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
             storeStatusDetailsResponse(registeredInstanceId, session, json);
         }
 
-        if (isConfigResponse(type) && instanceConfigService != null) {
+        if (isConfigResponse(type)
+                && instanceConfigService != null
+                && registeredInstanceId.equals(json.path("from").asText())
+                && "conductor".equals(json.path("to").asText())) {
             CommandMessage response = mapper.treeToValue(json, CommandMessage.class);
             instanceConfigService.handleConfigResponse(response);
         }
@@ -470,7 +474,7 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
         System.out.println("[WS][WORKER][IN] sessionId=" + session.getId()
                 + " instanceId=" + resolveWorkerId(session)
-                + " payload=" + payload);
+                + " payload=" + redactConfigValues(payload));
     }
 
     private void logOutgoing(WebSocketSession session, String workerId, String payload) {
@@ -479,7 +483,27 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         }
         System.out.println("[WS][WORKER][OUT] sessionId=" + session.getId()
                 + " instanceId=" + (workerId != null ? workerId : resolveWorkerId(session))
-                + " payload=" + payload);
+                + " payload=" + redactConfigValues(payload));
+    }
+
+    private String redactConfigValues(String payload) {
+        try {
+            JsonNode message = mapper.readTree(payload);
+            String type = message.path("type").asText("");
+            if ("request:config:set".equals(type) || "response:config:set".equals(type)) {
+                JsonNode configs = message.path("payload");
+                if (configs.isArray()) {
+                    for (JsonNode config : configs) {
+                        if (config instanceof ObjectNode configObject) {
+                            configObject.put("value", "[redacted]");
+                        }
+                    }
+                }
+            }
+            return mapper.writeValueAsString(message);
+        } catch (Exception e) {
+            return "[payload redacted due to serialization error]";
+        }
     }
 
     private String resolveWorkerId(WebSocketSession session) {
@@ -693,7 +717,8 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
         return "response:config:list".equals(type)
                 || "response:config:definitions".equals(type)
                 || "response:config:set".equals(type)
-                || "response:config:delete".equals(type);
+                || "response:config:delete".equals(type)
+                || "error:config:set".equals(type);
     }
 
     private boolean isThreadConfigurationResponse(String type) {

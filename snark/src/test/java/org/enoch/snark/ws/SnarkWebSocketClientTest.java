@@ -10,6 +10,8 @@ import org.enoch.common.status.ColonyStatus;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
+import org.enoch.snark.config.ConfigService;
+import org.enoch.snark.config.ConfigTerm;
 import org.enoch.snark.instance.si.Core;
 import org.enoch.snark.instance.si.ThreadManager;
 import org.junit.jupiter.api.Test;
@@ -234,5 +236,64 @@ class SnarkWebSocketClientTest {
                 ((Map<?, ?>) response.getPayload()).get("definitions")).getFirst();
         assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
         org.mockito.Mockito.verify(threadManager).managedDefinitions();
+    }
+
+    @Test
+    void shouldConvertRequestedConfigEntriesAndUpdateThreads() {
+        ObjectProvider<ConfigService> provider = mock(ObjectProvider.class);
+        ConfigService configService = mock(ConfigService.class);
+        when(provider.getObject()).thenReturn(configService);
+        client.setConfigServiceProvider(provider);
+
+        CommandMessage request = new CommandMessage();
+        request.setId("config-set-1");
+        request.setType("request:config:set");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+        request.setPayload(java.util.List.of(Map.of(
+                "module", "fleet",
+                "thread", "UpdateThread",
+                "key", "refresh",
+                "value", "45 seconds")));
+
+        CommandMessage response = client.buildConfigSetResponse(request);
+
+        assertEquals("response:config:set", response.getType());
+        assertEquals("config-set-1", response.getId());
+        assertEquals(200, response.getStatus());
+        ConfigDefinition definition = (ConfigDefinition) ((java.util.List<?>) response.getPayload()).getFirst();
+        assertEquals("fleet", definition.getModule());
+        assertEquals("45 seconds", definition.getValue());
+        org.mockito.ArgumentCaptor<java.util.List<ConfigTerm>> terms =
+                org.mockito.ArgumentCaptor.forClass(java.util.List.class);
+        org.mockito.Mockito.verify(configService).updateThreads(terms.capture());
+        assertEquals(1, terms.getValue().size());
+        assertEquals("fleet.UpdateThread.refresh=45 seconds", terms.getValue().getFirst().toString());
+    }
+
+    @Test
+    void shouldRejectMalformedConfigEntriesWithoutUpdatingThreads() {
+        ObjectProvider<ConfigService> provider = mock(ObjectProvider.class);
+        ConfigService configService = mock(ConfigService.class);
+        when(provider.getObject()).thenReturn(configService);
+        client.setConfigServiceProvider(provider);
+
+        CommandMessage request = new CommandMessage();
+        request.setId("config-set-2");
+        request.setType("request:config:set");
+        request.setFrom("conductor");
+        request.setTo("worker#1");
+        request.setPayload(java.util.List.of(Map.of(
+                "module", "fleet",
+                "thread", "",
+                "key", "refresh",
+                "value", "45 seconds")));
+
+        CommandMessage response = client.buildConfigSetResponse(request);
+
+        assertEquals("error:config:set", response.getType());
+        assertEquals(400, response.getStatus());
+        org.mockito.Mockito.verify(configService, org.mockito.Mockito.never()).updateThreads(
+                org.mockito.ArgumentMatchers.anyList());
     }
 }

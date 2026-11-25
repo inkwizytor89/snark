@@ -13,7 +13,10 @@ import org.enoch.common.command.CommandCatalogResponse;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.command.CommandSubmitRequest;
 import org.enoch.common.command.CommandSubmitResponse;
+import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
+import org.enoch.snark.config.ConfigService;
+import org.enoch.snark.config.ConfigTerm;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.action.command.CommandRecipeService;
 import org.enoch.snark.instance.WorkerLifecycle;
@@ -52,6 +55,7 @@ public class SnarkWebSocketClient {
 
     private ObjectProvider<WorkerLifecycle> workerLifecycleProvider;
     private ObjectProvider<ThreadManager> threadManagerProvider;
+    private ObjectProvider<ConfigService> configServiceProvider;
     private volatile WebSocket webSocket;
     private volatile String registrationRequestId;
     private volatile boolean registered;
@@ -86,6 +90,11 @@ public class SnarkWebSocketClient {
     @Autowired
     public void setThreadManagerProvider(ObjectProvider<ThreadManager> threadManagerProvider) {
         this.threadManagerProvider = threadManagerProvider;
+    }
+
+    @Autowired
+    public void setConfigServiceProvider(ObjectProvider<ConfigService> configServiceProvider) {
+        this.configServiceProvider = configServiceProvider;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -308,6 +317,76 @@ public class SnarkWebSocketClient {
             return buildThreadConfigurationError(incoming, 500,
                     "Failed to read managed thread configurations.");
         }
+    }
+
+    CommandMessage buildConfigSetResponse(CommandMessage incoming) {
+        try {
+            if (configServiceProvider == null) {
+                throw new IllegalStateException("Configuration service is unavailable");
+            }
+            JsonNode payload = objectMapper.valueToTree(incoming.getPayload());
+            if (!payload.isArray() || payload.size() == 0) {
+                throw new IllegalArgumentException("Expected a non-empty configuration list");
+            }
+
+            java.util.List<ConfigDefinition> definitions = new java.util.ArrayList<>();
+            java.util.List<ConfigTerm> terms = new java.util.ArrayList<>();
+            for (JsonNode config : payload) {
+                if (!config.isObject()
+                        || !config.path("module").isTextual()
+                        || config.path("module").asText().isBlank()
+                        || !config.path("thread").isTextual()
+                        || config.path("thread").asText().isBlank()
+                        || !config.path("key").isTextual()
+                        || config.path("key").asText().isBlank()
+                        || !config.path("value").isTextual()) {
+                    throw new IllegalArgumentException("Configuration entries require module, thread, key, and value");
+                }
+
+                String module = config.path("module").asText();
+                String thread = config.path("thread").asText();
+                String key = config.path("key").asText();
+                String value = config.path("value").asText();
+                definitions.add(new ConfigDefinition(module, thread, key, value, false, null));
+                ConfigTerm term = new ConfigTerm();
+                term.setModule(module);
+                term.setThread(thread);
+                term.setKey(key);
+                term.setValue(value);
+                terms.add(term);
+            }
+
+            configServiceProvider.getObject().updateThreads(terms);
+            return buildConfigSetResponse(incoming, definitions);
+        } catch (IllegalArgumentException e) {
+            return buildConfigSetError(incoming, 400, "Failed to update configuration.");
+        } catch (RuntimeException e) {
+            return buildConfigSetError(incoming, 500, "Failed to update configuration.");
+        }
+    }
+
+    private CommandMessage buildConfigSetResponse(CommandMessage incoming, java.util.List<ConfigDefinition> definitions) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType("response:config:set");
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(200);
+        response.setPayload(definitions);
+        return response;
+    }
+
+    private CommandMessage buildConfigSetError(CommandMessage incoming, int status, String errorMessage) {
+        CommandMessage error = new CommandMessage();
+        error.setId(incoming.getId());
+        error.setType("error:config:set");
+        error.setFrom(instanceId);
+        error.setTo(resolveTarget(incoming));
+        error.setTimestamp(System.currentTimeMillis());
+        error.setStatus(status);
+        error.setError(errorMessage);
+        return error;
     }
 
     private CommandMessage buildThreadConfigurationError(CommandMessage incoming, int status, String error) {
@@ -538,6 +617,8 @@ public class SnarkWebSocketClient {
                     }
                 } else if ("request:thread:configurations".equals(incoming.getType()) && registered) {
                     sendWebSocketMessage(webSocket, buildManagedThreadConfigurationResponse(incoming));
+                } else if ("request:config:set".equals(incoming.getType()) && registered) {
+                    sendWebSocketMessage(webSocket, buildConfigSetResponse(incoming));
                 } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
                     sendWebSocketMessage(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));
                 } else if ("request:command:submit".equals(incoming.getType()) && registered && commandRecipeService != null) {

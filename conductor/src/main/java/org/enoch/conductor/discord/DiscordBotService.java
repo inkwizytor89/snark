@@ -101,7 +101,8 @@ public class DiscordBotService {
                             if (command == null || command.isBlank()) {
                                 return;
                             }
-                            LOGGER.info("discord.bot.command.received user={} command={}", event.getAuthor().getName(), command);
+                            LOGGER.info("discord.bot.command.received user={} command={}",
+                                    event.getAuthor().getName(), DiscordCommandRouter.redactConfigValue(command));
                             String reply = renderReply(rawContent, event.getJDA().getSelfUser().getName(), command);
                             event.getChannel().sendMessage(reply).queue();
                         }

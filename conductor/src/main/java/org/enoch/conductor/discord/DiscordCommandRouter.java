@@ -8,6 +8,7 @@ import org.enoch.conductor.instance.ProfileRepository;
 import org.enoch.conductor.process.ProcessService;
 import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
+import org.enoch.conductor.config.InstanceConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -29,29 +32,42 @@ public class DiscordCommandRouter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordCommandRouter.class);
     private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final int MAX_THREAD_STATUS_LENGTH = 1800;
+    private static final Pattern SET_CONFIG_COMMAND =
+            Pattern.compile("^set\\s+config(?=\\s|$)\\s*(.*)$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CONFIG_ENTRY =
+            Pattern.compile("^([^\\s.=]+)\\.([^\\s.=]+)\\.([^\\s.=]+)\\s*=\\s*(.*)$", Pattern.DOTALL);
 
     private final ProfileRepository profileRepository;
     private final ProcessService processService;
     private final InstanceThreadConfigurationService threadConfigurationService;
+    private final InstanceConfigService instanceConfigService;
     private final DiscordCommandContext context = new DiscordCommandContext();
     private final CommandNode commands = createCommandTree();
 
     @Autowired
     public DiscordCommandRouter(ProfileRepository profileRepository,
                                 ProcessService processService,
-                                InstanceThreadConfigurationService threadConfigurationService) {
+                                InstanceThreadConfigurationService threadConfigurationService,
+                                InstanceConfigService instanceConfigService) {
         this.profileRepository = profileRepository;
         this.processService = processService;
         this.threadConfigurationService = threadConfigurationService;
+        this.instanceConfigService = instanceConfigService;
+    }
+
+    public DiscordCommandRouter(ProfileRepository profileRepository,
+                                ProcessService processService,
+                                InstanceThreadConfigurationService threadConfigurationService) {
+        this(profileRepository, processService, threadConfigurationService, null);
     }
 
     public DiscordCommandRouter(ProfileRepository profileRepository, ProcessService processService) {
-        this(profileRepository, processService, null);
+        this(profileRepository, processService, null, null);
     }
 
     private CommandNode createCommandTree() {
         CommandNode root = new CommandNode(
-                "Available commands: help, ping, context, set <id>, list, start, stop, restart, status, status thread, status deque");
+                "Available commands: help, ping, context, set <id>, set config <module.thread.key=value>, list, start, stop, restart, status, status thread, status deque");
         root.add("ping", "Replies with pong.",
                 runWithoutArguments(() -> DiscordCommandResult.info("ping", "pong")));
         root.add("context", "Shows the currently selected instance.",
@@ -135,11 +151,16 @@ public class DiscordCommandRouter {
         }
 
         String command = rawMessage.trim();
-        LOGGER.info("discord.bot.command.dispatched command={}", command);
+        LOGGER.info("discord.bot.command.dispatched command={}", redactConfigValue(command));
         return dispatch(command);
     }
 
     private DiscordCommandResult dispatch(String command) {
+        Matcher setConfigMatcher = SET_CONFIG_COMMAND.matcher(command);
+        if (setConfigMatcher.matches()) {
+            return setConfigEntry(setConfigMatcher.group(1));
+        }
+
         List<String> tokens = new ArrayList<>(List.of(command.split("\\s+")));
         CommandNode current = commands;
         if (tokens.get(0).equalsIgnoreCase("help")) {
@@ -161,7 +182,6 @@ public class DiscordCommandRouter {
             if (!current.children.isEmpty()) {
                 return unknownAction(command);
             }
-
             if (current.action != null) {
                 if (tokens.get(tokens.size() - 1).equalsIgnoreCase("help")) {
                     return DiscordCommandResult.info("help", current.help);
@@ -175,6 +195,66 @@ public class DiscordCommandRouter {
             return current.action.apply(List.of());
         }
         return unknownAction(command);
+    }
+
+    private DiscordCommandResult setConfigEntry(String entry) {
+        if (entry.equalsIgnoreCase("help")) {
+            return DiscordCommandResult.info("set config",
+                    "Sets one active instance configuration. Usage: set config <module.thread.key=value>");
+        }
+
+        Matcher matcher = CONFIG_ENTRY.matcher(entry);
+        if (!matcher.matches()) {
+            return DiscordCommandResult.failure("set config",
+                    "Invalid configuration entry.",
+                    "Use 'set config <module.thread.key=value>'.");
+        }
+
+        String instanceId = getActiveInstanceId();
+        if (instanceId == null) {
+            return noActiveInstance("set config");
+        }
+
+        try {
+            if (profileRepository.findById(instanceId).isEmpty()) {
+                LOGGER.warn("discord.bot.command.failed command=set config instanceId={} reason=active_instance_not_found",
+                        instanceId);
+                return DiscordCommandResult.failure("set config", "Active instance does not exist.", instanceId);
+            }
+            if (instanceConfigService == null) {
+                return DiscordCommandResult.failure("set config",
+                        "Unable to update instance configuration.", null);
+            }
+
+            ConfigDefinition config = new ConfigDefinition(
+                    matcher.group(1),
+                    matcher.group(2),
+                    matcher.group(3),
+                    matcher.group(4),
+                    false,
+                    null);
+            instanceConfigService.updateConfigEntry(instanceId, config);
+            LOGGER.info("discord.bot.command.dispatched command=set config instanceId={} entry={}.{}.{} result=accepted",
+                    instanceId, config.getModule(), config.getThread(), config.getKey());
+            return DiscordCommandResult.success("set config",
+                    "Configuration updated: " + config.getModule() + "." + config.getThread() + "." + config.getKey());
+        } catch (Exception e) {
+            LOGGER.warn("discord.bot.command.failed command=set config instanceId={} reason={}",
+                    instanceId, e.getClass().getSimpleName());
+            return DiscordCommandResult.failure("set config", "Configuration update failed.", e.getMessage());
+        }
+    }
+
+    public static String redactConfigValue(String command) {
+        Matcher matcher = SET_CONFIG_COMMAND.matcher(command == null ? "" : command);
+        if (!matcher.matches()) {
+            return command;
+        }
+        String entry = matcher.group(1);
+        int equalsIndex = entry.indexOf('=');
+        return equalsIndex < 0
+                ? "set config [redacted]"
+                : "set config " + entry.substring(0, equalsIndex + 1) + "[redacted]";
     }
 
     private DiscordCommandResult unknownAction(String command) {
@@ -377,8 +457,11 @@ public class DiscordCommandRouter {
 
         StringBuilder result = new StringBuilder();
         for (ThreadDefinition definition : definitions) {
-            StringBuilder line = new StringBuilder(definition.getThread());
-            List<String> configValues = definition.getConfigs().stream()
+            List<ConfigDefinition> configs = definition.getConfigs();
+            String module = "unknown";
+            if(!configs.isEmpty()) module = configs.get(0).getModule();
+            StringBuilder line = new StringBuilder(module+"."+definition.getThread());
+            List<String> configValues = configs.stream()
                     .map(this::formatConfigValue)
                     .toList();
             if (!configValues.isEmpty()) {
