@@ -135,33 +135,33 @@ public class FleetDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, SOURCE, "", false,
+        configs.add(new ConfigDefinition(SOURCE, "", false,
                 "Source coordinate expression that defines from which colonies fleets are dispatched."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, TARGET, "", false,
+        configs.add(new ConfigDefinition(TARGET, "", false,
                 "Target coordinate expression used by the fleet plan."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, MISSION, Mission.STATIONED.name(), false,
+        configs.add(new ConfigDefinition(MISSION, Mission.STATIONED.name(), false,
                 "Mission assigned to the dispatched fleet."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, SHIPS_WAVE, "", false,
+        configs.add(new ConfigDefinition(SHIPS_WAVE, "", false,
                 "Ship waves assigned to each dispatched fleet."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, LEAVE_SHIPS_WAVE, "", false,
+        configs.add(new ConfigDefinition(LEAVE_SHIPS_WAVE, "", false,
                 "Ships to leave behind at the origin colony."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, RESOURCES, "", false,
+        configs.add(new ConfigDefinition(RESOURCES, "", false,
                 "Resources to include in the fleet payload."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, LEAVE_RESOURCES, "", false,
+        configs.add(new ConfigDefinition(LEAVE_RESOURCES, "", false,
                 "Resources to leave behind on the origin colony after dispatch."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, SPEED, "", false,
+        configs.add(new ConfigDefinition(SPEED, "", false,
                 "Fleet speed override used during dispatch."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, TRIP, "", false,
+        configs.add(new ConfigDefinition(TRIP, "", false,
                 "Trip route expression used to define the fleet path."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, RECALL, "", false,
+        configs.add(new ConfigDefinition(RECALL, "", false,
                 "Recall delay applied after the fleet is sent."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, DRY_RUN, "false", false,
+        configs.add(new ConfigDefinition(DRY_RUN, "false", false,
                 "Only simulate dispatch planning without sending the fleet."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, QUEUE, QueueRunType.NORMAL.name(), false,
+        configs.add(new ConfigDefinition(QUEUE, QueueRunType.NORMAL.name(), false,
                 "Queue priority used when the fleet command is scheduled."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, EXPIRED_TIME, "", false,
+        configs.add(new ConfigDefinition(EXPIRED_TIME, "", false,
                 "Blocking time window used to avoid duplicate fleet dispatches."));
-        configs.add(new ConfigDefinition("fleet", THREAD_TYPE, START_CONDITION, "[]", false,
+        configs.add(new ConfigDefinition(START_CONDITION, "[]", false,
                 "Conditions that must be satisfied before the fleet plan can run."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Creates and sends fleet plans according to target, mission, and route configuration.",
@@ -191,8 +191,6 @@ public class FleetDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

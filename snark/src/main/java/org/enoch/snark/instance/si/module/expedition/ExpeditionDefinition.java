@@ -62,15 +62,15 @@ public class ExpeditionDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("expedition", THREAD_TYPE, SOURCE, "", false,
+        configs.add(new ConfigDefinition(SOURCE, "", false,
                 "Source colony set used for expedition planning."));
-        configs.add(new ConfigDefinition("expedition", THREAD_TYPE, MAX_DT, "2500", false,
+        configs.add(new ConfigDefinition(MAX_DT, "2500", false,
                 "Maximum transport capacity used for expedition ships."));
-        configs.add(new ConfigDefinition("expedition", THREAD_TYPE, BATTLE_EXTENSION, "true", false,
+        configs.add(new ConfigDefinition(BATTLE_EXTENSION, "true", false,
                 "Whether to include battle ships in expedition groups."));
-        configs.add(new ConfigDefinition("expedition", THREAD_TYPE, SYSTEM_SHIFT, "0", false,
+        configs.add(new ConfigDefinition(SYSTEM_SHIFT, "0", false,
                 "System offset applied to the expedition target."));
-        configs.add(new ConfigDefinition("expedition", THREAD_TYPE, SHIPS, DEFAULT_SHIPS_VALUE, false,
+        configs.add(new ConfigDefinition(SHIPS, DEFAULT_SHIPS_VALUE, false,
                 "Ships required for each expedition when enough ships are available."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Sends expeditions to distant systems and balances transport capability.",
@@ -91,8 +91,6 @@ public class ExpeditionDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

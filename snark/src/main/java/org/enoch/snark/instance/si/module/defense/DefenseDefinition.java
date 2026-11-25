@@ -56,17 +56,17 @@ public class DefenseDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, ALARM, AlarmSoundPlayer.MISSING_WAV, false,
+        configs.add(new ConfigDefinition(ALARM, AlarmSoundPlayer.MISSING_WAV, false,
                 "Play the alarm sound when hostile fleets are detected near the colony."));
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, LIMIT, "3000", false,
+        configs.add(new ConfigDefinition(LIMIT, "3000", false,
                 "Maximum defensive actions allowed before the thread pauses."));
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, RECALL, null, false,
+        configs.add(new ConfigDefinition(RECALL, null, false,
                 "Recall duration for retreat fleets. Defaults to a randomized 350-second delay."));
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, EXAMPLE_TIME, null, false,
+        configs.add(new ConfigDefinition(EXAMPLE_TIME, null, false,
                 "Sample time value used for defensive calculations and tests."));
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, EXAMPLE_COORDINATE, null, false,
+        configs.add(new ConfigDefinition(EXAMPLE_COORDINATE, null, false,
                 "Example coordinate used for defensive examples."));
-        configs.add(new ConfigDefinition("defense", THREAD_TYPE, EXAMPLE_ATTACKER_COORDINATE, null, false,
+        configs.add(new ConfigDefinition(EXAMPLE_ATTACKER_COORDINATE, null, false,
                 "Example coordinate of the attacker used for interception examples."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Monitors enemy fleets and reacts with local defense or retreat actions.",
@@ -106,8 +106,6 @@ public class DefenseDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

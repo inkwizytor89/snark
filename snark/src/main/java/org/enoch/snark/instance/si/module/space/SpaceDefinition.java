@@ -4,7 +4,6 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadConfig;
 
 import java.util.ArrayList;
@@ -65,21 +64,21 @@ public class SpaceDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, COORDINATE, "", false,
+        configs.add(new ConfigDefinition(COORDINATE, "", false,
                 "Center coordinate used when the thread scans a custom galaxy/system slice."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, RANGE, "", false,
+        configs.add(new ConfigDefinition(RANGE, "", false,
                 "Distance around the coordinate to include in the space scan."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, SPY_COORDINATE, "", false,
+        configs.add(new ConfigDefinition(SPY_COORDINATE, "", false,
                 "Coordinate used as the source of spy positions during galaxy analysis."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, SPY_PATTERN, "", false,
+        configs.add(new ConfigDefinition(SPY_PATTERN, "", false,
                 "Pattern applied when matching spy coordinates inside a scanned system."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, GALAXY_MAX, "0", false,
+        configs.add(new ConfigDefinition(GALAXY_MAX, "0", false,
                 "Maximum galaxy number used when scanning the galaxy map."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, SYSTEM_MAX, "499", false,
+        configs.add(new ConfigDefinition(SYSTEM_MAX, "499", false,
                 "Maximum system number within each galaxy."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, WRAP_SYSTEM, "true", false,
+        configs.add(new ConfigDefinition(WRAP_SYSTEM, "true", false,
                 "Wrap system indexing when the range exceeds the maximum system number."));
-        configs.add(new ConfigDefinition("space", THREAD_TYPE, EXPIRED_TIME, "P7D", false,
+        configs.add(new ConfigDefinition(EXPIRED_TIME, "P7D", false,
                 "Age threshold after which a system record is considered stale and should be rechecked."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Analyzes space ranges, refreshes galaxy data, and schedules follow-up scan commands.",
@@ -103,8 +102,6 @@ public class SpaceDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

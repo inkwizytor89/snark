@@ -45,11 +45,11 @@ public class ScanDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("scan", THREAD_TYPE, COORDINATE, "", false,
+        configs.add(new ConfigDefinition(COORDINATE, "", false,
                 "Coordinate used as the origin for the scan range."));
-        configs.add(new ConfigDefinition("scan", THREAD_TYPE, RANGE, "", false,
+        configs.add(new ConfigDefinition(RANGE, "", false,
                 "Scan radius around the configured coordinate or system."));
-        configs.add(new ConfigDefinition("scan", THREAD_TYPE, EXPLORATION_AREA, "", false,
+        configs.add(new ConfigDefinition(EXPLORATION_AREA, "", false,
                 "System area selected for discovery scans and exploration."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Finds unscanned targets within a configured area and prepares them for follow-up actions.",
@@ -68,8 +68,6 @@ public class ScanDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

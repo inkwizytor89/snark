@@ -10,7 +10,6 @@ import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadBeanFactory;
 import org.enoch.snark.instance.si.module.DatabaseThreadTypeRegistry;
-import org.enoch.snark.instance.si.module.ThreadMap;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,7 +83,7 @@ class ThreadManagerTest {
         databaseThread.conditions = "thread-condition";
 
         ThreadDefinition threadDefinition = new ThreadDefinition("update", "Update description", List.of(
-                new ConfigDefinition("database-module", "worker", "refresh", "12M", false, "Refresh interval")));
+                new ConfigDefinition("refresh", "12M", false, "Refresh interval")));
         when(runningInstance.threadConfiguration()).thenReturn(threadDefinition);
         when(runningInstance.getThreadEntity()).thenReturn(databaseThread);
         when(threadBeanFactory.create(UpdateThread.class, databaseThread)).thenReturn(runningInstance);

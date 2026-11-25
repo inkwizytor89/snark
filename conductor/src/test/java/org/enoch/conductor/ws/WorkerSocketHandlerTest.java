@@ -2,7 +2,6 @@ package org.enoch.conductor.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.enoch.common.status.NavigatorStatus;
 import org.enoch.common.status.ServerStatus;
 import org.enoch.common.status.StatusDetails;
 import org.enoch.common.config.ConfigDefinition;
@@ -318,7 +317,7 @@ class WorkerSocketHandlerTest {
         }).when(session).sendMessage(any(TextMessage.class));
 
         service.updateConfigEntry("worker#1",
-                new ConfigDefinition("fleet", "UpdateThread", "refresh", "45 seconds", false, ""));
+                new ConfigDefinition("refresh", "45 seconds", false, ""));
 
         ArgumentCaptor<List<ConfigDefinition>> configs = ArgumentCaptor.forClass(List.class);
         verify(stateRepository).saveConfigs(org.mockito.ArgumentMatchers.eq("worker#1"), configs.capture());

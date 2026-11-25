@@ -9,7 +9,7 @@ public class InstanceConfigDto extends ConfigDefinition {
     }
 
     public InstanceConfigDto(String module, String thread, String key, String value, boolean temporary, String description) {
-        super(module, thread, key, value, temporary, description);
+        super(key, value, temporary, description);
     }
 }
 

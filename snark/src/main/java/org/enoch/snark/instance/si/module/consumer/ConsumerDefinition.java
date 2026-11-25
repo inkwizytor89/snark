@@ -70,21 +70,21 @@ public class ConsumerDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("consumer", threadType, SOURCE, CoordinateExpressionService.NONE, false,
+        configs.add(new ConfigDefinition(SOURCE, CoordinateExpressionService.NONE, false,
                 "Colony coordinate expression used to open fleet dispatch pages when the consumer starts."));
-        configs.add(new ConfigDefinition("consumer", threadType, URL, null, false,
+        configs.add(new ConfigDefinition(URL, null, false,
                 "Game URL used to start the browser session."));
-        configs.add(new ConfigDefinition("consumer", threadType, HASH, null, false,
+        configs.add(new ConfigDefinition(HASH, null, false,
                 "Hash identifier for the target server session."));
-        configs.add(new ConfigDefinition("consumer", threadType, SERVER, null, false,
+        configs.add(new ConfigDefinition(SERVER, null, false,
                 "Server code or name used when opening the game session."));
-        configs.add(new ConfigDefinition("consumer", threadType, LOGIN, "missing_value", false,
+        configs.add(new ConfigDefinition(LOGIN, "missing_value", false,
                 "Login name used for the player session."));
-        configs.add(new ConfigDefinition("consumer", threadType, PASSWORD, "missing_value", false,
+        configs.add(new ConfigDefinition(PASSWORD, "missing_value", false,
                 "Password used for the player session."));
-        configs.add(new ConfigDefinition("consumer", threadType, WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe", false,
+        configs.add(new ConfigDefinition(WEBDRIVER_PATH, "C:\\global\\selenium\\chromedriver.exe", false,
                 "Custom path to the ChromeDriver used by the browser session."));
-        configs.add(new ConfigDefinition("consumer", threadType, RESTART_DURATION, "300S", false,
+        configs.add(new ConfigDefinition(RESTART_DURATION, "300S", false,
                 "How long the session stays alive before a restart is triggered."));
         return new ThreadDefinition(threadType, "Runs the browser-backed game consumer that processes queued commands and keeps the game session alive.", configs);
     }
@@ -106,8 +106,6 @@ public class ConsumerDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

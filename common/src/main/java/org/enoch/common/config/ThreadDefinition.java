@@ -10,8 +10,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ThreadDefinition {
-    private Long id;
-    private LocalDateTime updated;
     private String thread;
     private String name;
     private String module;
@@ -23,6 +21,7 @@ public class ThreadDefinition {
     private String commandLimit;
     private String conditions;
     private LocalDateTime createdOn;
+    private LocalDateTime updated;
     private List<ConfigDefinition> configs = new ArrayList<>();
 
     public ThreadDefinition(String thread, String description, List<ConfigDefinition> configs) {
@@ -30,9 +29,6 @@ public class ThreadDefinition {
         this.name = thread;
         this.description = description;
         this.configs = configs == null ? new ArrayList<>() : configs;
-        if (configs != null && !configs.isEmpty()) {
-            this.module = configs.getFirst().getModule();
-        }
         this.type = thread;
         this.time = "off";
         this.pause = "10S";

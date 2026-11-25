@@ -37,7 +37,7 @@ public class DefineDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("define", THREAD_TYPE, STRATEGY, NOT_NULL_STRATEGY, false,
+        configs.add(new ConfigDefinition(STRATEGY, NOT_NULL_STRATEGY, false,
                 "Strategy used when processing cached values and deciding whether empty results are accepted."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Writes and refreshes cache values derived from configured database queries.",
@@ -51,8 +51,6 @@ public class DefineDefinition implements ThreadConfig {
         for (ConfigDefinition config : definition.getConfigs()) {
             String value = STRATEGY.equals(config.getKey()) ? strategy : config.getValue();
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

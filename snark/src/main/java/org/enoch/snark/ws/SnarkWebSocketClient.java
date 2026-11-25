@@ -347,7 +347,7 @@ public class SnarkWebSocketClient {
                 String thread = config.path("thread").asText();
                 String key = config.path("key").asText();
                 String value = config.path("value").asText();
-                definitions.add(new ConfigDefinition(module, thread, key, value, false, null));
+                definitions.add(new ConfigDefinition(key, value, false, null));
                 ConfigTerm term = new ConfigTerm();
                 term.setModule(module);
                 term.setThread(thread);

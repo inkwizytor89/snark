@@ -227,8 +227,6 @@ public class DiscordCommandRouter {
             }
 
             ConfigDefinition config = new ConfigDefinition(
-                    matcher.group(1),
-                    matcher.group(2),
                     matcher.group(3),
                     matcher.group(4),
                     false,
@@ -459,12 +457,6 @@ public class DiscordCommandRouter {
         for (ThreadDefinition definition : definitions) {
             List<ConfigDefinition> configs = definition.getConfigs();
             String module = definition.getModule();
-            if (module == null || module.isBlank()) {
-                module = "unknown";
-                if (!configs.isEmpty()) {
-                    module = configs.get(0).getModule();
-                }
-            }
             StringBuilder line = new StringBuilder(module+"."+definition.getThread());
             List<String> configValues = configs.stream()
                     .map(this::formatConfigValue)

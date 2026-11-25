@@ -39,9 +39,9 @@ public class UpdateDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("update", UpdateThread.threadType, UpdateThread.REFRESH, "12M", false,
+        configs.add(new ConfigDefinition(UpdateThread.REFRESH, "12M", false,
                 "How often the navigator and colony state should be refreshed."));
-        configs.add(new ConfigDefinition("update", UpdateThread.threadType,
+        configs.add(new ConfigDefinition(
                 UpdateThread.CHECK_SPY_REPORTS_DURATION, "2M", false,
                 "Interval between checks for new spy reports and message processing."));
         return new ThreadDefinition(UpdateThread.threadType,
@@ -60,8 +60,6 @@ public class UpdateDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

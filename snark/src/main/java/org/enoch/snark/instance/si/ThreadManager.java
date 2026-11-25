@@ -269,7 +269,6 @@ public class ThreadManager implements ApplicationRunner {
             return definition;
         }
 
-        definition.setId(entity.id);
         definition.setUpdated(entity.updated);
         definition.setName(entity.name);
         definition.setThread(entity.name);
@@ -284,15 +283,15 @@ public class ThreadManager implements ApplicationRunner {
 
         String moduleName = entity.module == null ? null : entity.module.name;
         List<ConfigDefinition> controlConfigs = List.of(
-                new ConfigDefinition(moduleName, entity.name, "time", entity.time, false,
+                new ConfigDefinition("time", entity.time, false,
                         "Schedule controlling when the thread can run."),
-                new ConfigDefinition(moduleName, entity.name, "pause", entity.pause, false,
+                new ConfigDefinition("pause", entity.pause, false,
                         "Pause duration between thread processing cycles."),
-                new ConfigDefinition(moduleName, entity.name, "debug", entity.debug, false,
+                new ConfigDefinition("debug", entity.debug, false,
                         "Whether debug logging is enabled for the thread."),
-                new ConfigDefinition(moduleName, entity.name, "command_limit", entity.commandLimit, false,
+                new ConfigDefinition("command_limit", entity.commandLimit, false,
                         "Maximum number of commands processed concurrently; -1 means unlimited."),
-                new ConfigDefinition(moduleName, entity.name, "conditions", entity.conditions, false,
+                new ConfigDefinition("conditions", entity.conditions, false,
                         "Conditions that must be satisfied before the thread can run.")
         );
 

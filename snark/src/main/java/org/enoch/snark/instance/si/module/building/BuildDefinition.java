@@ -64,15 +64,15 @@ public class BuildDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("build", THREAD_TYPE, LIST, DEFAULT_LIST, false,
+        configs.add(new ConfigDefinition(LIST, DEFAULT_LIST, false,
                 "Build list applied on each colony to decide which structures are ordered next."));
-        configs.add(new ConfigDefinition("build", THREAD_TYPE, SWAP_TRANSPORT, "true", false,
+        configs.add(new ConfigDefinition(SWAP_TRANSPORT, "true", false,
                 "Allow resource transport between colonies before building if the local colony is short on materials."));
-        configs.add(new ConfigDefinition("build", THREAD_TYPE, SOURCE, CoordinateExpressionService.PLANETS, false,
+        configs.add(new ConfigDefinition(SOURCE, CoordinateExpressionService.PLANETS, false,
                 "Colony coordinate expression that selects where to build."));
-        configs.add(new ConfigDefinition("build", THREAD_TYPE, BuildDefinition.LEAVE_PLANET_RESOURCES, null, false,
+        configs.add(new ConfigDefinition(BuildDefinition.LEAVE_PLANET_RESOURCES, null, false,
                 "Resources to leave on each planet when calculating builds and resource transports."));
-        configs.add(new ConfigDefinition("build", THREAD_TYPE, BuildDefinition.LEAVE_MOON_RESOURCES, null, false,
+        configs.add(new ConfigDefinition(BuildDefinition.LEAVE_MOON_RESOURCES, null, false,
                 "Resources to leave on each moon when calculating builds and resource transports."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Builds structures from a configured colony build sequence and resource strategy.",
@@ -93,8 +93,6 @@ public class BuildDefinition implements ThreadConfig {
                 default -> config.getValue();
             };
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),

@@ -37,7 +37,7 @@ public class EventDefinition implements ThreadConfig {
 
     public static ThreadDefinition threadDefinition() {
         List<ConfigDefinition> configs = new ArrayList<>();
-        configs.add(new ConfigDefinition("event", THREAD_TYPE, ELEMENTS, "0", false,
+        configs.add(new ConfigDefinition(ELEMENTS, "0", false,
                 "Stored event count used to detect a change in event volume."));
         return new ThreadDefinition(THREAD_TYPE,
                 "Tracks important in-game events and raises a notification when the volume changes.",
@@ -53,8 +53,6 @@ public class EventDefinition implements ThreadConfig {
                     ? elements == null ? null : elements.toString()
                     : config.getValue();
             configs.add(new ConfigDefinition(
-                    config.getModule(),
-                    config.getThread(),
                     config.getKey(),
                     value,
                     config.getType(),
