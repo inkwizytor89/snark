@@ -156,31 +156,7 @@ class ConfigServiceTest {
     }
 
     @Test
-    void creatingUpdateThreadKeepsDefaultTimeOff() {
-        ModuleRepository moduleRepository = mock(ModuleRepository.class);
-        ThreadRepository threadRepository = mock(ThreadRepository.class);
-        ConfigRepository configRepository = mock(ConfigRepository.class);
-        ModuleEntity module = new ModuleEntity("global");
-
-        when(moduleRepository.findByName("global")).thenReturn(Optional.of(module));
-        when(threadRepository.find("global", "update")).thenReturn(Optional.empty());
-        when(threadRepository.save(any(ThreadEntity.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        ConfigEntry term = new ConfigEntry();
-        term.setModule("global");
-        term.setThread("update");
-
-        new ConfigService(moduleRepository, threadRepository, configRepository).createThread(term);
-
-        ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
-        verify(threadRepository).save(threadCaptor.capture());
-        assertEquals("off", threadCaptor.getValue().time);
-        assertEquals("update", threadCaptor.getValue().type);
-    }
-
-    @Test
-    void creatingNamedThreadUsesSelectedType() {
+    void updateThreadsCreatesNamedThreadWithSelectedTypeAndDefaultTimeOff() {
         ModuleRepository moduleRepository = mock(ModuleRepository.class);
         ThreadRepository threadRepository = mock(ThreadRepository.class);
         ConfigRepository configRepository = mock(ConfigRepository.class);
@@ -194,14 +170,16 @@ class ConfigServiceTest {
         ConfigEntry term = new ConfigEntry();
         term.setModule("global");
         term.setThread("update_main");
-        term.setKey("update");
+        term.setKey("type");
+        term.setValue("update");
 
-        new ConfigService(moduleRepository, threadRepository, configRepository).createThread(term);
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(term));
 
         ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
-        verify(threadRepository).save(threadCaptor.capture());
-        assertEquals("update_main", threadCaptor.getValue().name);
-        assertEquals("update", threadCaptor.getValue().type);
-        assertEquals("off", threadCaptor.getValue().time);
+        verify(threadRepository, atLeastOnce()).save(threadCaptor.capture());
+        assertEquals("update_main", threadCaptor.getAllValues().getFirst().name);
+        assertEquals("update", threadCaptor.getAllValues().getFirst().type);
+        assertEquals("off", threadCaptor.getAllValues().getFirst().time);
     }
 }

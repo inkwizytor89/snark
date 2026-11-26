@@ -421,18 +421,6 @@ public class SnarkWebSocketClient {
                         java.util.Map.of("module", definition));
             }
 
-            if ("request:thread:create".equals(incoming.getType())) {
-                ConfigEntry config = objectMapper.convertValue(incoming.getPayload(), ConfigEntry.class);
-                if (config == null || config.getModule() == null || config.getModule().isBlank()
-                        || config.getThread() == null || config.getThread().isBlank()
-                        || config.getKey() == null || config.getKey().isBlank()) {
-                    throw new IllegalArgumentException("Module, thread name, and thread type are required");
-                }
-                configServiceProvider.getObject().createThread(config);
-                return buildConfigMutationResponse(incoming, 200, null,
-                        java.util.Map.of("configs", configServiceProvider.getObject().listConfigs()));
-            }
-
             if ("request:thread:change-module".equals(incoming.getType())) {
                 JsonNode payload = objectMapper.valueToTree(incoming.getPayload());
                 ConfigEntry config = objectMapper.convertValue(payload.path("config"), ConfigEntry.class);
@@ -758,8 +746,7 @@ public class SnarkWebSocketClient {
                         || "request:thread:change-module".equals(incoming.getType())
                         || "request:module:set".equals(incoming.getType())
                         || "request:module:delete".equals(incoming.getType())
-                        || "request:thread:delete".equals(incoming.getType())
-                        || "request:thread:create".equals(incoming.getType())) && registered) {
+                        || "request:thread:delete".equals(incoming.getType())) && registered) {
                     sendWebSocketMessage(webSocket, buildConfigMutationResponse(incoming));
                 } else if ("request:command:catalog".equals(incoming.getType()) && registered && commandRecipeService != null) {
                     sendWebSocketMessage(webSocket, buildCommandCatalogResponse(incoming, commandRecipeService.listCommands()));

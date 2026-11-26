@@ -61,6 +61,16 @@ public class ConfigService implements ApplicationRunner {
         for (ConfigEntry term : configTerms) {
             ThreadEntity threadEntity = threadRepository.find(term.getModule(), term.getThread())
                     .orElseGet(() -> createThreadEntity(term));
+            if ("type".equalsIgnoreCase(term.getKey())) {
+                String selectedType = ThreadManager.availableThreadTypes().stream()
+                        .filter(type -> type.equalsIgnoreCase(term.getValue().trim()))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + term.getValue()));
+                threadEntity.type = selectedType;
+                threadEntity.updated = LocalDateTime.now();
+                threadRepository.save(threadEntity);
+                continue;
+            }
             threadEntity.update(term);
             threadEntity.updated = LocalDateTime.now();
             threadRepository.save(threadEntity);
@@ -243,33 +253,6 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional
-    public void createThread(ConfigEntry term) {
-        if (term == null || term.getModule() == null || term.getModule().isBlank()
-                || term.getThread() == null || term.getThread().isBlank()) {
-            throw new IllegalArgumentException("Module and thread are required");
-        }
-
-        threadRepository.find(term.getModule(), term.getThread()).ifPresentOrElse(
-                thread -> log.info("Thread '{}' already exists in module '{}'", thread.name, term.getModule()),
-                () -> {
-                    ModuleEntity module = moduleRepository.findByName(term.getModule())
-                            .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
-                    String type = term.getKey() == null || term.getKey().isBlank()
-                            ? ThreadManager.availableThreadTypes().stream()
-                                    .filter(term.getThread()::equalsIgnoreCase)
-                                    .findFirst()
-                                    .orElse(term.getThread())
-                            : ThreadManager.availableThreadTypes().stream()
-                                    .filter(typeName -> typeName.equalsIgnoreCase(term.getKey().trim()))
-                                    .findFirst()
-                                    .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + term.getKey()));
-                    ThreadEntity thread = new ThreadEntity(term.getThread(), module, type);
-                    threadRepository.save(thread);
-                    log.info("Created thread '{}' in module '{}' as {}", thread.name, thread.module.name, thread.type);
-                });
-    }
-
-    @Transactional
     public void deleteThread(ConfigEntry term) {
         threadRepository.find(term.getModule(), term.getThread()).ifPresent(thread -> {
             List<ConfigEntity> configs = configRepository.findByThread_Module_NameAndThread_Name(
@@ -284,8 +267,17 @@ public class ConfigService implements ApplicationRunner {
     private ThreadEntity createThreadEntity(ConfigEntry term) {
         ModuleEntity module = moduleRepository.findByName(term.getModule())
                 .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
+        String selectedType = "type".equalsIgnoreCase(term.getKey())
+                ? term.getValue()
+                : null;
+        String threadType = selectedType == null
+                ? resolveThreadType(term.getThread())
+                : ThreadManager.availableThreadTypes().stream()
+                        .filter(type -> type.equalsIgnoreCase(selectedType.trim()))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + selectedType));
         ThreadEntity thread = new ThreadEntity(
-                term.getThread(), module, resolveThreadType(term.getThread()));
+                term.getThread(), module, threadType);
         ThreadEntity savedThread = threadRepository.save(thread);
         log.info("Created thread '{}' in module '{} as {}'", savedThread.name, savedThread.module.name, savedThread.type);
         return savedThread;

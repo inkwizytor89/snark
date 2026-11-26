@@ -1498,13 +1498,18 @@ function initApp() {
         renderConfigThreadModal();
 
         try {
-            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread`, {
+            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/configs`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    module: moduleName.trim(),
-                    thread: threadName,
-                    key: configState.modalThread
+                    configs: [{
+                        module: moduleName.trim(),
+                        thread: threadName,
+                        key: 'type',
+                        value: configState.modalThread,
+                        temporary: false,
+                        description: 'Thread type'
+                    }]
                 })
             });
 

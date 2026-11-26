@@ -719,8 +719,6 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || "response:config:set".equals(type)
                 || "response:config:delete".equals(type)
                 || "response:module:set".equals(type)
-                || "response:thread:create".equals(type)
-                || "error:thread:create".equals(type)
                 || "error:config:set".equals(type)
                 || "error:module:set".equals(type);
     }

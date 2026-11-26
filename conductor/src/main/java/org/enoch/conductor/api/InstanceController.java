@@ -716,27 +716,6 @@ public class InstanceController {
         }
     }
 
-    @PostMapping("/{id}/thread")
-    public ResponseEntity<?> createThread(@PathVariable String id, @RequestBody ConfigEntry config) throws Exception {
-        if (profileRepository.findById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        if (config == null || config.getModule() == null || config.getModule().isBlank()
-                || config.getThread() == null || config.getThread().isBlank()
-                || config.getKey() == null || config.getKey().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Module, thread name, and thread type are required"));
-        }
-        try {
-            instanceConfigService.createThread(id, config);
-            var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
-            var modules = instanceThreadConfigurationService.getModules(id);
-            var availableDefinitions = instanceThreadConfigurationService.getAvailableDefinitions(id);
-            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, modules, availableDefinitions));
-        } catch (RuntimeException e) {
-            return mapConfigException(e);
-        }
-    }
-
     @PostMapping("/{id}/thread-module")
     public ResponseEntity<?> changeThreadModule(@PathVariable String id, @RequestBody Map<String, Object> request) throws Exception {
         if (profileRepository.findById(id).isEmpty()) {

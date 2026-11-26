@@ -107,10 +107,6 @@ public class InstanceConfigService {
         sendConfigRequest(instanceId, "request:module:delete", term);
     }
 
-    public void createThread(String instanceId, ConfigEntry term) throws Exception {
-        sendConfigRequest(instanceId, "request:thread:create", term);
-    }
-
     public void deleteThread(String instanceId, ConfigEntry term) throws Exception {
         sendConfigRequest(instanceId, "request:thread:delete", term);
     }
