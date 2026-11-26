@@ -11,6 +11,7 @@ import org.enoch.snark.instance.si.module.hunting.HuntingThread;
 import org.enoch.snark.instance.si.module.scan.ScanThread;
 import org.enoch.snark.instance.si.module.space.SpaceThread;
 import org.enoch.snark.instance.si.module.update.UpdateThread;
+import org.enoch.snark.instance.si.module.queuesimulator.QueueSimulatorThread;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
@@ -32,6 +33,8 @@ public class DatabaseThreadTypeRegistry {
             Map.entry("hunting", HuntingThread.class),
             Map.entry("fleet", FleetThread.class),
             Map.entry("event", EventThread.class),
+            Map.entry("queue-simulator", QueueSimulatorThread.class),
+            Map.entry("queuesimulator", QueueSimulatorThread.class),
             Map.entry("consumerthread", ConsumerThread.class),
             Map.entry("updatethread", UpdateThread.class),
             Map.entry("definethread", DefineThread.class),
@@ -42,7 +45,8 @@ public class DatabaseThreadTypeRegistry {
             Map.entry("scanthread", ScanThread.class),
             Map.entry("huntingthread", HuntingThread.class),
             Map.entry("fleetthread", FleetThread.class),
-            Map.entry("eventthread", EventThread.class)
+            Map.entry("eventthread", EventThread.class),
+            Map.entry("queuesimulatorthread", QueueSimulatorThread.class)
     );
 
     public Optional<Class<? extends AbstractThread>> resolve(String type) {
