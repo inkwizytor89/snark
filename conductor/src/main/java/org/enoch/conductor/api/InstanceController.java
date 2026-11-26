@@ -651,7 +651,8 @@ public class InstanceController {
         try {
             var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
             var modules = instanceThreadConfigurationService.getModules(id);
-            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, modules));
+            var availableDefinitions = instanceThreadConfigurationService.getAvailableDefinitions(id);
+            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, modules, availableDefinitions));
         } catch (RuntimeException e) {
             String message = e.getMessage() == null ? "Unknown thread configuration error" : e.getMessage();
             if (message.contains("timed out")) {
@@ -693,7 +694,8 @@ public class InstanceController {
             instanceConfigService.setModuleEntry(id, config);
             var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
             var refreshedModules = instanceThreadConfigurationService.getModules(id);
-            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, refreshedModules));
+            var availableDefinitions = instanceThreadConfigurationService.getAvailableDefinitions(id);
+            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, refreshedModules, availableDefinitions));
         } catch (RuntimeException e) {
             return mapConfigException(e);
         }

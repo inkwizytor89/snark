@@ -27,6 +27,7 @@ public class InstanceThreadConfigurationService {
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<String, CompletableFuture<List<ThreadDefinition>>> pendingRequests = new ConcurrentHashMap<>();
     private final Map<String, List<ModuleDefinition>> modulesByInstance = new ConcurrentHashMap<>();
+    private final Map<String, List<ThreadDefinition>> availableDefinitionsByInstance = new ConcurrentHashMap<>();
     private final Map<String, PendingRequest> pendingRequestDetails = new ConcurrentHashMap<>();
 
     public InstanceThreadConfigurationService(WorkerSocketHandler workerSocketHandler) {
@@ -121,7 +122,14 @@ public class InstanceThreadConfigurationService {
                     module == null || module.getName() == null || module.getName().isBlank())) {
                 throw new IllegalArgumentException("Thread configuration response contains invalid modules");
             }
+            List<ThreadDefinition> availableDefinitions = objectMapper.convertValue(
+                    payload.getOrDefault("availableDefinitions", List.of()),
+                    new TypeReference<List<ThreadDefinition>>() {});
+            if (availableDefinitions == null || availableDefinitions.stream().anyMatch(this::isInvalidDefinition)) {
+                throw new IllegalArgumentException("Thread configuration response contains invalid available definitions");
+            }
             modulesByInstance.put(instanceId, modules);
+            availableDefinitionsByInstance.put(instanceId, availableDefinitions);
             future.complete(definitions);
         } catch (Exception e) {
             future.completeExceptionally(new RuntimeException("Malformed thread configuration response", e));
@@ -139,8 +147,13 @@ public class InstanceThreadConfigurationService {
         return modulesByInstance.getOrDefault(instanceId, List.of());
     }
 
+    public List<ThreadDefinition> getAvailableDefinitions(String instanceId) {
+        return availableDefinitionsByInstance.getOrDefault(instanceId, List.of());
+    }
+
     public void clearInstanceState(String instanceId) {
         modulesByInstance.remove(instanceId);
+        availableDefinitionsByInstance.remove(instanceId);
     }
 
     public void cancelPendingRequests(String instanceId) {

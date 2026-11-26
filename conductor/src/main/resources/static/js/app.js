@@ -1237,8 +1237,10 @@ function initApp() {
         renderConfigThreadModal();
 
         try {
-            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/configs/definitions`);
-            configState.definitions = Array.isArray(payload.definitions) ? payload.definitions : [];
+            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread-configurations`);
+            configState.definitions = Array.isArray(payload.availableDefinitions)
+                ? payload.availableDefinitions
+                : (Array.isArray(payload.definitions) ? payload.definitions : []);
             configState.definitionsStatus = 'loaded';
             configState.modalThread = getAvailableThreads()[0] || '';
         } catch (error) {
@@ -1368,15 +1370,20 @@ function initApp() {
 
     function getAvailableThreads() {
         return [...new Set(configState.definitions
-            .map((definition) => String(definition.thread ?? '').trim())
+            .map((definition) => String(definition.type ?? definition.thread ?? definition.name ?? '').trim())
             .filter(Boolean))]
             .sort((a, b) => a.localeCompare(b));
     }
 
     function getSelectedThreadDefinitions() {
-        return configState.definitions
-            .filter((definition) => String(definition.thread ?? '') === configState.modalThread)
-            .slice()
+        const threadDefinition = configState.definitions.find((definition) =>
+            String(definition.type ?? definition.thread ?? definition.name ?? '') === configState.modalThread
+        );
+        if (!threadDefinition) {
+            return [];
+        }
+        return (Array.isArray(threadDefinition.configs) ? threadDefinition.configs : [])
+            .map((definition) => ({ ...definition, thread: configState.modalThread }))
             .sort((a, b) => String(a.key).localeCompare(String(b.key)));
     }
 

@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -212,6 +213,8 @@ class SnarkWebSocketClientTest {
         ThreadDefinition definition = (ThreadDefinition) definitions.getFirst();
         assertEquals("fleet", definition.getName());
         assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
+        java.util.List<?> available = (java.util.List<?>) payload.get("availableDefinitions");
+        assertFalse(available.isEmpty());
     }
 
     @Test

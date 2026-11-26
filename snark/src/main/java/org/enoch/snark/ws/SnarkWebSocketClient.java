@@ -305,7 +305,12 @@ public class SnarkWebSocketClient {
         response.setTo(resolveTarget(incoming));
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(200);
-        response.setPayload(Map.of("instanceId", instanceId, "definitions", definitions, "modules", modules));
+        response.setPayload(Map.of(
+                "instanceId", instanceId,
+                "definitions", definitions,
+                "modules", modules,
+                "availableDefinitions", ThreadManager.availableDefinitions()
+        ));
         return response;
     }
 
