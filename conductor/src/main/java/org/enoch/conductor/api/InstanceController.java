@@ -722,8 +722,9 @@ public class InstanceController {
             return ResponseEntity.notFound().build();
         }
         if (config == null || config.getModule() == null || config.getModule().isBlank()
-                || config.getThread() == null || config.getThread().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Module and thread type are required"));
+                || config.getThread() == null || config.getThread().isBlank()
+                || config.getKey() == null || config.getKey().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Module, thread name, and thread type are required"));
         }
         try {
             instanceConfigService.createThread(id, config);

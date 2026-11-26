@@ -316,13 +316,19 @@ public class SnarkWebSocketClient {
 
     CommandMessage buildManagedThreadConfigurationResponse(CommandMessage incoming) {
         try {
-            if (threadManagerProvider == null) {
-                throw new IllegalStateException("Thread manager is unavailable");
+            java.util.List<ThreadDefinition> definitions;
+            java.util.List<ModuleDefinition> modules;
+            if (configServiceProvider == null) {
+                if (threadManagerProvider == null) {
+                    throw new IllegalStateException("Configuration service is unavailable");
+                }
+                definitions = threadManagerProvider.getObject().managedDefinitions();
+                modules = java.util.List.of();
+            } else {
+                ConfigService configService = configServiceProvider.getObject();
+                definitions = configService.listThreadDefinitions();
+                modules = configService.listModuleDefinitions();
             }
-            java.util.List<ThreadDefinition> definitions = threadManagerProvider.getObject().managedDefinitions();
-            java.util.List<ModuleDefinition> modules = configServiceProvider == null
-                    ? java.util.List.of()
-                    : configServiceProvider.getObject().listModuleDefinitions();
             CommandMessage response = buildThreadConfigurationResponse(incoming, definitions, modules);
             if (objectMapper.writeValueAsBytes(response).length > MAX_MESSAGE_BYTES) {
                 return buildThreadConfigurationError(incoming, 500,
@@ -418,8 +424,9 @@ public class SnarkWebSocketClient {
             if ("request:thread:create".equals(incoming.getType())) {
                 ConfigEntry config = objectMapper.convertValue(incoming.getPayload(), ConfigEntry.class);
                 if (config == null || config.getModule() == null || config.getModule().isBlank()
-                        || config.getThread() == null || config.getThread().isBlank()) {
-                    throw new IllegalArgumentException("Module and thread are required");
+                        || config.getThread() == null || config.getThread().isBlank()
+                        || config.getKey() == null || config.getKey().isBlank()) {
+                    throw new IllegalArgumentException("Module, thread name, and thread type are required");
                 }
                 configServiceProvider.getObject().createThread(config);
                 return buildConfigMutationResponse(incoming, 200, null,

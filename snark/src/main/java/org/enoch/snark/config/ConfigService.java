@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ModuleDefinition;
+import org.enoch.common.config.ThreadDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.time.LocalDateTime;
 
@@ -147,6 +149,75 @@ public class ConfigService implements ApplicationRunner {
         return definition;
     }
 
+    @Transactional(readOnly = true)
+    public List<ThreadDefinition> listThreadDefinitions() {
+        List<ThreadDefinition> available = ThreadManager.availableDefinitions();
+        return threadRepository.findAllWithModule().stream()
+                .map(thread -> buildThreadDefinition(thread, available))
+                .sorted((left, right) -> {
+                    int moduleComparison = String.valueOf(left.getModule()).compareTo(String.valueOf(right.getModule()));
+                    return moduleComparison != 0
+                            ? moduleComparison
+                            : String.valueOf(left.getName()).compareTo(String.valueOf(right.getName()));
+                })
+                .toList();
+    }
+
+    private ThreadDefinition buildThreadDefinition(ThreadEntity thread, List<ThreadDefinition> available) {
+        ThreadDefinition template = available.stream()
+                .filter(definition -> thread.type != null
+                        && (thread.type.equals(definition.getType())
+                        || thread.type.equals(definition.getName())))
+                .findFirst()
+                .orElse(null);
+
+        String moduleName = thread.module == null ? null : thread.module.name;
+        String description = template == null ? "" : template.getDescription();
+        ThreadDefinition definition = new ThreadDefinition(thread.name, thread.type, description, new ArrayList<>());
+        definition.setModule(moduleName);
+        definition.setCreatedOn(thread.createdOn);
+        definition.setUpdated(thread.updated);
+
+        List<ConfigDefinition> configs = new ArrayList<>(List.of(
+                new ConfigDefinition("time", thread.time, false,
+                        "Schedule controlling when the thread can run."),
+                new ConfigDefinition("pause", thread.pause, false,
+                        "Pause duration between thread processing cycles."),
+                new ConfigDefinition("debug", thread.debug, false,
+                        "Whether debug logging is enabled for the thread."),
+                new ConfigDefinition("command_limit", thread.commandLimit, false,
+                        "Maximum number of commands processed concurrently; -1 means unlimited."),
+                new ConfigDefinition("conditions", thread.conditions, false,
+                        "Conditions that must be satisfied before the thread can run.")
+        ));
+
+        Map<String, ConfigDefinition> defaults = new java.util.LinkedHashMap<>();
+        if (template != null && template.getConfigs() != null) {
+            template.getConfigs().forEach(config -> defaults.put(config.getKey(), config));
+        }
+
+        Map<String, String> stored = new java.util.LinkedHashMap<>();
+        if (thread.configs != null) {
+            thread.configs.forEach(config -> stored.put(config.key, config.value));
+        }
+
+        defaults.forEach((key, config) -> configs.add(new ConfigDefinition(
+                key,
+                stored.getOrDefault(key, config.getValue()),
+                config.getType(),
+                config.isTemporary(),
+                config.getDescription())));
+
+        stored.forEach((key, value) -> {
+            if (!defaults.containsKey(key)) {
+                configs.add(new ConfigDefinition(key, value, false, ""));
+            }
+        });
+
+        definition.setConfigs(configs);
+        return definition;
+    }
+
     public List<ConfigDefinition> listConfigs() {
         return configRepository.findAll().stream()
                 .map(config -> new ConfigDefinition(
@@ -183,10 +254,15 @@ public class ConfigService implements ApplicationRunner {
                 () -> {
                     ModuleEntity module = moduleRepository.findByName(term.getModule())
                             .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
-                    String type = ThreadManager.availableThreadTypes().stream()
-                            .filter(term.getThread()::equalsIgnoreCase)
-                            .findFirst()
-                            .orElse(term.getThread());
+                    String type = term.getKey() == null || term.getKey().isBlank()
+                            ? ThreadManager.availableThreadTypes().stream()
+                                    .filter(term.getThread()::equalsIgnoreCase)
+                                    .findFirst()
+                                    .orElse(term.getThread())
+                            : ThreadManager.availableThreadTypes().stream()
+                                    .filter(typeName -> typeName.equalsIgnoreCase(term.getKey().trim()))
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + term.getKey()));
                     ThreadEntity thread = new ThreadEntity(term.getThread(), module, type);
                     threadRepository.save(thread);
                     log.info("Created thread '{}' in module '{}' as {}", thread.name, thread.module.name, thread.type);

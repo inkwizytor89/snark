@@ -218,14 +218,15 @@ class SnarkWebSocketClientTest {
     }
 
     @Test
-    void shouldReadManagedDefinitionsWhenBuildingRequestedResponse() {
-        ObjectProvider<ThreadManager> provider = mock(ObjectProvider.class);
-        ThreadManager threadManager = mock(ThreadManager.class);
-        when(provider.getObject()).thenReturn(threadManager);
-        when(threadManager.managedDefinitions()).thenReturn(java.util.List.of(
+    void shouldReadDatabaseThreadDefinitionsWhenBuildingRequestedResponse() {
+        ObjectProvider<ConfigService> provider = mock(ObjectProvider.class);
+        ConfigService configService = mock(ConfigService.class);
+        when(provider.getObject()).thenReturn(configService);
+        when(configService.listThreadDefinitions()).thenReturn(java.util.List.of(
                 new ThreadDefinition("fleet", "fleet", "Fleet configuration", java.util.List.of(
                         new ConfigDefinition("mission", "ATTACK", false, "")))));
-        client.setThreadManagerProvider(provider);
+        when(configService.listModuleDefinitions()).thenReturn(java.util.List.of());
+        client.setConfigServiceProvider(provider);
         CommandMessage request = new CommandMessage();
         request.setId("thread-config-2");
         request.setType("request:thread:configurations");
@@ -238,7 +239,8 @@ class SnarkWebSocketClientTest {
         ThreadDefinition definition = (ThreadDefinition) ((java.util.List<?>)
                 ((Map<?, ?>) response.getPayload()).get("definitions")).getFirst();
         assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
-        org.mockito.Mockito.verify(threadManager).managedDefinitions();
+        org.mockito.Mockito.verify(configService).listThreadDefinitions();
+        org.mockito.Mockito.verify(configService).listModuleDefinitions();
     }
 
     @Test

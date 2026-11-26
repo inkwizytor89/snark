@@ -37,6 +37,7 @@ function initApp() {
     const configThreadExistingModule = document.getElementById('configThreadExistingModule');
     const configThreadNewModule = document.getElementById('configThreadNewModule');
     const configThreadSelect = document.getElementById('configThreadSelect');
+    const configThreadName = document.getElementById('configThreadName');
     const configThreadDefinitionFields = document.getElementById('configThreadDefinitionFields');
     const configThreadModalSubtitle = document.getElementById('configThreadModalSubtitle');
     const configThreadModalMessage = document.getElementById('configThreadModalMessage');
@@ -63,6 +64,7 @@ function initApp() {
             definitionsStatus: 'idle',
             definitionsError: '',
             modalThread: '',
+            modalThreadName: '',
             modalExistingModule: '',
             modalNewModule: '',
             modalValues: {},
@@ -1227,6 +1229,7 @@ function initApp() {
         configState.definitionsStatus = 'loading';
         configState.definitionsError = '';
         configState.modalThread = '';
+        configState.modalThreadName = '';
         configState.modalExistingModule = '';
         configState.modalNewModule = '';
         configState.modalValues = {};
@@ -1256,12 +1259,14 @@ function initApp() {
         configThreadExistingModule.innerHTML = '';
         configThreadNewModule.value = '';
         configThreadSelect.innerHTML = '';
+        if (configThreadName) configThreadName.value = '';
         configThreadDefinitionFields.innerHTML = '';
         configThreadModalMessage.hidden = true;
         configThreadModalMessage.textContent = '';
         configState.definitionsStatus = 'idle';
         configState.definitionsError = '';
         configState.modalThread = '';
+        configState.modalThreadName = '';
         configState.modalExistingModule = '';
         configState.modalNewModule = '';
         configState.modalValues = {};
@@ -1390,6 +1395,7 @@ function initApp() {
     function renderConfigThreadModal() {
         configState.modalExistingModule = configThreadExistingModule.value;
         configState.modalNewModule = configThreadNewModule.value;
+        configState.modalThreadName = configThreadName.value;
         configThreadDefinitionFields.querySelectorAll('[data-thread-config-key]').forEach((input) => {
             configState.modalValues[input.dataset.threadConfigKey] = input.value;
         });
@@ -1401,6 +1407,7 @@ function initApp() {
         ].join('');
         configThreadExistingModule.value = configState.modalExistingModule;
         configThreadNewModule.value = configState.modalNewModule;
+        configThreadName.value = configState.modalThreadName;
 
         if (configState.definitionsStatus === 'loading') {
             configThreadSelect.innerHTML = '<option value="">Loading threads...</option>';
@@ -1427,7 +1434,9 @@ function initApp() {
         configThreadSelect.disabled = !threads.length || configState.modalSaving;
 
         configThreadDefinitionFields.innerHTML = '';
-        saveConfigThreadBtn.disabled = !configState.modalThread || configState.modalSaving;
+        saveConfigThreadBtn.disabled = !configState.modalThread
+            || !String(configState.modalThreadName).trim()
+            || configState.modalSaving;
 
         if (configState.modalSaving) {
             saveConfigThreadBtn.textContent = 'Saving...';
@@ -1476,6 +1485,13 @@ function initApp() {
             return;
         }
 
+        const threadName = configThreadName.value.trim();
+        if (!threadName) {
+            configState.modalError = 'Thread name is required';
+            renderConfigThreadModal();
+            return;
+        }
+
 
         configState.modalSaving = true;
         configState.modalError = '';
@@ -1487,7 +1503,8 @@ function initApp() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     module: moduleName.trim(),
-                    thread: configState.modalThread
+                    thread: threadName,
+                    key: configState.modalThread
                 })
             });
 
@@ -1951,6 +1968,12 @@ function initApp() {
 
     configThreadSelect.addEventListener('change', () => {
         configState.modalThread = configThreadSelect.value;
+        configState.modalError = '';
+        renderConfigThreadModal();
+    });
+
+    configThreadName.addEventListener('input', () => {
+        configState.modalThreadName = configThreadName.value;
         configState.modalError = '';
         renderConfigThreadModal();
     });

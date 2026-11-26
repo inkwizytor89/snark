@@ -668,9 +668,6 @@ main {
     margin-bottom: 16px;
 }
 
-.config-modal-thread-field {
-    grid-column: 1 / -1;
-}
 
 .config-thread-fields {
     display: flex;

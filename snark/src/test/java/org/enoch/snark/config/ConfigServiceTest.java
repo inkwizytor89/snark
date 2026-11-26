@@ -1,6 +1,7 @@
 package org.enoch.snark.config;
 
 import org.enoch.common.config.ConfigEntry;
+import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ModuleEntity;
 import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
@@ -128,6 +129,33 @@ class ConfigServiceTest {
     }
 
     @Test
+    void listThreadDefinitionsIncludesInactiveThreadsAndStoredValues() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+        ThreadEntity thread = new ThreadEntity("update", module, "update");
+        thread.time = "off";
+        thread.configs.add(new org.enoch.snark.db.entity.ConfigEntity(thread, "refresh", "30M"));
+
+        when(threadRepository.findAllWithModule()).thenReturn(List.of(thread));
+
+        List<ThreadDefinition> definitions = new ConfigService(
+                moduleRepository, threadRepository, configRepository).listThreadDefinitions();
+
+        assertEquals(1, definitions.size());
+        ThreadDefinition definition = definitions.getFirst();
+        assertEquals("update", definition.getName());
+        assertEquals("global", definition.getModule());
+        assertEquals("off", definition.getConfigs().stream()
+                .filter(config -> "time".equals(config.getKey()))
+                .findFirst().orElseThrow().getValue());
+        assertEquals("30M", definition.getConfigs().stream()
+                .filter(config -> "refresh".equals(config.getKey()))
+                .findFirst().orElseThrow().getValue());
+    }
+
+    @Test
     void creatingUpdateThreadKeepsDefaultTimeOff() {
         ModuleRepository moduleRepository = mock(ModuleRepository.class);
         ThreadRepository threadRepository = mock(ThreadRepository.class);
@@ -149,5 +177,31 @@ class ConfigServiceTest {
         verify(threadRepository).save(threadCaptor.capture());
         assertEquals("off", threadCaptor.getValue().time);
         assertEquals("update", threadCaptor.getValue().type);
+    }
+
+    @Test
+    void creatingNamedThreadUsesSelectedType() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+
+        when(moduleRepository.findByName("global")).thenReturn(Optional.of(module));
+        when(threadRepository.find("global", "update_main")).thenReturn(Optional.empty());
+        when(threadRepository.save(any(ThreadEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("global");
+        term.setThread("update_main");
+        term.setKey("update");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository).createThread(term);
+
+        ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
+        verify(threadRepository).save(threadCaptor.capture());
+        assertEquals("update_main", threadCaptor.getValue().name);
+        assertEquals("update", threadCaptor.getValue().type);
+        assertEquals("off", threadCaptor.getValue().time);
     }
 }
