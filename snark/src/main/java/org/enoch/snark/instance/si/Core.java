@@ -57,9 +57,11 @@ public class Core {
     }
 
     public void push(AbstractCommand command) {
-        if(commandDeque == null)
-            System.err.println("Unexpected error: "+command);
-        commandDeque.push(command);
+        if (commandDeque != null) {
+            commandDeque.push(command);
+            return;
+        }
+        System.err.println("Unexpected error: "+command);
     }
 
     public ServerStatus status() {

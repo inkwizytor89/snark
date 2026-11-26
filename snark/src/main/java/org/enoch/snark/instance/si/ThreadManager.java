@@ -24,6 +24,7 @@ import org.enoch.snark.instance.si.module.hunting.HuntingDefinition;
 import org.enoch.snark.instance.si.module.scan.ScanDefinition;
 import org.enoch.snark.instance.si.module.space.SpaceDefinition;
 import org.enoch.snark.instance.si.module.update.UpdateDefinition;
+import org.enoch.snark.instance.si.module.queuesimulator.QueueSimulatorDefinition;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -251,7 +252,8 @@ public class ThreadManager implements ApplicationRunner {
                 ScanDefinition.threadDefinition(),
                 HuntingDefinition.threadDefinition(),
                 FleetDefinition.threadDefinition(),
-                EventDefinition.threadDefinition()
+                EventDefinition.threadDefinition(),
+                QueueSimulatorDefinition.threadDefinition()
         );
     }
 
