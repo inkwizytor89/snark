@@ -77,6 +77,14 @@ public class ProcessService {
      * Starts an instance based on its profile.
      */
     public synchronized void start(InstanceProfile profile) throws Exception {
+        start(profile, true);
+    }
+
+    public synchronized void startWithoutProperties(InstanceProfile profile) throws Exception {
+        start(profile, false);
+    }
+
+    private synchronized void start(InstanceProfile profile, boolean withProperties) throws Exception {
         managedProfiles.put(profile.getId(), profile);
         InstanceRuntime currentRuntime = runtimes.get(profile.getId());
         if (currentRuntime != null && currentRuntime.getProcess().isAlive()) {
@@ -89,10 +97,12 @@ public class ProcessService {
 
         Path instanceDir = Path.of(instancesDirPath, profile.getId());
         Files.createDirectories(instanceDir);
-        Path propertiesPath = profileRepository.resolvePropertiesPath(profile);
         instanceLogService.prepareLogs(instanceDir);
         long startedAt = System.currentTimeMillis();
-        Process process = workerProcessLauncher.launch(profile, instanceDir, propertiesPath);
+        Process process = withProperties
+                ? workerProcessLauncher.launch(profile, instanceDir,
+                        profileRepository.resolvePropertiesPath(profile))
+                : workerProcessLauncher.launch(profile, instanceDir);
         try {
             instanceLogService.capture(profile.getId(), process, instanceDir);
         } catch (IOException e) {

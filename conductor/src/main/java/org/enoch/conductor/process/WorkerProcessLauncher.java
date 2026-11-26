@@ -22,6 +22,10 @@ public class WorkerProcessLauncher {
         this.configuredWorkerJar = configuredWorkerJar;
     }
 
+    public Process launch(InstanceProfile profile, Path instanceDir) throws IOException {
+        return launch(profile, instanceDir, null);
+    }
+
     public Process launch(InstanceProfile profile, Path instanceDir, Path propertiesPath) throws IOException {
         String workerJarPath = resolveWorkerJar();
         System.out.println("Using worker jar: " + workerJarPath);
@@ -36,7 +40,9 @@ public class WorkerProcessLauncher {
             command.add("-Ddatabase-file=" + databaseFile);
         }
 
-        command.add("-Dproperties=" + propertiesPath);
+        if (propertiesPath != null) {
+            command.add("-Dproperties=" + propertiesPath);
+        }
         command.add("-jar");
         command.add(workerJarPath);
         command.add("--instanceId=" + profile.getId());

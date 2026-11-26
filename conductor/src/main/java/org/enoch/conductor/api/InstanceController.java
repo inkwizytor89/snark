@@ -196,6 +196,28 @@ public class InstanceController {
         return ResponseEntity.ok(Map.of("message", "Instance started", "id", id));
     }
 
+    @PostMapping("/{id}/start-without-properties")
+    public ResponseEntity<Map<String, String>> startInstanceWithoutProperties(@PathVariable String id) throws Exception {
+        InstanceProfile profile = profileRepository.loadAll().stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            processService.startWithoutProperties(profile);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage(),
+                    "id", id
+            ));
+        }
+        return ResponseEntity.ok(Map.of("message", "Instance started without properties", "id", id));
+    }
+
     @PostMapping("/{id}/stop")
     public ResponseEntity<Map<String, String>> stopInstance(@PathVariable String id) {
         processService.stop(id);

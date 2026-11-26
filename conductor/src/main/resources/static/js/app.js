@@ -350,9 +350,10 @@ function initApp() {
                 </div>
                 <div class="instance-actions">
                     ${inst.running
-                        ? `<button class="btn-action btn-stop" onclick="stopInstance('${escapeHtml(inst.id)}')">Stop</button>
-                           <button class="btn-action btn-restart" onclick="restartInstance('${escapeHtml(inst.id)}')">Restart</button>`
-                        : `<button class="btn-action btn-start" onclick="startInstance('${escapeHtml(inst.id)}')">Start</button>`
+                        ? `<button type="button" class="btn-action btn-stop" aria-label="Stop instance" title="Stop" onclick="stopInstance('${escapeHtml(inst.id)}')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" /></svg></button>
+                           <button type="button" class="btn-action btn-restart" aria-label="Restart instance" title="Restart" onclick="restartInstance('${escapeHtml(inst.id)}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7" /></svg></button>`
+                        : `<button type="button" class="btn-action btn-start-play" aria-label="Start instance without properties" title="Start without properties" onclick="startInstanceWithoutProperties('${escapeHtml(inst.id)}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></button>
+                           <button type="button" class="btn-action btn-start-properties" aria-label="Start instance with properties" title="Start with properties" onclick="startInstance('${escapeHtml(inst.id)}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8" /></svg></button>`
                     }
                 </div>
             </div>
@@ -1652,10 +1653,27 @@ function initApp() {
         }
     }
 
+    window.startInstanceWithoutProperties = async function(id) {
+        try {
+            const response = await fetch(`/api/instances/${encodeURIComponent(id)}/start-without-properties`, { method: 'POST' });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
+            term.write(`✓ ${data.message}\r\n`);
+            await loadInstances();
+        } catch (error) {
+            term.write(`✗ Error: ${error.message}\r\n`);
+        }
+    };
+
     window.startInstance = async function(id) {
         try {
             const response = await fetch(`/api/instances/${encodeURIComponent(id)}/start`, { method: 'POST' });
             const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
             term.write(`✓ ${data.message}\r\n`);
             await loadInstances();
         } catch (error) {

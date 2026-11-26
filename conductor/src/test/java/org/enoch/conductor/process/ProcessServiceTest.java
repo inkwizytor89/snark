@@ -210,6 +210,28 @@ class ProcessServiceTest {
         verify(launcher, times(2)).launch(eq(profile), any(Path.class), any(Path.class));
     }
 
+    @Test
+    void shouldStartInstanceWithoutResolvingPropertiesFile() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        WorkerSocketHandler workerSocketHandler = mock(WorkerSocketHandler.class);
+        WorkerProcessLauncher launcher = mock(WorkerProcessLauncher.class);
+        InstanceLogService logService = mock(InstanceLogService.class);
+        Process process = mock(Process.class);
+        InstanceProfile profile = profile("worker#without-properties");
+        when(launcher.launch(eq(profile), any(Path.class))).thenReturn(process);
+        when(process.isAlive()).thenReturn(true);
+        when(process.pid()).thenReturn(51L);
+
+        ProcessService service = new ProcessService(
+                temporaryDirectory.toString(), 30_000L, profileRepository,
+                workerSocketHandler, launcher, logService, null);
+        service.startWithoutProperties(profile);
+
+        verify(launcher).launch(eq(profile), any(Path.class));
+        verify(profileRepository, times(0)).resolvePropertiesPath(profile);
+        assertSame(process, service.getRuntime(profile.getId()).getProcess());
+    }
+
     private InstanceProfile profile(String id) {
         InstanceProfile profile = new InstanceProfile();
         profile.setId(id);
