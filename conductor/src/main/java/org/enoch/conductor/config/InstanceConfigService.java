@@ -66,6 +66,10 @@ public class InstanceConfigService {
         return result;
     }
 
+    public void setModuleEntry(String instanceId, ConfigEntry config) throws Exception {
+        sendConfigRequest(instanceId, "request:module:set", config);
+    }
+
     public void updateConfigEntry(String instanceId, ConfigEntry config) throws Exception {
         List<ConfigDefinition> result = sendConfigRequest(instanceId, "request:config:set", List.of(config));
         if (result == null || result.isEmpty()) {
@@ -166,6 +170,9 @@ public class InstanceConfigService {
             return List.of();
         }
 
+        if (payload instanceof Map<?, ?> payloadMap && payloadMap.containsKey("module")) {
+            return List.of();
+        }
         return objectMapper.convertValue(payload, new TypeReference<List<ConfigDefinition>>() {});
     }
 

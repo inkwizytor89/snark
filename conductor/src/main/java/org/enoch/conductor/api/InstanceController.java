@@ -650,7 +650,8 @@ public class InstanceController {
 
         try {
             var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
-            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions));
+            var modules = instanceThreadConfigurationService.getModules(id);
+            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, modules));
         } catch (RuntimeException e) {
             String message = e.getMessage() == null ? "Unknown thread configuration error" : e.getMessage();
             if (message.contains("timed out")) {
@@ -673,6 +674,26 @@ public class InstanceController {
         try {
             var definitions = instanceConfigService.fetchDefinitions(id);
             return ResponseEntity.ok(new ConfigDefinitionsResponse(id, definitions));
+        } catch (RuntimeException e) {
+            return mapConfigException(e);
+        }
+    }
+
+    @PostMapping("/{id}/modules/config")
+    public ResponseEntity<?> setModuleConfig(@PathVariable String id, @RequestBody ConfigEntry config) throws Exception {
+        if (profileRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (config == null || config.getModule() == null || config.getModule().isBlank()
+                || config.getKey() == null || config.getKey().isBlank()
+                || config.getValue() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Module, key, and value are required"));
+        }
+        try {
+            instanceConfigService.setModuleEntry(id, config);
+            var definitions = instanceThreadConfigurationService.fetchManagedDefinitions(id);
+            var refreshedModules = instanceThreadConfigurationService.getModules(id);
+            return ResponseEntity.ok(new InstanceThreadConfigurationsResponse(id, definitions, refreshedModules));
         } catch (RuntimeException e) {
             return mapConfigException(e);
         }

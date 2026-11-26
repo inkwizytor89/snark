@@ -18,6 +18,10 @@ the module and thread structure.
 - `deleteThread(term)` removes a thread and its configuration entries.
 - `deleteModule(term)` removes a module, all of its threads, and their
   configuration entries.
+- `listModuleDefinitions()` returns module names and current `time`/`conditions`
+  settings for GUI and WebSocket consumers.
+- `updateModule(term)` updates one module setting (`time` or `conditions`) and
+  creates the module when it does not exist.
 
 ## Configuration term
 

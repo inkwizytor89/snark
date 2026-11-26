@@ -261,7 +261,7 @@ class SnarkWebSocketClientTest {
         assertEquals("response:config:set", response.getType());
         assertEquals("config-set-1", response.getId());
         assertEquals(200, response.getStatus());
-        ConfigEntry definition = (ConfigEntry) ((java.util.List<?>) response.getPayload()).getFirst();
+        ConfigDefinition definition = (ConfigDefinition) ((java.util.List<?>) response.getPayload()).getFirst();
         assertEquals("refresh", definition.getKey());
         assertEquals("45 seconds", definition.getValue());
         org.mockito.ArgumentCaptor<java.util.List<ConfigEntry>> terms =

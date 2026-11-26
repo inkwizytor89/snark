@@ -14,6 +14,7 @@ import org.enoch.common.command.CommandMessage;
 import org.enoch.common.command.CommandSubmitRequest;
 import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.config.ThreadDefinition;
+import org.enoch.common.config.ModuleDefinition;
 import org.enoch.snark.config.ConfigService;
 import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ConfigDefinition;
@@ -289,6 +290,14 @@ public class SnarkWebSocketClient {
             CommandMessage incoming,
             java.util.List<ThreadDefinition> definitions
     ) {
+        return buildThreadConfigurationResponse(incoming, definitions, java.util.List.of());
+    }
+
+    CommandMessage buildThreadConfigurationResponse(
+            CommandMessage incoming,
+            java.util.List<ThreadDefinition> definitions,
+            java.util.List<ModuleDefinition> modules
+    ) {
         CommandMessage response = new CommandMessage();
         response.setId(incoming.getId());
         response.setType("response:thread:configurations");
@@ -296,7 +305,7 @@ public class SnarkWebSocketClient {
         response.setTo(resolveTarget(incoming));
         response.setTimestamp(System.currentTimeMillis());
         response.setStatus(200);
-        response.setPayload(Map.of("instanceId", instanceId, "definitions", definitions));
+        response.setPayload(Map.of("instanceId", instanceId, "definitions", definitions, "modules", modules));
         return response;
     }
 
@@ -306,7 +315,10 @@ public class SnarkWebSocketClient {
                 throw new IllegalStateException("Thread manager is unavailable");
             }
             java.util.List<ThreadDefinition> definitions = threadManagerProvider.getObject().managedDefinitions();
-            CommandMessage response = buildThreadConfigurationResponse(incoming, definitions);
+            java.util.List<ModuleDefinition> modules = configServiceProvider == null
+                    ? java.util.List.of()
+                    : configServiceProvider.getObject().listModuleDefinitions();
+            CommandMessage response = buildThreadConfigurationResponse(incoming, definitions, modules);
             if (objectMapper.writeValueAsBytes(response).length > MAX_MESSAGE_BYTES) {
                 return buildThreadConfigurationError(incoming, 500,
                         "Managed thread configuration response exceeds the message size limit.");
@@ -386,6 +398,18 @@ public class SnarkWebSocketClient {
                 throw new IllegalStateException("Configuration service is unavailable");
             }
 
+            if ("request:module:set".equals(incoming.getType())) {
+                ConfigEntry config = objectMapper.convertValue(incoming.getPayload(), ConfigEntry.class);
+                if (config == null || config.getModule() == null || config.getModule().isBlank()
+                        || config.getKey() == null || config.getKey().isBlank()
+                        || config.getValue() == null) {
+                    throw new IllegalArgumentException("Module, key, and value are required");
+                }
+                ModuleDefinition definition = configServiceProvider.getObject().updateModule(config);
+                return buildConfigMutationResponse(incoming, 200, null,
+                        java.util.Map.of("module", definition));
+            }
+
             if ("request:thread:change-module".equals(incoming.getType())) {
                 JsonNode payload = objectMapper.valueToTree(incoming.getPayload());
                 ConfigEntry config = objectMapper.convertValue(payload.path("config"), ConfigEntry.class);
@@ -428,6 +452,22 @@ public class SnarkWebSocketClient {
         } catch (RuntimeException e) {
             return buildConfigMutationResponse(incoming, 500, "Failed to mutate configuration.");
         }
+    }
+
+    private CommandMessage buildConfigMutationResponse(CommandMessage incoming, int status,
+                                                       String errorMessage, Object payload) {
+        CommandMessage response = new CommandMessage();
+        response.setId(incoming.getId());
+        response.setType(status == 200
+                ? "response:" + incoming.getType().substring("request:".length())
+                : "error:" + incoming.getType().substring("request:".length()));
+        response.setFrom(instanceId);
+        response.setTo(resolveTarget(incoming));
+        response.setTimestamp(System.currentTimeMillis());
+        response.setStatus(status);
+        response.setPayload(payload);
+        response.setError(errorMessage);
+        return response;
     }
 
     private CommandMessage buildConfigMutationResponse(CommandMessage incoming, int status, String errorMessage) {
@@ -693,6 +733,7 @@ public class SnarkWebSocketClient {
                     sendWebSocketMessage(webSocket, buildConfigSetResponse(incoming));
                 } else if (("request:config:delete".equals(incoming.getType())
                         || "request:thread:change-module".equals(incoming.getType())
+                        || "request:module:set".equals(incoming.getType())
                         || "request:module:delete".equals(incoming.getType())
                         || "request:thread:delete".equals(incoming.getType())) && registered) {
                     sendWebSocketMessage(webSocket, buildConfigMutationResponse(incoming));

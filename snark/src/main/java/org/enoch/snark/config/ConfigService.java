@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ConfigDefinition;
+import org.enoch.common.config.ModuleDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -99,6 +100,51 @@ public class ConfigService implements ApplicationRunner {
             moduleRepository.delete(module);
             log.info("Deleted module '{}' and all its threads and configurations", term.getModule());
         });
+    }
+
+    @Transactional(readOnly = true)
+    public List<ModuleDefinition> listModuleDefinitions() {
+        return moduleRepository.findAll().stream().map(module -> {
+            ModuleDefinition definition = new ModuleDefinition(module.name, module.time, module.conditions);
+            definition.setCreatedOn(module.createdOn);
+            definition.setUpdated(module.updated);
+            definition.setConfigs(List.of(
+                    new ConfigDefinition("time", module.time, false,
+                            "Schedule controlling when the module can run."),
+                    new ConfigDefinition("conditions", module.conditions, false,
+                            "Conditions that must be satisfied before the module can run.")
+            ));
+            return definition;
+        }).toList();
+    }
+
+    @Transactional
+    public ModuleDefinition updateModule(ConfigEntry term) {
+        if (term == null || term.getModule() == null || term.getModule().isBlank()
+                || term.getKey() == null || term.getKey().isBlank()) {
+            throw new IllegalArgumentException("Module, key, and value are required");
+        }
+
+        ModuleEntity module = moduleRepository.findByName(term.getModule())
+                .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
+        switch (term.getKey()) {
+            case "time" -> module.time = term.getValue();
+            case "conditions" -> module.conditions = term.getValue();
+            default -> throw new IllegalArgumentException("Unsupported module configuration key: " + term.getKey());
+        }
+        module.updated = LocalDateTime.now();
+        moduleRepository.save(module);
+
+        ModuleDefinition definition = new ModuleDefinition(module.name, module.time, module.conditions);
+        definition.setCreatedOn(module.createdOn);
+        definition.setUpdated(module.updated);
+        definition.setConfigs(List.of(
+                new ConfigDefinition("time", module.time, false,
+                        "Schedule controlling when the module can run."),
+                new ConfigDefinition("conditions", module.conditions, false,
+                        "Conditions that must be satisfied before the module can run.")
+        ));
+        return definition;
     }
 
     public List<ConfigDefinition> listConfigs() {

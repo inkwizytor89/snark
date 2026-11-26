@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "modules")
 public class ModuleEntity extends IdEntity {
@@ -16,6 +18,9 @@ public class ModuleEntity extends IdEntity {
 
     @Column(name = "conditions", nullable = false, columnDefinition = "TEXT")
     public String conditions = "";
+
+    @Column(name = "created_on")
+    public LocalDateTime createdOn = LocalDateTime.now();
 
     public ModuleEntity() {
     }

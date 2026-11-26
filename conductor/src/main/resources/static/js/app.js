@@ -52,6 +52,7 @@ function initApp() {
             instanceId: null,
             status: 'idle',
             configs: [],
+            modules: [],
             error: '',
             bannerMessage: '',
             bannerType: '',
@@ -733,7 +734,7 @@ function initApp() {
             body = '<div class="loading">Loading configs...</div>';
         } else if (configState.status === 'error') {
             body = `<div class="config-feedback is-error">${escapeHtml(configState.error)}</div>`;
-        } else if (configState.status === 'loaded' && configState.configs.length === 0) {
+        } else if (configState.status === 'loaded' && configState.configs.length === 0 && configState.modules.length === 0) {
             body = '<div class="loading">No configs configured</div>';
         } else if (configState.status === 'loaded') {
             body = renderConfigGroups(configState.configs);
@@ -774,27 +775,75 @@ function initApp() {
             threads.get(threadName).push(config);
         });
 
-        const moduleMarkup = [...modules.entries()]
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([moduleName, threads]) => `
-                <section class="config-module-card">
-                    <div class="config-module-header">
-                        <div class="config-module-title">${escapeHtml(moduleName)}</div>
-                        <div class="config-header-actions">
-                            <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}">Delete module</button>
+        const moduleDefinitions = new Map(
+            (Array.isArray(configState.modules) ? configState.modules : [])
+                .map((module) => [normalizeModuleDisplayName(module.name), module])
+        );
+
+        const moduleNames = new Set([
+            ...modules.keys(),
+            ...moduleDefinitions.keys()
+        ]);
+
+        const moduleMarkup = [...moduleNames]
+            .sort((a, b) => a.localeCompare(b))
+            .map((moduleName) => {
+                const threads = modules.get(moduleName) || new Map();
+                const module = moduleDefinitions.get(moduleName);
+                return `
+                    <section class="config-module-card">
+                        <div class="config-module-header">
+                            <div class="config-module-title">${escapeHtml(moduleName)}</div>
+                            <div class="config-header-actions">
+                                <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}">Delete module</button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="config-thread-list">
-                        ${[...threads.entries()]
-                            .sort((a, b) => a[0].localeCompare(b[0]))
-                            .map(([threadName, items]) => renderConfigThread(moduleName, threadName, items))
-                            .join('')}
-                    </div>
-                </section>
-            `)
+                        <div class="config-thread-list">
+                            ${module ? renderModuleSettings(module) : ''}
+                            ${[...threads.entries()]
+                                .sort((a, b) => a[0].localeCompare(b[0]))
+                                .map(([threadName, items]) => renderConfigThread(moduleName, threadName, items))
+                                .join('')}
+                        </div>
+                    </section>
+                `;
+            })
             .join('');
 
         return `<div class="config-groups">${moduleMarkup}</div>`;
+    }
+
+    function renderModuleSettings(module) {
+        const moduleName = module.name || '';
+        const configs = Array.isArray(module.configs) ? module.configs : [];
+        const fields = configs.map((config) => `
+            <div class="config-row">
+                <div class="config-key">
+                    <span class="config-key-name">${escapeHtml(config.key)}</span>
+                    ${config.description ? `<span class="config-description-text">${escapeHtml(config.description)}</span>` : ''}
+                </div>
+                <div>
+                    <input
+                        type="text"
+                        class="config-value-input"
+                        data-module-config-name="${escapeHtml(moduleName)}"
+                        data-module-config-key="${escapeHtml(config.key)}"
+                        value="${escapeHtml(config.value ?? '')}"
+                    />
+                </div>
+            </div>
+        `).join('');
+        return `
+            <section class="config-thread-card config-module-settings-card">
+                <div class="config-thread-header">
+                    <div class="config-thread-title">Module settings</div>
+                    <div class="config-header-actions">
+                        <button type="button" class="btn-primary btn-small" data-config-action="save-module" data-module-name="${escapeHtml(moduleName)}">Save module</button>
+                    </div>
+                </div>
+                <div class="config-thread-body">${fields}</div>
+            </section>
+        `;
     }
 
     function renderConfigThread(moduleName, threadName, configs) {
@@ -1002,6 +1051,7 @@ function initApp() {
             const endpoint = forceReload ? 'thread-configurations' : 'configs';
             const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/${endpoint}`);
             configState.status = 'loaded';
+            configState.modules = forceReload && Array.isArray(payload.modules) ? payload.modules : [];
             configState.configs = forceReload
                 ? (Array.isArray(payload.definitions)
                     ? payload.definitions.flatMap((definition) => (
@@ -1023,6 +1073,44 @@ function initApp() {
         }
 
         renderInstanceDetails();
+    }
+
+    async function saveModuleConfig(moduleName) {
+        const inst = getSelectedInstance();
+        if (!inst) return;
+
+        const inputs = [...instanceDetails.querySelectorAll('[data-module-config-name]')]
+            .filter((input) => input.dataset.moduleConfigName === moduleName);
+        try {
+            let payload = null;
+            for (const input of inputs) {
+                payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/modules/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        module: moduleName,
+                        thread: 'main',
+                        key: input.dataset.moduleConfigKey,
+                        value: input.value
+                    })
+                });
+            }
+            configState.modules = Array.isArray(payload?.modules) ? payload.modules : configState.modules;
+            configState.configs = Array.isArray(payload?.definitions)
+                ? payload.definitions.flatMap((definition) => Array.isArray(definition.configs)
+                    ? definition.configs.map((config) => ({
+                        ...config,
+                        module: config.module ?? definition.module ?? '',
+                        thread: config.thread ?? definition.name ?? definition.type ?? '',
+                        threadDescription: definition.description || ''
+                    })) : [])
+                : configState.configs;
+            setConfigBanner('Module configs saved', 'success');
+            renderInstanceDetails();
+        } catch (error) {
+            setConfigBanner(error.message, 'error');
+            renderInstanceDetails();
+        }
     }
 
     async function saveConfigRow(rowKey) {
@@ -1997,6 +2085,8 @@ function initApp() {
                 deleteThread(configAction.dataset.moduleName, configAction.dataset.threadName);
             } else if (action === 'delete-module') {
                 deleteModule(configAction.dataset.moduleName);
+            } else if (action === 'save-module') {
+                saveModuleConfig(configAction.dataset.moduleName);
             }
             return;
         }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import org.enoch.common.command.CommandMessage;
 import org.enoch.common.config.ThreadDefinition;
+import org.enoch.common.config.ModuleDefinition;
 import org.enoch.conductor.ws.WorkerSocketHandler;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class InstanceThreadConfigurationService {
     private final WorkerSocketHandler workerSocketHandler;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<String, CompletableFuture<List<ThreadDefinition>>> pendingRequests = new ConcurrentHashMap<>();
+    private final Map<String, List<ModuleDefinition>> modulesByInstance = new ConcurrentHashMap<>();
     private final Map<String, PendingRequest> pendingRequestDetails = new ConcurrentHashMap<>();
 
     public InstanceThreadConfigurationService(WorkerSocketHandler workerSocketHandler) {
@@ -112,6 +114,14 @@ public class InstanceThreadConfigurationService {
             if (definitions == null || definitions.stream().anyMatch(this::isInvalidDefinition)) {
                 throw new IllegalArgumentException("Thread configuration response contains invalid definitions");
             }
+            List<ModuleDefinition> modules = objectMapper.convertValue(
+                    payload.getOrDefault("modules", List.of()),
+                    new TypeReference<List<ModuleDefinition>>() {});
+            if (modules == null || modules.stream().anyMatch(module ->
+                    module == null || module.getName() == null || module.getName().isBlank())) {
+                throw new IllegalArgumentException("Thread configuration response contains invalid modules");
+            }
+            modulesByInstance.put(instanceId, modules);
             future.complete(definitions);
         } catch (Exception e) {
             future.completeExceptionally(new RuntimeException("Malformed thread configuration response", e));
@@ -123,6 +133,14 @@ public class InstanceThreadConfigurationService {
                 || definition.getConfigs() == null
                 || definition.getConfigs().stream().anyMatch(config ->
                 config == null || config.getKey() == null || config.getKey().isBlank());
+    }
+
+    public List<ModuleDefinition> getModules(String instanceId) {
+        return modulesByInstance.getOrDefault(instanceId, List.of());
+    }
+
+    public void clearInstanceState(String instanceId) {
+        modulesByInstance.remove(instanceId);
     }
 
     public void cancelPendingRequests(String instanceId) {

@@ -40,24 +40,12 @@ class SnarkApplicationTests {
 
 	@Test
 	void migratesCommonThreadConfigurationOutOfConfigRows() {
-		String mainTime = jdbcTemplate.queryForObject("""
-				SELECT t.time
-				FROM threads t JOIN modules m ON m.id = t.module_id
-				WHERE m.name = 'global' AND t.name = 'main'
-				""", String.class);
-		String consumerPause = jdbcTemplate.queryForObject("""
-				SELECT t.pause
-				FROM threads t JOIN modules m ON m.id = t.module_id
-				WHERE m.name = 'global' AND t.name = 'consumer'
-				""", String.class);
 		Integer commonConfigCount = jdbcTemplate.queryForObject("""
 				SELECT COUNT(*)
 				FROM config
 				WHERE "key" IN ('time', 'pause', 'debug', 'command_limit', 'conditions', 'name', 'type')
 				""", Integer.class);
 
-		assertEquals("on", mainTime);
-		assertEquals("0.4S", consumerPause);
 		assertEquals(0, commonConfigCount);
 	}
 

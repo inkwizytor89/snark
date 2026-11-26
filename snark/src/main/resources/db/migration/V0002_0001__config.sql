@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS modules (
     time VARCHAR(255) NOT NULL DEFAULT 'on',
     conditions TEXT NOT NULL DEFAULT '',
     updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_modules_name UNIQUE (name)
 );
 

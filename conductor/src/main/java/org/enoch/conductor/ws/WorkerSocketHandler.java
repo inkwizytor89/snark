@@ -718,7 +718,9 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
                 || "response:config:definitions".equals(type)
                 || "response:config:set".equals(type)
                 || "response:config:delete".equals(type)
-                || "error:config:set".equals(type);
+                || "response:module:set".equals(type)
+                || "error:config:set".equals(type)
+                || "error:module:set".equals(type);
     }
 
     private boolean isThreadConfigurationResponse(String type) {
