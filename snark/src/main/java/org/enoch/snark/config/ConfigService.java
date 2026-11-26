@@ -41,7 +41,7 @@ public class ConfigService implements ApplicationRunner {
     private final ThreadRepository threadRepository;
     private final ConfigRepository configRepository;
 
-    @Value("${properties:server.properties}")
+    @Value("${properties:}")
     private String propertiesPath;
 
     @Override
