@@ -1426,31 +1426,8 @@ function initApp() {
             : '<option value="">No threads available</option>';
         configThreadSelect.disabled = !threads.length || configState.modalSaving;
 
-        const definitions = getSelectedThreadDefinitions();
-        if (!definitions.length) {
-            configThreadDefinitionFields.innerHTML = '<div class="loading">Select a thread to load fields</div>';
-            saveConfigThreadBtn.disabled = true;
-        } else {
-            configThreadDefinitionFields.innerHTML = definitions.map((definition) => `
-                <div class="config-thread-field-card">
-                    <div class="config-key">
-                        <span class="config-key-name">${escapeHtml(definition.key)}</span>
-                        ${definition.description ? `<span class="config-description-text">${escapeHtml(definition.description)}</span>` : ''}
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            class="config-thread-field-input"
-                            data-thread-config-key="${escapeHtml(definition.key)}"
-                            data-thread-config-description="${escapeHtml(definition.description || '')}"
-                            value="${escapeHtml(configState.modalValues[definition.key] || '')}"
-                            ${configState.modalSaving ? 'disabled' : ''}
-                        />
-                    </div>
-                </div>
-            `).join('');
-            saveConfigThreadBtn.disabled = configState.modalSaving;
-        }
+        configThreadDefinitionFields.innerHTML = '';
+        saveConfigThreadBtn.disabled = !configState.modalThread || configState.modalSaving;
 
         if (configState.modalSaving) {
             saveConfigThreadBtn.textContent = 'Saving...';
@@ -1493,49 +1470,42 @@ function initApp() {
             return;
         }
 
-        const definitions = getSelectedThreadDefinitions();
-        if (!definitions.length) {
-            configState.modalError = 'Thread is required';
+        if (!configState.modalThread) {
+            configState.modalError = 'Thread type is required';
             renderConfigThreadModal();
             return;
         }
 
-        const configsToSave = definitions.map((definition) => {
-            const input = configThreadDefinitionFields.querySelector(`[data-thread-config-key="${CSS.escape(definition.key)}"]`);
-            const value = input ? input.value : '';
-            return {
-                module: moduleName.trim(),
-                thread: definition.thread,
-                key: definition.key,
-                value: value,
-                temporary: false,
-                description: definition.description || ''
-            };
-        }).filter((config) => String(config.value).trim() !== '');
-
-        if (!configsToSave.length) {
-            configState.modalError = 'No values to save';
-            renderConfigThreadModal();
-            return;
-        }
 
         configState.modalSaving = true;
         configState.modalError = '';
         renderConfigThreadModal();
 
         try {
-            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/configs`, {
+            const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ configs: configsToSave })
+                body: JSON.stringify({
+                    module: moduleName.trim(),
+                    thread: configState.modalThread
+                })
             });
 
             configState.status = 'loaded';
-            configState.configs = Array.isArray(payload.configs) ? payload.configs : [];
+            configState.configs = Array.isArray(payload.definitions)
+                ? payload.definitions.flatMap((definition) => Array.isArray(definition.configs)
+                    ? definition.configs.map((config) => ({
+                        ...config,
+                        module: config.module ?? definition.module ?? '',
+                        thread: config.thread ?? definition.name ?? definition.type ?? '',
+                        threadDescription: definition.description || ''
+                    }))
+                    : [])
+                : [];
             configState.dirtyValues = {};
             configState.rowErrors = {};
             configState.pendingActions = {};
-            setConfigBanner('Thread configs saved', 'success');
+            setConfigBanner('Thread created with default values', 'success');
             closeConfigThreadModal();
             renderInstanceDetails();
         } catch (error) {
@@ -2034,7 +2004,7 @@ function initApp() {
             renderInstanceDetails();
             loadInstanceStatus(item.dataset.id);
             if (activeDetailsTab === 'configs') {
-                loadConfigs();
+                loadConfigs(true);
             }
             if (activeDetailsTab === 'commands') {
                 loadCommands(item.dataset.id);
@@ -2048,7 +2018,7 @@ function initApp() {
             activeDetailsTab = tabButton.dataset.detailTab;
             renderInstanceDetails();
             if (activeDetailsTab === 'configs') {
-                loadConfigs();
+                loadConfigs(true);
             }
             if (activeDetailsTab === 'coordinates' && selectedInstance) {
                 loadCoordinates(selectedInstance);

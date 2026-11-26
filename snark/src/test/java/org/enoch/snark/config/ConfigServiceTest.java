@@ -6,6 +6,7 @@ import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ModuleRepository;
 import org.enoch.snark.db.repository.ThreadRepository;
+import org.enoch.snark.instance.si.ThreadManager;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -124,5 +125,29 @@ class ConfigServiceTest {
         assertEquals("5S", threadCaptor.getValue().pause);
         assertTrue(threadCaptor.getValue().updated.isAfter(previousUpdate)
                 || threadCaptor.getValue().updated.isEqual(previousUpdate));
+    }
+
+    @Test
+    void creatingUpdateThreadKeepsDefaultTimeOff() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+
+        when(moduleRepository.findByName("global")).thenReturn(Optional.of(module));
+        when(threadRepository.find("global", "update")).thenReturn(Optional.empty());
+        when(threadRepository.save(any(ThreadEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("global");
+        term.setThread("update");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository).createThread(term);
+
+        ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
+        verify(threadRepository).save(threadCaptor.capture());
+        assertEquals("off", threadCaptor.getValue().time);
+        assertEquals("update", threadCaptor.getValue().type);
     }
 }

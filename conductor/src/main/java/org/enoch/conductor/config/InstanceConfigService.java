@@ -107,6 +107,10 @@ public class InstanceConfigService {
         sendConfigRequest(instanceId, "request:module:delete", term);
     }
 
+    public void createThread(String instanceId, ConfigEntry term) throws Exception {
+        sendConfigRequest(instanceId, "request:thread:create", term);
+    }
+
     public void deleteThread(String instanceId, ConfigEntry term) throws Exception {
         sendConfigRequest(instanceId, "request:thread:delete", term);
     }
@@ -170,8 +174,13 @@ public class InstanceConfigService {
             return List.of();
         }
 
-        if (payload instanceof Map<?, ?> payloadMap && payloadMap.containsKey("module")) {
-            return List.of();
+        if (payload instanceof Map<?, ?> payloadMap) {
+            if (payloadMap.containsKey("configs")) {
+                return objectMapper.convertValue(payloadMap.get("configs"), new TypeReference<List<ConfigDefinition>>() {});
+            }
+            if (payloadMap.containsKey("module")) {
+                return List.of();
+            }
         }
         return objectMapper.convertValue(payload, new TypeReference<List<ConfigDefinition>>() {});
     }
