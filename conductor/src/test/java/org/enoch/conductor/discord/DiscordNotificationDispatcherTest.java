@@ -9,6 +9,7 @@ import org.enoch.conductor.instance.ProfileRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +53,20 @@ class DiscordNotificationDispatcherTest {
         dispatcher.dispatchStatusChange("worker#1", "status changed to running");
 
         verify(channel, times(3)).sendMessage(anyString());
+    }
+
+    @Test
+    void shouldDoNothingWhenDiscordChannelIsNotConfigured() throws Exception {
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        ObjectProvider<DiscordBotService> botProvider = mock(ObjectProvider.class);
+
+        for (String channelId : Arrays.asList(null, "", "   ", "0")) {
+            when(profileRepository.loadAll()).thenReturn(List.of(profile(channelId)));
+            DiscordNotificationDispatcher dispatcher = new DiscordNotificationDispatcher(profileRepository, botProvider);
+            dispatcher.dispatchStatusChange("worker#1", "status changed to running");
+        }
+
+        verifyNoInteractions(botProvider);
     }
 
     @Test

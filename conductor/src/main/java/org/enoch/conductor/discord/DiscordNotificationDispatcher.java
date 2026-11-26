@@ -59,7 +59,11 @@ public class DiscordNotificationDispatcher {
             }
 
             String channelId = profile.getDiscordChannelId();
-            if (!DiscordChannelValidator.isAllowedForNotification(channelId)) {
+            String normalizedChannelId = channelId == null ? "" : channelId.trim();
+            if (normalizedChannelId.isEmpty() || "0".equals(normalizedChannelId)) {
+                return;
+            }
+            if (!DiscordChannelValidator.isAllowedForNotification(normalizedChannelId)) {
                 LOGGER.warn("discord.bot.notification.failed instanceId={} channelId={} reason=invalid_channel_id", instanceId, channelId);
                 return;
             }
