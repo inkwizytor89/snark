@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +59,8 @@ public class ConfigService implements ApplicationRunner {
             ThreadEntity threadEntity = threadRepository.find(term.getModule(), term.getThread())
                     .orElseGet(() -> createThreadEntity(term));
             threadEntity.update(term);
+            threadEntity.updated = LocalDateTime.now();
+            threadRepository.save(threadEntity);
             configRepository.saveAll(threadEntity.configs);
         }
     }
@@ -70,7 +73,16 @@ public class ConfigService implements ApplicationRunner {
         ModuleEntity module = moduleRepository.findByName(moduleName)
                 .orElseGet(() -> moduleRepository.save(new ModuleEntity(moduleName)));
 
+        module.updated = LocalDateTime.now();
+        moduleRepository.save(module);
+
+        moduleRepository.findByName(term.getModule()).ifPresent(sourceModule -> {
+            sourceModule.updated = LocalDateTime.now();
+            moduleRepository.save(sourceModule);
+        });
+
         thread.module = module;
+        thread.updated = LocalDateTime.now();
         threadRepository.save(thread);
     }
 
@@ -106,7 +118,11 @@ public class ConfigService implements ApplicationRunner {
     public void deleteConfig(ConfigEntry term) {
         threadRepository.find(term.getModule(), term.getThread()).ifPresent(thread ->
                 configRepository.findByThreadAndKey(thread, term.getKey())
-                        .ifPresent(configRepository::delete));
+                        .ifPresent(config -> {
+                            configRepository.delete(config);
+                            thread.updated = LocalDateTime.now();
+                            threadRepository.save(thread);
+                        }));
     }
 
     @Transactional

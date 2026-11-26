@@ -11,8 +11,10 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +42,87 @@ class ConfigServiceTest {
                 .updateThreads(List.of(term));
 
         ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
+        verify(threadRepository, atLeastOnce()).save(threadCaptor.capture());
+        assertEquals("expedition", threadCaptor.getAllValues().getLast().type);
+    }
+
+    @Test
+    void changingThreadModuleUpdatesBothModulesAndThread() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity source = new ModuleEntity("source");
+        ModuleEntity target = new ModuleEntity("target");
+        ThreadEntity thread = new ThreadEntity("fleet", source, "fleet");
+
+        when(threadRepository.find("source", "fleet")).thenReturn(Optional.of(thread));
+        when(moduleRepository.findByName("target")).thenReturn(Optional.of(target));
+        when(moduleRepository.findByName("source")).thenReturn(Optional.of(source));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("source");
+        term.setThread("fleet");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .changeThreadModule(term, "target");
+
+        assertEquals(target, thread.module);
+        assertTrue(thread.updated.isAfter(LocalDateTime.MIN));
+        assertTrue(source.updated.isAfter(LocalDateTime.MIN));
+        assertTrue(target.updated.isAfter(LocalDateTime.MIN));
+        verify(moduleRepository, atLeast(2)).save(any(ModuleEntity.class));
+        verify(threadRepository).save(thread);
+    }
+
+    @Test
+    void deletingConfigUpdatesThreadTimestamp() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+        ThreadEntity thread = new ThreadEntity("queue-simulator", module, "queue-simulator");
+        org.enoch.snark.db.entity.ConfigEntity config =
+                new org.enoch.snark.db.entity.ConfigEntity(thread, "pause", "10S");
+
+        when(threadRepository.find("global", "queue-simulator")).thenReturn(Optional.of(thread));
+        when(configRepository.findByThreadAndKey(thread, "pause")).thenReturn(Optional.of(config));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("global");
+        term.setThread("queue-simulator");
+        term.setKey("pause");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository).deleteConfig(term);
+
+        verify(configRepository).delete(config);
+        verify(threadRepository).save(thread);
+        assertTrue(thread.updated.isAfter(LocalDateTime.MIN));
+    }
+
+    @Test
+    void persistsControlConfigAndUpdatesThreadTimestamp() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+        ThreadEntity thread = new ThreadEntity("queue-simulator", module, "queue-simulator");
+        LocalDateTime previousUpdate = thread.updated;
+        when(threadRepository.find("global", "queue-simulator")).thenReturn(Optional.of(thread));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("global");
+        term.setThread("queue-simulator");
+        term.setKey("pause");
+        term.setValue("5S");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(term));
+
+        ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
         verify(threadRepository).save(threadCaptor.capture());
-        assertEquals("expedition", threadCaptor.getValue().type);
+        verify(configRepository).saveAll(thread.configs);
+        assertEquals("5S", threadCaptor.getValue().pause);
+        assertTrue(threadCaptor.getValue().updated.isAfter(previousUpdate)
+                || threadCaptor.getValue().updated.isEqual(previousUpdate));
     }
 }
