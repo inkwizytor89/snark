@@ -60,7 +60,9 @@ function initApp() {
             dirtyValues: {},
             rowErrors: {},
             pendingActions: {},
+            pendingMutation: '',
             definitions: [],
+            availableTypes: [],
             definitionsStatus: 'idle',
             definitionsError: '',
             modalThread: '',
@@ -797,7 +799,7 @@ function initApp() {
                         <div class="config-module-header">
                             <div class="config-module-title">${escapeHtml(moduleName)}</div>
                             <div class="config-header-actions">
-                                <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}">Delete module</button>
+                                <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}" ${configState.pendingMutation === `module-delete:${moduleName}` ? 'disabled' : ''}>${configState.pendingMutation === `module-delete:${moduleName}` ? '<span class="config-spinner"></span>Deleting...' : 'Delete module'}</button>
                             </div>
                         </div>
                         <div class="config-thread-list">
@@ -840,7 +842,7 @@ function initApp() {
                 <div class="config-thread-header">
                     <div class="config-thread-title">Module settings</div>
                     <div class="config-header-actions">
-                        <button type="button" class="btn-primary btn-small" data-config-action="save-module" data-module-name="${escapeHtml(moduleName)}">Save module</button>
+                        <button type="button" class="btn-primary btn-small" data-config-action="save-module" data-module-name="${escapeHtml(moduleName)}" ${configState.pendingMutation === `module-save:${moduleName}` ? 'disabled' : ''}>${configState.pendingMutation === `module-save:${moduleName}` ? '<span class="config-spinner"></span>Saving...' : 'Save module'}</button>
                     </div>
                 </div>
                 <div class="config-thread-body">${fields}</div>
@@ -858,8 +860,8 @@ function initApp() {
                 <div class="config-thread-header">
                     <div class="config-thread-title">${escapeHtml(threadName)} ${helpIcon}</div>
                     <div class="config-header-actions">
-                        <button type="button" class="btn-secondary btn-small" data-config-action="change-thread-module" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}">Change module</button>
-                        <button type="button" class="btn-danger btn-small" data-config-action="delete-thread" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}">Delete thread</button>
+                        <button type="button" class="btn-secondary btn-small" data-config-action="change-thread-module" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}" ${configState.pendingMutation === `thread-module:${moduleName}:${threadName}` ? 'disabled' : ''}>${configState.pendingMutation === `thread-module:${moduleName}:${threadName}` ? '<span class="config-spinner"></span>Moving...' : 'Change module'}</button>
+                        <button type="button" class="btn-danger btn-small" data-config-action="delete-thread" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}" ${configState.pendingMutation === `thread-delete:${moduleName}:${threadName}` ? 'disabled' : ''}>${configState.pendingMutation === `thread-delete:${moduleName}:${threadName}` ? '<span class="config-spinner"></span>Deleting...' : 'Delete thread'}</button>
                     </div>
                 </div>
                 <div class="config-thread-body">
@@ -914,7 +916,7 @@ function initApp() {
                             data-row-key="${escapeHtml(rowKey)}"
                             ${!isChanged || isBusy ? 'disabled' : ''}
                         >
-                            ${pendingAction === 'saving' ? 'Saving...' : 'Save'}
+                            ${pendingAction === 'saving' ? '<span class="config-spinner"></span>Saving...' : 'Save'}
                         </button>
                     </div>
                     <div class="config-row-actions">
@@ -975,62 +977,74 @@ function initApp() {
         return payload;
     }
 
+    async function executeConfirmedMutation(pendingKey, operation, successMessage) {
+        configState.pendingMutation = pendingKey;
+        renderInstanceDetails();
+        try {
+            await operation();
+            await loadConfigs(true);
+            configState.pendingMutation = '';
+            setConfigBanner(successMessage, 'success');
+            renderInstanceDetails();
+        } catch (error) {
+            configState.pendingMutation = '';
+            if (/timed out/i.test(error.message)) {
+                await loadConfigs(true);
+                setConfigBanner('Instance did not respond to the configuration operation; configuration refreshed', 'error');
+            } else {
+                setConfigBanner(error.message, 'error');
+            }
+            renderInstanceDetails();
+        }
+    }
+
     async function changeThreadModule(moduleName, threadName) {
         const inst = getSelectedInstance();
         if (!inst) return;
         const destination = window.prompt(`Move thread "${threadName}" to module`, moduleName);
         if (destination === null || !destination.trim()) return;
-        try {
-            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread-module`, {
+        await executeConfirmedMutation(
+            `thread-module:${moduleName}:${threadName}`,
+            () => apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread-module`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     config: { module: moduleName, thread: threadName, key: '', value: '' },
                     module: destination.trim()
                 })
-            });
-            setConfigBanner(`Thread "${threadName}" moved to module "${destination.trim()}"`, 'success');
-            await loadConfigs(true);
-        } catch (error) {
-            setConfigBanner(error.message, 'error');
-            renderInstanceDetails();
-        }
+            }),
+            `Thread "${threadName}" moved to module "${destination.trim()}"`
+        );
     }
 
     async function deleteThread(moduleName, threadName) {
         const inst = getSelectedInstance();
         if (!inst) return;
         if (!window.confirm(`Delete thread "${threadName}" and all its configs?`)) return;
-        try {
-            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread`, {
+        await executeConfirmedMutation(
+            `thread-delete:${moduleName}:${threadName}`,
+            () => apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ module: moduleName, thread: threadName, key: '', value: '' })
-            });
-            setConfigBanner(`Thread "${threadName}" deleted`, 'success');
-            await loadConfigs(true);
-        } catch (error) {
-            setConfigBanner(error.message, 'error');
-            renderInstanceDetails();
-        }
+            }),
+            `Thread "${threadName}" deleted`
+        );
     }
 
     async function deleteModule(moduleName) {
         const inst = getSelectedInstance();
         if (!inst) return;
         if (!window.confirm(`Delete module "${moduleName}" and all its threads and configs?`)) return;
-        try {
-            await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/module`, {
+        await executeConfirmedMutation(
+            `module-delete:${moduleName}`,
+            () => apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/module`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ module: moduleName, thread: 'main', key: '', value: '' })
-            });
-            setConfigBanner(`Module "${moduleName}" deleted`, 'success');
-            await loadConfigs(true);
-        } catch (error) {
-            setConfigBanner(error.message, 'error');
-            renderInstanceDetails();
-        }
+            }),
+            `Module "${moduleName}" deleted`
+        );
     }
 
     async function loadConfigs(forceReload = false) {
@@ -1083,36 +1097,24 @@ function initApp() {
 
         const inputs = [...instanceDetails.querySelectorAll('[data-module-config-name]')]
             .filter((input) => input.dataset.moduleConfigName === moduleName);
-        try {
-            let payload = null;
-            for (const input of inputs) {
-                payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/modules/config`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        module: moduleName,
-                        thread: 'main',
-                        key: input.dataset.moduleConfigKey,
-                        value: input.value
-                    })
-                });
-            }
-            configState.modules = Array.isArray(payload?.modules) ? payload.modules : configState.modules;
-            configState.configs = Array.isArray(payload?.definitions)
-                ? payload.definitions.flatMap((definition) => Array.isArray(definition.configs)
-                    ? definition.configs.map((config) => ({
-                        ...config,
-                        module: config.module ?? definition.module ?? '',
-                        thread: config.thread ?? definition.name ?? definition.type ?? '',
-                        threadDescription: definition.description || ''
-                    })) : [])
-                : configState.configs;
-            setConfigBanner('Module configs saved', 'success');
-            renderInstanceDetails();
-        } catch (error) {
-            setConfigBanner(error.message, 'error');
-            renderInstanceDetails();
-        }
+        await executeConfirmedMutation(
+            `module-save:${moduleName}`,
+            async () => {
+                for (const input of inputs) {
+                    await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/modules/config`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            module: moduleName,
+                            thread: 'main',
+                            key: input.dataset.moduleConfigKey,
+                            value: input.value
+                        })
+                    });
+                }
+            },
+            'Module configs saved'
+        );
     }
 
     async function saveConfigRow(rowKey) {
@@ -1166,16 +1168,20 @@ function initApp() {
                 throw new Error('Worker did not confirm the saved config');
             }
 
-            configState.status = 'loaded';
-            configState.configs = returnedConfigs;
+            await loadConfigs(true);
+            delete configState.pendingActions[rowKey];
             configState.dirtyValues = {};
             configState.rowErrors = {};
-            configState.pendingActions = {};
-            setConfigBanner('Config saved', 'success');
+            setConfigBanner('Config saved and configuration refreshed', 'success');
         } catch (error) {
             delete configState.pendingActions[rowKey];
             configState.rowErrors[rowKey] = error.message;
             setConfigBanner(error.message, 'error');
+
+            if (/timed out/i.test(error.message)) {
+                await loadConfigs(true);
+                setConfigBanner('Instance did not respond to config edit; configuration refreshed', 'error');
+            }
         }
 
         renderInstanceDetails();
@@ -1205,16 +1211,20 @@ function initApp() {
                 })
             });
 
-            configState.status = 'loaded';
-            configState.configs = Array.isArray(payload.configs) ? payload.configs : [];
+            await loadConfigs(true);
+            delete configState.pendingActions[rowKey];
             configState.dirtyValues = {};
             configState.rowErrors = {};
-            configState.pendingActions = {};
-            setConfigBanner('Config deleted', 'success');
+            setConfigBanner('Config deleted and configuration refreshed', 'success');
         } catch (error) {
             delete configState.pendingActions[rowKey];
             configState.rowErrors[rowKey] = error.message;
             setConfigBanner(error.message, 'error');
+
+            if (/timed out/i.test(error.message)) {
+                await loadConfigs(true);
+                setConfigBanner('Instance did not respond to config deletion; configuration refreshed', 'error');
+            }
         }
 
         renderInstanceDetails();
@@ -1241,9 +1251,10 @@ function initApp() {
 
         try {
             const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/thread-configurations`);
-            configState.definitions = Array.isArray(payload.availableDefinitions)
-                ? payload.availableDefinitions
-                : (Array.isArray(payload.definitions) ? payload.definitions : []);
+            configState.availableTypes = Array.isArray(payload.availableTypes) ? payload.availableTypes : [];
+            configState.definitions = Array.isArray(payload.availableTypes)
+                ? payload.availableTypes.map((type) => ({ name: type, type, configs: [] }))
+                : [];
             configState.definitionsStatus = 'loaded';
             configState.modalThread = getAvailableThreads()[0] || '';
         } catch (error) {
@@ -1527,9 +1538,9 @@ function initApp() {
             configState.dirtyValues = {};
             configState.rowErrors = {};
             configState.pendingActions = {};
-            setConfigBanner('Thread created with default values', 'success');
             closeConfigThreadModal();
-            renderInstanceDetails();
+            await loadConfigs(true);
+            setConfigBanner('Thread created with default values', 'success');
         } catch (error) {
             configState.modalSaving = false;
             configState.modalError = error.message;

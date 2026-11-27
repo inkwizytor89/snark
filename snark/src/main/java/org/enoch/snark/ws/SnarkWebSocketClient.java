@@ -298,6 +298,15 @@ public class SnarkWebSocketClient {
             java.util.List<ThreadDefinition> definitions,
             java.util.List<ModuleDefinition> modules
     ) {
+        return buildThreadConfigurationResponse(incoming, definitions, modules, ThreadManager.availableThreadTypes());
+    }
+
+    CommandMessage buildThreadConfigurationResponse(
+            CommandMessage incoming,
+            java.util.List<ThreadDefinition> definitions,
+            java.util.List<ModuleDefinition> modules,
+            java.util.List<String> availableTypes
+    ) {
         CommandMessage response = new CommandMessage();
         response.setId(incoming.getId());
         response.setType("response:thread:configurations");
@@ -309,7 +318,7 @@ public class SnarkWebSocketClient {
                 "instanceId", instanceId,
                 "definitions", definitions,
                 "modules", modules,
-                "availableDefinitions", ThreadManager.availableDefinitions()
+                "availableTypes", availableTypes
         ));
         return response;
     }
@@ -329,7 +338,10 @@ public class SnarkWebSocketClient {
                 definitions = configService.listThreadDefinitions();
                 modules = configService.listModuleDefinitions();
             }
-            CommandMessage response = buildThreadConfigurationResponse(incoming, definitions, modules);
+            java.util.List<String> availableTypes = configServiceProvider == null
+                    ? java.util.List.of()
+                    : configServiceProvider.getObject().availableThreadTypes();
+            CommandMessage response = buildThreadConfigurationResponse(incoming, definitions, modules, availableTypes);
             if (objectMapper.writeValueAsBytes(response).length > MAX_MESSAGE_BYTES) {
                 return buildThreadConfigurationError(incoming, 500,
                         "Managed thread configuration response exceeds the message size limit.");
@@ -380,9 +392,13 @@ public class SnarkWebSocketClient {
             configServiceProvider.getObject().updateThreads(entries);
             return buildConfigSetResponse(incoming, entries);
         } catch (IllegalArgumentException e) {
-            return buildConfigSetError(incoming, 400, "Failed to update configuration.");
+            System.err.println("[WS][ERROR] Failed to update configuration: " + e.getMessage());
+            return buildConfigSetError(incoming, 400,
+                    e.getMessage() == null ? "Failed to update configuration." : e.getMessage());
         } catch (RuntimeException e) {
-            return buildConfigSetError(incoming, 500, "Failed to update configuration.");
+            System.err.println("[WS][ERROR] Failed to update configuration: " + e.getMessage());
+            return buildConfigSetError(incoming, 500,
+                    e.getMessage() == null ? "Failed to update configuration." : e.getMessage());
         }
     }
 

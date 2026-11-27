@@ -17,17 +17,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.enoch.conductor.process.WorkerRestPortResolver;
 
 @Service
 public class InstanceThreadConfigurationService {
 
-    private static final long REQUEST_TIMEOUT_SECONDS = 5L;
+    private static final long REQUEST_TIMEOUT_SECONDS = 10L;
 
     private final WorkerSocketHandler workerSocketHandler;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<String, CompletableFuture<List<ThreadDefinition>>> pendingRequests = new ConcurrentHashMap<>();
     private final Map<String, List<ModuleDefinition>> modulesByInstance = new ConcurrentHashMap<>();
-    private final Map<String, List<ThreadDefinition>> availableDefinitionsByInstance = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> availableTypesByInstance = new ConcurrentHashMap<>();
     private final Map<String, PendingRequest> pendingRequestDetails = new ConcurrentHashMap<>();
 
     public InstanceThreadConfigurationService(WorkerSocketHandler workerSocketHandler) {
@@ -40,6 +45,40 @@ public class InstanceThreadConfigurationService {
     }
 
     public List<ThreadDefinition> fetchManagedDefinitions(String instanceId) {
+        if (workerSocketHandler.getRegisteredSessionId(instanceId) == null) {
+            throw new RuntimeException("Instance is offline");
+        }
+
+        int port = WorkerRestPortResolver.resolve(instanceId);
+        try {
+            URI uri = URI.create("http://127.0.0.1:" + port
+                    + "/api/internal/configurations?instanceId=" + java.net.URLEncoder.encode(instanceId, "UTF-8"));
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                    .timeout(java.time.Duration.ofSeconds(REQUEST_TIMEOUT_SECONDS))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(
+                    request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("Worker configuration REST returned HTTP " + response.statusCode());
+            }
+
+            RestConfigurationResponse payload = objectMapper.readValue(response.body(), RestConfigurationResponse.class);
+            if (!instanceId.equals(payload.instanceId())) {
+                throw new RuntimeException("Worker configuration REST returned a different instance ID");
+            }
+            modulesByInstance.put(instanceId, payload.modules() == null ? List.of() : payload.modules());
+            availableTypesByInstance.put(instanceId, payload.availableTypes() == null ? List.of() : payload.availableTypes());
+            return payload.definitions() == null ? List.of() : payload.definitions();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Worker configuration REST request interrupted", e);
+        } catch (Exception e) {
+            return fetchManagedDefinitionsOverWebSocket(instanceId);
+        }
+    }
+
+    private List<ThreadDefinition> fetchManagedDefinitionsOverWebSocket(String instanceId) {
         String requestId = UUID.randomUUID().toString();
         String sessionId = workerSocketHandler.getRegisteredSessionId(instanceId);
         if (sessionId == null) {
@@ -122,14 +161,14 @@ public class InstanceThreadConfigurationService {
                     module == null || module.getName() == null || module.getName().isBlank())) {
                 throw new IllegalArgumentException("Thread configuration response contains invalid modules");
             }
-            List<ThreadDefinition> availableDefinitions = objectMapper.convertValue(
-                    payload.getOrDefault("availableDefinitions", List.of()),
-                    new TypeReference<List<ThreadDefinition>>() {});
-            if (availableDefinitions == null || availableDefinitions.stream().anyMatch(this::isInvalidDefinition)) {
-                throw new IllegalArgumentException("Thread configuration response contains invalid available definitions");
+            List<String> availableTypes = objectMapper.convertValue(
+                    payload.getOrDefault("availableTypes", List.of()),
+                    new TypeReference<List<String>>() {});
+            if (availableTypes == null || availableTypes.stream().anyMatch(type -> type == null || type.isBlank())) {
+                throw new IllegalArgumentException("Thread configuration response contains invalid available types");
             }
             modulesByInstance.put(instanceId, modules);
-            availableDefinitionsByInstance.put(instanceId, availableDefinitions);
+            availableTypesByInstance.put(instanceId, availableTypes);
             future.complete(definitions);
         } catch (Exception e) {
             future.completeExceptionally(new RuntimeException("Malformed thread configuration response", e));
@@ -147,13 +186,13 @@ public class InstanceThreadConfigurationService {
         return modulesByInstance.getOrDefault(instanceId, List.of());
     }
 
-    public List<ThreadDefinition> getAvailableDefinitions(String instanceId) {
-        return availableDefinitionsByInstance.getOrDefault(instanceId, List.of());
+    public List<String> getAvailableTypes(String instanceId) {
+        return availableTypesByInstance.getOrDefault(instanceId, List.of());
     }
 
     public void clearInstanceState(String instanceId) {
         modulesByInstance.remove(instanceId);
-        availableDefinitionsByInstance.remove(instanceId);
+        availableTypesByInstance.remove(instanceId);
     }
 
     public void cancelPendingRequests(String instanceId) {
@@ -165,6 +204,14 @@ public class InstanceThreadConfigurationService {
                 }
             }
         });
+    }
+
+    private record RestConfigurationResponse(
+            String instanceId,
+            List<ThreadDefinition> definitions,
+            List<ModuleDefinition> modules,
+            List<String> availableTypes
+    ) {
     }
 
     private record PendingRequest(String instanceId, String sessionId) {

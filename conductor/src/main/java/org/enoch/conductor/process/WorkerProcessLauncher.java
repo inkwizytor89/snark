@@ -48,6 +48,7 @@ public class WorkerProcessLauncher {
         command.add("--instanceId=" + profile.getId());
         command.add("--instanceDir=" + instanceDir);
         command.add("--managerUrl=ws://localhost:8080/ws");
+        command.add("--server.port=" + WorkerRestPortResolver.resolve(profile.getId()));
 
         return new ProcessBuilder(command).start();
     }

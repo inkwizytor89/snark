@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class InstanceConfigService {
 
-    private static final long REQUEST_TIMEOUT_SECONDS = 5L;
+    private static final long REQUEST_TIMEOUT_SECONDS = 10L;
 
     private final InstanceConfigStateRepository stateRepository;
     private final WorkerSocketHandler workerSocketHandler;

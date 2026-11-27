@@ -9,7 +9,7 @@ public record InstanceThreadConfigurationsResponse(
         String instanceId,
         List<ThreadDefinition> definitions,
         List<ModuleDefinition> modules,
-        List<ThreadDefinition> availableDefinitions
+        List<String> availableTypes
 ) {
     public InstanceThreadConfigurationsResponse(String instanceId, List<ThreadDefinition> definitions) {
         this(instanceId, definitions, List.of(), List.of());

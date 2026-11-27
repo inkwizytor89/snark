@@ -602,6 +602,22 @@ main {
     cursor: not-allowed;
 }
 
+.config-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: config-spin 0.8s linear infinite;
+}
+
+@keyframes config-spin {
+    to { transform: rotate(360deg); }
+}
+
 .config-row-actions {
     display: flex;
     gap: 8px;

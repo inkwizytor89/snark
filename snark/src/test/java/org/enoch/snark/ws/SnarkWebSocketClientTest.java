@@ -213,7 +213,7 @@ class SnarkWebSocketClientTest {
         ThreadDefinition definition = (ThreadDefinition) definitions.getFirst();
         assertEquals("fleet", definition.getName());
         assertEquals("ATTACK", definition.getConfigs().getFirst().getValue());
-        java.util.List<?> available = (java.util.List<?>) payload.get("availableDefinitions");
+        java.util.List<?> available = (java.util.List<?>) payload.get("availableTypes");
         assertFalse(available.isEmpty());
     }
 

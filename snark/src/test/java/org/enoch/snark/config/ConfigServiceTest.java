@@ -156,6 +156,30 @@ class ConfigServiceTest {
     }
 
     @Test
+    void updateThreadsUpdatesControlConfigAndRespondsWithoutFailure() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("global");
+        ThreadEntity thread = new ThreadEntity("update", module, "update");
+
+        when(threadRepository.find("global", "update")).thenReturn(Optional.of(thread));
+
+        ConfigEntry term = new ConfigEntry();
+        term.setModule("global");
+        term.setThread("update");
+        term.setKey("time");
+        term.setValue("12M");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(term));
+
+        assertEquals("12M", thread.time);
+        verify(threadRepository).save(thread);
+        verify(configRepository).saveAll(thread.configs);
+    }
+
+    @Test
     void updateThreadsCreatesNamedThreadWithSelectedTypeAndDefaultTimeOff() {
         ModuleRepository moduleRepository = mock(ModuleRepository.class);
         ThreadRepository threadRepository = mock(ThreadRepository.class);

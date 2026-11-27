@@ -160,8 +160,23 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional(readOnly = true)
+    public List<ThreadDefinition> availableThreadDefinitions() {
+        return ThreadManager.availableDefinitions();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> availableThreadTypes() {
+        return availableThreadDefinitions().stream()
+                .map(ThreadDefinition::getType)
+                .filter(type -> type != null && !type.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<ThreadDefinition> listThreadDefinitions() {
-        List<ThreadDefinition> available = ThreadManager.availableDefinitions();
+        List<ThreadDefinition> available = availableThreadDefinitions();
         return threadRepository.findAllWithModule().stream()
                 .map(thread -> buildThreadDefinition(thread, available))
                 .sorted((left, right) -> {
