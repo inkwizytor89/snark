@@ -330,6 +330,36 @@ class WorkerSocketHandlerTest {
     }
 
     @Test
+    void shouldCorrelateThreadDeleteMutationResponse() throws Exception {
+        WorkerSocketHandler handler = new TestWorkerSocketHandler();
+        TestWorkerSocketHandler testHandler = (TestWorkerSocketHandler) handler;
+        WebSocketSession session = openSession();
+        testHandler.receive(session, """
+                {"id":"registration-delete","type":"request:register","from":"worker#1","to":"conductor",
+                 "timestamp":1,"status":100,"payload":{"instanceId":"worker#1"}}
+                """);
+        InstanceConfigStateRepository stateRepository = mock(InstanceConfigStateRepository.class);
+        InstanceConfigService service = new InstanceConfigService(stateRepository, handler);
+        handler.setInstanceConfigService(service);
+
+        doAnswer(invocation -> {
+            TextMessage sentMessage = invocation.getArgument(0);
+            JsonNode request = mapper.readTree(sentMessage.getPayload());
+            assertEquals("request:thread:delete", request.path("type").asText());
+            testHandler.receive(session, """
+                    {"id":"%s","type":"response:thread:delete","from":"worker#1","to":"conductor",
+                     "timestamp":2,"status":200,"payload":null}
+                    """.formatted(request.path("id").asText()));
+            return null;
+        }).when(session).sendMessage(any(TextMessage.class));
+
+        service.deleteThread("worker#1",
+                new ConfigEntry("global", "update", "", ""));
+
+        verify(session, times(2)).sendMessage(any(TextMessage.class));
+    }
+
+    @Test
     void shouldCloseSessionsSendingOversizedWorkerMessages() throws Exception {
         WorkerSocketHandler handler = new TestWorkerSocketHandler();
         WebSocketSession session = openSession();

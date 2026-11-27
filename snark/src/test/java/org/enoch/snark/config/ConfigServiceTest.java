@@ -7,7 +7,6 @@ import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ModuleRepository;
 import org.enoch.snark.db.repository.ThreadRepository;
-import org.enoch.snark.instance.si.ThreadManager;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -122,10 +121,34 @@ class ConfigServiceTest {
 
         ArgumentCaptor<ThreadEntity> threadCaptor = ArgumentCaptor.forClass(ThreadEntity.class);
         verify(threadRepository).save(threadCaptor.capture());
-        verify(configRepository).saveAll(thread.configs);
+        verify(configRepository, never()).saveAll(anyList());
         assertEquals("5S", threadCaptor.getValue().pause);
         assertTrue(threadCaptor.getValue().updated.isAfter(previousUpdate)
                 || threadCaptor.getValue().updated.isEqual(previousUpdate));
+    }
+
+    @Test
+    void parsesThreePartPropertiesWithCompleteKeyAndValue() {
+        ConfigEntry term = ConfigEntry.parse("expy.xds.max_dt", "2501", "global");
+
+        assertEquals("expy", term.getModule());
+        assertEquals("xds", term.getThread());
+        assertEquals("max_dt", term.getKey());
+        assertEquals("2501", term.getValue());
+    }
+
+    @Test
+    void appliesNewConfigEntityWithKeyAndValueWithoutPersisting() {
+        ModuleEntity module = new ModuleEntity("expy");
+        ThreadEntity thread = new ThreadEntity("xds", module, "expedition");
+        ConfigEntry term = new ConfigEntry("expy", "xds", "max_dt", "2500");
+
+        thread.applyUnsavedConfigUpdate(term);
+
+        org.enoch.snark.db.entity.ConfigEntity created = thread.configs.getFirst();
+        assertEquals("max_dt", created.key);
+        assertEquals("2500", created.value);
+        assertEquals(thread, created.thread);
     }
 
     @Test
@@ -176,7 +199,74 @@ class ConfigServiceTest {
 
         assertEquals("12M", thread.time);
         verify(threadRepository).save(thread);
-        verify(configRepository).saveAll(thread.configs);
+        verify(configRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void updateThreadsPersistsOnlyCreatedCustomConfig() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("expy");
+        ThreadEntity thread = new ThreadEntity("xds", module, "expedition");
+
+        when(threadRepository.find("expy", "xds")).thenReturn(Optional.of(thread));
+        when(configRepository.save(any(org.enoch.snark.db.entity.ConfigEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ConfigEntry term = new ConfigEntry("expy", "xds", "max_dt", "2501");
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(term));
+
+        ArgumentCaptor<org.enoch.snark.db.entity.ConfigEntity> captor =
+                ArgumentCaptor.forClass(org.enoch.snark.db.entity.ConfigEntity.class);
+        verify(configRepository).save(captor.capture());
+        assertEquals("max_dt", captor.getValue().key);
+        assertEquals("2501", captor.getValue().value);
+    }
+
+    @Test
+    void updateThreadsUpdatesExistingCustomConfigAndPersistsIt() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("expy");
+        ThreadEntity thread = new ThreadEntity("xds", module, "expedition");
+        org.enoch.snark.db.entity.ConfigEntity existing =
+                new org.enoch.snark.db.entity.ConfigEntity(thread, "max_dt", "2500");
+
+        when(threadRepository.find("expy", "xds")).thenReturn(Optional.of(thread));
+        when(configRepository.findByThreadAndKey(thread, "max_dt")).thenReturn(Optional.of(existing));
+        when(configRepository.save(existing)).thenReturn(existing);
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(new ConfigEntry("expy", "xds", "max_dt", "2502")));
+
+        assertEquals("2502", existing.value);
+        verify(configRepository).save(existing);
+    }
+
+    @Test
+    void updateThreadsUpdatesThreadCollectionExistingConfigWhenRepositoryLookupIsEmpty() {
+        ModuleRepository moduleRepository = mock(ModuleRepository.class);
+        ThreadRepository threadRepository = mock(ThreadRepository.class);
+        ConfigRepository configRepository = mock(ConfigRepository.class);
+        ModuleEntity module = new ModuleEntity("expy");
+        ThreadEntity thread = new ThreadEntity("nowe", module, "expedition");
+        org.enoch.snark.db.entity.ConfigEntity existing =
+                new org.enoch.snark.db.entity.ConfigEntity(thread, "max_dt", "2500");
+
+        when(threadRepository.find("expy", "nowe")).thenReturn(Optional.of(thread));
+        when(configRepository.findByThreadAndKey(thread, "max_dt")).thenReturn(Optional.empty());
+        when(configRepository.save(existing)).thenReturn(existing);
+
+        new ConfigService(moduleRepository, threadRepository, configRepository)
+                .updateThreads(List.of(new ConfigEntry("expy", "nowe", "max_dt", "2502")));
+
+        assertEquals("2502", existing.value);
+        verify(configRepository).save(existing);
+        verify(configRepository, never()).save(argThat(config -> config != existing));
     }
 
     @Test

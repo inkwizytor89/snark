@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConfigEntry {
-    private String module;
-    private String thread;
+    private String module = "global";
+    private String thread = "main";
     private String key;
     private String value;
 

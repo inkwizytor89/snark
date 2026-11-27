@@ -714,13 +714,15 @@ public class WorkerSocketHandler extends TextWebSocketHandler {
     }
 
     private boolean isConfigResponse(String type) {
-        return "response:config:list".equals(type)
-                || "response:config:definitions".equals(type)
-                || "response:config:set".equals(type)
-                || "response:config:delete".equals(type)
-                || "response:module:set".equals(type)
-                || "error:config:set".equals(type)
-                || "error:module:set".equals(type);
+        if (type == null) {
+            return false;
+        }
+        return type.startsWith("response:config:")
+                || type.startsWith("error:config:")
+                || type.startsWith("response:module:")
+                || type.startsWith("error:module:")
+                || type.startsWith("response:thread:")
+                || type.startsWith("error:thread:");
     }
 
     private boolean isThreadConfigurationResponse(String type) {

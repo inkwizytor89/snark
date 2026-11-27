@@ -7,7 +7,7 @@ import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.types.ColonyType;
 import org.enoch.snark.instance.service.CoordinateExpressionService;
-import org.enoch.snark.instance.si.module.ThreadConfig;
+import org.enoch.snark.config.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;

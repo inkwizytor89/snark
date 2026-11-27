@@ -1,4 +1,4 @@
-package org.enoch.snark.instance.si.module;
+package org.enoch.snark.config;
 
 import org.enoch.common.config.ThreadDefinition;
 

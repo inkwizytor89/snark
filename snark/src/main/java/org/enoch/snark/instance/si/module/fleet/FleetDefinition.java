@@ -8,7 +8,7 @@ import org.enoch.snark.db.entity.ConfigEntity;
 import org.enoch.snark.instance.model.to.Resources;
 import org.enoch.snark.instance.model.to.ShipsMap;
 import org.enoch.snark.instance.si.QueueRunType;
-import org.enoch.snark.instance.si.module.ThreadConfig;
+import org.enoch.snark.config.ThreadConfig;
 import org.enoch.snark.instance.si.module.consumer.gi.types.Mission;
 
 import java.util.ArrayList;

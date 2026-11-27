@@ -1,5 +1,6 @@
 package org.enoch.common.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,9 @@ public class ModuleDefinition {
     private String name;
     private String time;
     private String conditions;
+    @JsonIgnore
     private LocalDateTime createdOn;
+    @JsonIgnore
     private LocalDateTime updated;
     private List<ConfigDefinition> configs = new ArrayList<>();
 

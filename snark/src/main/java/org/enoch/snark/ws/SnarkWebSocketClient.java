@@ -16,6 +16,7 @@ import org.enoch.common.command.CommandSubmitResponse;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.common.config.ModuleDefinition;
 import org.enoch.snark.config.ConfigService;
+import org.enoch.snark.config.ThreadType;
 import org.enoch.common.config.ConfigEntry;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.status.StatusDetails;
@@ -298,7 +299,7 @@ public class SnarkWebSocketClient {
             java.util.List<ThreadDefinition> definitions,
             java.util.List<ModuleDefinition> modules
     ) {
-        return buildThreadConfigurationResponse(incoming, definitions, modules, ThreadManager.availableThreadTypes());
+        return buildThreadConfigurationResponse(incoming, definitions, modules, ThreadType.availableTypes());
     }
 
     CommandMessage buildThreadConfigurationResponse(
@@ -340,7 +341,7 @@ public class SnarkWebSocketClient {
             }
             java.util.List<String> availableTypes = configServiceProvider == null
                     ? java.util.List.of()
-                    : configServiceProvider.getObject().availableThreadTypes();
+                    : ThreadType.availableTypes();
             CommandMessage response = buildThreadConfigurationResponse(incoming, definitions, modules, availableTypes);
             if (objectMapper.writeValueAsBytes(response).length > MAX_MESSAGE_BYTES) {
                 return buildThreadConfigurationError(incoming, 500,

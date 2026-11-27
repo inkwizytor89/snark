@@ -12,19 +12,7 @@ import org.enoch.snark.expression.ExpressionService;
 import org.enoch.snark.instance.si.module.AbstractThread;
 import org.enoch.snark.instance.si.module.ThreadBeanFactory;
 import org.enoch.snark.instance.si.module.DatabaseThreadTypeRegistry;
-import org.enoch.snark.instance.si.module.building.BuildDefinition;
-import org.enoch.snark.instance.si.module.consumer.ConsumerDefinition;
 import org.enoch.snark.instance.si.module.consumer.ConsumerThread;
-import org.enoch.snark.instance.si.module.defense.DefenseDefinition;
-import org.enoch.snark.instance.si.module.define.DefineDefinition;
-import org.enoch.snark.instance.si.module.event.EventDefinition;
-import org.enoch.snark.instance.si.module.expedition.ExpeditionDefinition;
-import org.enoch.snark.instance.si.module.fleet.FleetDefinition;
-import org.enoch.snark.instance.si.module.hunting.HuntingDefinition;
-import org.enoch.snark.instance.si.module.scan.ScanDefinition;
-import org.enoch.snark.instance.si.module.space.SpaceDefinition;
-import org.enoch.snark.instance.si.module.update.UpdateDefinition;
-import org.enoch.snark.instance.si.module.queuesimulator.QueueSimulatorDefinition;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -240,23 +228,6 @@ public class ThreadManager implements ApplicationRunner {
     ) {
     }
 
-    public static List<ThreadDefinition> availableDefinitions() {
-        return List.of(
-                ConsumerDefinition.threadDefinition(),
-                UpdateDefinition.threadDefinition(),
-                DefineDefinition.threadDefinition(),
-                DefenseDefinition.threadDefinition(),
-                ExpeditionDefinition.threadDefinition(),
-                BuildDefinition.threadDefinition(),
-                SpaceDefinition.threadDefinition(),
-                ScanDefinition.threadDefinition(),
-                HuntingDefinition.threadDefinition(),
-                FleetDefinition.threadDefinition(),
-                EventDefinition.threadDefinition(),
-                QueueSimulatorDefinition.threadDefinition()
-        );
-    }
-
     public List<ThreadDefinition> managedDefinitions() {
         return managedThreads.values().stream()
                 .map(ManagedThread::thread)
@@ -302,11 +273,4 @@ public class ThreadManager implements ApplicationRunner {
         return definition;
     }
 
-    public static List<String> availableThreadTypes() {
-        return availableDefinitions().stream()
-                .map(ThreadDefinition::getType)
-                .filter(Objects::nonNull)
-                .sorted()
-                .toList();
-    }
 }

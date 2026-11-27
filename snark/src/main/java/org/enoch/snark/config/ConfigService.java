@@ -17,7 +17,6 @@ import org.enoch.snark.db.entity.ThreadEntity;
 import org.enoch.snark.db.repository.ConfigRepository;
 import org.enoch.snark.db.repository.ModuleRepository;
 import org.enoch.snark.db.repository.ThreadRepository;
-import org.enoch.snark.instance.si.ThreadManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ import java.time.LocalDateTime;
 public class ConfigService implements ApplicationRunner {
 
     private static final String GLOBAL_MODULE = "global";
-    private static final String SERVER_KEY = "server";
     public static final String TEMPLATE = "template";
     private static List<ConfigEntry> configs = new ArrayList<>();
 
@@ -58,24 +56,66 @@ public class ConfigService implements ApplicationRunner {
 
     @Transactional
     public void updateThreads(List<ConfigEntry> configTerms) {
+        if (configTerms == null) {
+            return;
+        }
         for (ConfigEntry term : configTerms) {
-            ThreadEntity threadEntity = threadRepository.find(term.getModule(), term.getThread())
-                    .orElseGet(() -> createThreadEntity(term));
-            if ("type".equalsIgnoreCase(term.getKey())) {
-                String selectedType = ThreadManager.availableThreadTypes().stream()
-                        .filter(type -> type.equalsIgnoreCase(term.getValue().trim()))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + term.getValue()));
-                threadEntity.type = selectedType;
-                threadEntity.updated = LocalDateTime.now();
-                threadRepository.save(threadEntity);
+            if (term == null) {
                 continue;
             }
-            threadEntity.update(term);
-            threadEntity.updated = LocalDateTime.now();
-            threadRepository.save(threadEntity);
-            configRepository.saveAll(threadEntity.configs);
+            try {
+                boolean typeUpdate = "type".equalsIgnoreCase(term.getKey());
+                if (typeUpdate) {
+                    term.setValue(ThreadType.resolveType(term.getValue()));
+                }
+
+                ThreadEntity threadEntity = threadRepository.find(term.getModule(), term.getThread())
+                        .orElseGet(() -> createThreadEntity(term));
+                boolean isCustomConfig = !isControlConfigKey(term.getKey());
+
+                if (isCustomConfig) {
+                    ConfigEntity storedConfig = threadEntity.findConfig(term.getKey())
+                            .orElseGet(() -> configRepository.findByThreadAndKey(threadEntity, term.getKey()).orElse(null));
+                    if (storedConfig != null) {
+                        storedConfig.value = term.getValue();
+                        storedConfig.updated = LocalDateTime.now();
+                        threadEntity.updated = LocalDateTime.now();
+                        ConfigEntity savedConfig = configRepository.save(storedConfig);
+                        threadRepository.save(threadEntity);
+                        log.info("Updated config: module='{}', thread='{}', key='{}', value='{}', id={}.",
+                                term.getModule(), term.getThread(), savedConfig.key, savedConfig.value, savedConfig.id);
+                    } else {
+                        ConfigEntity config = new ConfigEntity(threadEntity, term.getKey(), term.getValue());
+                        if (config.key == null || config.key.isBlank() || config.value == null) {
+                            throw new IllegalArgumentException("Cannot persist config with empty key or value");
+                        }
+                        threadEntity.updated = LocalDateTime.now();
+                        ConfigEntity savedConfig = configRepository.save(config);
+                        threadRepository.save(threadEntity);
+                        log.info("Created config: module='{}', thread='{}', key='{}', value='{}', id={}.",
+                                term.getModule(), term.getThread(), savedConfig.key, savedConfig.value, savedConfig.id);
+                    }
+                } else {
+                    threadEntity.applyUnsavedConfigUpdate(term);
+                    threadEntity.updated = LocalDateTime.now();
+                    threadRepository.save(threadEntity);
+                    log.info("Updated config: module='{}', thread='{}', key='{}', value='{}'.",
+                            term.getModule(), term.getThread(), term.getKey(), term.getValue());
+                }
+            } catch (RuntimeException exception) {
+                log.error("Failed to update config: module='{}', thread='{}', key='{}', value='{}'",
+                        term.getModule(), term.getThread(), term.getKey(), term.getValue(), exception);
+                throw exception;
+            }
         }
+    }
+
+    private boolean isControlConfigKey(String key) {
+        if (key == null) {
+            return false;
+        }
+        return List.of("time", "type", "pause", "debug", "command_limit", "conditions").stream()
+                .anyMatch(controlKey -> controlKey.equalsIgnoreCase(key));
     }
 
     @Transactional
@@ -160,23 +200,8 @@ public class ConfigService implements ApplicationRunner {
     }
 
     @Transactional(readOnly = true)
-    public List<ThreadDefinition> availableThreadDefinitions() {
-        return ThreadManager.availableDefinitions();
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> availableThreadTypes() {
-        return availableThreadDefinitions().stream()
-                .map(ThreadDefinition::getType)
-                .filter(type -> type != null && !type.isBlank())
-                .distinct()
-                .sorted()
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<ThreadDefinition> listThreadDefinitions() {
-        List<ThreadDefinition> available = availableThreadDefinitions();
+        List<ThreadDefinition> available = ThreadType.availableDefinitions();
         return threadRepository.findAllWithModule().stream()
                 .map(thread -> buildThreadDefinition(thread, available))
                 .sorted((left, right) -> {
@@ -282,27 +307,10 @@ public class ConfigService implements ApplicationRunner {
     private ThreadEntity createThreadEntity(ConfigEntry term) {
         ModuleEntity module = moduleRepository.findByName(term.getModule())
                 .orElseGet(() -> moduleRepository.save(new ModuleEntity(term.getModule())));
-        String selectedType = "type".equalsIgnoreCase(term.getKey())
-                ? term.getValue()
-                : null;
-        String threadType = selectedType == null
-                ? resolveThreadType(term.getThread())
-                : ThreadManager.availableThreadTypes().stream()
-                        .filter(type -> type.equalsIgnoreCase(selectedType.trim()))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Unsupported thread type: " + selectedType));
-        ThreadEntity thread = new ThreadEntity(
-                term.getThread(), module, threadType);
+        ThreadEntity thread = new ThreadEntity(term.getThread(), module, ThreadType.resolve(term));
         ThreadEntity savedThread = threadRepository.save(thread);
         log.info("Created thread '{}' in module '{} as {}'", savedThread.name, savedThread.module.name, savedThread.type);
         return savedThread;
-    }
-
-    private String resolveThreadType(String threadName) {
-        return ThreadManager.availableThreadTypes().stream()
-                .filter(threadName::contains)
-                .findFirst()
-                .orElse(threadName);
     }
 
     @Transactional

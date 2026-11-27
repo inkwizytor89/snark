@@ -31,7 +31,7 @@ public class WorkerConfigurationController {
 
         List<ThreadDefinition> definitions = configService.listThreadDefinitions();
         List<ModuleDefinition> modules = configService.listModuleDefinitions();
-        List<String> availableTypes = configService.availableThreadTypes();
+        List<String> availableTypes = ThreadType.availableTypes();
         return new WorkerConfigurationResponse(this.instanceId, definitions, modules, availableTypes);
     }
 

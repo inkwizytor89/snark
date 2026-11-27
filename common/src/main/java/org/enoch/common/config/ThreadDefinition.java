@@ -1,6 +1,7 @@
 package org.enoch.common.config;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,9 @@ public class ThreadDefinition {
     private String module;
     private String type;
     private String description;
+    @JsonIgnore
     private LocalDateTime createdOn;
+    @JsonIgnore
     private LocalDateTime updated;
     private List<ConfigDefinition> configs = new ArrayList<>();
 

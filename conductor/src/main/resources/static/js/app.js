@@ -824,7 +824,6 @@ function initApp() {
             <div class="config-row">
                 <div class="config-key">
                     <span class="config-key-name">${escapeHtml(config.key)}</span>
-                    ${config.description ? `<span class="config-description-text">${escapeHtml(config.description)}</span>` : ''}
                 </div>
                 <div>
                     <input
@@ -883,21 +882,11 @@ function initApp() {
             : config.value ?? '';
         const isChanged = String(dirtyValue) !== String(config.value ?? '');
         const isBusy = pendingAction !== '';
-        const descriptionParts = [];
-
-        if (config.description) {
-            descriptionParts.push(config.description);
-        }
-        if (config.temporary) {
-            descriptionParts.push('Temporary');
-        }
-
         return `
             <div class="config-row-shell" data-row-key="${escapeHtml(rowKey)}">
                 <div class="config-row">
                     <div class="config-key">
                         <span class="config-key-name">${escapeHtml(config.key)} <span class="config-help-icon" title="${escapeHtml(config.description || 'No description available')}">?</span></span>
-                        ${descriptionParts.length ? `<span class="config-description-text">${escapeHtml(descriptionParts.join(' · '))}</span>` : ''}
                     </div>
                     <div>
                         <input

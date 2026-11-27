@@ -4,7 +4,7 @@ import lombok.Data;
 import org.enoch.common.config.ConfigDefinition;
 import org.enoch.common.config.ThreadDefinition;
 import org.enoch.snark.db.entity.ConfigEntity;
-import org.enoch.snark.instance.si.module.ThreadConfig;
+import org.enoch.snark.config.ThreadConfig;
 
 import java.util.ArrayList;
 import java.util.List;

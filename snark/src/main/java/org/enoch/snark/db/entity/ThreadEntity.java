@@ -6,6 +6,7 @@ import org.enoch.common.config.ConfigEntry;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "threads")
@@ -39,7 +40,7 @@ public class ThreadEntity extends IdEntity {
     @Column(name = "created_on")
     public LocalDateTime createdOn = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "thread", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "thread", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     public List<ConfigEntity> configs = new ArrayList<>();
 
     public ThreadEntity() {
@@ -52,33 +53,50 @@ public class ThreadEntity extends IdEntity {
     }
 
     public void addConfig(ConfigEntity config) {
-        configs.add(config);
         config.thread = this;
+        configs.add(config);
     }
 
     public String getThreadIdentity() {
         return module.name + "." + name;
     }
 
-    public void update(ConfigEntry term) {
-        switch (term.getKey()) {
-            case "time" -> time = term.getValue();
-            case "pause" -> pause = term.getValue();
-            case "debug" -> debug = term.getValue();
-            case "command_limit" -> commandLimit = term.getValue();
-            case "conditions" -> conditions = term.getValue();
-            default -> {
-                ConfigEntity config = configs.stream()
-                        .filter(existing -> existing.key.equals(term.getKey()))
-                        .findFirst()
-                        .orElseGet(() -> {
-                            ConfigEntity newConfig = new ConfigEntity();
-                            addConfig(newConfig);
-                            newConfig.key = term.getKey();
-                            return newConfig;
-                        });
-                config.value = term.getValue();
-            }
+    public boolean applyUnsavedConfigUpdate(ConfigEntry term) {
+        if (term == null || term.getKey() == null || term.getKey().isBlank()
+                || term.getValue() == null) {
+            throw new IllegalArgumentException("Configuration key and value are required");
         }
+        String key = term.getKey().toLowerCase(java.util.Locale.ROOT);
+        if ("time".equals(key)) {
+            time = term.getValue();
+        } else if ("type".equals(key)) {
+            type = term.getValue();
+        } else if ("pause".equals(key)) {
+            pause = term.getValue();
+        } else if ("debug".equals(key)) {
+            debug = term.getValue();
+        } else if ("command_limit".equals(key)) {
+            commandLimit = term.getValue();
+        } else if ("conditions".equals(key)) {
+            conditions = term.getValue();
+        } else {
+            Optional<ConfigEntity> existing = findConfig(term.getKey());
+            if (existing.isPresent()) {
+                existing.get().value = term.getValue();
+                return false;
+            }
+            new ConfigEntity(this, term.getKey(), term.getValue());
+            return true;
+        }
+        return false;
+    }
+
+    public Optional<ConfigEntity> findConfig(String key) {
+        if (key == null || configs == null) {
+            return Optional.empty();
+        }
+        return configs.stream()
+                .filter(config -> config != null && key.equalsIgnoreCase(config.key))
+                .findFirst();
     }
 }

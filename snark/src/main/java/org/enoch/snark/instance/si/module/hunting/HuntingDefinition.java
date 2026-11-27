@@ -1,7 +1,7 @@
 package org.enoch.snark.instance.si.module.hunting;
 
 import org.enoch.common.config.ThreadDefinition;
-import org.enoch.snark.instance.si.module.ThreadConfig;
+import org.enoch.snark.config.ThreadConfig;
 
 import java.util.Collections;
 
