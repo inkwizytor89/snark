@@ -42,3 +42,5 @@ hs_err_pid*
 /snark/snark.trace.db
 /sounds/
 /settings
+/conductor/settings
+/conductor/start-properties/start.properties

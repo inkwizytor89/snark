@@ -1229,7 +1229,7 @@ function initApp() {
         configState.definitionsError = '';
         configState.modalThread = '';
         configState.modalThreadName = '';
-        configState.modalExistingModule = '';
+        configState.modalExistingModule = 'global';
         configState.modalNewModule = '';
         configState.modalValues = {};
         configState.modalError = '';
@@ -1267,7 +1267,7 @@ function initApp() {
         configState.definitionsError = '';
         configState.modalThread = '';
         configState.modalThreadName = '';
-        configState.modalExistingModule = '';
+        configState.modalExistingModule = 'global';
         configState.modalNewModule = '';
         configState.modalValues = {};
         configState.modalError = '';
@@ -1367,10 +1367,15 @@ function initApp() {
     }
 
     function getAvailableModules() {
-        return [...new Map(
-            configState.configs.map((config) => [String(config.module ?? ''), normalizeModuleDisplayName(config.module)])
-        ).entries()]
+        const modules = [...new Map([
+            ['global', 'Global'],
+            ...configState.configs.map((config) => [
+                String(config.module ?? ''),
+                normalizeModuleDisplayName(config.module)
+            ])
+        ].filter(([value]) => String(value).trim())].entries())
             .sort((a, b) => a[1].localeCompare(b[1]));
+        return modules;
     }
 
     function getAvailableThreads() {
@@ -1401,10 +1406,9 @@ function initApp() {
         });
 
         const modules = getAvailableModules();
-        configThreadExistingModule.innerHTML = [
-            '<option value="">Select existing module</option>',
-            ...modules.map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
-        ].join('');
+        configThreadExistingModule.innerHTML = modules
+            .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
+            .join('');
         configThreadExistingModule.value = configState.modalExistingModule;
         configThreadNewModule.value = configState.modalNewModule;
         configThreadName.value = configState.modalThreadName;
