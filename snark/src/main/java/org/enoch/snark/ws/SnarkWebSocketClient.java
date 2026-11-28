@@ -168,7 +168,7 @@ public class SnarkWebSocketClient {
         response.setStatus(200);
         response.setPayload(Map.of(
                 "instanceId", instanceId,
-                "state", "running",
+                "state", effectiveLifecycleState(),
                 "revision", statusRevision.incrementAndGet(),
                 "serverStatus", core.statusSummary(),
                 "hostname", resolveHostname(),
@@ -197,12 +197,7 @@ public class SnarkWebSocketClient {
         update.setTo("conductor");
         update.setTimestamp(System.currentTimeMillis());
         update.setStatus(200);
-        String effectiveState = runtimeState;
-        if ("running".equals(effectiveState) || "starting".equals(effectiveState) || "logged_out".equals(effectiveState)) {
-            effectiveState = effectiveState;
-        } else {
-            effectiveState = "running";
-        }
+        String effectiveState = effectiveLifecycleState();
         update.setPayload(Map.of(
                 "instanceId", instanceId,
                 "state", effectiveState,
@@ -212,6 +207,15 @@ public class SnarkWebSocketClient {
                 "version", resolveVersion()
         ));
         return update;
+    }
+
+    private String effectiveLifecycleState() {
+        if ("running".equals(runtimeState)
+                || "starting".equals(runtimeState)
+                || "logged_out".equals(runtimeState)) {
+            return runtimeState;
+        }
+        return "running";
     }
 
     public void publishLoggedOutState(String retryAtText) {

@@ -12,7 +12,9 @@ import org.enoch.common.status.StatusDetails;
 import org.enoch.snark.db.entity.ColonyEntity;
 import org.enoch.snark.db.repository.CacheEntryRepository;
 import org.enoch.snark.db.repository.ColonyRepository;
+import org.enoch.snark.instance.WorkerLifecycle;
 import org.enoch.snark.instance.service.Navigator;
+import org.springframework.beans.factory.ObjectProvider;
 import org.enoch.snark.instance.model.technology.Ship;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class Core {
 
     private final CacheEntryRepository cacheEntryRepository;
     private final ColonyRepository colonyRepository;
+    private final ObjectProvider<WorkerLifecycle> workerLifecycleProvider;
 
     private CommandDeque commandDeque;
     private boolean isDequeReady;
@@ -47,7 +50,10 @@ public class Core {
 
     public void register(CommandDeque commandDeque) {
         this.commandDeque = commandDeque;
-        System.err.println("Register CommandDeque");
+        WorkerLifecycle lifecycle = workerLifecycleProvider.getIfAvailable();
+        if (lifecycle != null) {
+            lifecycle.notifyRunning();
+        }
     }
 
     public synchronized boolean isDequeReady() {

@@ -88,6 +88,7 @@ class SnarkWebSocketClientTest {
         incoming.setFrom("conductor");
         incoming.setTo("worker#1");
 
+        client.publishRunningState();
         CommandMessage response = client.buildStatusResponse(incoming);
 
         assertEquals("status-123", response.getId());
@@ -113,6 +114,20 @@ class SnarkWebSocketClientTest {
                 .path("navigatorStatus").path("lastUpdate").asText());
         assertEquals("Nhash", json.path("payload").path("serverStatus").path("commandDeque").asText());
         assertTrue(json.path("payload").path("serverStatus").path("coordinates").isNull());
+    }
+
+    @Test
+    void shouldReportStartingStateInStatusResponse() {
+        client.publishStartingState();
+        CommandMessage incoming = new CommandMessage();
+        incoming.setId("status-starting");
+        incoming.setType("request:status");
+        incoming.setFrom("conductor");
+        incoming.setTo("worker#1");
+
+        CommandMessage response = client.buildStatusResponse(incoming);
+
+        assertEquals("starting", ((Map<?, ?>) response.getPayload()).get("state"));
     }
 
     @Test
