@@ -543,7 +543,7 @@ main {
 
 .config-row {
     display: grid;
-    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1.2fr) auto auto;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1.2fr) auto auto auto;
     gap: 10px;
     align-items: center;
     padding: 12px 14px;
@@ -660,6 +660,67 @@ main {
     width: min(920px, 100%);
 }
 
+.add-config-modal-card {
+    width: min(620px, 100%);
+}
+
+.add-config-modal-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.add-config-fields {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.add-config-fields .placeholder-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-config-equals {
+    padding-bottom: 9px;
+    font-weight: 700;
+}
+
+.config-string-modal-card {
+    width: min(520px, 100%);
+}
+
+.config-string-modal-card form,
+.config-string-modal-card .placeholder-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.config-string-modal-card form {
+    gap: 16px;
+}
+
+.config-string-modal-card .placeholder-field {
+    gap: 8px;
+}
+
+.config-thread-type {
+    margin-left: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(0, 212, 255, 0.12);
+    border: 1px solid rgba(0, 212, 255, 0.35);
+    color: #67dfff;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.config-type-button {
+    min-width: 58px;
+}
+
 .settings-modal-card {
     width: min(720px, 100%);
 }
@@ -712,6 +773,7 @@ main {
     }
 
     .config-thread-field-card,
+    .add-config-fields,
     .config-modal-layout,
     .settings-grid,
     .detail-grid {

@@ -42,11 +42,23 @@ function initApp() {
     const configThreadModalSubtitle = document.getElementById('configThreadModalSubtitle');
     const configThreadModalMessage = document.getElementById('configThreadModalMessage');
     const saveConfigThreadBtn = document.getElementById('saveConfigThreadBtn');
+    const addConfigModal = document.getElementById('addConfigModal');
+    const addConfigForm = document.getElementById('addConfigForm');
+    const addConfigKey = document.getElementById('addConfigKey');
+    const addConfigValue = document.getElementById('addConfigValue');
+    const addConfigModalFeedback = document.getElementById('addConfigModalFeedback');
+    const confirmAddConfigBtn = document.getElementById('confirmAddConfigBtn');
+    let addConfigContext = null;
     const globalSettingsModal = document.getElementById('globalSettingsModal');
     const globalSettingsForm = document.getElementById('globalSettingsForm');
     const globalSettingsFeedback = document.getElementById('globalSettingsFeedback');
 
     const configState = createEmptyConfigState();
+
+    if (window.ConfigModalRegistry && window.StringModal) {
+        window.ConfigModalRegistry.register('String', window.StringModal);
+        window.ConfigModalRegistry.register('java.lang.String', window.StringModal);
+    }
 
     function createEmptyConfigState() {
         return {
@@ -70,6 +82,7 @@ function initApp() {
             modalExistingModule: '',
             modalNewModule: '',
             modalValues: {},
+            threadDefinitions: [],
             modalError: '',
             modalSaving: false
         };
@@ -799,6 +812,7 @@ function initApp() {
                         <div class="config-module-header">
                             <div class="config-module-title">${escapeHtml(moduleName)}</div>
                             <div class="config-header-actions">
+                                <button type="button" class="btn-secondary btn-small" data-config-action="open-add-config" data-module-name="${escapeHtml(moduleName)}" data-thread-name="">Add config</button>
                                 <button type="button" class="btn-danger btn-small" data-config-action="delete-module" data-module-name="${escapeHtml(moduleName)}" ${configState.pendingMutation === `module-delete:${moduleName}` ? 'disabled' : ''}>${configState.pendingMutation === `module-delete:${moduleName}` ? '<span class="config-spinner"></span>Deleting...' : 'Delete module'}</button>
                             </div>
                         </div>
@@ -834,6 +848,16 @@ function initApp() {
                         value="${escapeHtml(config.value ?? '')}"
                     />
                 </div>
+                <div class="config-row-actions">
+                    <button
+                        type="button"
+                        class="btn-secondary btn-small config-type-button"
+                        data-config-action="open-module-config-modal"
+                        data-module-name="${escapeHtml(moduleName)}"
+                        data-module-config-key="${escapeHtml(config.key)}"
+                        title="Open ${escapeHtml(getConfigTypeLabel(config.type))} editor"
+                    >${escapeHtml(getConfigTypeLabel(config.type))}</button>
+                </div>
             </div>
         `).join('');
         return `
@@ -851,14 +875,26 @@ function initApp() {
 
     function renderConfigThread(moduleName, threadName, configs) {
         const description = configs.find((config) => config.threadDescription)?.threadDescription || '';
+        const threadDefinition = (configState.threadDefinitions || []).find((definition) =>
+            (definition.name || definition.thread) === threadName
+            && (definition.module || moduleName) === moduleName
+        );
+        const threadType = configs.find((config) => config.threadType)?.threadType
+            || threadDefinition?.type
+            || '';
         const helpIcon = description
             ? `<span class="config-help-icon" title="${escapeHtml(description)}">?</span>`
             : '';
         return `
             <section class="config-thread-card">
                 <div class="config-thread-header">
-                    <div class="config-thread-title">${escapeHtml(threadName)} ${helpIcon}</div>
+                    <div class="config-thread-title">
+                        ${escapeHtml(threadName)}
+                        ${threadType ? `<span class="config-thread-type" title="Thread type">${escapeHtml(threadType)}</span>` : ''}
+                        ${helpIcon}
+                    </div>
                     <div class="config-header-actions">
+                        <button type="button" class="btn-secondary btn-small" data-config-action="open-add-config" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}">Add config</button>
                         <button type="button" class="btn-secondary btn-small" data-config-action="change-thread-module" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}" ${configState.pendingMutation === `thread-module:${moduleName}:${threadName}` ? 'disabled' : ''}>${configState.pendingMutation === `thread-module:${moduleName}:${threadName}` ? '<span class="config-spinner"></span>Moving...' : 'Change module'}</button>
                         <button type="button" class="btn-danger btn-small" data-config-action="delete-thread" data-module-name="${escapeHtml(moduleName)}" data-thread-name="${escapeHtml(threadName)}" ${configState.pendingMutation === `thread-delete:${moduleName}:${threadName}` ? 'disabled' : ''}>${configState.pendingMutation === `thread-delete:${moduleName}:${threadName}` ? '<span class="config-spinner"></span>Deleting...' : 'Delete thread'}</button>
                     </div>
@@ -900,6 +936,16 @@ function initApp() {
                     <div class="config-row-actions">
                         <button
                             type="button"
+                            class="btn-secondary btn-small config-type-button"
+                            data-config-action="open-config-modal"
+                            data-row-key="${escapeHtml(rowKey)}"
+                            title="Open ${escapeHtml(getConfigTypeLabel(config.type))} editor"
+                            ${isBusy ? 'disabled' : ''}
+                        >${escapeHtml(getConfigTypeLabel(config.type))}</button>
+                    </div>
+                    <div class="config-row-actions">
+                        <button
+                            type="button"
                             class="btn-primary btn-small"
                             data-config-action="save-row"
                             data-row-key="${escapeHtml(rowKey)}"
@@ -928,6 +974,20 @@ function initApp() {
     function normalizeModuleDisplayName(moduleName) {
         const trimmed = String(moduleName ?? '').trim();
         return trimmed ? trimmed : 'General';
+    }
+
+    function getConfigTypeLabel(type) {
+        if (!type) {
+            return 'String';
+        }
+        const normalized = typeof type === 'string'
+            ? type
+            : (type.name || type.typeName || type.value || '');
+        if (!normalized || normalized === 'String' || normalized.endsWith('.String')) {
+            return 'String';
+        }
+        const lastSeparator = Math.max(normalized.lastIndexOf('.'), normalized.lastIndexOf('$'));
+        return lastSeparator >= 0 ? normalized.slice(lastSeparator + 1) : normalized;
     }
 
     function getConfigRowKey(config) {
@@ -984,6 +1044,76 @@ function initApp() {
                 setConfigBanner(error.message, 'error');
             }
             renderInstanceDetails();
+        }
+    }
+
+    function openAddConfigModal(moduleName, threadName) {
+        addConfigContext = { moduleName, threadName: threadName || '' };
+        document.getElementById('addConfigModalTitle').textContent = threadName
+            ? `Add config to ${threadName}`
+            : `Add module config to ${moduleName}`;
+        addConfigKey.value = '';
+        addConfigValue.value = '';
+        addConfigModalFeedback.hidden = true;
+        addConfigModalFeedback.textContent = '';
+        confirmAddConfigBtn.disabled = false;
+        addConfigModal.hidden = false;
+        requestAnimationFrame(() => addConfigKey.focus());
+    }
+
+    function closeAddConfigModal() {
+        addConfigContext = null;
+        addConfigModal.hidden = true;
+    }
+
+    async function submitAddConfig() {
+        const inst = getSelectedInstance();
+        if (!inst || !addConfigContext) {
+            return;
+        }
+
+        const key = addConfigKey.value.trim();
+        const value = addConfigValue.value;
+        if (!key) {
+            addConfigModalFeedback.textContent = 'Key is required';
+            addConfigModalFeedback.className = 'config-feedback is-error';
+            addConfigModalFeedback.hidden = false;
+            addConfigKey.focus();
+            return;
+        }
+
+        confirmAddConfigBtn.disabled = true;
+        addConfigModalFeedback.hidden = true;
+        const entry = {
+            module: addConfigContext.moduleName,
+            thread: addConfigContext.threadName || 'main',
+            key,
+            value
+        };
+
+        try {
+            if (addConfigContext.threadName) {
+                await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/configs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ configs: [entry] })
+                });
+            } else {
+                await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/modules/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry)
+                });
+            }
+            closeAddConfigModal();
+            await loadConfigs(true);
+            setConfigBanner(`Config "${key}" added`, 'success');
+            renderInstanceDetails();
+        } catch (error) {
+            confirmAddConfigBtn.disabled = false;
+            addConfigModalFeedback.textContent = error.message;
+            addConfigModalFeedback.className = 'config-feedback is-error';
+            addConfigModalFeedback.hidden = false;
         }
     }
 
@@ -1057,6 +1187,9 @@ function initApp() {
             const payload = await apiRequestJson(`/api/instances/${encodeURIComponent(inst.id)}/${endpoint}`);
             configState.status = 'loaded';
             configState.modules = forceReload && Array.isArray(payload.modules) ? payload.modules : [];
+            configState.threadDefinitions = forceReload && Array.isArray(payload.definitions)
+                ? payload.definitions
+                : [];
             configState.configs = forceReload
                 ? (Array.isArray(payload.definitions)
                     ? payload.definitions.flatMap((definition) => (
@@ -1065,7 +1198,8 @@ function initApp() {
                                 ...config,
                                 module: config.module ?? definition.module ?? '',
                                 thread: config.thread ?? definition.name ?? definition.type ?? '',
-                                threadDescription: definition.description || ''
+                                threadDescription: definition.description || '',
+                                threadType: definition.type || ''
                             }))
                             : []
                     ))
@@ -1373,7 +1507,7 @@ function initApp() {
                 String(config.module ?? ''),
                 normalizeModuleDisplayName(config.module)
             ])
-        ].filter(([value]) => String(value).trim())].entries())
+        ].filter(([value]) => String(value).trim())).entries()]
             .sort((a, b) => a[1].localeCompare(b[1]));
         return modules;
     }
@@ -1524,7 +1658,8 @@ function initApp() {
                         ...config,
                         module: config.module ?? definition.module ?? '',
                         thread: config.thread ?? definition.name ?? definition.type ?? '',
-                        threadDescription: definition.description || ''
+                        threadDescription: definition.description || '',
+                        threadType: definition.type || ''
                     }))
                     : [])
                 : [];
@@ -1959,6 +2094,16 @@ function initApp() {
     globalSettingsForm.addEventListener('submit', saveGlobalSettings);
     configThreadForm.addEventListener('submit', saveThreadConfigs);
     document.getElementById('cancelConfigThreadBtn').addEventListener('click', closeConfigThreadModal);
+    addConfigForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitAddConfig();
+    });
+    document.getElementById('cancelAddConfigBtn').addEventListener('click', closeAddConfigModal);
+    addConfigModal.addEventListener('click', (event) => {
+        if (event.target === addConfigModal) {
+            closeAddConfigModal();
+        }
+    });
 
     const dbCheckbox = document.getElementById('newInstanceUseDatabaseCheckbox');
     if (dbCheckbox) {
@@ -2080,10 +2225,55 @@ function initApp() {
         }
         if (configAction) {
             const action = configAction.dataset.configAction;
-            if (action === 'refresh') {
+            if (action === 'open-add-config') {
+                openAddConfigModal(configAction.dataset.moduleName, configAction.dataset.threadName);
+            } else if (action === 'refresh') {
                 loadConfigs(true);
             } else if (action === 'add-thread') {
                 openAddThreadModal();
+            } else if (action === 'open-config-modal') {
+                const rowKey = configAction.dataset.rowKey;
+                const config = findConfigByRowKey(rowKey);
+                if (config) {
+                    const currentValue = Object.prototype.hasOwnProperty.call(configState.dirtyValues, rowKey)
+                        ? configState.dirtyValues[rowKey]
+                        : (config.value ?? '');
+                    window.ConfigModalRegistry.open(config.type, {
+                        key: config.key,
+                        value: currentValue,
+                        onConfirm: (newValue) => {
+                            const input = instanceDetails.querySelector(`[data-config-input="${CSS.escape(rowKey)}"]`);
+                            if (input) {
+                                input.value = newValue;
+                            }
+                            if (String(newValue) === String(config.value ?? '')) {
+                                delete configState.dirtyValues[rowKey];
+                            } else {
+                                configState.dirtyValues[rowKey] = newValue;
+                            }
+                            delete configState.rowErrors[rowKey];
+                            const saveButton = instanceDetails.querySelector(`[data-config-action="save-row"][data-row-key="${CSS.escape(rowKey)}"]`);
+                            if (saveButton) {
+                                saveButton.disabled = !Object.prototype.hasOwnProperty.call(configState.dirtyValues, rowKey);
+                            }
+                        }
+                    });
+                }
+            } else if (action === 'open-module-config-modal') {
+                const moduleName = configAction.dataset.moduleName;
+                const configKey = configAction.dataset.moduleConfigKey;
+                const module = (configState.modules || []).find((item) => normalizeModuleDisplayName(item.name) === normalizeModuleDisplayName(moduleName));
+                const config = module && (module.configs || []).find((item) => item.key === configKey);
+                const input = instanceDetails.querySelector(`[data-module-config-name="${CSS.escape(moduleName)}"][data-module-config-key="${CSS.escape(configKey)}"]`);
+                if (config && input) {
+                    window.ConfigModalRegistry.open(config.type, {
+                        key: config.key,
+                        value: input.value,
+                        onConfirm: (newValue) => {
+                            input.value = newValue;
+                        }
+                    });
+                }
             } else if (action === 'save-row') {
                 saveConfigRow(configAction.dataset.rowKey);
             } else if (action === 'delete-row') {
